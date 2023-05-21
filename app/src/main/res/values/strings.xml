@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">EMPlay</string>
+    <string name="movie_Btn">Movie</string>
+    <string name="music_Btn">Music</string>
+    <string name="open" />
+    <string name="close" />
+</resources>
