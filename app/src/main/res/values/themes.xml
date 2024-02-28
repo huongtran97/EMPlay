@@ -12,5 +12,8 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@color/black</item>
         <!-- Customize your theme here. -->
+        <style name="CardViewStyle" parent="android:Widget.TextView">
+            <item name="android:foreground">@drawable/card</item>
+        </style>
     </style>
 </resources>
