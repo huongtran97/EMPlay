@@ -1,75 +1,82 @@
 package emplay.entertainment.emplay;
 
-import android.annotation.SuppressLint;
+import androidx.recyclerview.widget.RecyclerView;
+
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+
+import android.view.ViewGroup;
+import android.view.View;
+import android.view.LayoutInflater;
+import android.widget.TextView;
+import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
-import java.util.ArrayList;
-import java.util.List;
 
-public abstract class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder> {
-    Context mContext;
-    ArrayList<MovieDetails> mData;
+public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder> {
 
-    public int getItemVieType(int position) {
-        MovieDetails thisRow = mData.get(position);
-        return thisRow.getId();
-    }
+    private Context mContext;
+    private List<MovieModel> mData;
 
-    public MovieAdapter(Context mContext, ArrayList<MovieDetails> mData) {
+
+    public MovieAdapter(android.content.Context mContext, java.util.List<MovieModel> mData) {
         this.mContext = mContext;
         this.mData = mData;
     }
 
+    @NonNull
     @Override
-    public MovieAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v;
         LayoutInflater inflater = LayoutInflater.from(mContext);
-        v = inflater.inflate(R.layout.movie_option,parent, false);
-        return  new MovieAdapter.MyViewHolder(v);
+        v = inflater.inflate(R.layout.movie_item, parent, false);
+        return new MyViewHolder(v);
+
     }
 
     @Override
-    public void onBindViewHolder(MovieAdapter.MyViewHolder holder, @SuppressLint({"RecycleView", "RecyclerView"}) int position) {
-        holder.mTitle.setText(mData.get(position).getmTitle());
-        holder.mReleaseDate.setText(mData.get(position).getmTitle());
-        holder.mVoteAverage.setText(mData.get(position).getmTitle());
-        holder.mOverview.setText(mData.get(position).getmTitle());
-        holder.mPoster.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                MovieInformation parentActivity = ( MovieInformation) view.getContext();
-                parentActivity.userCLickedItem(mData.get(position),position);
-            }
-        });
-        Glide.with(mContext).load(mData.get(position).getmPoster((holder.mPoster)));
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+
+        holder.id.setText(mData.get(position).getId());
+        holder.name.setText(mData.get(position).getName());
+        holder.vote.setText(mData.get(position).getVote());
+
+
+        //Using Glide library to display the image
+        Glide.with(mContext).load(mData.get(position).getImg()).into(holder.img);
+
+
     }
 
     @Override
-    public int getItemCount(){
+    public int getItemCount() {
         return mData.size();
     }
 
 
-    public class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        List<MovieDetails> movieDetailsList = new ArrayList<>();
-        TextView mTitle;
-        TextView mReleaseDate;
-        TextView mVoteAverage;
-        TextView mOverview;
-        TextView mPoster;
+        TextView id;
+        TextView name;
+        TextView vote;
+        ImageView img;
+
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            id = itemView.findViewById(R.id.id_txt);
+            name = itemView.findViewById(R.id.name_txt);
+            vote = itemView.findViewById(R.id.vote_txt);
+            img = itemView.findViewById(R.id.img_movie);
+
+
         }
     }
+
+
 }
