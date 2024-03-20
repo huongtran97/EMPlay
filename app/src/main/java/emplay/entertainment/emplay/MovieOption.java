@@ -82,13 +82,13 @@ public class MovieOption extends AppCompatActivity {
 
         @Override
         public void onPostExecute(String s) {
-
             try {
-                JSONObject jsonObject = new JSONObject();
+                JSONObject jsonObject = new JSONObject(s); // Parse the JSON response string
                 JSONArray jsonArray = jsonObject.getJSONArray("results");
 
-                for (int i = 0; i < jsonArray.length(); i++) {
+                List<MovieModel> movieList = new java.util.ArrayList<>(); // Create a new list to hold MovieModel objects
 
+                for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                     MovieModel movieModel = new MovieModel();
                     movieModel.setId(jsonObject1.getString("id"));
@@ -96,13 +96,15 @@ public class MovieOption extends AppCompatActivity {
                     movieModel.setVote(jsonObject1.getString("vote_average"));
                     movieModel.setImg(jsonObject1.getString("poster_path"));
 
-                    movieList.add(movieModel);
+                    movieList.add(movieModel); // Add the MovieModel object to the list
                 }
+
+                PutDataIntoRecyclerview(movieList); // Pass the list to PutDataIntoRecyclerview method
             } catch (org.json.JSONException e) {
                 e.printStackTrace();
             }
-            PutDataIntoRecyclerview(movieList);
         }
+
     }
 
     private void PutDataIntoRecyclerview(List<MovieModel> movieList) {

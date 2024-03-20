@@ -28,9 +28,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         this.mData = mData;
     }
 
-    @NonNull
+
     @Override
-    public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder( ViewGroup parent, int viewType) {
         View v;
         LayoutInflater inflater = LayoutInflater.from(mContext);
         v = inflater.inflate(R.layout.movie_item, parent, false);
@@ -39,7 +39,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder( MyViewHolder holder, int position) {
 
         holder.id.setText(mData.get(position).getId());
         holder.name.setText(mData.get(position).getName());
@@ -47,7 +47,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
 
 
         //Using Glide library to display the image
-        Glide.with(mContext).load(mData.get(position).getImg()).into(holder.img);
+
+        String collectionId = "int32"; // Replace 123 with your actual collection ID
+
+        String imageUrl = "https://api.themoviedb.org/3/collection/" + collectionId + "/images";
+
+        Glide.with(mContext)
+                .load(imageUrl)
+                .into(holder.img);
 
 
     }
@@ -66,7 +73,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         ImageView img;
 
 
-        public MyViewHolder(@NonNull View itemView) {
+        public MyViewHolder( View itemView) {
             super(itemView);
 
             id = itemView.findViewById(R.id.id_txt);
