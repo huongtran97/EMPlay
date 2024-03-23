@@ -47,13 +47,10 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
 
 
         //Using Glide library to display the image
-
-        String collectionId = "int32"; // Replace 123 with your actual collection ID
-
-        String imageUrl = "https://api.themoviedb.org/3/collection/" + collectionId + "/images";
+        //Link to get the image from APIs data
 
         Glide.with(mContext)
-                .load(imageUrl)
+                .load("https://image.tmdb.org/t/p/w500/" + mData.get(position).getImg())
                 .into(holder.img);
 
 
@@ -79,7 +76,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
             id = itemView.findViewById(R.id.id_txt);
             name = itemView.findViewById(R.id.name_txt);
             vote = itemView.findViewById(R.id.vote_txt);
-            img = itemView.findViewById(R.id.img_movie);
+            img = itemView.findViewById(R.id.header);
 
 
         }

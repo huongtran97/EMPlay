@@ -2,6 +2,7 @@ package emplay.entertainment.emplay;
 
 import static emplay.entertainment.emplay.R.*;
 
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.AsyncTask;
@@ -16,14 +17,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
+
 
 public class MovieOption extends AppCompatActivity {
+
 
     //APIs JSON link on the Internet
     private static String JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
     List<MovieModel> movieList;
     RecyclerView movieRecyclerView;
+
+
 
     @Override
     protected void onCreate(android.os.Bundle saveInstanceState) {
@@ -35,6 +39,8 @@ public class MovieOption extends AppCompatActivity {
 
         GetMovieData getMovieData = new GetMovieData();
         getMovieData.execute();
+
+
 
     }
 
@@ -91,9 +97,9 @@ public class MovieOption extends AppCompatActivity {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                     MovieModel movieModel = new MovieModel();
-                    movieModel.setId(jsonObject1.getString("id"));
+                    movieModel.setId("Date: "+jsonObject1.getString("release_date"));
                     movieModel.setName(jsonObject1.getString("title"));
-                    movieModel.setVote(jsonObject1.getString("vote_average"));
+                    movieModel.setVote("Vote: "+jsonObject1.getString("vote_average"));
                     movieModel.setImg(jsonObject1.getString("poster_path"));
 
                     movieList.add(movieModel); // Add the MovieModel object to the list
@@ -110,9 +116,13 @@ public class MovieOption extends AppCompatActivity {
     private void PutDataIntoRecyclerview(List<MovieModel> movieList) {
 
         MovieAdapter movieAdapter = new MovieAdapter(this, movieList);
-        movieRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        movieRecyclerView.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this,3));
         movieRecyclerView.setAdapter(movieAdapter);
+
+
+
     }
+
 
 
 }
