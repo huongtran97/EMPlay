@@ -18,15 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 
-
 public class MovieOption extends AppCompatActivity {
 
 
     //APIs JSON link on the Internet
-    private static String JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
+    private static final String JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
     List<MovieModel> movieList;
-    RecyclerView movieRecyclerView;
 
+    RecyclerView movieRecyclerView;
 
 
     @Override
@@ -34,12 +33,14 @@ public class MovieOption extends AppCompatActivity {
         super.onCreate(saveInstanceState);
         setContentView(layout.movie_activity);
 
+
         movieList = new java.util.ArrayList<>();
+
         movieRecyclerView = findViewById(R.id.movie_recycler_view);
+
 
         GetMovieData getMovieData = new GetMovieData();
         getMovieData.execute();
-
 
 
     }
@@ -97,10 +98,11 @@ public class MovieOption extends AppCompatActivity {
                 for (int i = 0; i < jsonArray.length(); i++) {
                     JSONObject jsonObject1 = jsonArray.getJSONObject(i);
                     MovieModel movieModel = new MovieModel();
-                    movieModel.setId("Date: "+jsonObject1.getString("release_date"));
+                    movieModel.setId("Date: " + jsonObject1.getString("release_date"));
                     movieModel.setName(jsonObject1.getString("title"));
-                    movieModel.setVote("Vote: "+jsonObject1.getString("vote_average"));
+                    movieModel.setVote("Vote: " + jsonObject1.getString("vote_average"));
                     movieModel.setImg(jsonObject1.getString("poster_path"));
+                    movieModel.setOverview(jsonObject1.getString("overview"));
 
                     movieList.add(movieModel); // Add the MovieModel object to the list
                 }
@@ -116,13 +118,11 @@ public class MovieOption extends AppCompatActivity {
     private void PutDataIntoRecyclerview(List<MovieModel> movieList) {
 
         MovieAdapter movieAdapter = new MovieAdapter(this, movieList);
-        movieRecyclerView.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this,3));
+        movieRecyclerView.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 3));
         movieRecyclerView.setAdapter(movieAdapter);
 
 
-
     }
-
 
 
 }
