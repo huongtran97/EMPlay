@@ -6,14 +6,8 @@ public class MovieModel {
     String name;
     String vote;
     String img;
+    String overview;
 
-
-    public MovieModel(String id, String name, String vote, String img) {
-        this.id = id;
-        this.name = name;
-        this.vote = vote;
-        this.img = img;
-    }
 
     public String getId() {
         return id;
@@ -47,10 +41,30 @@ public class MovieModel {
         this.img = img;
     }
 
+    public String getOverview() {
+        return overview;
+    }
+
+    public void setOverview(String overview) {
+        this.overview = overview;
+    }
+
+    public MovieModel(String id, String name, String vote, String img, String overview) {
+        this.id = id;
+        this.name = name;
+        this.vote = vote;
+        this.img = img;
+        this.overview = overview;
+    }
+
+
+
     public MovieModel() {
 
 
 
 
     }
+
+
 }

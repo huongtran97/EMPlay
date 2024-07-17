@@ -6,7 +6,7 @@ import android.content.Context;
 
 import java.util.List;
 
-import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 
 import android.view.ViewGroup;
 import android.view.View;
@@ -19,8 +19,8 @@ import com.bumptech.glide.Glide;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder> {
 
-    private Context mContext;
-    private List<MovieModel> mData;
+    private final Context mContext;
+    private final List<MovieModel> mData;
 
 
     public MovieAdapter(android.content.Context mContext, java.util.List<MovieModel> mData) {
@@ -30,20 +30,35 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
 
 
     @Override
-    public MyViewHolder onCreateViewHolder( ViewGroup parent, int viewType) {
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v;
+        View view;
         LayoutInflater inflater = LayoutInflater.from(mContext);
+        LayoutInflater inflater1 = LayoutInflater.from(mContext);
         v = inflater.inflate(R.layout.movie_item, parent, false);
-        return new MyViewHolder(v);
+        view = inflater1.inflate(R.layout.movie_information, parent,false);
+        return new MyViewHolder(v, view);
 
     }
 
     @Override
-    public void onBindViewHolder( MyViewHolder holder, int position) {
+    public void onBindViewHolder(MyViewHolder holder, int position) {
 
         holder.id.setText(mData.get(position).getId());
         holder.name.setText(mData.get(position).getName());
         holder.vote.setText(mData.get(position).getVote());
+
+        holder.movieCardview.setOnClickListener(v -> {
+            android.content.Intent intent = new android.content.Intent(mContext,MovieInformation.class);
+            intent.putExtra("name", mData.get(position).getName());
+            intent.putExtra("overview", mData.get(position).getOverview());
+            intent.putExtra("poster_path", mData.get(position).getImg());
+            mContext.startActivity(intent);
+
+
+        });
+
+
 
 
         //Using Glide library to display the image
@@ -68,15 +83,17 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         TextView name;
         TextView vote;
         ImageView img;
+        CardView movieCardview;
 
 
-        public MyViewHolder( View itemView) {
+        public MyViewHolder(android.view.View itemView, android.view.View view) {
             super(itemView);
 
             id = itemView.findViewById(R.id.id_txt);
             name = itemView.findViewById(R.id.name_txt);
             vote = itemView.findViewById(R.id.vote_txt);
             img = itemView.findViewById(R.id.header);
+            movieCardview = (CardView) itemView.findViewById(emplay.entertainment.emplay.R.id.pick_movie_item_id);
 
 
         }

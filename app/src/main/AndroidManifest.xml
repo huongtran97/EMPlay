@@ -4,6 +4,7 @@
     package="emplay.entertainment.emplay">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -25,9 +26,14 @@
             android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".MovieOption"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".AboutPage"></activity>
-        <activity android:name=".LoginPage"></activity>
-        <activity android:name=".SignUpPage"></activity>
+        <activity android:name=".MovieInformation"
+            android:theme="@style/HiddenTitleTheme"></activity>
+        <activity android:name=".AboutPage"
+            android:theme="@style/HiddenTitleTheme"></activity>
+        <activity android:name=".LoginPage"
+            android:theme="@style/HiddenTitleTheme"></activity>
+        <activity android:name=".SignUpPage"
+            android:theme="@style/HiddenTitleTheme"></activity>
 
     </application>
 
