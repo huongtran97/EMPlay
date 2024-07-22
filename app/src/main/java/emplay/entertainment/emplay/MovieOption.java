@@ -1,79 +1,87 @@
 package emplay.entertainment.emplay;
 
-import static emplay.entertainment.emplay.R.*;
-
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
 
-import java.net.URL;
-import java.net.HttpURLConnection;
-
-import org.json.JSONObject;
-import org.json.JSONArray;
-
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * @author Tran Ngoc Que Huong
+ * @version 1.0
+ *
+ * The MovieOption activity displays a list of popular movies in a grid and provides detailed
+ * information for each selected movie in a separate list.
+ */
 public class MovieOption extends AppCompatActivity {
 
-
-    //APIs JSON link on the Internet
-    private static final String JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
-    List<MovieModel> movieList;
-
-    RecyclerView movieRecyclerView;
-
+    private static final String INITIAL_JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
+    private List<MovieModel> movieList;
+    private RecyclerView movieRecyclerView, movieRecyclerView1;
+    private MovieAdapter adapter;
+    private MovieInformationAdapter adapter1;
 
     @Override
-    protected void onCreate(android.os.Bundle saveInstanceState) {
+    protected void onCreate(Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
-        setContentView(layout.movie_activity);
+        setContentView(R.layout.movie_activity);
 
+        // Initialize RecyclerViews
+        movieRecyclerView = findViewById(R.id.movie_card_view);
+        movieRecyclerView1 = findViewById(R.id.movie_information_details);
 
-        movieList = new java.util.ArrayList<>();
+        // Initialize movie list and adapters
+        movieList = new ArrayList<>();
+        adapter = new MovieAdapter(this, movieList, this::onItemClicked);
+        movieRecyclerView.setAdapter(adapter);
+        movieRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));  // Use GridLayoutManager for grid view
 
-        movieRecyclerView = findViewById(R.id.movie_recycler_view);
+        adapter1 = new MovieInformationAdapter(new ArrayList<>());
+        movieRecyclerView1.setAdapter(adapter1);
+        movieRecyclerView1.setLayoutManager(new LinearLayoutManager(this));  // Use LinearLayoutManager for list view
 
-
-        GetMovieData getMovieData = new GetMovieData();
-        getMovieData.execute();
-
-
+        // Fetch initial movie data
+        new FetchInitialData().execute(INITIAL_JSON_URL);
     }
 
-    public class GetMovieData extends AsyncTask<String, String, String> {
+    /**
+     * Handles click events on items in the movie list.
+     *
+     * @param itemView The clicked MovieModel item.
+     */
+    public void onItemClicked(MovieModel itemView) {
+        new FetchNewData().execute(itemView.getId());
+    }
 
-
+    /**
+     * AsyncTask to fetch initial data (list of popular movies) from the API.
+     */
+    private class FetchInitialData extends AsyncTask<String, Void, List<MovieModel>> {
         @Override
-        protected String doInBackground(String... strings) {
-
+        protected List<MovieModel> doInBackground(String... urls) {
             String current = "";
             try {
-                URL url;
-                HttpURLConnection urlConnection = null;
-
-                try {
-                    url = new URL(JSON_URL);
-                    urlConnection = (HttpURLConnection) url.openConnection();
-
-                    java.io.InputStream is = urlConnection.getInputStream();
-                    java.io.InputStreamReader isr = new java.io.InputStreamReader(is);
-
-
+                URL url = new URL(urls[0]);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                try (java.io.InputStream is = urlConnection.getInputStream();
+                     java.io.InputStreamReader isr = new java.io.InputStreamReader(is)) {
                     int movieData = isr.read();
                     while (movieData != -1) {
                         current += (char) movieData;
                         movieData = isr.read();
                     }
-                    return current;
-
-                } catch (java.net.MalformedURLException e) {
-                    e.printStackTrace();
-                } catch (java.io.IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     if (urlConnection != null) {
@@ -83,46 +91,126 @@ public class MovieOption extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return current;
-
+            return parseMovieData(current);
         }
 
         @Override
-        public void onPostExecute(String s) {
+        protected void onPostExecute(List<MovieModel> movieList) {
+            PutDataIntoRecyclerview(movieList);  // Update both RecyclerViews
+        }
+    }
+
+    /**
+     * AsyncTask to fetch detailed data for a single movie based on its ID.
+     */
+    private class FetchNewData extends AsyncTask<String, Void, MovieModel> {
+        @Override
+        protected MovieModel doInBackground(String... itemIds) {
+            String itemId = itemIds[0];
+            String url = "https://api.themoviedb.org/3/movie/" + itemId + "?api_key=ff3dce8592d15d036bf53cbedeca224b";
+            String current = "";
             try {
-                JSONObject jsonObject = new JSONObject(s); // Parse the JSON response string
-                JSONArray jsonArray = jsonObject.getJSONArray("results");
-
-                List<MovieModel> movieList = new java.util.ArrayList<>(); // Create a new list to hold MovieModel objects
-
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                    MovieModel movieModel = new MovieModel();
-                    movieModel.setId("Date: " + jsonObject1.getString("release_date"));
-                    movieModel.setName(jsonObject1.getString("title"));
-                    movieModel.setVote("Vote: " + jsonObject1.getString("vote_average"));
-                    movieModel.setImg(jsonObject1.getString("poster_path"));
-                    movieModel.setOverview(jsonObject1.getString("overview"));
-
-                    movieList.add(movieModel); // Add the MovieModel object to the list
+                URL apiUrl = new URL(url);
+                HttpURLConnection urlConnection = (HttpURLConnection) apiUrl.openConnection();
+                try (java.io.InputStream is = urlConnection.getInputStream();
+                     java.io.InputStreamReader isr = new java.io.InputStreamReader(is)) {
+                    int movieData = isr.read();
+                    while (movieData != -1) {
+                        current += (char) movieData;
+                        movieData = isr.read();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (urlConnection != null) {
+                        urlConnection.disconnect();
+                    }
                 }
-
-                PutDataIntoRecyclerview(movieList); // Pass the list to PutDataIntoRecyclerview method
-            } catch (org.json.JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
+            return parseSingleMovieData(current);
         }
 
+        @Override
+        protected void onPostExecute(MovieModel movieModel) {
+            if (movieModel != null) {
+                List<MovieModel> detailList = new ArrayList<>();
+                detailList.add(movieModel);
+                adapter1.updateData(detailList);  // Update adapter1 with a single movie detail in list format
+            }
+        }
     }
 
+    /**
+     * Parses JSON data to extract a list of movies.
+     *
+     * @param jsonData The JSON data as a string.
+     * @return A list of MovieModel objects.
+     */
+    private List<MovieModel> parseMovieData(String jsonData) {
+        List<MovieModel> movieList = new ArrayList<>();
+        try {
+            JSONObject jsonObject = new JSONObject(jsonData);
+            JSONArray jsonArray = jsonObject.getJSONArray("results");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
+                MovieModel movieModel = new MovieModel(
+                        jsonObject1.getString("id"),
+                        jsonObject1.getString("title"),
+                        "Vote: " + jsonObject1.getString("vote_average"),
+                        jsonObject1.getString("poster_path"),
+                        "Overview: " + jsonObject1.getString("overview"),
+                        "Language: " + jsonObject1.getString("original_language"),
+                        "Release Date: " + jsonObject1.getString("release_date")
+                );
+                movieList.add(movieModel);
+            }
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+        }
+        return movieList;
+    }
+
+    /**
+     * Parses JSON data to extract a single movie's details.
+     *
+     * @param jsonData The JSON data as a string.
+     * @return A MovieModel object containing the movie's details.
+     */
+    private static MovieModel parseSingleMovieData(String jsonData) {
+        try {
+            JSONObject jsonObject = new JSONObject(jsonData);
+            return new MovieModel(
+                    jsonObject.getString("id"),
+                    jsonObject.getString("title"),
+                    "Vote: " + jsonObject.getString("vote_average"),
+                    jsonObject.getString("poster_path"),
+                    "Overview: " + jsonObject.getString("overview"),
+                    "Language: " + jsonObject.getString("original_language"),
+                    "Release Date: " + jsonObject.getString("release_date")
+            );
+        } catch (org.json.JSONException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Updates the data displayed in the RecyclerViews.
+     *
+     * @param movieList The list of movies to display.
+     */
     private void PutDataIntoRecyclerview(List<MovieModel> movieList) {
+        // Update the main RecyclerView
+        adapter.updateData(movieList);
 
-        MovieAdapter movieAdapter = new MovieAdapter(this, movieList);
-        movieRecyclerView.setLayoutManager(new androidx.recyclerview.widget.GridLayoutManager(this, 3));
-        movieRecyclerView.setAdapter(movieAdapter);
+        // Update the detail RecyclerView with the same list or a new list if needed
+        movieRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));  // Use GridLayoutManager for grid view
+        movieRecyclerView.setAdapter(adapter);
 
-
+        movieRecyclerView1.setLayoutManager(new LinearLayoutManager(this));  // Use LinearLayoutManager for list view
+        movieRecyclerView1.setAdapter(adapter1);
     }
-
-
 }

@@ -3,11 +3,6 @@ package emplay.entertainment.emplay;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
-
-import java.util.List;
-
-import androidx.cardview.widget.CardView;
-
 import android.view.ViewGroup;
 import android.view.View;
 import android.view.LayoutInflater;
@@ -16,88 +11,113 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.List;
 
+/**
+ * @author Tran Ngoc Que Huong
+ * @version 1.0
+ * RecyclerView.Adapter implementation for displaying a list of movies.
+ */
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder> {
 
     private final Context mContext;
     private final List<MovieModel> mData;
+    private final OnItemClickListener onItemClickListener;
 
-
-    public MovieAdapter(android.content.Context mContext, java.util.List<MovieModel> mData) {
-        this.mContext = mContext;
-        this.mData = mData;
+    /**
+     * Interface for handling click events on movie items.
+     */
+    public interface OnItemClickListener {
+        /**
+         * Called when a movie item is clicked.
+         *
+         * @param itemView The MovieModel object associated with the clicked item.
+         */
+        void onItemClick(MovieModel itemView);
     }
 
+    /**
+     * Constructor for the MovieAdapter.
+     *
+     * @param context             The context in which the adapter is operating.
+     * @param data                The list of MovieModel objects to be displayed.
+     * @param onItemClickListener Listener for handling item click events.
+     */
+    public MovieAdapter(Context context, List<MovieModel> data, OnItemClickListener onItemClickListener) {
+        this.mContext = context;
+        this.mData = data;
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    /**
+     * Updates the data in the adapter.
+     *
+     * @param newMovies The new list of MovieModel objects.
+     */
+    public void updateData(List<MovieModel> newMovies) {
+        mData.clear();
+        mData.addAll(newMovies);
+        notifyDataSetChanged();
+    }
 
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v;
-        View view;
-        LayoutInflater inflater = LayoutInflater.from(mContext);
-        LayoutInflater inflater1 = LayoutInflater.from(mContext);
-        v = inflater.inflate(R.layout.movie_item, parent, false);
-        view = inflater1.inflate(R.layout.movie_information, parent,false);
-        return new MyViewHolder(v, view);
-
+        // Inflate the layout for a movie item and create a ViewHolder
+        View v = LayoutInflater.from(mContext).inflate(R.layout.movie_item, parent, false);
+        return new MyViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
+        // Bind data to the ViewHolder
+        MovieModel movie = mData.get(position);
 
-        holder.id.setText(mData.get(position).getId());
-        holder.name.setText(mData.get(position).getName());
-        holder.vote.setText(mData.get(position).getVote());
-
-        holder.movieCardview.setOnClickListener(v -> {
-            android.content.Intent intent = new android.content.Intent(mContext,MovieInformation.class);
-            intent.putExtra("name", mData.get(position).getName());
-            intent.putExtra("overview", mData.get(position).getOverview());
-            intent.putExtra("poster_path", mData.get(position).getImg());
-            mContext.startActivity(intent);
-
-
-        });
-
-
-
-
-        //Using Glide library to display the image
-        //Link to get the image from APIs data
-
+        holder.name.setText(movie.getName());
+        holder.vote.setText(movie.getVote());
         Glide.with(mContext)
-                .load("https://image.tmdb.org/t/p/w500/" + mData.get(position).getImg())
+                .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
                 .into(holder.img);
 
-
+        // Bind the click listener to the item
+        holder.bind(movie, onItemClickListener);
     }
 
     @Override
     public int getItemCount() {
+        // Return the number of items in the data set
         return mData.size();
     }
 
-
+    /**
+     * ViewHolder class for the movie items.
+     */
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView id;
         TextView name;
         TextView vote;
         ImageView img;
-        CardView movieCardview;
 
-
-        public MyViewHolder(android.view.View itemView, android.view.View view) {
+        /**
+         * Constructor for the ViewHolder.
+         *
+         * @param itemView The view for the movie item.
+         */
+        public MyViewHolder(View itemView) {
             super(itemView);
 
-            id = itemView.findViewById(R.id.id_txt);
             name = itemView.findViewById(R.id.name_txt);
             vote = itemView.findViewById(R.id.vote_txt);
             img = itemView.findViewById(R.id.header);
-            movieCardview = (CardView) itemView.findViewById(emplay.entertainment.emplay.R.id.pick_movie_item_id);
+        }
 
-
+        /**
+         * Binds the item and click listener to the ViewHolder.
+         *
+         * @param item                The MovieModel object to bind.
+         * @param onItemClickListener The listener for click events.
+         */
+        public void bind(MovieModel item, OnItemClickListener onItemClickListener) {
+            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(item));
         }
     }
-
-
 }
