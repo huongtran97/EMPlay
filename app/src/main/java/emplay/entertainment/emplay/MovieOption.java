@@ -1,17 +1,17 @@
 package emplay.entertainment.emplay;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-import androidx.recyclerview.widget.LinearLayoutManager;
+import android.view.MenuItem;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,8 +21,25 @@ import java.util.List;
  * @author Tran Ngoc Que Huong
  * @version 1.0
  *
- * The MovieOption activity displays a list of popular movies in a grid and provides detailed
+ * The  MovieOption activity displays a list of popular movies in a grid and provides detailed
  * information for each selected movie in a separate list.
+ * <p>
+ * This activity initializes two RecyclerView: one for displaying a grid of popular movies
+ * and another for displaying detailed information about a selected movie. It also sets up a BottomNavigationView
+ * for navigation between different sections of the app.
+ * <p>
+ * The movie data is fetched asynchronously from a remote API. The initial data is retrieved using FetchInitialData
+ * and detailed data for a specific movie is fetched using FetchNewData.
+ * <p>
+ * The BottomNavigationView provides navigation options for:
+ * <ul>
+ *     <li>Home - Navigates to the  MovieOption activity.</li>
+ *     <li>Favorite - Navigates to the FavoriteMovie activity.</li>
+ *     <li>Search - Navigates to the SearchMovie activity.</li>
+ *     <li>Profile - Navigates to the ProfileMovie activity.</li>
+ * </ul>
+ * <p>
+ * The data displayed in the RecyclerView is updated by parsing the JSON data received from the API.
  */
 public class MovieOption extends AppCompatActivity {
 
@@ -53,6 +70,35 @@ public class MovieOption extends AppCompatActivity {
 
         // Fetch initial movie data
         new FetchInitialData().execute(INITIAL_JSON_URL);
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.movie_bottom_navigation_view);
+        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.movie_home) {
+                    // Navigate to MovieOption activity
+                    Intent intent = new Intent(MovieOption.this, MovieOption.class);
+                    startActivity(intent);
+                    return true;
+                } else if (item.getItemId() == R.id.movie_favorite) {
+                    // Navigate to FavoriteMovie activity
+                    Intent intent1 = new Intent(MovieOption.this, FavoriteMovie.class);
+                    startActivity(intent1);
+                    return true;
+                } else if (item.getItemId() == R.id.movie_search) {
+                    // Navigate to SearchMovie activity
+                    Intent intent2 = new Intent(MovieOption.this, SearchMovie.class);
+                    startActivity(intent2);
+                    return true;
+                } else if (item.getItemId() == R.id.movie_profile) {
+                    // Navigate to ProfileMovie activity
+                    Intent intent3 = new Intent(MovieOption.this, ProfileMovie.class);
+                    startActivity(intent3);
+                    return true;
+                }
+                return false;
+            }
+        });
     }
 
     /**

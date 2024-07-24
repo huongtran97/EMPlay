@@ -26,14 +26,19 @@
             android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".MovieOption"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".MovieInformation"
-            android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".AboutPage"
             android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".LoginPage"
             android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".SignUpPage"
             android:theme="@style/HiddenTitleTheme"></activity>
+        <activity android:name=".FavoriteMovie"
+            android:theme="@style/HiddenTitleTheme"></activity>
+        <activity android:name=".SearchMovie"
+            android:theme="@style/HiddenTitleTheme"></activity>
+        <activity android:name=".ProfileMovie"
+            android:theme="@style/HiddenTitleTheme"></activity>
+
 
     </application>
 
