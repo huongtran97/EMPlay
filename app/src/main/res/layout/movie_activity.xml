@@ -45,6 +45,11 @@
 
     </ScrollView>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/fragment_container"/>
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/movie_bottom_navigation_view"
         android:layout_width="0dp"

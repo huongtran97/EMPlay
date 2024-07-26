@@ -1,262 +1,77 @@
 package emplay.entertainment.emplay;
 
-import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.MenuItem;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import androidx.fragment.app.Fragment;
 
 /**
  * @author Tran Ngoc Que Huong
  * @version 1.0
  *
- * The  MovieOption activity displays a list of popular movies in a grid and provides detailed
- * information for each selected movie in a separate list.
- * <p>
- * This activity initializes two RecyclerView: one for displaying a grid of popular movies
- * and another for displaying detailed information about a selected movie. It also sets up a BottomNavigationView
- * for navigation between different sections of the app.
- * <p>
- * The movie data is fetched asynchronously from a remote API. The initial data is retrieved using FetchInitialData
- * and detailed data for a specific movie is fetched using FetchNewData.
- * <p>
- * The BottomNavigationView provides navigation options for:
- * <ul>
- *     <li>Home - Navigates to the  MovieOption activity.</li>
- *     <li>Favorite - Navigates to the FavoriteMovie activity.</li>
- *     <li>Search - Navigates to the SearchMovie activity.</li>
- *     <li>Profile - Navigates to the ProfileMovie activity.</li>
- * </ul>
- * <p>
- * The data displayed in the RecyclerView is updated by parsing the JSON data received from the API.
+ * This class represents the main activity for the movie application.
+ * It handles navigation between different fragments using a BottomNavigationView.
  */
 public class MovieOption extends AppCompatActivity {
 
-    private static final String INITIAL_JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
-    private List<MovieModel> movieList;
-    private RecyclerView movieRecyclerView, movieRecyclerView1;
-    private MovieAdapter adapter;
-    private MovieInformationAdapter adapter1;
-
+    /**
+     * Called when the activity is first created.
+     * Sets up the initial fragment and the BottomNavigationView for navigation.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down,
+     *                           this contains the data it most recently supplied in onSaveInstanceState(Bundle).
+     *                           Otherwise, it is null.
+     */
     @Override
-    protected void onCreate(Bundle saveInstanceState) {
-        super.onCreate(saveInstanceState);
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_activity);
 
-        // Initialize RecyclerViews
-        movieRecyclerView = findViewById(R.id.movie_card_view);
-        movieRecyclerView1 = findViewById(R.id.movie_information_details);
-
-        // Initialize movie list and adapters
-        movieList = new ArrayList<>();
-        adapter = new MovieAdapter(this, movieList, this::onItemClicked);
-        movieRecyclerView.setAdapter(adapter);
-        movieRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));  // Use GridLayoutManager for grid view
-
-        adapter1 = new MovieInformationAdapter(new ArrayList<>());
-        movieRecyclerView1.setAdapter(adapter1);
-        movieRecyclerView1.setLayoutManager(new LinearLayoutManager(this));  // Use LinearLayoutManager for list view
-
-        // Fetch initial movie data
-        new FetchInitialData().execute(INITIAL_JSON_URL);
-
         BottomNavigationView bottomNavigationView = findViewById(R.id.movie_bottom_navigation_view);
+
+        // Set initial fragment if there is no saved instance state
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
+        }
+
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+            /**
+             * Called when an item in the BottomNavigationView is selected.
+             * Replaces the current fragment with the selected fragment.
+             *
+             * @param item The selected item.
+             * @return true to display the selected item as the selected item,
+             *         false to do nothing.
+             */
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() == R.id.movie_home) {
-                    // Navigate to MovieOption activity
-                    Intent intent = new Intent(MovieOption.this, MovieOption.class);
-                    startActivity(intent);
-                    return true;
-                } else if (item.getItemId() == R.id.movie_favorite) {
-                    // Navigate to FavoriteMovie activity
-                    Intent intent1 = new Intent(MovieOption.this, FavoriteMovie.class);
-                    startActivity(intent1);
-                    return true;
-                } else if (item.getItemId() == R.id.movie_search) {
-                    // Navigate to SearchMovie activity
-                    Intent intent2 = new Intent(MovieOption.this, SearchMovie.class);
-                    startActivity(intent2);
-                    return true;
-                } else if (item.getItemId() == R.id.movie_profile) {
-                    // Navigate to ProfileMovie activity
-                    Intent intent3 = new Intent(MovieOption.this, ProfileMovie.class);
-                    startActivity(intent3);
-                    return true;
+                Fragment selectedFragment = null;
+
+                int itemId = item.getItemId();
+
+                // Determine which fragment to display based on the selected menu item
+                if (itemId == R.id.menu_movie_home) {
+                    selectedFragment = new HomeFragment();
+                } else if (itemId == R.id.menu_movie_favorite) {
+                    selectedFragment = new FavoriteFragment();
+                } else if (itemId == R.id.menu_movie_search) {
+                    selectedFragment = new SearchFragment();
+                } else if (itemId == R.id.menu_movie_profile) {
+                    selectedFragment = new ProfileFragment();
                 }
-                return false;
+
+                // Replace the current fragment with the selected fragment
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+                return true;
             }
         });
-    }
 
-    /**
-     * Handles click events on items in the movie list.
-     *
-     * @param itemView The clicked MovieModel item.
-     */
-    public void onItemClicked(MovieModel itemView) {
-        new FetchNewData().execute(itemView.getId());
-    }
-
-    /**
-     * AsyncTask to fetch initial data (list of popular movies) from the API.
-     */
-    private class FetchInitialData extends AsyncTask<String, Void, List<MovieModel>> {
-        @Override
-        protected List<MovieModel> doInBackground(String... urls) {
-            String current = "";
-            try {
-                URL url = new URL(urls[0]);
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                try (java.io.InputStream is = urlConnection.getInputStream();
-                     java.io.InputStreamReader isr = new java.io.InputStreamReader(is)) {
-                    int movieData = isr.read();
-                    while (movieData != -1) {
-                        current += (char) movieData;
-                        movieData = isr.read();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return parseMovieData(current);
-        }
-
-        @Override
-        protected void onPostExecute(List<MovieModel> movieList) {
-            PutDataIntoRecyclerview(movieList);  // Update both RecyclerViews
-        }
-    }
-
-    /**
-     * AsyncTask to fetch detailed data for a single movie based on its ID.
-     */
-    private class FetchNewData extends AsyncTask<String, Void, MovieModel> {
-        @Override
-        protected MovieModel doInBackground(String... itemIds) {
-            String itemId = itemIds[0];
-            String url = "https://api.themoviedb.org/3/movie/" + itemId + "?api_key=ff3dce8592d15d036bf53cbedeca224b";
-            String current = "";
-            try {
-                URL apiUrl = new URL(url);
-                HttpURLConnection urlConnection = (HttpURLConnection) apiUrl.openConnection();
-                try (java.io.InputStream is = urlConnection.getInputStream();
-                     java.io.InputStreamReader isr = new java.io.InputStreamReader(is)) {
-                    int movieData = isr.read();
-                    while (movieData != -1) {
-                        current += (char) movieData;
-                        movieData = isr.read();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (urlConnection != null) {
-                        urlConnection.disconnect();
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return parseSingleMovieData(current);
-        }
-
-        @Override
-        protected void onPostExecute(MovieModel movieModel) {
-            if (movieModel != null) {
-                List<MovieModel> detailList = new ArrayList<>();
-                detailList.add(movieModel);
-                adapter1.updateData(detailList);  // Update adapter1 with a single movie detail in list format
-            }
-        }
-    }
-
-    /**
-     * Parses JSON data to extract a list of movies.
-     *
-     * @param jsonData The JSON data as a string.
-     * @return A list of MovieModel objects.
-     */
-    private List<MovieModel> parseMovieData(String jsonData) {
-        List<MovieModel> movieList = new ArrayList<>();
-        try {
-            JSONObject jsonObject = new JSONObject(jsonData);
-            JSONArray jsonArray = jsonObject.getJSONArray("results");
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject jsonObject1 = jsonArray.getJSONObject(i);
-                MovieModel movieModel = new MovieModel(
-                        jsonObject1.getString("id"),
-                        jsonObject1.getString("title"),
-                        "Vote: " + jsonObject1.getString("vote_average"),
-                        jsonObject1.getString("poster_path"),
-                        "Overview: " + jsonObject1.getString("overview"),
-                        "Language: " + jsonObject1.getString("original_language"),
-                        "Release Date: " + jsonObject1.getString("release_date")
-                );
-                movieList.add(movieModel);
-            }
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
-        }
-        return movieList;
-    }
-
-    /**
-     * Parses JSON data to extract a single movie's details.
-     *
-     * @param jsonData The JSON data as a string.
-     * @return A MovieModel object containing the movie's details.
-     */
-    private static MovieModel parseSingleMovieData(String jsonData) {
-        try {
-            JSONObject jsonObject = new JSONObject(jsonData);
-            return new MovieModel(
-                    jsonObject.getString("id"),
-                    jsonObject.getString("title"),
-                    "Vote: " + jsonObject.getString("vote_average"),
-                    jsonObject.getString("poster_path"),
-                    "Overview: " + jsonObject.getString("overview"),
-                    "Language: " + jsonObject.getString("original_language"),
-                    "Release Date: " + jsonObject.getString("release_date")
-            );
-        } catch (org.json.JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Updates the data displayed in the RecyclerViews.
-     *
-     * @param movieList The list of movies to display.
-     */
-    private void PutDataIntoRecyclerview(List<MovieModel> movieList) {
-        // Update the main RecyclerView
-        adapter.updateData(movieList);
-
-        // Update the detail RecyclerView with the same list or a new list if needed
-        movieRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));  // Use GridLayoutManager for grid view
-        movieRecyclerView.setAdapter(adapter);
-
-        movieRecyclerView1.setLayoutManager(new LinearLayoutManager(this));  // Use LinearLayoutManager for list view
-        movieRecyclerView1.setAdapter(adapter1);
     }
 }
+
+
+

@@ -1,24 +1,23 @@
 package emplay.entertainment.emplay;
 
 /**
- * @author Tran Ngoc Que Huong
- * @version 1.0
- *
  * Represents a movie with its details.
  * <p>
  * This class encapsulates the information about a movie, including its unique identifier, title, rating,
  * poster image path, overview, language, and release date.
  * </p>
+ *
+ * @version 1.0
  */
 public class MovieModel {
 
     private String id;
-    private String name;
-    private String vote;
-    private String posterPath; // Changed from 'img' to 'posterPath'
+    private String title;
+    private String vote_average;
+    private String poster_path;
     private String overview;
-    private String language;
-    private String releaseDate;
+    private String original_language;
+    private String release_date;
 
     /**
      * Default constructor.
@@ -27,7 +26,8 @@ public class MovieModel {
      * a default constructor.
      * </p>
      */
-    public MovieModel(String id, String title, String voteAverage, String posterPath, String overview, String originalLanguage) {
+    public MovieModel() {
+        // Default constructor
     }
 
     /**
@@ -43,12 +43,12 @@ public class MovieModel {
      */
     public MovieModel(String id, String name, String vote, String posterPath, String overview, String language, String releaseDate) {
         this.id = id;
-        this.name = name;
-        this.vote = vote;
-        this.posterPath = posterPath;
+        this.title = name;
+        this.vote_average = vote;
+        this.poster_path = posterPath;
         this.overview = overview;
-        this.language = language;
-        this.releaseDate = releaseDate;
+        this.original_language = language;
+        this.release_date = releaseDate;
     }
 
     /**
@@ -75,7 +75,7 @@ public class MovieModel {
      * @return the title of the movie
      */
     public String getName() {
-        return name;
+        return title;
     }
 
     /**
@@ -84,7 +84,7 @@ public class MovieModel {
      * @param name the title to set
      */
     public void setName(String name) {
-        this.name = name;
+        this.title = name;
     }
 
     /**
@@ -93,7 +93,7 @@ public class MovieModel {
      * @return the rating of the movie
      */
     public String getVote() {
-        return vote;
+        return vote_average;
     }
 
     /**
@@ -102,7 +102,7 @@ public class MovieModel {
      * @param vote the rating to set
      */
     public void setVote(String vote) {
-        this.vote = vote;
+        this.vote_average = vote;
     }
 
     /**
@@ -111,7 +111,7 @@ public class MovieModel {
      * @return the path to the poster image
      */
     public String getPosterPath() {
-        return posterPath;
+        return poster_path;
     }
 
     /**
@@ -120,7 +120,7 @@ public class MovieModel {
      * @param posterPath the path to set
      */
     public void setPosterPath(String posterPath) {
-        this.posterPath = posterPath;
+        this.poster_path = posterPath;
     }
 
     /**
@@ -147,7 +147,7 @@ public class MovieModel {
      * @return the language of the movie
      */
     public String getLanguage() {
-        return language;
+        return original_language;
     }
 
     /**
@@ -156,7 +156,7 @@ public class MovieModel {
      * @param language the language to set
      */
     public void setLanguage(String language) {
-        this.language = language;
+        this.original_language = language;
     }
 
     /**
@@ -165,7 +165,7 @@ public class MovieModel {
      * @return the release date of the movie
      */
     public String getReleaseDate() {
-        return releaseDate;
+        return release_date;
     }
 
     /**
@@ -174,6 +174,6 @@ public class MovieModel {
      * @param releaseDate the release date to set
      */
     public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+        this.release_date = releaseDate;
     }
 }

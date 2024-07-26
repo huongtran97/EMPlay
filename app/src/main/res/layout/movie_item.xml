@@ -29,7 +29,7 @@
             android:fontFamily="sans-serif-black"
             android:textAlignment="viewStart"
             android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/id_txt"

@@ -32,11 +32,12 @@
             android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".SignUpPage"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".FavoriteMovie"
+        <activity android:name=".FavoriteFragment"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".SearchMovie"
-            android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".ProfileMovie"
+        <activity android:name=".SearchFragment"
+            android:theme="@style/HiddenTitleTheme"
+            android:windowSoftInputMode="adjustResize"></activity>
+        <activity android:name=".ProfileFragment"
             android:theme="@style/HiddenTitleTheme"></activity>
 
 
