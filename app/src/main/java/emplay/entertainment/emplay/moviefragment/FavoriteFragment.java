@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.moviefragment;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,16 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-public class ProfileFragment extends Fragment {
+import emplay.entertainment.emplay.R;
+
+public class FavoriteFragment extends Fragment {
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.movie_profile_view, container, false);
-
-        // Initialize your views and data here
-
-        return view;
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.movie_favorite_view, container, false);
     }
 }
+
 

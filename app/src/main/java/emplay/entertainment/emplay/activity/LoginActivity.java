@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +15,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class LoginPage extends AppCompatActivity {
+import emplay.entertainment.emplay.R;
+
+public class LoginActivity extends AppCompatActivity {
     private EditText username;
     private EditText password;
     private Button loginBtn;
@@ -35,12 +37,12 @@ public class LoginPage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (username.getText().toString().equals("emily") && password.getText().toString().equals("1997")) {
-                    Toast.makeText(LoginPage.this, "Successful!", Toast.LENGTH_SHORT).show();
-                    Intent logIn_yes = new Intent(LoginPage.this,MainActivity.class);
+                    Toast.makeText(LoginActivity.this, "Successful!", Toast.LENGTH_SHORT).show();
+                    Intent logIn_yes = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(logIn_yes);
 
                 } else {
-                    Toast.makeText(LoginPage.this, "Wrong password or username. Try again!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, "Wrong password or username. Try again!", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -53,7 +55,7 @@ public class LoginPage extends AppCompatActivity {
             public void onClick(@NonNull View widget) {
                 signUp = findViewById(R.id.sign_up);
                 signUp.setOnClickListener(click -> {
-                    Intent sign_up_page = new Intent(LoginPage.this, SignUpPage.class);
+                    Intent sign_up_page = new Intent(LoginActivity.this, SignUpActivity.class);
                     startActivity(sign_up_page);
                 });
 

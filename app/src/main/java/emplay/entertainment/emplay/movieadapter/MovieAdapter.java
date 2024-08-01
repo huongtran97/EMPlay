@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.movieadapter;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -12,6 +12,9 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
+
+import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.models.MovieModel;
 
 /**
  * @author Tran Ngoc Que Huong
@@ -31,9 +34,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         /**
          * Called when a movie item is clicked.
          *
-         * @param itemView The MovieModel object associated with the clicked item.
+         * @param movie The MovieModel object associated with the clicked item.
          */
-        void onItemClick(MovieModel itemView);
+        void onItemClick(MovieModel movie);
     }
 
     /**
@@ -72,8 +75,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         // Bind data to the ViewHolder
         MovieModel movie = mData.get(position);
 
-        holder.name.setText(movie.getName());
-        holder.vote.setText(movie.getVote());
+        holder.name.setText(movie.getTitle());
+        holder.year.setText(movie.getReleaseDate());
+
         Glide.with(mContext)
                 .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
                 .into(holder.img);
@@ -94,7 +98,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView name;
-        TextView vote;
+        TextView year;
         ImageView img;
 
         /**
@@ -106,7 +110,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
             super(itemView);
 
             name = itemView.findViewById(R.id.name_txt);
-            vote = itemView.findViewById(R.id.vote_txt);
+            year = itemView.findViewById(R.id.year_txt);
             img = itemView.findViewById(R.id.header);
         }
 
@@ -121,3 +125,4 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         }
     }
 }
+

@@ -8,6 +8,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.fragment.app.Fragment;
 
+import emplay.entertainment.emplay.moviefragment.FavoriteFragment;
+import emplay.entertainment.emplay.moviefragment.HomeFragment;
+import emplay.entertainment.emplay.moviefragment.ProfileFragment;
+import emplay.entertainment.emplay.moviefragment.SearchFragment;
+
 /**
  * @author Tran Ngoc Que Huong
  * @version 1.0

@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.activity;
 
 import static emplay.entertainment.emplay.R.*;
 import static emplay.entertainment.emplay.R.id.*;
@@ -16,6 +16,9 @@ import android.widget.TextView;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import emplay.entertainment.emplay.MovieOption;
+import emplay.entertainment.emplay.MusicOption;
+import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.R.id;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,10 +29,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int itemId = item.getItemId();
         if (itemId == login) {
-            Intent loginPage = new Intent(MainActivity.this, LoginPage.class);
+            Intent loginPage = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(loginPage);
         } else if (itemId == about) {
-            Intent aboutPage = new Intent(MainActivity.this, AboutPage.class);
+            Intent aboutPage = new Intent(MainActivity.this, AboutActivity.class);
             startActivity(aboutPage);
         }
         return super.onOptionsItemSelected(item);

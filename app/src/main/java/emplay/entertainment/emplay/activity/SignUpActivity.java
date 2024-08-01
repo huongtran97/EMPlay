@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -13,7 +13,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class SignUpPage extends AppCompatActivity {
+import emplay.entertainment.emplay.R;
+
+public class SignUpActivity extends AppCompatActivity {
     private TextView user_login;
 
     @SuppressLint("MissingInflatedId")
@@ -30,7 +32,7 @@ public class SignUpPage extends AppCompatActivity {
             public void onClick(@NonNull View widget) {
                 user_login = findViewById(R.id.re_login);
                 user_login.setOnClickListener(click -> {
-                    Intent sign_up_page = new Intent(SignUpPage.this, LoginPage.class);
+                    Intent sign_up_page = new Intent(SignUpActivity.this, LoginActivity.class);
                     startActivity(sign_up_page);
                 });
 

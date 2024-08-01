@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EMPlay">
         <activity
-            android:name=".MainActivity"
+            android:name=".activity.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,20 +26,12 @@
             android:theme="@style/HiddenTitleTheme"></activity>
         <activity android:name=".MovieOption"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".AboutPage"
+        <activity android:name=".activity.AboutActivity"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".LoginPage"
+        <activity android:name=".activity.LoginActivity"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".SignUpPage"
+        <activity android:name=".activity.SignUpActivity"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".FavoriteFragment"
-            android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".SearchFragment"
-            android:theme="@style/HiddenTitleTheme"
-            android:windowSoftInputMode="adjustResize"></activity>
-        <activity android:name=".ProfileFragment"
-            android:theme="@style/HiddenTitleTheme"></activity>
-
 
     </application>
 

@@ -4,117 +4,93 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="4dp">
+    android:layout_margin="2dp"
+    app:cardCornerRadius="26dp"
+    app:cardElevation="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#4C4545">
+        android:layout_height="195dp"
+        android:background="#D54C4545">
 
         <TextView
             android:id="@+id/search_title"
-            android:layout_width="379dp"
-            android:layout_height="54dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="254dp"
+            android:layout_height="62dp"
+            android:layout_marginTop="20dp"
             android:layout_marginEnd="8dp"
             android:fontFamily="sans-serif-medium"
             android:text="Title goes here"
             android:textColor="@color/white"
-            android:textSize="20sp"
+            android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_bias="0.666"
+            app:layout_constraintStart_toEndOf="@+id/search_poster"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.7" />
 
         <ImageView
             android:id="@+id/search_poster"
-            android:layout_width="149dp"
-            android:layout_height="222dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="117dp"
+            android:layout_height="157dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="20dp"
             android:scaleType="centerCrop"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.064"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/search_title"
+            app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/avatars" />
-
-        <ImageButton
-            android:id="@+id/favorite_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:background="@color/purple_200"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.089"
-            app:layout_constraintStart_toEndOf="@+id/search_poster"
-            app:layout_constraintTop_toBottomOf="@+id/search_title"
-            app:srcCompat="@drawable/baseline_favorite_border_24" />
 
         <TextView
             android:id="@+id/search_release_date"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="8dp"
+            android:layout_width="235dp"
+            android:layout_height="25dp"
             android:fontFamily="sans-serif-medium"
+            android:inputType="text"
             android:text="Release date goes here"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.266"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
-            app:layout_constraintTop_toBottomOf="@+id/favorite_btn" />
+            app:layout_constraintTop_toBottomOf="@+id/search_ratingBar"
+            app:layout_constraintWidth_percent="0.7" />
 
         <TextView
             android:id="@+id/search_language"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_width="231dp"
+            android:layout_height="22dp"
             android:layout_marginTop="4dp"
-            android:layout_marginEnd="8dp"
             android:fontFamily="sans-serif-medium"
             android:text="Language goes here"
             android:textColor="@color/white"
             android:textSize="14sp"
             android:textStyle="italic"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/search_poster"
-            app:layout_constraintTop_toBottomOf="@+id/search_release_date" />
-
-        <Button
-            android:id="@+id/trailer_btn"
-            android:layout_width="132dp"
-            android:layout_height="43dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginEnd="8dp"
-            android:background="#B2502424"
-            android:text="TRAILER"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.329"
-            app:layout_constraintStart_toEndOf="@+id/search_poster"
-            app:layout_constraintTop_toBottomOf="@+id/search_language" />
-
-        <TextView
-            android:id="@+id/search_overview"
-            android:layout_width="360dp"
-            android:layout_height="150dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="Overview goes here"
-            android:textColor="@color/white"
-            android:textSize="10sp"
-            android:textStyle="italic"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.244"
+            app:layout_constraintStart_toEndOf="@+id/search_poster"
+            app:layout_constraintTop_toBottomOf="@+id/search_release_date"
+            app:layout_constraintVertical_bias="0.0"
+            app:layout_constraintWidth_percent="0.7" />
+
+        <RatingBar
+            android:id="@+id/search_ratingBar"
+            android:layout_width="243dp"
+            android:layout_height="44dp"
+            android:isIndicator="true"
+            android:numStars="5"
+            android:rating="0"
+            android:scaleX="0.4"
+            android:scaleY="0.4"
+            android:stepSize="0.5"
+            android:theme="@style/CustomRatingBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.44"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/search_poster" />
+            app:layout_constraintTop_toBottomOf="@+id/search_title"
+            app:layout_constraintWidth_percent="0.7" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

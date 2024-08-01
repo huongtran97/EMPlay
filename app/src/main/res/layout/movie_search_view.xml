@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".SearchFragment">
+    tools:context=".moviefragment.SearchFragment">
 
     <TextView
         android:id="@+id/movie_search"
@@ -34,9 +34,11 @@
         android:textColorHint="#FFFFFF"
         android:textSize="14sp"
         android:textStyle="italic"
+        android:imeOptions="actionSearch"
         app:layout_constraintEnd_toStartOf="@+id/search_movie_btn"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/movie_search" />
+        app:layout_constraintTop_toBottomOf="@+id/movie_search"
+        android:singleLine="true"/>
 
     <ImageButton
         android:id="@+id/search_movie_btn"
