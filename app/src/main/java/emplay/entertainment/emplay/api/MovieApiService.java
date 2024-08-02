@@ -40,4 +40,8 @@ public interface MovieApiService {
             @Path("id") int movieId,
             @Query("api_key") String apiKey);
 
+    @GET("3/trending/all/week")
+    Call<MovieTrendingResponse> getTrendingMovie(
+            @Query("api_key") String apiKey);
+
 }

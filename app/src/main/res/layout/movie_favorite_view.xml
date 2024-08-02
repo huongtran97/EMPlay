@@ -11,16 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/movie_bottom_navigation_favorite_view"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:background="#A18C8C"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/movie_bottom_navigate_menu"
-        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

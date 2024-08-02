@@ -48,10 +48,8 @@ import retrofit2.Call;
  */
 
 public class HomeFragment extends Fragment {
-
-    private static final String INITIAL_JSON_URL = "https://api.themoviedb.org/3/movie/popular?api_key=ff3dce8592d15d036bf53cbedeca224b";
     private List<MovieModel> movieList;
-    private RecyclerView movieRecyclerView, movieRecyclerView1;
+    private RecyclerView movieRecyclerView, movieRecyclerView1, movieRecyclerView3;
     private MovieAdapter adapter;
     private MovieInformationAdapter adapter1;
     private MovieApiService apiService;
@@ -74,14 +72,15 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.movie_activity, container, false);
 
         // Initialize RecyclerViews
-        movieRecyclerView = view.findViewById(R.id.movie_card_view);
+        movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
         movieRecyclerView1 = view.findViewById(R.id.movie_information_details);
+        movieRecyclerView3 = view.findViewById(R.id.movie_trending_recyclerview);//Working on movie Trending
 
         // Initialize movie list and adapters
         movieList = new ArrayList<>();
         adapter = new MovieAdapter(getContext(), movieList, this::onItemClicked);
         movieRecyclerView.setAdapter(adapter);
-        movieRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));  // Use GridLayoutManager for grid view
+        movieRecyclerView.setLayoutManager((new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)));  // Use GridLayoutManager for grid view
 
         adapter1 = new MovieInformationAdapter(new ArrayList<>());
         movieRecyclerView1.setAdapter(adapter1);
