@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.movieadapter;
 
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,7 @@ import android.util.Log;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.MovieModel;
+import emplay.entertainment.emplay.models.TVShowModel;
 
 
 public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.MovieResultViewHolder> {

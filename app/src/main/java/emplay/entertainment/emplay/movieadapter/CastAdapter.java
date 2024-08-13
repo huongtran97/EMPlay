@@ -17,6 +17,7 @@ import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.CastModel;
+import emplay.entertainment.emplay.models.CrewModel;
 
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
 

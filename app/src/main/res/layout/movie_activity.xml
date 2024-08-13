@@ -22,21 +22,21 @@
             android:orientation="vertical">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/movie_information_details"
+                android:id="@+id/movie_tv_information_recyclerview"
                 android:layout_width="match_parent"
-                android:layout_height="455dp"
+                android:layout_height="279dp"
                 android:layout_marginTop="25dp" />
 
             <TextView
                 android:id="@+id/movie_trending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Trending"
+                android:text="TV Shows"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/movie_trending_recyclerview"
+                android:id="@+id/tvshow_popular_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="horizontal" />
@@ -45,7 +45,7 @@
                 android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Popular"
+                android:text="Movies"
                 android:textColor="@color/white"
                 android:textStyle="bold" />
 

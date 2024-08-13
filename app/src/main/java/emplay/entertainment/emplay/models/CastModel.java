@@ -36,4 +36,5 @@ public class CastModel {
     public void setProfilePath(String profilePath) {
         this.profilePath = profilePath;
     }
+
 }

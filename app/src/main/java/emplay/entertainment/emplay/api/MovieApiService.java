@@ -26,9 +26,12 @@ public interface MovieApiService {
             @Query("query") String query
     );
 
-    @GET("3/genre/movie/list")
-    Call<MovieDetailsResponse.Genre> getGenres(
-            @Query("api_key") String apiKey);
+    @GET("3/search/tv")
+    Call<TVShowResponse> searchTVShows(
+            @Query("api_key") String apiKey,
+            @Query("query") String query
+    );
+
 
     @GET("3/movie/{id}/credits")
     Call<MovieCreditsResponse> getMovieCredits(
@@ -40,8 +43,25 @@ public interface MovieApiService {
             @Path("id") int movieId,
             @Query("api_key") String apiKey);
 
-    @GET("3/trending/all/week")
-    Call<MovieTrendingResponse> getTrendingMovie(
+    @GET("3/tv/popular")
+    Call<TVShowResponse> getPopularTVShows(
             @Query("api_key") String apiKey);
 
+    @GET("3/tv/{id}")
+    Call<TVShowDetailsResponse> getTVShowDetails(
+            @Path("id") int tvId,
+            @Query("api_key") String apiKey
+    );
+
+    @GET("3/tv/{id}/credits")
+    Call<TVShowCreditsResponses> getTVShowCredits(
+            @Path("id") int tvId,
+            @Query("api_key") String apiKey
+    );
+
+    @GET("3/tv/{id}/similar")
+    Call<TVShowSimilarResponse> getTVShowSimilar(
+            @Path("id") int tvId,
+            @Query("api_key") String apiKey
+    );
 }

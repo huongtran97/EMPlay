@@ -15,6 +15,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -94,7 +95,8 @@ public class ShowResultDetailsFragment extends Fragment {
 
         movieResultAdapter = new MovieResultAdapter(movieList, getActivity());
         castAdapter = new CastAdapter(castList, getActivity());
-        suggestionAdapter = new SuggestionAdapter(suggestionList, getActivity()); // Pass suggestionList
+//        suggestionAdapter = new SuggestionAdapter(suggestionList, getActivity());
+        suggestionAdapter = new SuggestionAdapter(suggestionList, getContext(), this::onItemClicked);
 
         detailRecyclerView.setAdapter(movieResultAdapter);
         castRecyclerView.setAdapter(castAdapter);
@@ -120,6 +122,18 @@ public class ShowResultDetailsFragment extends Fragment {
         }
 
         return view;
+    }
+
+    private void onItemClicked(MovieModel movie) {
+        if (movie != null) {
+            ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
+            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, showResultDetailsFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else {
+            Toast.makeText(getContext(), "Movie details are not available", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void fetchMovieDetails() {

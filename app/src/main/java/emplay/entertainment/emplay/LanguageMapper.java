@@ -13,7 +13,7 @@ public class LanguageMapper {
 
     static {
         languageMap.put("en", "English");
-        languageMap.put("ja", "UwU");
+        languageMap.put("ja", "Japanese");
         languageMap.put("es", "Spanish");
         languageMap.put("fr", "French");
         languageMap.put("vi", "Vietnamese");
@@ -29,6 +29,8 @@ public class LanguageMapper {
         languageMap.put("hu", "Hungarian");
         languageMap.put("bg", "Bulgarian");
         languageMap.put("da", "Danish");
+        languageMap.put("br", "Brazilian");
+        languageMap.put("pt", "Portuguese");
 
     }
 

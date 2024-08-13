@@ -38,6 +38,8 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
         this.movieInformationList = movieInformationList;
     }
 
+
+
     @Override
     public MovieInformationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Inflate the layout for movie information item and create a ViewHolder

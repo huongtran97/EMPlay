@@ -9,9 +9,7 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.bumptech.glide.Glide;
 
@@ -19,16 +17,23 @@ import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.MovieModel;
+import emplay.entertainment.emplay.models.TVShowModel;
+import emplay.entertainment.emplay.movieadapter.SuggestionTVAdapter.OnItemClickListener;
 
 public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.SuggestionViewHolder> {
 
     private List<MovieModel> suggestionList;
-
     private final Context context;
+    private final OnItemClickListener onItemClickListener;
 
-    public SuggestionAdapter(List<MovieModel> suggestionList, Context context) {
+    public SuggestionAdapter(List<MovieModel> suggestionList, Context context, OnItemClickListener onItemClickListener) {
         this.suggestionList = suggestionList;
         this.context = context;
+        this.onItemClickListener = onItemClickListener;
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(MovieModel movie);
     }
 
     @NonNull
@@ -48,6 +53,8 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
                 .load("https://image.tmdb.org/t/p/w500" + movieModel.getPosterPath())
                 .into(holder.poster);
 
+        holder.bind(movieModel, onItemClickListener);
+
     }
 
     @Override
@@ -66,6 +73,10 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
             ratingBar = itemView.findViewById(R.id.suggestion_rating_bar);
             releaseDate = itemView.findViewById(R.id.suggestion_release_date);
             poster = itemView.findViewById(R.id.poster);
+        }
+
+        public void bind(MovieModel movie, OnItemClickListener onItemClickListener) {
+            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movie));
         }
     }
 }

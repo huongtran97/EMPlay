@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
-    tools:context=".moviefragment.SearchFragment">
+    tools:context=".moviefragment.SearchMoviesFragment">
 
     <TextView
         android:id="@+id/movie_search"
@@ -23,45 +23,120 @@
 
     <EditText
         android:id="@+id/input_title"
-        android:layout_width="300dp"
-        android:layout_height="23dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="380dp"
+        android:layout_height="33dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/rounded_edittext"
         android:hint="Tell me your movie..."
+        android:imeOptions="actionSearch"
+        android:singleLine="true"
         android:textColor="@color/white"
         android:textColorHint="#FFFFFF"
         android:textSize="14sp"
         android:textStyle="italic"
-        android:imeOptions="actionSearch"
-        app:layout_constraintEnd_toStartOf="@+id/search_movie_btn"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/movie_search"
-        android:singleLine="true"/>
+        app:layout_constraintTop_toBottomOf="@+id/horizontal_menu" />
 
     <ImageButton
         android:id="@+id/search_movie_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="28dp"
+        android:layout_height="23dp"
         android:background="#00FFFFFF"
         android:src="@drawable/movie_search"
+        app:layout_constraintBottom_toBottomOf="@+id/input_title"
+        app:layout_constraintEnd_toEndOf="@+id/input_title"
+        app:layout_constraintTop_toTopOf="@+id/input_title" />
+
+    <!-- Horizontal LinearLayout to hold the menu items -->
+
+
+    <LinearLayout
+        android:id="@+id/horizontal_menu"
+        android:layout_width="227dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/menu_item_background"
+        android:gravity="center"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/input_title"
-        app:layout_constraintTop_toBottomOf="@+id/movie_search" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- First menu item -->
+        <LinearLayout
+            android:id="@+id/menu_movie_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/menu_item_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:onClick="onMovieClick"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/menu_movie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="movie"
+                android:src="@drawable/movie" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:text="Movie"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <!-- Divider -->
+        <View
+            android:layout_width="1dp"
+            android:layout_height="wrap_content"
+            android:background="#99656363" />
+
+        <!-- Second menu item -->
+        <LinearLayout
+            android:id="@+id/menu_tvshow_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/menu_item_background"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:onClick="onTVShowClick"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/menu_tvshow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="tv_show"
+                android:src="@drawable/tv_show" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:gravity="center"
+                android:text="TV Show"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="14dp"
         app:layout_constraintBottom_toBottomOf="parent"
-
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/input_title" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -29,7 +29,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_result_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="513dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"/>
 
                 <TextView
@@ -46,7 +46,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_result_cast_recyclerview"
                     android:layout_width="wrap_content"
-                    android:layout_height="138dp"
+                    android:layout_height="wrap_content"
                     android:scrollbars="horizontal" />
 
                 <TextView
@@ -55,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
                     android:padding="10dp"
-                    android:text="Suggestion"
+                    android:text="Recommendation"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />

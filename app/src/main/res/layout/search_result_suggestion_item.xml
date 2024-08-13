@@ -41,8 +41,8 @@
 
         <RatingBar
             android:id="@+id/suggestion_rating_bar"
-            android:layout_width="284dp"
-            android:layout_height="41dp"
+            android:layout_width="234dp"
+            android:layout_height="42dp"
             android:numStars="5"
             android:rating="0"
             android:scaleX="0.2"

@@ -2,8 +2,6 @@ package emplay.entertainment.emplay.moviefragment;
 
 import android.content.Context;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +11,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,13 +38,16 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SearchFragment extends Fragment {
-
+public class SearchMoviesFragment extends Fragment {
+    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
     private SearchMovieAdapter searchAdapter;
     private List<MovieModel> searchMovieList;
     private MovieApiService apiService;
     private EditText inputSearch;
     private SharedViewModel viewModel;
+    private LinearLayout searchMovieLayout;
+    private LinearLayout searchTVShowLayout;
+    private boolean isTVShowSearch = false;
 
     @Nullable
     @Override
@@ -55,9 +57,16 @@ public class SearchFragment extends Fragment {
         // Initialize the ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
+        // Initialize UI elements
         inputSearch = view.findViewById(R.id.input_title);
         RecyclerView recyclerView = view.findViewById(R.id.search_recycler_view);
         ImageButton searchButton = view.findViewById(R.id.search_movie_btn);
+        searchMovieLayout = view.findViewById(R.id.menu_movie_layout);
+        searchTVShowLayout = view.findViewById(R.id.menu_tvshow_layout);
+
+        // Set click listeners
+        searchMovieLayout.setOnClickListener(v -> onMovieClick());
+        searchTVShowLayout.setOnClickListener(v -> onTVShowClick());
 
         searchMovieList = new ArrayList<>();
         searchAdapter = new SearchMovieAdapter(searchMovieList, this::showMovieDetails);
@@ -78,25 +87,73 @@ public class SearchFragment extends Fragment {
         // Set up OnClickListener for Search Button
         searchButton.setOnClickListener(v -> performSearch());
 
+        // Restore state if needed
+        if (savedInstanceState != null) {
+            isTVShowSearch = savedInstanceState.getBoolean("isTVShowSearch", false);
+            inputSearch.setText(savedInstanceState.getString("searchQuery", ""));
+        }
+
+        // Set initial selected state
+        updateMenuSelection();
+
         // Observe LiveData from ViewModel
         setupObservers();
 
         return view;
     }
 
+    private void updateMenuSelection() {
+        boolean isTVShow = viewModel.getIsTVShowSearch().getValue() != null && viewModel.getIsTVShowSearch().getValue();
+        searchMovieLayout.setSelected(!isTVShow);
+        searchTVShowLayout.setSelected(isTVShow);
+    }
+
+    private void onTVShowClick() {
+        // Handle the TV Show item click
+        viewModel.setIsTVShowSearch(true);
+        updateMenuSelection();
+        replaceFragment(new SearchTVShowsFragment(), "SearchTVShowsFragment");
+    }
+
+    private void onMovieClick() {
+        // Handle the movie item click
+        viewModel.setIsTVShowSearch(false);
+        updateMenuSelection();
+        replaceFragment(new SearchMoviesFragment(), "SearchMoviesFragment");
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isTVShowSearch", isTVShowSearch);
+        outState.putString("searchQuery", inputSearch.getText().toString());
+    }
+
     private void performSearch() {
         String query = inputSearch.getText().toString().trim();
         if (!query.isEmpty()) {
-            searchMovies(query);
+            if (isTVShowSearch) {
+                // Ensure the TV show fragment is active for search
+                Fragment tvShowsFragment = getParentFragmentManager().findFragmentByTag("SearchTVShowsFragment");
+                if (tvShowsFragment instanceof SearchTVShowsFragment) {
+                    ((SearchTVShowsFragment) tvShowsFragment).searchTVShows(query);
+                } else {
+                    Log.e("PerformSearch", "SearchTVShowsFragment is not found or not of the correct type");
+                }
+            } else {
+                // Call searchMovies method (make sure it's defined in the correct context)
+                searchMovies(query);
+            }
+            viewModel.setLastSearchWasTVShow(isTVShowSearch); // Update ViewModel with the correct search type
             hideKeyboard();
         } else {
-            Toast.makeText(getContext(), "Please enter a movie title", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Please enter a search term", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void searchMovies(String query) {
-        String apiKey = "ff3dce8592d15d036bf53cbedeca224b";
-        Call<MovieResponse> call = apiService.searchMovies(apiKey, query);
+
+    void searchMovies(String query) {
+        Call<MovieResponse> call = apiService.searchMovies(API_KEY, query);
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
@@ -146,7 +203,6 @@ public class SearchFragment extends Fragment {
     private void showMovieDetails(MovieModel movie) {
         if (movie != null) {
             ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
-
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultDetailsFragment);
             transaction.addToBackStack(null);
@@ -162,5 +218,18 @@ public class SearchFragment extends Fragment {
             searchMovieList.addAll(movies);
             searchAdapter.notifyDataSetChanged();
         });
+
+        viewModel.getIsTVShowSearch().observe(getViewLifecycleOwner(), isTVShowSearch -> {
+            this.isTVShowSearch = isTVShowSearch;
+            updateMenuSelection();
+        });
     }
+
+    private void replaceFragment(Fragment fragment, String tag) {
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment, tag);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
 }

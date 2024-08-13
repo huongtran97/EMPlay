@@ -8,7 +8,7 @@
     <TextView
         android:id="@+id/search_result_title"
         android:layout_width="403dp"
-        android:layout_height="58dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:fontFamily="sans-serif-medium"
@@ -34,7 +34,7 @@
         android:id="@+id/ratingBar"
         android:layout_width="232dp"
         android:layout_height="44dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="2dp"
         android:isIndicator="true"
         android:numStars="5"
         android:rating="0"
@@ -42,9 +42,8 @@
         android:scaleY="0.4"
         android:stepSize="0.5"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/search_result_title" />
 
     <TextView
         android:id="@+id/search_result_genres"
@@ -93,7 +92,7 @@
     <TextView
         android:id="@+id/search_result_overview"
         android:layout_width="394dp"
-        android:layout_height="226dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:fontFamily="sans-serif-medium"
