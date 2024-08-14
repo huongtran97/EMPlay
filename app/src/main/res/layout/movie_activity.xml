@@ -7,6 +7,7 @@
     android:background="@color/black"
     android:id="@+id/movie_home_fragment">
 
+
     <ScrollView
         android:id="@+id/scrollView2"
         android:layout_width="match_parent"
@@ -14,25 +15,38 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44">
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/movie_tv_information_recyclerview"
+            <TextView
+                android:id="@+id/up_coming_movie"
                 android:layout_width="match_parent"
-                android:layout_height="279dp"
-                android:layout_marginTop="25dp" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="30dp"
+                android:text="  Up Coming"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/up_coming_movie_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="horizontal"/>
 
             <TextView
                 android:id="@+id/movie_trending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="TV Shows"
+                android:text="  TV Shows"
                 android:textColor="@color/white"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -45,8 +59,9 @@
                 android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Movies"
+                android:text="  Movies"
                 android:textColor="@color/white"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView

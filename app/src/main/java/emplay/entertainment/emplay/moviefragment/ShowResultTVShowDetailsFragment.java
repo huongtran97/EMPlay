@@ -206,13 +206,13 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private void setRecyclerViewBackground(String posterPath) {
         // Create the URL for the poster image
-        String posterUrl = "https://image.tmdb.org/t/p/w500" + posterPath; // Adjust the size as needed
+        String posterUrl = "https://image.tmdb.org/t/p/w500" + posterPath;
 
         // Load the image with Glide and apply the blur transformation
         Glide.with(this)
                 .load(posterUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(25)))
+                .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
                 .into(new CustomTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {

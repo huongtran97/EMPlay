@@ -22,6 +22,9 @@ public class MovieModel implements Serializable {
     @SerializedName("poster_path")
     private String posterPath;
 
+    @SerializedName("backdrop_path")
+    private String backdropPath;
+
     @SerializedName("overview")
     private String overview;
 
@@ -39,12 +42,15 @@ public class MovieModel implements Serializable {
     @SerializedName("cast")
     private List<String> cast;
 
+
+
     // Constructor including genres
-    public MovieModel(int id, String title, double voteAverage, String posterPath, String overview, String originalLanguage, String releaseDate, int runtime, List<String> genres) {
+    public MovieModel(int id, String title, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String releaseDate, int runtime, List<String> genres) {
         this.id = id;
         this.title = title;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
         this.overview = overview;
         this.originalLanguage = originalLanguage;
         this.releaseDate = releaseDate;
@@ -105,6 +111,10 @@ public class MovieModel implements Serializable {
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
     }
+
+    public String getBackdropPath() {return backdropPath;}
+
+    public void setBackdropPath(String backdropPath) {this.backdropPath = backdropPath;}
 
     public String getOverview() {
         return overview;

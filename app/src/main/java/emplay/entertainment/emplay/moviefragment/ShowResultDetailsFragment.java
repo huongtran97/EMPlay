@@ -95,7 +95,6 @@ public class ShowResultDetailsFragment extends Fragment {
 
         movieResultAdapter = new MovieResultAdapter(movieList, getActivity());
         castAdapter = new CastAdapter(castList, getActivity());
-//        suggestionAdapter = new SuggestionAdapter(suggestionList, getActivity());
         suggestionAdapter = new SuggestionAdapter(suggestionList, getContext(), this::onItemClicked);
 
         detailRecyclerView.setAdapter(movieResultAdapter);
@@ -159,6 +158,7 @@ public class ShowResultDetailsFragment extends Fragment {
                                 movieDetails.getTitle(),
                                 movieDetails.getVoteAverage(),
                                 movieDetails.getPosterPath(),
+                                movieDetails.getBackdropPath(),
                                 movieDetails.getOverview(),
                                 LanguageMapper.getLanguageName(movieDetails.getOriginalLanguage()), // Language mapping here
                                 movieDetails.getReleaseDate(),
@@ -168,7 +168,7 @@ public class ShowResultDetailsFragment extends Fragment {
                     }
                     movieResultAdapter.notifyDataSetChanged();
                     // Set the background with the blurred poster image
-                    setRecyclerViewBackground(movieDetails.getPosterPath());
+                    setRecyclerViewBackground(movieDetails.getBackdropPath());
 
                     Toast.makeText(getContext(), "Movie details fetched successfully", Toast.LENGTH_SHORT).show();
                 } else {
@@ -185,33 +185,41 @@ public class ShowResultDetailsFragment extends Fragment {
         });
     }
 
-private void setRecyclerViewBackground(String posterPath) {
-    // Create the URL for the poster image
-    String posterUrl = "https://image.tmdb.org/t/p/w500" + posterPath; // Adjust the size as needed
+    private void setRecyclerViewBackground(String backdropPath) {
+        if (backdropPath == null || backdropPath.isEmpty()) {
+            return; // Handle case where backdropPath is null or empty
+        }
 
-    // Load the image with Glide and apply the blur transformation
-    Glide.with(this)
-            .load(posterUrl)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(25)))
-            .into(new CustomTarget<Drawable>() {
-                @Override
-                public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                    // Combine the blurred image with the gradient drawable
-                    Drawable[] layers = new Drawable[2];
-                    layers[0] = resource; // Blurred image
-                    layers[1] = getResources().getDrawable(R.drawable.gradient_bg); // Gradient drawable
+        // Create the URL for the backdrop image
+        String posterUrl = "https://image.tmdb.org/t/p/w500/" + backdropPath;
 
-                    LayerDrawable layerDrawable = new LayerDrawable(layers);
-                    detailRecyclerView.setBackground(layerDrawable);
-                }
+        // Load the image with Glide and apply the blur transformation
+        Glide.with(this)
+                .load(posterUrl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        // Combine the blurred image with the gradient drawable
+                        Drawable[] layers = new Drawable[2];
+                        layers[0] = resource; // Blurred image
 
-                @Override
-                public void onLoadCleared(@Nullable Drawable placeholder) {
-                    // Handle when the load is cleared, if needed
-                }
-            });
-}
+                        // Use ContextCompat.getDrawable or Resources.getDrawable with theme
+                        layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg); // Gradient drawable
+
+                        LayerDrawable layerDrawable = new LayerDrawable(layers);
+                        detailRecyclerView.setBackground(layerDrawable);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                        // Handle when the load is cleared, if needed
+                    }
+                });
+    }
+
+
 
     private void fetchCastList() {
 

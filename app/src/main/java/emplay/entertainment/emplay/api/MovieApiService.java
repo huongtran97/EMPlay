@@ -32,7 +32,6 @@ public interface MovieApiService {
             @Query("query") String query
     );
 
-
     @GET("3/movie/{id}/credits")
     Call<MovieCreditsResponse> getMovieCredits(
             @Path("id") int movieId,
@@ -64,4 +63,8 @@ public interface MovieApiService {
             @Path("id") int tvId,
             @Query("api_key") String apiKey
     );
+
+    @GET("3/movie/upcoming")
+    Call<UpcomingMovieResponse> getUpcomingMovies(
+            @Query("api_key") String apiKey);
 }

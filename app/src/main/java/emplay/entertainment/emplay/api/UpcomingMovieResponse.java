@@ -1,10 +1,65 @@
 package emplay.entertainment.emplay.api;
 
 import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
+
+import emplay.entertainment.emplay.api.MovieDetailsResponse;
+import emplay.entertainment.emplay.api.MovieDetailsResponse.Cast;
+import emplay.entertainment.emplay.api.MovieDetailsResponse.Genre;
 import emplay.entertainment.emplay.models.MovieModel;
 
-public class MovieDetailsResponse {
+public class UpcomingMovieResponse {
+    @SerializedName("dates")
+    private Dates dates;
+    @SerializedName("page")
+    private int page;
+
+
+
+    @SerializedName("results")
+    private List<MovieModel> results;
+
+    public List<MovieModel> getResults() {
+        return results;
+    }
+
+    public void setResults(List<MovieModel> results) {
+        this.results = results;
+    }
+
+    public UpcomingMovieResponse(List<MovieModel> results) {
+        this.results = results;
+    }
+
+
+
+    // Getters and setters...
+
+    public static class Dates {
+        @SerializedName("maximum")
+        private String maximum;
+        @SerializedName("minimum")
+        private String minimum;
+
+        // Getters and setters
+        public String getMaximum() {
+            return maximum;
+        }
+
+        public void setMaximum(String maximum) {
+            this.maximum = maximum;
+        }
+
+        public String getMinimum() {
+            return minimum;
+        }
+
+        public void setMinimum(String minimum) {
+            this.minimum = minimum;
+        }
+
+    }
 
     @SerializedName("id")
     private int id;
@@ -75,6 +130,7 @@ public class MovieDetailsResponse {
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
     }
+
     public String getBackdropPath() {
         return backdropPath;
     }
@@ -140,8 +196,6 @@ public class MovieDetailsResponse {
     }
 
 
-
-
     public static class Genre {
         @SerializedName("id")
         private int id;
@@ -202,6 +256,6 @@ public class MovieDetailsResponse {
             this.profilePath = profilePath;
         }
 
-
     }
 }
+
