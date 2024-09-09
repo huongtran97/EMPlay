@@ -156,7 +156,6 @@ public class SearchTVShowsFragment extends Fragment {
         String query = inputSearch.getText().toString().trim();
         if (!query.isEmpty()) {
             if (isMoviesSearch) {
-                // Ensure the TV show fragment is active for search
                 Fragment tvShowsFragment = getParentFragmentManager().findFragmentByTag("SearchTVShowsFragment");
                 if (tvShowsFragment instanceof SearchTVShowsFragment) {
                     ((SearchTVShowsFragment) tvShowsFragment).searchTVShows(query);
@@ -164,7 +163,7 @@ public class SearchTVShowsFragment extends Fragment {
                     Log.e("PerformSearch", "SearchTVShowsFragment is not found or not of the correct type");
                 }
             } else {
-                // Call searchMovies method
+                // Call searchTVShows method
                 searchTVShows(query);
             }
             viewModel.setLastSearchWasTVShow(isMoviesSearch); // Update ViewModel with the correct search type

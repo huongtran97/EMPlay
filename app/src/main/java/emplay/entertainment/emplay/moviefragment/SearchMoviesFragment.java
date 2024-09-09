@@ -158,7 +158,6 @@ public class SearchMoviesFragment extends Fragment {
         String query = inputSearch.getText().toString().trim();
         if (!query.isEmpty()) {
             if (isTVShowSearch) {
-                // Ensure the TV show fragment is active for search
                 Fragment tvShowsFragment = getParentFragmentManager().findFragmentByTag("SearchTVShowsFragment");
                 if (tvShowsFragment instanceof SearchTVShowsFragment) {
                     ((SearchTVShowsFragment) tvShowsFragment).searchTVShows(query);
