@@ -1,13 +1,14 @@
 package emplay.entertainment.emplay.movieadapter;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.view.ViewGroup;
 import android.view.View;
 import android.view.LayoutInflater;
-import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
@@ -71,20 +72,25 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
     }
 
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
-        // Bind data to the ViewHolder
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MovieModel movie = mData.get(position);
 
-        holder.name.setText(movie.getTitle());
-        holder.year.setText(movie.getReleaseDate());
+        // Handle null or empty poster path
+        String posterUrl = movie.getPosterPath();
+        if (posterUrl == null || posterUrl.isEmpty()) {
+            holder.img.setImageResource(R.drawable.placeholder_image);
+        } else {
+            Glide.with(mContext)
+                    .load("https://image.tmdb.org/t/p/w500/" + posterUrl)
+                    .into(holder.img);
+        }
 
-        Glide.with(mContext)
-                .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
-                .into(holder.img);
-
-        // Bind the click listener to the item
+        // Bind the item
         holder.bind(movie, onItemClickListener);
     }
+
+
+
 
     @Override
     public int getItemCount() {
@@ -96,10 +102,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
      * ViewHolder class for the movie items.
      */
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-
-        TextView name;
-        TextView year;
         ImageView img;
+
 
         /**
          * Constructor for the ViewHolder.
@@ -109,9 +113,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         public MyViewHolder(View itemView) {
             super(itemView);
 
-            name = itemView.findViewById(R.id.name_txt);
-            year = itemView.findViewById(R.id.year_txt);
             img = itemView.findViewById(R.id.header);
+
         }
 
         /**

@@ -42,6 +42,9 @@ public class MovieDetailsResponse {
     @SerializedName("movie")
     private MovieModel movieDetails;
 
+    public MovieDetailsResponse(int id, String title, String posterPath, String overview, float rating) {
+    }
+
 
     // Getters and Setters
     public int getId() {

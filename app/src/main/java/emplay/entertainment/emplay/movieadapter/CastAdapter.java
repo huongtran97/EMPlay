@@ -11,13 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.CastModel;
-import emplay.entertainment.emplay.models.CrewModel;
 
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
 
@@ -47,10 +47,13 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
         CastModel castModel = castList.get(position);
         if (castModel != null) {
             holder.nameTextView.setText(castModel.getName());
+            holder.characterTextView.setText(castModel.getCharacter());
 
             // Load cast profile image using Glide
+            RequestOptions options = new RequestOptions().circleCrop();
             Glide.with(context)
                     .load("https://image.tmdb.org/t/p/w500" + castModel.getProfilePath())
+                    .apply(options)
                     .into(holder.profileImageView);
         }
     }
@@ -62,11 +65,13 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
     public static class CastViewHolder extends RecyclerView.ViewHolder {
         TextView nameTextView;
+        TextView characterTextView;
         ImageView profileImageView;
 
         public CastViewHolder(@NonNull View itemView) {
             super(itemView);
             nameTextView = itemView.findViewById(R.id.cast_name_profile);
+            characterTextView = itemView.findViewById(R.id.cast_character_profile);
             profileImageView = itemView.findViewById(R.id.cast_poster_profile);
         }
     }

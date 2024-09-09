@@ -21,8 +21,8 @@
         android:background="@drawable/customer_edittext">
 
         <LinearLayout
-            android:layout_width="373dp"
-            android:layout_height="384dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:background="@color/purple_200"
             android:orientation="vertical"
@@ -38,41 +38,72 @@
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
-            <EditText
-                android:id="@+id/username"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="40dp"
-                android:background="@drawable/customer_edittext"
-                android:drawableLeft="@drawable/login"
-                android:drawablePadding="8dp"
-                android:hint="User name"
-                android:padding="8dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
                 android:textColor="@color/white"
-                android:textColorHighlight="@color/cardview_light_background" />
+                android:textSize="16sp"
+                android:layout_marginTop="20dp"/>
 
-            <EditText
-                android:id="@+id/password"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_marginTop="40dp"
-                android:background="@drawable/customer_edittext"
-                android:drawableLeft="@drawable/user_password"
-                android:drawablePadding="8dp"
-                android:hint="Password"
-                android:padding="8dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/login"
+                    android:drawablePadding="8dp"
+                    android:padding="8dp"
+                    android:textColor="@color/black" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Password"
                 android:textColor="@color/white"
-                android:textColorHighlight="@color/cardview_light_background" />
+                android:textSize="16sp"
+                android:layout_marginTop="5dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/user_password"
+                    android:drawablePadding="8dp"
+                    android:padding="8dp"
+                    android:textColor="@color/black" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="33dp"
+                android:layout_height="34dp"
+                android:padding="4dp"
+                android:layout_marginStart="135dp"
+                android:layout_marginTop="10dp"
+                android:visibility="gone" />
 
             <Button
                 android:id="@+id/login_btn"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="30dp"
                 android:backgroundTint="#C9403838"
-                android:text="Sign In"
-                android:textSize="25sp"
+                android:text="ENTER"
                 android:textAllCaps="false"
+                android:textSize="25sp"
                 app:cornerRadius="20dp" />
 
         </LinearLayout>

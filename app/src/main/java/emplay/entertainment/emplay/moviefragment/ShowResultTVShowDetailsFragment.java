@@ -1,11 +1,11 @@
 package emplay.entertainment.emplay.moviefragment;
 
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
-import android.os.Build.VERSION;
-import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -39,9 +40,9 @@ import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.TVShowCreditsResponses;
 import emplay.entertainment.emplay.api.TVShowDetailsResponse;
 import emplay.entertainment.emplay.api.TVShowSimilarResponse;
-import emplay.entertainment.emplay.models.CrewModel;
+import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.TVShowModel;
-import emplay.entertainment.emplay.movieadapter.CrewAdapter;
+import emplay.entertainment.emplay.movieadapter.CastAdapter;
 import emplay.entertainment.emplay.movieadapter.SuggestionTVAdapter;
 import emplay.entertainment.emplay.movieadapter.TVShowInformationAdapter;
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -58,13 +59,13 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private int tvId;
     private List<TVShowModel> tvInformationList;
-    private List<CrewModel> crewList;
+    private List<CastModel> castList;
     private List<TVShowModel> suggestionList;
     private RecyclerView detailRecyclerView;
     private RecyclerView castRecyclerView;
     private RecyclerView suggestionRecyclerView;
     private TVShowInformationAdapter tvAdapter;
-    private CrewAdapter crewAdapter;
+    private CastAdapter castAdapter;
     private SuggestionTVAdapter suggestionAdapter;
     private MovieApiService apiService;
 
@@ -93,12 +94,12 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
         // Initialize lists for data
         tvInformationList = new ArrayList<>();
-        crewList = new ArrayList<>();
+        castList = new ArrayList<>();
         suggestionList = new ArrayList<>();
 
         // Initialize adapters and pass the lists
         tvAdapter = new TVShowInformationAdapter(tvInformationList, getActivity());
-        crewAdapter = new CrewAdapter(crewList, getContext());
+        castAdapter = new CastAdapter(castList, getContext());
 //        suggestionAdapter = new SuggestionTVAdapter(suggestionList, getActivity());
         suggestionAdapter = new SuggestionTVAdapter(suggestionList, getContext(), this::onItemClicked);
 
@@ -106,7 +107,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
         // Set adapters to RecyclerViews
         detailRecyclerView.setAdapter(tvAdapter);
-        castRecyclerView.setAdapter(crewAdapter);
+        castRecyclerView.setAdapter(castAdapter);
         suggestionRecyclerView.setAdapter(suggestionAdapter);
 
         // Initialize API service
@@ -209,7 +210,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         String posterUrl = "https://image.tmdb.org/t/p/w500" + posterPath;
 
         // Load the image with Glide and apply the blur transformation
-        Glide.with(this)
+        Glide.with(requireContext()) // Use requireContext() for Fragment
                 .load(posterUrl)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
@@ -219,7 +220,10 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                         // Combine the blurred image with the gradient drawable
                         Drawable[] layers = new Drawable[2];
                         layers[0] = resource; // Blurred image
-                        layers[1] = getResources().getDrawable(R.drawable.gradient_bg); // Gradient drawable
+
+                        // Get the gradient drawable using ContextCompat
+                        Drawable gradientDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg);
+                        layers[1] = gradientDrawable != null ? gradientDrawable : new ColorDrawable(Color.TRANSPARENT); // Fallback if drawable is null
 
                         LayerDrawable layerDrawable = new LayerDrawable(layers);
                         detailRecyclerView.setBackground(layerDrawable);
@@ -227,10 +231,11 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
                     @Override
                     public void onLoadCleared(@Nullable Drawable placeholder) {
-                        // Handle when the load is cleared, if needed
+                        // Handle when the load is cleared
                     }
                 });
     }
+
 
     private void fetchTVCastList() {
         Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(tvId, API_KEY);
@@ -240,20 +245,21 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     TVShowCreditsResponses tvCreditsResponse = response.body();
 
-                    List<TVShowCreditsResponses.Cast> crewList = tvCreditsResponse.getCast();
-                    if (crewList != null && !crewList.isEmpty()) {
-                        List<CrewModel> crewModels = new ArrayList<>();
-                        for (TVShowCreditsResponses.Cast cast : crewList) {
-                            CrewModel crewModel = new CrewModel(
-                                    cast.getCrewId(),
+                    List<TVShowCreditsResponses.Cast> castList = tvCreditsResponse.getCast();
+                    if (castList != null && !castList.isEmpty()) {
+                        List<CastModel> castModels = new ArrayList<>();
+                        for (TVShowCreditsResponses.Cast cast : castList) {
+                            CastModel castModel = new CastModel(
+                                    cast.getCastId(),
                                     cast.getName(),
-                                    cast.getProfilePath()
+                                    cast.getProfilePath(),
+                                    cast.getCharacter()
                             );
-                            crewModels.add(crewModel);
+                            castModels.add(castModel);
                         }
-                        ShowResultTVShowDetailsFragment.this.crewList.clear();
-                        ShowResultTVShowDetailsFragment.this.crewList.addAll(crewModels);
-                        crewAdapter.notifyDataSetChanged();
+                        ShowResultTVShowDetailsFragment.this.castList.clear();
+                        ShowResultTVShowDetailsFragment.this.castList.addAll(castModels);
+                        castAdapter.notifyDataSetChanged();
                     } else {
                         Toast.makeText(requireContext(), "Cast list is empty", Toast.LENGTH_SHORT).show();
                     }
@@ -278,13 +284,13 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             @Override
             public void onResponse(Call<TVShowSimilarResponse> call, Response<TVShowSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    TVShowSimilarResponse recommendationsResponse = response.body();
-                    Log.d("API Response", "Response body: " + recommendationsResponse.toString()); // Log the full response
+                    TVShowSimilarResponse suggestionResponse = response.body();
+                    Log.d("API Response", "Response body: " + suggestionResponse.toString()); // Log the full response
 
                     suggestionList.clear();
-                    List<TVShowModel> recommendations = recommendationsResponse.getResults();
-                    if (recommendations != null) {
-                        for (TVShowModel tv : recommendations) {
+                    List<TVShowModel> suggestion = suggestionResponse.getResults();
+                    if (suggestion != null) {
+                        for (TVShowModel tv : suggestion) {
                             suggestionList.add(new TVShowModel(
                                     tv.getId(),
                                     tv.getName(),
@@ -294,8 +300,11 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                                     tv.getOriginalLanguage(),
                                     tv.getFirstAirDate()
                             ));
+                            // Log each item added to the suggestion list
+                            Log.d("Suggestion Item", "TV Show added: " + tv.getName());
                         }
-                        Log.d("Suggestion List", "TV Shows added: " + suggestionList.toString()); // Log the suggestion list
+                        // Log the size of the suggestion list
+                        Log.d("Suggestion List", "Total TV Shows added: " + suggestionList.size());
                     } else {
                         Log.d("API Response", "Recommendations are null");
                     }
@@ -320,7 +329,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
         });
     }
-
 
 }
 

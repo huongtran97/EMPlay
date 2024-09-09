@@ -1,50 +1,48 @@
 package emplay.entertainment.emplay.moviefragment;
 
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.MultiTransformation;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emplay.entertainment.emplay.api.TVShowDetailsResponse;
+import emplay.entertainment.emplay.activity.AboutActivity;
+import emplay.entertainment.emplay.activity.LoginActivity;
 import emplay.entertainment.emplay.api.TVShowResponse;
-import emplay.entertainment.emplay.api.UpcomingMovieResponse;
-import emplay.entertainment.emplay.models.SharedViewModel;
+import emplay.entertainment.emplay.api.UpComingTVShowsResponse;
+import emplay.entertainment.emplay.api.UpComingMovieResponse;
 import emplay.entertainment.emplay.models.TVShowModel;
 import emplay.entertainment.emplay.movieadapter.MovieAdapter;
-import emplay.entertainment.emplay.movieadapter.MovieInformationAdapter;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
-import emplay.entertainment.emplay.api.MovieDetailsResponse;
 import emplay.entertainment.emplay.api.MovieResponse;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.movieadapter.TVShowAdapter;
-import emplay.entertainment.emplay.movieadapter.TVShowInformationAdapter;
+import emplay.entertainment.emplay.movieadapter.UpComingTVAdapter;
 import emplay.entertainment.emplay.movieadapter.UpcomingMovieAdapter;
-import jp.wasabeef.glide.transformations.BlurTransformation;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Call;
@@ -57,15 +55,47 @@ import retrofit2.Call;
  */
 
 public class HomeFragment extends Fragment {
-    private List<MovieModel> movieList;
-    private List<MovieModel> upComingList;
-    private List<TVShowModel> tvList;
-    private RecyclerView movieRecyclerView, tvRecyclerView2, upComingRecyclerView;
+    private List<MovieModel> movieList, upComingMoviesList;
+    private List<TVShowModel> tvList, upComingTVList;
+    private RecyclerView movieRecyclerView, tvRecyclerView2, upComingRecyclerView, upComingTVRecyclerview;
     private MovieAdapter movieAdapter;
     private TVShowAdapter tvShowAdapter;
     private UpcomingMovieAdapter upcomingMovieAdapter;
+    private UpComingTVAdapter upComingTVAdapter;
     private MovieApiService apiService;
     private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);  // Enables options menu in fragment
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.popupmenu, menu);  // Inflate the menu
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.about) {
+            Intent aboutPage = new Intent(requireActivity(), AboutActivity.class);
+            startActivity(aboutPage);
+            return true;
+        } else if (itemId == R.id.logout) {
+            FirebaseAuth.getInstance().signOut();
+            Intent loginPage = new Intent(requireActivity(), LoginActivity.class);
+            startActivity(loginPage);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
 
     /**
      * Called to have the fragment instantiate its user interface view.
@@ -81,7 +111,7 @@ public class HomeFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.movie_activity, container, false);
+        View view = inflater.inflate(R.layout.activity_main, container, false);
 
 
 
@@ -89,6 +119,7 @@ public class HomeFragment extends Fragment {
         movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
         tvRecyclerView2 = view.findViewById(R.id.tvshow_popular_recyclerview);
         upComingRecyclerView = view.findViewById(R.id.up_coming_movie_recyclerview);
+        upComingTVRecyclerview = view.findViewById(R.id.up_coming_tv_recyclerview);
 
         // Initialize movie list and adapters
         movieList = new ArrayList<>();
@@ -101,29 +132,35 @@ public class HomeFragment extends Fragment {
         tvRecyclerView2.setAdapter(tvShowAdapter);
         tvRecyclerView2.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));//Trending movie adapter
 
-        upComingList = new ArrayList<>();
-        upcomingMovieAdapter = new UpcomingMovieAdapter(getContext(),upComingList, this::onItemClicked);
+        upComingMoviesList = new ArrayList<>();
+        upcomingMovieAdapter = new UpcomingMovieAdapter(getContext(),upComingMoviesList, this::onItemClicked);
         upComingRecyclerView.setAdapter(upcomingMovieAdapter);
         upComingRecyclerView.setLayoutManager((new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)));
 
+        upComingTVList = new ArrayList<>();
+        upComingTVAdapter = new UpComingTVAdapter(getContext(),upComingTVList,this::onItemClicked);
+        upComingTVRecyclerview.setAdapter(upComingTVAdapter);
+        upComingTVRecyclerview.setLayoutManager((new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)));
 
 
         // Initialize API service
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
         // Fetch initial movie data
-        fetchInitialData();
+        fetchPopularMovies();
         fetchPopularTV();
         fetchUpComingMovie();
+        fetchUpComingTV();
 
         return view;
     }
 
+
     private void fetchUpComingMovie() {
-        Call<UpcomingMovieResponse> call = apiService.getUpcomingMovies(API_KEY);
-        call.enqueue(new Callback<UpcomingMovieResponse>() {
+        Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(API_KEY);
+        call.enqueue(new Callback<UpComingMovieResponse>() {
             @Override
-            public void onResponse(Call<UpcomingMovieResponse> call, Response<UpcomingMovieResponse> response) {
+            public void onResponse(Call<UpComingMovieResponse> call, Response<UpComingMovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<MovieModel> movieList = response.body().getResults();
                     upcomingMovieAdapter.updateData(movieList);
@@ -140,12 +177,42 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<UpcomingMovieResponse> call, Throwable t) {
+            public void onFailure(Call<UpComingMovieResponse> call, Throwable t) {
                 Toast.makeText(getContext(), "Failed to load movie data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("HomeFragment", "Error fetching movie data", t);
             }
         });
     }
+
+    private void fetchUpComingTV() {
+        Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(API_KEY);
+        call.enqueue(new Callback<UpComingTVShowsResponse>() {
+            @Override
+            public void onResponse(Call<UpComingTVShowsResponse> call, Response<UpComingTVShowsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<TVShowModel> tvList = response.body().getResults();
+                    upComingTVAdapter.updateData(tvList);
+                } else {
+                    Log.e("HomeFragment", "Failed to load TV show data. Status code: " + response.code());
+                    try {
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+                        Log.e("HomeFragment", "Error response: " + errorBody);
+                    } catch (IOException e) {
+                        Log.e("HomeFragment", "Error reading error body", e);
+                    }
+                    Toast.makeText(getContext(), "Failed to load TV show data", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UpComingTVShowsResponse> call, Throwable t) {
+                Toast.makeText(getContext(), "Failed to load TV show data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("HomeFragment", "Error fetching TV show data", t);
+            }
+        });
+
+    }
+
 
     /**
      * Fetches the initial list of popular movies from the API and updates the movie adapter.
@@ -153,7 +220,7 @@ public class HomeFragment extends Fragment {
      * This method makes an API call to retrieve popular movies and updates the MovieAdapter with the fetched data.
      * Displays a Toast message if the data loading fails.
      */
-    private void fetchInitialData() {
+    private void fetchPopularMovies() {
         Call<MovieResponse> call = apiService.getPopularMovies(API_KEY);
         call.enqueue(new Callback<MovieResponse>() {
             @Override

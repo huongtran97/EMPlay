@@ -46,9 +46,7 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
     @Override
     public void onBindViewHolder(@NonNull SuggestionViewHolder holder, int position) {
         MovieModel movieModel = suggestionList.get(position);
-        holder.title.setText(movieModel.getTitle());
-        holder.ratingBar.setRating((float) (movieModel.getVoteAverage() / 2));
-        holder.releaseDate.setText(movieModel.getReleaseDate());
+
         Glide.with(context)
                 .load("https://image.tmdb.org/t/p/w500" + movieModel.getPosterPath())
                 .into(holder.poster);
@@ -63,15 +61,9 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
     }
 
     public class SuggestionViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        RatingBar ratingBar;
-        TextView releaseDate;
         ImageView poster;
         public SuggestionViewHolder(@NonNull View itemView) {
             super(itemView);
-            title = itemView.findViewById(R.id.suggestion_title);
-            ratingBar = itemView.findViewById(R.id.suggestion_rating_bar);
-            releaseDate = itemView.findViewById(R.id.suggestion_release_date);
             poster = itemView.findViewById(R.id.poster);
         }
 

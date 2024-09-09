@@ -6,12 +6,13 @@
     android:layout_height="wrap_content"
     android:layout_margin="2dp"
     app:cardCornerRadius="26dp"
+    android:backgroundTint="#90302E2E"
     app:cardElevation="1dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="195dp"
-        android:background="#D54C4545">
+        android:background="@drawable/rounded_search_items_bg">
 
         <TextView
             android:id="@+id/search_title"

@@ -6,110 +6,140 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/movie_information_title"
-        android:layout_width="322dp"
-        android:layout_height="61dp"
+        android:id="@+id/search_result_title"
+        android:layout_width="403dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
         android:fontFamily="sans-serif-medium"
         android:text="Title goes here"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="19sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.475"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="154dp"
+        android:layout_height="233dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageButton2" />
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars" />
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="232dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="2dp"
+        android:isIndicator="true"
+        android:numStars="5"
+        android:rating="0"
+        android:scaleX="0.4"
+        android:scaleY="0.4"
+        android:stepSize="0.5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_result_title" />
 
     <TextView
-        android:id="@+id/movie_information_release_date"
-        android:layout_width="103dp"
-        android:layout_height="21dp"
-        android:layout_marginStart="16dp"
-        android:text="Release date goes here"
+        android:id="@+id/search_result_genres"
+        android:layout_width="265dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="4dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Geners goes here"
+        android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="9sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toStartOf="@+id/movie_information_runtime"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/movie_information_genre" />
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="@+id/add_to_library_btn"
+        app:layout_constraintStart_toStartOf="@+id/trailer_btn"
+        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
 
     <TextView
-        android:id="@+id/movie_information_language"
-        android:layout_width="101dp"
-        android:layout_height="22dp"
+        android:id="@+id/search_result_language"
+        android:layout_width="110dp"
+        android:layout_height="20dp"
         android:layout_marginEnd="48dp"
+        android:fontFamily="sans-serif-light"
         android:text="Language goes here"
+        android:textAlignment="viewStart"
         android:textColor="@color/white"
         android:textSize="9sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/movie_information_runtime" />
+        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
 
     <TextView
-        android:id="@+id/movie_information_overview"
-        android:layout_width="376dp"
-        android:layout_height="182dp"
+        android:id="@+id/search_result_release_date"
+        android:layout_width="105dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="48dp"
+        android:fontFamily="sans-serif-light"
+        android:text="Runtime goes here"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/white"
+        android:textSize="9sp"
+        android:textStyle="italic"
+        app:layout_constraintEnd_toStartOf="@+id/search_result_runtime"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
+
+    <TextView
+        android:id="@+id/search_result_overview"
+        android:layout_width="394dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="4dp"
         android:fontFamily="sans-serif-medium"
         android:justificationMode="inter_word"
         android:text="Overview goes here"
         android:textAlignment="textStart"
         android:textColor="@color/white"
         android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/movie_information_language"
-        app:layout_constraintVertical_bias="0.0" />
-
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="156dp"
-        android:layout_height="236dp"
-        android:layout_marginTop="28dp"
-        android:contentDescription="play_trailer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/play_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:contentDescription="play_trailer"
-        android:src="@drawable/baseline_play_circle_24"
-        app:layout_constraintBottom_toBottomOf="@+id/imageButton2"
-        app:layout_constraintEnd_toEndOf="@+id/imageButton2"
-        app:layout_constraintStart_toStartOf="@+id/imageButton2"
-        app:layout_constraintTop_toTopOf="@+id/imageButton2" />
+        app:layout_constraintTop_toBottomOf="@+id/search_result_runtime" />
 
     <TextView
-        android:id="@+id/movie_information_runtime"
-        android:layout_width="96dp"
+        android:id="@+id/search_result_runtime"
+        android:layout_width="102dp"
         android:layout_height="21dp"
-        android:layout_marginEnd="1dp"
+        android:fontFamily="sans-serif-light"
         android:text="Runtime goes here"
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="9sp"
-        app:layout_constraintEnd_toStartOf="@+id/movie_information_language"
-        app:layout_constraintTop_toBottomOf="@+id/movie_information_genre" />
+        android:textStyle="italic"
+        app:layout_constraintEnd_toStartOf="@+id/search_result_language"
+        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
 
-    <TextView
-        android:id="@+id/movie_information_genre"
-        android:layout_width="307dp"
-        android:layout_height="22dp"
-        android:text="Genres goes here"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="bold"
+    <ImageButton
+        android:id="@+id/add_to_library_btn"
+        android:layout_width="49dp"
+        android:layout_height="41dp"
+        android:layout_marginEnd="124dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/movie_information_title" />
+        app:layout_constraintTop_toBottomOf="@+id/ratingBar"
+        app:srcCompat="@drawable/baseline_favorite_border_24"
+        android:backgroundTint="#00302E2E"/>
 
+    <Button
+        android:id="@+id/trailer_btn"
+        android:layout_width="119dp"
+        android:layout_height="42dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginEnd="3dp"
+        android:backgroundTint="#6A302E2E"
+        android:text="trailer"
+        app:layout_constraintEnd_toStartOf="@+id/add_to_library_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

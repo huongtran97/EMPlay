@@ -5,11 +5,15 @@ public class CastModel {
     private int id;
     private String name;
     private String profilePath;
+    private String character;
 
-    public CastModel(int id, String name, String profilePath) {
+
+
+    public CastModel(int id, String name, String profilePath, String character) {
         this.id = id;
         this.name = name;
         this.profilePath = profilePath;
+        this.character = character;
     }
 
     // Getters and setters
@@ -35,6 +39,13 @@ public class CastModel {
 
     public void setProfilePath(String profilePath) {
         this.profilePath = profilePath;
+    }
+    public String getCharacter() {
+        return character;
+    }
+
+    public void setCharacter(String character) {
+        this.character = character;
     }
 
 }

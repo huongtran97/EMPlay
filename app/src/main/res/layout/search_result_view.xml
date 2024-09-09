@@ -9,8 +9,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/black"
-        tools:context=".moviefragment.MovieResultFragment">
+        tools:context=".moviefragment.MovieResultFragment"
+        android:background="@color/black">
 
         <ScrollView
             android:id="@+id/scrollView"
@@ -55,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-medium"
                     android:padding="10dp"
-                    android:text="Recommendation"
+                    android:text="Suggestion"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -63,7 +63,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_result_suggestion_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="720dp" />
+                    android:layout_height="720dp"/>
 
             </LinearLayout>
         </ScrollView>

@@ -53,9 +53,6 @@ public class TVShowAdapter extends RecyclerView.Adapter<TVShowAdapter.MyViewHold
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         TVShowModel tv = mData.get(position);
 
-        holder.name.setText(tv.getName() != null ? tv.getName() : "N/A");
-        holder.year.setText(tv.getFirstAirDate() != null ? tv.getFirstAirDate() : "N/A");
-
         Glide.with(mContext)
                 .load("https://image.tmdb.org/t/p/w500/" + tv.getPosterPath())
                 .into(holder.img);
@@ -70,14 +67,10 @@ public class TVShowAdapter extends RecyclerView.Adapter<TVShowAdapter.MyViewHold
 
     public static class MyViewHolder extends RecyclerView.ViewHolder {
 
-        TextView name;
-        TextView year;
         ImageView img;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-            name = itemView.findViewById(R.id.name_txt);
-            year = itemView.findViewById(R.id.year_txt);
             img = itemView.findViewById(R.id.header);
         }
 

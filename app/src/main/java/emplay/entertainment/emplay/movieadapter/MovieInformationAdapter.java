@@ -1,11 +1,14 @@
 package emplay.entertainment.emplay.movieadapter;
 
+import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -81,7 +84,7 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
         private TextView releaseDate;
         private TextView genre;
         private TextView runtime;
-        private ImageButton poster;
+        private ImageView poster;
 
         /**
          * Constructor for the ViewHolder.
@@ -90,13 +93,13 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
          */
         public MovieInformationViewHolder(View itemView) {
             super(itemView);
-            name = itemView.findViewById(R.id.movie_information_title);
-            overView = itemView.findViewById(R.id.movie_information_overview);
-            language = itemView.findViewById(R.id.movie_information_language);
-            releaseDate = itemView.findViewById(R.id.movie_information_release_date);
-            genre = itemView.findViewById(R.id.movie_information_genre);
-            runtime = itemView.findViewById(R.id.movie_information_runtime);
-            poster = itemView.findViewById(R.id.imageButton2);
+            name = itemView.findViewById(R.id.search_result_title);
+            overView = itemView.findViewById(R.id.search_result_overview);
+            language = itemView.findViewById(R.id.search_result_language);
+            releaseDate = itemView.findViewById(R.id.search_result_release_date);
+            genre = itemView.findViewById(R.id.search_result_genres);
+            runtime = itemView.findViewById(R.id.search_result_runtime);
+            poster = itemView.findViewById(R.id.imageView);
         }
 
         /**
@@ -130,7 +133,7 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
 
             // Set a click listener if needed
             itemView.setOnClickListener(v -> {
-                // Handle click event
+                // Handle click trailer event
             });
         }
     }

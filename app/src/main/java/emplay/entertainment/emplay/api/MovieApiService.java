@@ -37,8 +37,8 @@ public interface MovieApiService {
             @Path("id") int movieId,
             @Query("api_key") String apiKey);
 
-    @GET("3/movie/{id}/recommendations")
-    Call<MovieRecommendationsResponse> getMovieRecommendations(
+    @GET("3/movie/{id}/similar")
+    Call<MovieSimilarResponse> getMovieSimilar(
             @Path("id") int movieId,
             @Query("api_key") String apiKey);
 
@@ -64,7 +64,13 @@ public interface MovieApiService {
             @Query("api_key") String apiKey
     );
 
-    @GET("3/movie/upcoming")
-    Call<UpcomingMovieResponse> getUpcomingMovies(
-            @Query("api_key") String apiKey);
+    @GET("3/discover/movie?include_video=false&language=en-US&page=1&primary_release_date.gte=2024-09-16&primary_release_date.lte=2024-10-16&sort_by=popularity.desc")
+    Call<UpComingMovieResponse> getUpcomingMovies(
+            @Query("api_key") String apiKey
+    );
+
+    @GET("3/discover/tv?include_video=false&language=en-US&page=1&first_air_date.gte=2024-09-16&first_air_date.lte=2024-10-16&sort_by=popularity.desc")
+    Call<UpComingTVShowsResponse> getUpcomingTVShows(
+            @Query("api_key") String apiKey
+    );
 }

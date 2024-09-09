@@ -5,66 +5,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:clickable="true"
     android:id="@+id/search_result_suggestion_item"
-    android:layout_width="120dp"
-    android:layout_height="265dp"
-    android:layout_margin="9dp"
+    android:layout_width="107dp"
+    android:layout_height="160dp"
+    android:layout_margin="13dp"
     android:backgroundTint="#90302E2E"
     cardview:cardCornerRadius="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="4dp">
+        android:layout_height="match_parent">
 
         <ImageView
             android:id="@+id/poster"
-            android:layout_width="107dp"
-            android:layout_height="163dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             cardview:layout_constraintHorizontal_bias="0.545" />
 
-        <TextView
-            android:id="@+id/suggestion_title"
-            android:layout_width="111dp"
-            android:layout_height="37dp"
-            android:fontFamily="sans-serif-black"
-            android:maxLines="3"
-            android:textAlignment="center"
-            android:textColor="#FFFFFF"
-            android:textSize="10sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/poster"
-            cardview:layout_constraintHorizontal_bias="0.666" />
-
-        <RatingBar
-            android:id="@+id/suggestion_rating_bar"
-            android:layout_width="234dp"
-            android:layout_height="42dp"
-            android:numStars="5"
-            android:rating="0"
-            android:scaleX="0.2"
-            android:scaleY="0.2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/suggestion_title"
-            cardview:layout_constraintHorizontal_bias="0.495" />
-
-        <TextView
-            android:id="@+id/suggestion_release_date"
-            android:layout_width="107dp"
-            android:layout_height="30dp"
-            android:ellipsize="end"
-            android:fontFamily="sans-serif-black"
-            android:maxLines="1"
-            android:textAlignment="center"
-            android:textColor="#FFFFFF"
-            android:textSize="8sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/suggestion_rating_bar" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

@@ -12,7 +12,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
@@ -44,15 +46,14 @@ public class SuggestionTVAdapter extends RecyclerView.Adapter<SuggestionTVAdapte
     @Override
     public void onBindViewHolder(@NonNull SuggestionTVViewHolder holder, int position) {
         TVShowModel tvModel = suggestionTVList.get(position);
-        holder.name.setText(tvModel.getName());
-        holder.ratingBar.setRating((float) (tvModel.getVoteAverage() / 2));
-        holder.firstAirDate.setText(tvModel.getFirstAirDate());
         Glide.with(context)
-                .load("https://image.tmdb.org/t/p/w500" + tvModel.getPosterPath())
+                .load("https://image.tmdb.org/t/p/w500/" + tvModel.getPosterPath())
                 .into(holder.poster);
 
         holder.bind(tvModel, onItemClickListener);
     }
+
+
 
     @Override
     public int getItemCount() {
@@ -60,16 +61,10 @@ public class SuggestionTVAdapter extends RecyclerView.Adapter<SuggestionTVAdapte
     }
 
     public class SuggestionTVViewHolder extends RecyclerView.ViewHolder {
-        TextView name;
-        RatingBar ratingBar;
-        TextView firstAirDate;
         ImageView poster;
 
         public SuggestionTVViewHolder(@NonNull View itemView) {
             super(itemView);
-            name = itemView.findViewById(R.id.suggestion_title);
-            ratingBar = itemView.findViewById(R.id.suggestion_rating_bar);
-            firstAirDate = itemView.findViewById(R.id.suggestion_release_date);
             poster = itemView.findViewById(R.id.poster);
         }
 
@@ -77,4 +72,5 @@ public class SuggestionTVAdapter extends RecyclerView.Adapter<SuggestionTVAdapte
             itemView.setOnClickListener(v -> onItemClickListener.onItemClick(tv));
         }
     }
+
 }

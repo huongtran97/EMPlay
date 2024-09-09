@@ -94,11 +94,32 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
+    <ImageButton
+        android:id="@+id/add_to_library_btn"
+        android:layout_width="49dp"
+        android:layout_height="41dp"
+        android:layout_marginEnd="232dp"
+        android:backgroundTint="#00302E2E"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_first_air_date"
+        app:srcCompat="@drawable/baseline_favorite_border_24" />
+
+    <Button
+        android:id="@+id/trailer_btn"
+        android:layout_width="119dp"
+        android:layout_height="42dp"
+        android:backgroundTint="#6A302E2E"
+        android:text="trailer"
+        app:layout_constraintEnd_toStartOf="@+id/add_to_library_btn"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_first_air_date" />
+
     <TextView
         android:id="@+id/tvshow_result_overview"
         android:layout_width="391dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="4dp"
         android:fontFamily="sans-serif-medium"
         android:justificationMode="inter_word"
         android:text="Overview goes here"
@@ -107,7 +128,7 @@
         android:textSize="10sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_ratingBar" />
+        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
 
     <TextView
         android:id="@+id/tvshow_result_language"

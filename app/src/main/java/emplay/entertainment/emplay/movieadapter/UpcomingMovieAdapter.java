@@ -59,9 +59,6 @@ public class UpcomingMovieAdapter extends RecyclerView.Adapter<UpcomingMovieAdap
         // Bind data to the ViewHolder
         MovieModel movie = mData.get(position);
 
-        holder.name.setText(movie.getTitle());
-        holder.year.setText(movie.getReleaseDate());
-
         Glide.with(mContext)
                 .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
                 .into(holder.img);
@@ -77,14 +74,10 @@ public class UpcomingMovieAdapter extends RecyclerView.Adapter<UpcomingMovieAdap
     }
 
     public class MyViewHolder extends ViewHolder {
-        TextView name;
-        TextView year;
         ImageView img;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            name = itemView.findViewById(R.id.name_txt);
-            year = itemView.findViewById(R.id.year_txt);
             img = itemView.findViewById(R.id.header);
         }
         public void bind(MovieModel item, UpcomingMovieAdapter.OnItemClickListener onItemClickListener) {

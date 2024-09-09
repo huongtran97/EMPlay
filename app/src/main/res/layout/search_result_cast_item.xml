@@ -4,9 +4,9 @@
     android:clickable="true"
     android:id="@+id/search_result_cast_card_view"
     android:layout_width="85dp"
-    android:layout_height="130dp"
+    android:layout_height="150dp"
     android:layout_margin="4dp"
-    android:backgroundTint="#90716F6F"
+    android:backgroundTint="#000000"
     cardview:cardCornerRadius="4dp">
 
     <LinearLayout
@@ -21,12 +21,24 @@
 
         <TextView
             android:id="@+id/cast_name_profile"
-            android:layout_width="80dp"
-            android:layout_height="33dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginStart="2dp"
             android:layout_marginTop="4dp"
             android:layout_marginEnd="2dp"
             android:fontFamily="sans-serif-black"
+            android:textAlignment="center"
+            android:textColor="#FFFFFF"
+            android:textSize="10sp" />
+
+        <TextView
+            android:id="@+id/cast_character_profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="2dp"
+            android:fontFamily="sans-serif-light"
             android:textAlignment="center"
             android:textColor="#FFFFFF"
             android:textSize="10sp" />

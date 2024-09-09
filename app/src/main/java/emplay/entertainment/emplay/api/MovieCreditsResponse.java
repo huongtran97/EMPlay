@@ -28,6 +28,16 @@ public class MovieCreditsResponse {
         @SerializedName("profile_path")
         private String profilePath;
 
+        @SerializedName("character")
+        private String character;
+
+        public Cast(int castId, String name, String profilePath, String character) {
+            this.castId = castId;
+            this.name = name;
+            this.profilePath = profilePath;
+            this.character = character;
+        }
+
         public int getCastId() {
             return castId;
         }
@@ -38,6 +48,9 @@ public class MovieCreditsResponse {
 
         public String getProfilePath() {
             return profilePath;
+        }
+
+        public String getCharacter() { return character;
         }
     }
 }

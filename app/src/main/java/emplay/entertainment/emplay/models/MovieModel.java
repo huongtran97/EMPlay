@@ -58,6 +58,20 @@ public class MovieModel implements Serializable {
         this.genres = genres;
     }
 
+    public MovieModel(int id, String title, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String releaseDate, int runtime, List<String> genres, List<String> cast) {
+        this.id = id;
+        this.title = title;
+        this.voteAverage = voteAverage;
+        this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
+        this.overview = overview;
+        this.originalLanguage = originalLanguage;
+        this.releaseDate = releaseDate;
+        this.runtime = runtime;
+        this.genres = genres;
+        this.cast = cast;
+    }
+
 
 
     public MovieModel(int id, String title, double voteAverage, String posterPath, String overview, String originalLanguage, String release_date) {
@@ -75,7 +89,15 @@ public class MovieModel implements Serializable {
         this.id = id;
         this.title = title;
         this.posterPath = posterPath;
+        this.releaseDate = releaseDate;
     }
+
+    public MovieModel(int id, String title, String posterPath) {
+        this.id = id;
+        this.title = title;
+        this.posterPath = posterPath;
+    }
+
 
 
 

@@ -6,10 +6,6 @@
         android:icon="@drawable/movie_home"
         android:id="@+id/menu_movie_home"
         />
-    <item android:title="Favorite"
-        android:icon="@drawable/movie_favorite"
-        android:id="@+id/menu_movie_favorite"
-        />
     <item android:title="Search"
         android:icon="@drawable/movie_search"
         android:id="@+id/menu_movie_search"

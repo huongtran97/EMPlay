@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="@drawable/background"
     tools:context=".moviefragment.SearchMoviesFragment">
 
     <TextView
@@ -116,6 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:contentDescription="tv_show"
+                android:layout_marginStart="15dp"
                 android:src="@drawable/tv_show" />
 
             <TextView

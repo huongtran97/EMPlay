@@ -2,6 +2,7 @@ package emplay.entertainment.emplay.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class TVShowModel implements Serializable {
@@ -45,18 +46,6 @@ public class TVShowModel implements Serializable {
     @SerializedName("number_of_seasons")
     private int numberOfSeasons;
 
-
-    // Constructor with fewer fields
-    public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview, String originalLanguage, String firstAirDate) {
-        this.id = id;
-        this.name = name;
-        this.voteAverage = voteAverage;
-        this.posterPath = posterPath;
-        this.overview = overview;
-        this.originalLanguage = originalLanguage;
-        this.firstAirDate = firstAirDate;
-    }
-
     public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview, String originalLanguage, String firstAirDate, List<String> seasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
         this.id = id;
         this.name = name;
@@ -71,6 +60,32 @@ public class TVShowModel implements Serializable {
         this.genres = genres;
 
     }
+
+    public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview) {
+        this.id = id;
+        this.name = name;
+        this.voteAverage = voteAverage;
+        this.posterPath = posterPath;
+        this.overview = overview;
+    }
+
+    public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview, String originalLanguage, String firstAirDate) {
+        this.id = id;
+        this.name = name;
+        this.voteAverage = voteAverage;
+        this.posterPath = posterPath;
+        this.overview = overview;
+        this.originalLanguage = originalLanguage;
+        this.firstAirDate = firstAirDate;
+    }
+
+    public TVShowModel(int id, String name, String posterPath) {
+        this.id = id;
+        this.name = name;
+        this.posterPath = posterPath;
+    }
+
+
 
     // Getters and Setters
     public int getId() {

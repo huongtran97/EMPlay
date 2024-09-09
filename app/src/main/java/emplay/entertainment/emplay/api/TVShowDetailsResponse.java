@@ -7,6 +7,7 @@ import java.util.List;
 
 import emplay.entertainment.emplay.api.MovieDetailsResponse.Cast;
 import emplay.entertainment.emplay.api.MovieDetailsResponse.Genre;
+import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.models.ProductContries;
 import emplay.entertainment.emplay.models.Season;
 import emplay.entertainment.emplay.models.TVShowModel;
@@ -56,6 +57,8 @@ public class TVShowDetailsResponse {
     private List<SpokenLanguage> spoken_languages;
     @SerializedName("production_countries")
     private List<ProductionCountry> production_countries;
+    @SerializedName("tv")
+    private TVShowModel tvDetails;
 
 
 
@@ -82,6 +85,9 @@ public class TVShowDetailsResponse {
         this.networks = networks;
         this.spoken_languages = spoken_languages;
         this.production_countries = production_countries;
+    }
+
+    public TVShowDetailsResponse(int id, String title, String posterPath, String overview, float rating) {
     }
 
     // Getters and Setters for all fields
@@ -260,6 +266,12 @@ public class TVShowDetailsResponse {
 
     public void setProduction_countries(List<ProductionCountry> production_countries) {
         this.production_countries = production_countries;
+    }
+
+    public TVShowModel getTVShowDetails() { return tvDetails;
+    }
+    public void setTVDetails(TVShowModel tvDetails) {
+        this.tvDetails = tvDetails;
     }
 
     public static class Genre {

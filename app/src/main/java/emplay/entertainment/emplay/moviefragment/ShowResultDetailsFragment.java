@@ -36,7 +36,7 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.MovieCreditsResponse;
 import emplay.entertainment.emplay.api.MovieDetailsResponse;
-import emplay.entertainment.emplay.api.MovieRecommendationsResponse;
+import emplay.entertainment.emplay.api.MovieSimilarResponse;
 import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.movieadapter.CastAdapter;
@@ -67,7 +67,6 @@ public class ShowResultDetailsFragment extends Fragment {
     private SuggestionAdapter suggestionAdapter;
     private MovieApiService apiService;
 
-
     public static ShowResultDetailsFragment newInstance(int movieId) {
         ShowResultDetailsFragment fragment = new ShowResultDetailsFragment();
         Bundle args = new Bundle();
@@ -85,13 +84,15 @@ public class ShowResultDetailsFragment extends Fragment {
         castRecyclerView = view.findViewById(R.id.search_result_cast_recyclerview);
         suggestionRecyclerView = view.findViewById(R.id.search_result_suggestion_recyclerview);
 
+
+
         detailRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         castRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         suggestionRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         movieList = new ArrayList<>();
         castList = new ArrayList<>();
-        suggestionList = new ArrayList<>(); // Initialize suggestionList here
+        suggestionList = new ArrayList<>(); // Initialize suggestionList
 
         movieResultAdapter = new MovieResultAdapter(movieList, getActivity());
         castAdapter = new CastAdapter(castList, getActivity());
@@ -100,6 +101,8 @@ public class ShowResultDetailsFragment extends Fragment {
         detailRecyclerView.setAdapter(movieResultAdapter);
         castRecyclerView.setAdapter(castAdapter);
         suggestionRecyclerView.setAdapter(suggestionAdapter);
+
+
 
         // Initialize Retrofit and MovieApiService
         Retrofit retrofit = new Retrofit.Builder()
@@ -120,8 +123,11 @@ public class ShowResultDetailsFragment extends Fragment {
             }
         }
 
+
+
         return view;
     }
+
 
     private void onItemClicked(MovieModel movie) {
         if (movie != null) {
@@ -214,7 +220,7 @@ public class ShowResultDetailsFragment extends Fragment {
 
                     @Override
                     public void onLoadCleared(@Nullable Drawable placeholder) {
-                        // Handle when the load is cleared, if needed
+                        // Handle when the load is cleared
                     }
                 });
     }
@@ -238,7 +244,8 @@ public class ShowResultDetailsFragment extends Fragment {
                             CastModel castModel = new CastModel(
                                     cast.getCastId(),
                                     cast.getCastName(),
-                                    cast.getProfilePath()
+                                    cast.getProfilePath(),
+                                    cast.getCharacter()
                             );
                             castModels.add(castModel);
                         }
@@ -263,12 +270,12 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void fetchSuggestionList() {
-        Call<MovieRecommendationsResponse> call = apiService.getMovieRecommendations(movieId, API_KEY);
-        call.enqueue(new Callback<MovieRecommendationsResponse>() {
+        Call<MovieSimilarResponse> call = apiService.getMovieSimilar(movieId, API_KEY);
+        call.enqueue(new Callback<MovieSimilarResponse>() {
             @Override
-            public void onResponse(Call<MovieRecommendationsResponse> call, Response<MovieRecommendationsResponse> response) {
+            public void onResponse(Call<MovieSimilarResponse> call, Response<MovieSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    MovieRecommendationsResponse recommendationsResponse = response.body();
+                    MovieSimilarResponse recommendationsResponse = response.body();
                     Log.d("API Response", "Response body: " + recommendationsResponse.toString()); // Log the full response
 
                     suggestionList.clear();
@@ -285,17 +292,19 @@ public class ShowResultDetailsFragment extends Fragment {
                                     movie.getReleaseDate()
                             ));
                         }
-                        Log.d("Suggestion List", "Movies added: " + suggestionList.toString()); // Log the suggestion list
-                    } else {
-                        Log.d("API Response", "Recommendations are null");
+
                     }
-                    suggestionAdapter.notifyDataSetChanged();
-                    Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
+                    if (recommendations != null && !recommendations.isEmpty()) {
+                        suggestionList.clear();
+                        suggestionList.addAll(recommendations);
+                        suggestionAdapter.notifyDataSetChanged();
+                        Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getContext(), "No suggestions available", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
-                    Log.e("ShowResultDetailsFragment", "Failed to load movie recommendations. Status code: " + response.code());
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("ShowResultDetailsFragment", "Error response: " + errorBody);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -304,9 +313,8 @@ public class ShowResultDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<MovieRecommendationsResponse> call, Throwable t) {
+            public void onFailure(Call<MovieSimilarResponse> call, Throwable t) {
                 Toast.makeText(getContext(), "Failed to load movie recommendations: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("ShowResultDetailsFragment", "Error fetching movie recommendations", t);
             }
         });
     }
