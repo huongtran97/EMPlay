@@ -3,6 +3,8 @@ package emplay.entertainment.emplay.moviefragment;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,17 +78,40 @@ public class SearchTVShowsFragment extends Fragment {
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        // Set up EditorActionListener for EditText
-        inputSearch.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+        // Set up TextWatcher for real-time search
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Empty action
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Perform the search as text changes
                 performSearch();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Empty action
+            }
+        });
+
+        // Set up OnClickListener for Search Button
+        searchButton.setOnClickListener(v -> {
+            performSearch();
+            hideKeyboard(); // Hide the keyboard when search button is clicked
+        });
+
+        // Set up OnEditorActionListener to hide the keyboard when Enter is pressed
+        inputSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearch();
+                hideKeyboard();
                 return true;
             }
             return false;
         });
-
-        // Set up OnClickListener for Search Button
-        searchButton.setOnClickListener(v -> performSearch());
 
         // Restore state if needed
         if (savedInstanceState != null) {
@@ -131,18 +156,22 @@ public class SearchTVShowsFragment extends Fragment {
         String query = inputSearch.getText().toString().trim();
         if (!query.isEmpty()) {
             if (isMoviesSearch) {
-                // Ensure the movie fragment is active for search
-                Fragment moviesFragment = (SearchTVShowsFragment) getParentFragmentManager().findFragmentById(R.id.fragment_container);
-                if (moviesFragment instanceof SearchMoviesFragment) {
-                    ((SearchMoviesFragment) moviesFragment).searchMovies(query);
+                // Ensure the TV show fragment is active for search
+                Fragment tvShowsFragment = getParentFragmentManager().findFragmentByTag("SearchTVShowsFragment");
+                if (tvShowsFragment instanceof SearchTVShowsFragment) {
+                    ((SearchTVShowsFragment) tvShowsFragment).searchTVShows(query);
+                } else {
+                    Log.e("PerformSearch", "SearchTVShowsFragment is not found or not of the correct type");
                 }
             } else {
+                // Call searchMovies method
                 searchTVShows(query);
             }
-            viewModel.setLastSearchWasTVShow(true);
-            hideKeyboard();
+            viewModel.setLastSearchWasTVShow(isMoviesSearch); // Update ViewModel with the correct search type
         } else {
-            Toast.makeText(getContext(), "Please enter a search term", Toast.LENGTH_SHORT).show();
+            // Handle empty query case
+            searchTVList.clear();
+            searchAdapter.notifyDataSetChanged();
         }
     }
 
@@ -152,7 +181,7 @@ public class SearchTVShowsFragment extends Fragment {
             @Override
             public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    searchTVList.clear(); // Clear previous results
+                    searchTVList.clear();
                     List<TVShowModel> tvShows = response.body().getResults();
                     if (tvShows != null && !tvShows.isEmpty()) {
                         for (TVShowModel tv : tvShows) {

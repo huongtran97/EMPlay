@@ -3,6 +3,8 @@ package emplay.entertainment.emplay.moviefragment;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -75,17 +77,40 @@ public class SearchMoviesFragment extends Fragment {
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        // Set up EditorActionListener for EditText
-        inputSearch.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+        // Set up TextWatcher for real-time search
+        inputSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                // Empty action
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Perform the search as text changes
                 performSearch();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // Empty action
+            }
+        });
+
+        // Set up OnClickListener for Search Button
+        searchButton.setOnClickListener(v -> {
+            performSearch();
+            hideKeyboard(); // Hide the keyboard when search button is clicked
+        });
+
+        // Set up OnEditorActionListener to hide the keyboard when Enter is pressed
+        inputSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+                performSearch();
+                hideKeyboard();
                 return true;
             }
             return false;
         });
-
-        // Set up OnClickListener for Search Button
-        searchButton.setOnClickListener(v -> performSearch());
 
         // Restore state if needed
         if (savedInstanceState != null) {
@@ -141,16 +166,16 @@ public class SearchMoviesFragment extends Fragment {
                     Log.e("PerformSearch", "SearchTVShowsFragment is not found or not of the correct type");
                 }
             } else {
-                // Call searchMovies method (make sure it's defined in the correct context)
+                // Call searchMovies method
                 searchMovies(query);
             }
             viewModel.setLastSearchWasTVShow(isTVShowSearch); // Update ViewModel with the correct search type
-            hideKeyboard();
         } else {
-            Toast.makeText(getContext(), "Please enter a search term", Toast.LENGTH_SHORT).show();
+            // Handle empty query case
+            searchMovieList.clear();
+            searchAdapter.notifyDataSetChanged();
         }
     }
-
 
     void searchMovies(String query) {
         Call<MovieResponse> call = apiService.searchMovies(API_KEY, query);
@@ -231,5 +256,4 @@ public class SearchMoviesFragment extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
     }
-
 }
