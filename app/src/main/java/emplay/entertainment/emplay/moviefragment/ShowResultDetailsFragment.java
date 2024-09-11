@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.moviefragment;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build.VERSION;
@@ -26,17 +27,20 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import emplay.entertainment.emplay.LanguageMapper;
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.MovieCreditsResponse;
 import emplay.entertainment.emplay.api.MovieDetailsResponse;
 import emplay.entertainment.emplay.api.MovieSimilarResponse;
+import emplay.entertainment.emplay.api.MoviesTrailerResponses;
+import emplay.entertainment.emplay.api.MoviesTrailerResponses.TrailerModel;
 import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.movieadapter.CastAdapter;
@@ -85,14 +89,13 @@ public class ShowResultDetailsFragment extends Fragment {
         suggestionRecyclerView = view.findViewById(R.id.search_result_suggestion_recyclerview);
 
 
-
         detailRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         castRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         suggestionRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
         movieList = new ArrayList<>();
         castList = new ArrayList<>();
-        suggestionList = new ArrayList<>(); // Initialize suggestionList
+        suggestionList = new ArrayList<>();
 
         movieResultAdapter = new MovieResultAdapter(movieList, getActivity());
         castAdapter = new CastAdapter(castList, getActivity());
@@ -101,8 +104,6 @@ public class ShowResultDetailsFragment extends Fragment {
         detailRecyclerView.setAdapter(movieResultAdapter);
         castRecyclerView.setAdapter(castAdapter);
         suggestionRecyclerView.setAdapter(suggestionAdapter);
-
-
 
         // Initialize Retrofit and MovieApiService
         Retrofit retrofit = new Retrofit.Builder()
@@ -118,16 +119,14 @@ public class ShowResultDetailsFragment extends Fragment {
                 fetchMovieDetails();
                 fetchCastList();
                 fetchSuggestionList();
+                fetchTrailersForMovie();
             } else {
                 Toast.makeText(getContext(), "Invalid movie ID", Toast.LENGTH_SHORT).show();
             }
         }
 
-
-
         return view;
     }
-
 
     private void onItemClicked(MovieModel movie) {
         if (movie != null) {
@@ -141,6 +140,74 @@ public class ShowResultDetailsFragment extends Fragment {
         }
     }
 
+    private void fetchTrailersForMovie() {
+        Call<MoviesTrailerResponses> call = apiService.getMoviesTrailer(movieId, API_KEY);
+        call.enqueue(new Callback<MoviesTrailerResponses>() {
+            @Override
+            public void onResponse(Call<MoviesTrailerResponses> call, Response<MoviesTrailerResponses> response) {
+                if (response.isSuccessful()) {
+                    MoviesTrailerResponses trailerResponses = response.body();
+                    List<MoviesTrailerResponses.TrailerModel> trailers = trailerResponses != null ? trailerResponses.getResults() : null;
+
+                    Log.d("TrailerFetchSuccess", "Raw JSON Response: " + new Gson().toJson(trailerResponses));
+
+                    List<MoviesTrailerResponses.TrailerModel> teaserTrailers = new ArrayList<>();
+                    if (trailers != null) {
+                        for (MoviesTrailerResponses.TrailerModel trailer : trailers) {
+                            Log.d("TrailerFetchSuccess", "Trailer Type: " + trailer.getType() + ", Key: " + trailer.getKey());
+                            if ("Trailer".equalsIgnoreCase(trailer.getType())) {
+                                teaserTrailers.add(trailer);
+                            }
+                        }
+                    }
+
+                    Log.d("TrailerFetchSuccess", "Filtered Teaser trailers size: " + teaserTrailers.size());
+
+                    List<TrailerModel> adapterTrailers = convertToTrailerModels(teaserTrailers);
+                    if (movieResultAdapter != null) {
+                        movieResultAdapter.setTeaserTrailers(adapterTrailers);
+                    }
+
+                    if (!teaserTrailers.isEmpty()) {
+                        MoviesTrailerResponses.TrailerModel firstTeaser = teaserTrailers.get(0);
+                        firstTeaser.getKey();
+
+                    } else {
+                        Toast.makeText(getContext(), "No teaser available", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Log.e("TrailerFetchError", "Response Code: " + response.code() + ", Message: " + response.message());
+                    Toast.makeText(getContext(), "Failed to retrieve trailers. Response Code: " + response.code(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<MoviesTrailerResponses> call, Throwable t) {
+                Log.e("TrailerFetchError", "Error fetching trailers: " + t.getMessage());
+                Toast.makeText(getContext(), "Error fetching trailers: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+
+    private List<MoviesTrailerResponses.TrailerModel> convertToTrailerModels(List<MoviesTrailerResponses.TrailerModel> apiTrailers) {
+        List<MoviesTrailerResponses.TrailerModel> adapterTrailers = new ArrayList<>();
+
+        if (apiTrailers != null) {
+            for (MoviesTrailerResponses.TrailerModel apiTrailer : apiTrailers) {
+                MoviesTrailerResponses.TrailerModel trailerModel = new MoviesTrailerResponses.TrailerModel(
+                        apiTrailer.getKey(),
+                        apiTrailer.getName());
+                adapterTrailers.add(trailerModel);
+            }
+        }
+
+        return adapterTrailers;
+    }
+
+
+
     private void fetchMovieDetails() {
         Call<MovieDetailsResponse> call = apiService.getMovieDetails(movieId, API_KEY);
         call.enqueue(new Callback<MovieDetailsResponse>() {
@@ -148,8 +215,6 @@ public class ShowResultDetailsFragment extends Fragment {
             public void onResponse(Call<MovieDetailsResponse> call, Response<MovieDetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MovieDetailsResponse movieDetails = response.body();
-
-
                     List<String> genres = new ArrayList<>();
                     if (movieDetails.getGenres() != null) {
                         for (MovieDetailsResponse.Genre genre : movieDetails.getGenres()) {
@@ -166,7 +231,7 @@ public class ShowResultDetailsFragment extends Fragment {
                                 movieDetails.getPosterPath(),
                                 movieDetails.getBackdropPath(),
                                 movieDetails.getOverview(),
-                                LanguageMapper.getLanguageName(movieDetails.getOriginalLanguage()), // Language mapping here
+                                LanguageMapper.getLanguageName(movieDetails.getOriginalLanguage()), // Language mapping
                                 movieDetails.getReleaseDate(),
                                 movieDetails.getRuntime(),
                                 genres
@@ -225,18 +290,13 @@ public class ShowResultDetailsFragment extends Fragment {
                 });
     }
 
-
-
     private void fetchCastList() {
-
         Call<MovieCreditsResponse> call = apiService.getMovieCredits(movieId, API_KEY);
         call.enqueue(new Callback<MovieCreditsResponse>() {
             @Override
             public void onResponse(Call<MovieCreditsResponse> call, Response<MovieCreditsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MovieCreditsResponse movieCreditsResponse = response.body();
-
-
                     List<MovieCreditsResponse.Cast> castList = movieCreditsResponse.getCast();
                     if (castList != null && !castList.isEmpty()) {
                         List<CastModel> castModels = new ArrayList<>();
@@ -276,11 +336,16 @@ public class ShowResultDetailsFragment extends Fragment {
             public void onResponse(Call<MovieSimilarResponse> call, Response<MovieSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MovieSimilarResponse recommendationsResponse = response.body();
-                    Log.d("API Response", "Response body: " + recommendationsResponse.toString()); // Log the full response
+                    Log.d("API Response", "Response body: " + recommendationsResponse.toString());
 
+                    // Ensure suggestionList is initialized
+                    if (suggestionList == null) {
+                        suggestionList = new ArrayList<>();
+                    }
                     suggestionList.clear();
+
                     List<MovieModel> recommendations = recommendationsResponse.getResults();
-                    if (recommendations != null) {
+                    if (recommendations != null && !recommendations.isEmpty()) {
                         for (MovieModel movie : recommendations) {
                             suggestionList.add(new MovieModel(
                                     movie.getId(),
@@ -292,11 +357,6 @@ public class ShowResultDetailsFragment extends Fragment {
                                     movie.getReleaseDate()
                             ));
                         }
-
-                    }
-                    if (recommendations != null && !recommendations.isEmpty()) {
-                        suggestionList.clear();
-                        suggestionList.addAll(recommendations);
                         suggestionAdapter.notifyDataSetChanged();
                         Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
                     } else {
@@ -305,6 +365,7 @@ public class ShowResultDetailsFragment extends Fragment {
                 } else {
                     try {
                         String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
+                        Log.e("API Error", errorBody);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -318,6 +379,7 @@ public class ShowResultDetailsFragment extends Fragment {
             }
         });
     }
+
 }
 
 

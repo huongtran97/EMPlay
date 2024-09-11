@@ -4,22 +4,32 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import com.squareup.picasso.Transformation;
+import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
+import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import java.security.MessageDigest;
 
-public class CircleTransform implements Transformation {
+public class CircleTransform extends BitmapTransformation {
+
+    private static final String ID = "emplay.entertainment.emplay.CircleTransform";
+    private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
+
     @Override
-    public Bitmap transform(Bitmap source) {
-        int size = Math.min(source.getWidth(), source.getHeight());
-
-        int x = (source.getWidth() - size) / 2;
-        int y = (source.getHeight() - size) / 2;
-
-        Bitmap squaredBitmap = Bitmap.createBitmap(source, x, y, size, size);
-        if (squaredBitmap != source) {
-            source.recycle();
+    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+        if (toTransform == null) {
+            return null;
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
+        int size = Math.min(toTransform.getWidth(), toTransform.getHeight());
+
+        // Create a square bitmap
+        Bitmap squaredBitmap = Bitmap.createBitmap(toTransform, (toTransform.getWidth() - size) / 2,
+                (toTransform.getHeight() - size) / 2, size, size);
+
+        // Create a new bitmap with a circle
+        Bitmap bitmap = pool.get(size, size, Bitmap.Config.ARGB_8888);
+        if (bitmap == null) {
+            bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        }
 
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
@@ -27,6 +37,7 @@ public class CircleTransform implements Transformation {
         paint.setShader(shader);
         paint.setAntiAlias(true);
 
+        // Draw the circle
         float r = size / 2f;
         canvas.drawCircle(r, r, r, paint);
 
@@ -35,9 +46,7 @@ public class CircleTransform implements Transformation {
     }
 
     @Override
-    public String key() {
-        return "circle";
+    public void updateDiskCacheKey(MessageDigest messageDigest) {
+        messageDigest.update(ID_BYTES);
     }
 }
-
-

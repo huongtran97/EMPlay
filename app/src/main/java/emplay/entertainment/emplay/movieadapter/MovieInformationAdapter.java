@@ -131,10 +131,7 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
                     .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
                     .into(poster);
 
-            // Set a click listener if needed
-            itemView.setOnClickListener(v -> {
-                // Handle click trailer event
-            });
+
         }
     }
 }

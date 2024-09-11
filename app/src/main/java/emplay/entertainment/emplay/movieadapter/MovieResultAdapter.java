@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.movieadapter;
 
+import static android.content.ContentValues.TAG;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_ID;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_POSTER_PATH;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TITLE;
@@ -7,15 +8,20 @@ import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_MOVIES;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
@@ -27,10 +33,10 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.util.Log;
-import android.widget.Toast;
-
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.activity.TrailerActivity;
+import emplay.entertainment.emplay.api.MoviesTrailerResponses;
+import emplay.entertainment.emplay.api.MoviesTrailerResponses.TrailerModel;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.moviefragment.ProfileFragment;
@@ -38,16 +44,15 @@ import emplay.entertainment.emplay.moviefragment.ProfileFragment;
 public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.MovieResultViewHolder> {
 
     private List<MovieModel> movieList;
+    private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private FragmentActivity fragmentActivity;
     private DatabaseHelper databaseHelper;
-    private Context context;
 
     // Constructor
     public MovieResultAdapter(List<MovieModel> movieList, FragmentActivity fragmentActivity) {
         this.movieList = movieList;
         this.fragmentActivity = fragmentActivity;
-        this.context = fragmentActivity; // Initialize context
-        this.databaseHelper = new DatabaseHelper(context); // Initialize DatabaseHelper with context
+        this.databaseHelper = new DatabaseHelper(fragmentActivity); // Initialize DatabaseHelper with context
     }
 
     @NonNull
@@ -61,13 +66,12 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
     public void onBindViewHolder(@NonNull MovieResultViewHolder holder, int position) {
         MovieModel movieModel = movieList.get(position);
         if (movieModel != null) {
-            // Bind data as before
             holder.resultTitle.setText(movieModel.getTitle());
             holder.resultReleaseDate.setText("Release Date: " + movieModel.getReleaseDate());
-            holder.resultLanguage.setText("\u2022    Language: " + movieModel.getOriginalLanguage());
+            holder.resultLanguage.setText("\u2022 Language: " + movieModel.getOriginalLanguage());
             holder.resultRatingBar.setRating((float) (movieModel.getVoteAverage() / 2));
             holder.resultOverview.setText("Overview: " + movieModel.getOverview());
-            holder.resultRuntime.setText("\u2022    Runtime: " + movieModel.getRuntime() + " min");
+            holder.resultRuntime.setText("\u2022 Runtime: " + movieModel.getRuntime() + " min");
 
             List<String> genres = movieModel.getGenres() != null ? movieModel.getGenres() : new ArrayList<>();
             StringBuilder genreNames = new StringBuilder();
@@ -81,6 +85,7 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
 
             Glide.with(holder.itemView.getContext())
                     .load("https://image.tmdb.org/t/p/w500" + movieModel.getPosterPath())
+                    .error(R.drawable.placeholder_image) // Replace with your placeholder image
                     .into(holder.resultPoster);
 
             // Check if the movie is already saved and update the icon
@@ -90,26 +95,58 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
                 holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
             }
 
+            // Trailer button logic
+            holder.trailerBtn.setOnClickListener(v -> {
+                if (!trailers.isEmpty()) {
+                    // Get the trailer key
+                    String videoKey = trailers.get(0).getKey();
+
+                    // Start TrailerActivity with the videoKey
+                    Intent intent = new Intent(holder.itemView.getContext(), TrailerActivity.class);
+                    intent.putExtra("MOVIE_ID", videoKey);  // Pass the trailer key to TrailerActivity
+                    holder.itemView.getContext().startActivity(intent);
+                } else {
+                    Toast.makeText(fragmentActivity, "No trailer available", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+
+            // Add/Remove movie logic
             holder.addBtn.setOnClickListener(v -> {
                 if (isMovieSaved(movieModel.getId())) {
                     removeMovieFromDatabase(movieModel.getId());
                     holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
-                    Toast.makeText(context, "Movie removed from library", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(fragmentActivity, "Movie removed from library", Toast.LENGTH_SHORT).show();
                 } else {
                     long result = saveMovieToDatabase(movieModel);
                     if (result != -1) {
                         holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
-                        Toast.makeText(context, "Movie added to library", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(fragmentActivity, "Movie added to library", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(context, "Failed to add movie", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(fragmentActivity, "Failed to add movie", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
+            // Item click logic for displaying movie details
             holder.itemView.setOnClickListener(v -> onItemClick(movieModel));
+        } else {
+            Log.e("MovieResultAdapter", "MovieModel at position " + position + " is null");
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return movieList.size();
+    }
+
+    // Update the trailers list and notify adapter
+//    public void updateTrailers(List<MoviesTrailerResponses.TrailerModel> trailers) {
+//        this.trailers = trailers != null ? trailers : new ArrayList<>();
+//        notifyDataSetChanged();
+//    }
+
+    // Check if the movie is already saved in the database
     private boolean isMovieSaved(long movieId) {
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
         String query = "SELECT COUNT(*) FROM " + TABLE_MOVIES + " WHERE " + COLUMN_ID + " = ?";
@@ -122,38 +159,40 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         return isSaved;
     }
 
+    // Remove a movie from the database
     private void removeMovieFromDatabase(long movieId) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         db.delete(TABLE_MOVIES, COLUMN_ID + " = ?", new String[]{String.valueOf(movieId)});
     }
 
-    @Override
-    public int getItemCount() {
-        return movieList.size();
-    }
-
+    // Save a movie to the database
     public long saveMovieToDatabase(MovieModel movie) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase(); // Use databaseHelper instance
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, movie.getId());
         values.put(COLUMN_TITLE, movie.getTitle());
         values.put(COLUMN_POSTER_PATH, movie.getPosterPath());
 
-        long result = db.insertWithOnConflict(TABLE_MOVIES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        return result;
+        return db.insertWithOnConflict(TABLE_MOVIES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
+    // Handle item click for navigating to movie details
     private void onItemClick(MovieModel movieModel) {
-        // Create a new instance of the movie details fragment with the selected movie's ID
         ProfileFragment profileFragment = ProfileFragment.newInstance(movieModel.getId());
 
-        // Begin a fragment transaction to replace the current fragment with the movie details fragment
         FragmentTransaction transaction = fragmentActivity.getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, profileFragment);
-        transaction.addToBackStack(null); // Add the transaction to the back stack to allow the user to navigate back
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 
+    public void setTeaserTrailers(List<MoviesTrailerResponses.TrailerModel> adapterTrailers) {
+        this.trailers = adapterTrailers != null ? adapterTrailers : new ArrayList<>();
+        notifyDataSetChanged();
+    }
+
+
+    // ViewHolder class for the RecyclerView
     public static class MovieResultViewHolder extends RecyclerView.ViewHolder {
         TextView resultTitle;
         TextView resultReleaseDate;
@@ -164,6 +203,7 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         TextView resultOverview;
         TextView resultRuntime;
         ImageButton addBtn;
+        Button trailerBtn;
 
         public MovieResultViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -176,6 +216,8 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
             resultOverview = itemView.findViewById(R.id.search_result_overview);
             resultRuntime = itemView.findViewById(R.id.search_result_runtime);
             addBtn = itemView.findViewById(R.id.add_to_library_btn);
+            trailerBtn = itemView.findViewById(R.id.trailer_btn);
         }
     }
 }
+

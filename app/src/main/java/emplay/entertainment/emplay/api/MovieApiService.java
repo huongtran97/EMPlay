@@ -73,4 +73,10 @@ public interface MovieApiService {
     Call<UpComingTVShowsResponse> getUpcomingTVShows(
             @Query("api_key") String apiKey
     );
+
+    @GET("3/movie/{movie_id}/videos")
+    Call<MoviesTrailerResponses> getMoviesTrailer(
+            @Path("movie_id") int movieId,
+            @Query("api_key") String apiKey);
+
 }
