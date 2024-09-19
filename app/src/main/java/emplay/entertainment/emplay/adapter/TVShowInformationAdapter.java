@@ -12,7 +12,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,7 +31,7 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
-import emplay.entertainment.emplay.LanguageMapper;
+import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.api.TVShowsTrailerResponses;

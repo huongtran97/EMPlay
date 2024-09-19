@@ -15,7 +15,7 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 
-import emplay.entertainment.emplay.LanguageMapper;
+import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.MovieDetailsResponse;
 import emplay.entertainment.emplay.api.MovieDetailsResponse.Genre;

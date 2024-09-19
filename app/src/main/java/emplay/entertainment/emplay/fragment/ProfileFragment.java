@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
-import emplay.entertainment.emplay.SwipeToDeleteCallback;
+import emplay.entertainment.emplay.tool.SwipeToDeleteCallback;
 import emplay.entertainment.emplay.activity.LoginActivity;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.models.MovieModel;

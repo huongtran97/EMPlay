@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.activity;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +9,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.SharedViewModel;
 import emplay.entertainment.emplay.fragment.HomeFragment;
 import emplay.entertainment.emplay.fragment.ProfileFragment;

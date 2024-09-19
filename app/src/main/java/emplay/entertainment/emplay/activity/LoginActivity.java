@@ -24,7 +24,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import emplay.entertainment.emplay.MainActivity;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 

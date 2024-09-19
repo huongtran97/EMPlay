@@ -25,7 +25,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
-import emplay.entertainment.emplay.MainActivity;
 import emplay.entertainment.emplay.R;
 
 public class SignUpActivity extends AppCompatActivity {

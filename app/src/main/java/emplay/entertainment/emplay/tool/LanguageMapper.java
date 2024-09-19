@@ -1,4 +1,4 @@
-package emplay.entertainment.emplay;
+package emplay.entertainment.emplay.tool;
 
 import android.os.Build.VERSION_CODES;
 
