@@ -234,7 +234,7 @@ public class ShowResultDetailsFragment extends Fragment {
                     }
                     movieResultAdapter.notifyDataSetChanged();
                     // Set the background with the blurred poster image
-                    setRecyclerViewBackground(movieDetails.getBackdropPath());
+                    setRecyclerViewBackground(movieDetails.getBackdropPath(),movieDetails.getPosterPath());
 
                 } else {
 
@@ -250,39 +250,64 @@ public class ShowResultDetailsFragment extends Fragment {
         });
     }
 
-    private void setRecyclerViewBackground(String backdropPath) {
-        if (backdropPath == null || backdropPath.isEmpty()) {
-            return; // Handle case where backdropPath is null or empty
+    private void setRecyclerViewBackground(String backdropPath, String posterPath) {
+        String imageUrl = null;
+
+        // Check if backdropPath is available and valid
+        if (backdropPath != null && !backdropPath.isEmpty()) {
+            imageUrl = "https://image.tmdb.org/t/p/w500/" + backdropPath;
+        }
+        // If backdropPath is not available, check for posterPath
+        else if (posterPath != null && !posterPath.isEmpty()) {
+            imageUrl = "https://image.tmdb.org/t/p/w500/" + posterPath;
         }
 
-        // Create the URL for the backdrop image
-        String posterUrl = "https://image.tmdb.org/t/p/w500/" + backdropPath;
+        // If both backdropPath and posterPath are null/empty, load the placeholder image
+        if (imageUrl == null) {
+            Glide.with(this)
+                    .load(R.drawable.placeholder_image)  // Load the placeholder image
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
+                    .into(new CustomTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            Drawable[] layers = new Drawable[2];
+                            layers[0] = resource;
+                            layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg);
+                            LayerDrawable layerDrawable = new LayerDrawable(layers);
+                            detailRecyclerView.setBackground(layerDrawable);
+                        }
 
-        // Load the image with Glide and apply the blur transformation
-        Glide.with(this)
-                .load(posterUrl)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
-                .into(new CustomTarget<Drawable>() {
-                    @Override
-                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        // Combine the blurred image with the gradient drawable
-                        Drawable[] layers = new Drawable[2];
-                        layers[0] = resource; // Blurred image
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                            // Handle when the load is cleared
+                        }
+                    });
+        } else {
+            // Load the valid image URL
+            Glide.with(this)
+                    .load(imageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
+                    .into(new CustomTarget<Drawable>() {
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            Drawable[] layers = new Drawable[2];
+                            layers[0] = resource;
+                            layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg);
+                            LayerDrawable layerDrawable = new LayerDrawable(layers);
+                            detailRecyclerView.setBackground(layerDrawable);
+                        }
 
-                        // Use ContextCompat.getDrawable or Resources.getDrawable with theme
-                        layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg); // Gradient drawable
-
-                        LayerDrawable layerDrawable = new LayerDrawable(layers);
-                        detailRecyclerView.setBackground(layerDrawable);
-                    }
-
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-                        // Handle when the load is cleared
-                    }
-                });
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                            // Handle when the load is cleared
+                        }
+                    });
+        }
     }
+
+
 
     private void fetchCastList() {
         Call<MovieCreditsResponse> call = apiService.getMovieCredits(movieId, API_KEY);

@@ -8,7 +8,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.bumptech.glide.Glide;
 
@@ -16,7 +15,6 @@ import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.MovieModel;
-
 
 public class UpcomingMovieAdapter extends RecyclerView.Adapter<UpcomingMovieAdapter.MyViewHolder> {
 
@@ -62,25 +60,21 @@ public class UpcomingMovieAdapter extends RecyclerView.Adapter<UpcomingMovieAdap
                 .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
                 .into(holder.img);
 
-        // Bind the click listener to the item
-        holder.bind(movie, onItemClickListener);
+        // Set the click listener directly in onBindViewHolder
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movie));
     }
-
 
     @Override
     public int getItemCount() {
         return mData.size();
     }
 
-    public class MyViewHolder extends ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView img;
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
-
             img = itemView.findViewById(R.id.header);
-        }
-        public void bind(MovieModel item, UpcomingMovieAdapter.OnItemClickListener onItemClickListener) {
-            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(item));
         }
     }
 }

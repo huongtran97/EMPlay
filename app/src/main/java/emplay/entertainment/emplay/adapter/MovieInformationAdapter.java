@@ -38,8 +38,6 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
         this.movieInformationList = movieInformationList;
     }
 
-
-
     @Override
     public MovieInformationViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // Inflate the layout for movie information item and create a ViewHolder
@@ -49,9 +47,47 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
 
     @Override
     public void onBindViewHolder(MovieInformationViewHolder holder, int position) {
-        // Bind data to the ViewHolder
+        // Bind data to the ViewHolder directly
         MovieDetailsResponse movie = movieInformationList.get(position);
-        holder.bind(movie);
+
+        holder.name.setText(movie.getTitle());
+        holder.overView.setText(movie.getOverview());
+        if (VERSION.SDK_INT >= VERSION_CODES.N) {
+            holder.language.setText("\u2022    Language: " + LanguageMapper.getLanguageName(movie.getOriginalLanguage()));
+        }
+        holder.releaseDate.setText("Release Date: " + movie.getReleaseDate());
+
+        // Convert list of genres to a comma-separated string
+        List<String> genres = new ArrayList<>();
+        if (movie.getGenres() != null) {
+            for (Genre genre : movie.getGenres()) {
+                genres.add(genre.getName());
+            }
+        }
+        String genresString = String.join(" | ", genres);
+        holder.genre.setText(genresString);
+
+        holder.runtime.setText("\u2022    Runtime: " + movie.getRuntime() + " min");
+
+        // Check for both poster and backdrop paths
+        if (movie.getPosterPath() != null && !movie.getPosterPath().isEmpty()) {
+            // Load the poster path
+            Glide.with(holder.itemView.getContext())
+                    .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
+                    .placeholder(R.drawable.placeholder_image)
+                    .into(holder.poster);
+        } else if (movie.getBackdropPath() != null && !movie.getBackdropPath().isEmpty()) {
+            // Load the backdrop path
+            Glide.with(holder.itemView.getContext())
+                    .load("https://image.tmdb.org/t/p/w500/" + movie.getBackdropPath())
+                    .placeholder(R.drawable.placeholder_image)
+                    .into(holder.poster);
+        } else {
+            // Both paths are null or empty, load a fallback image
+            Glide.with(holder.itemView.getContext())
+                    .load(R.drawable.placeholder_image) // Load fallback image from resources
+                    .into(holder.poster);
+        }
     }
 
     @Override
@@ -96,54 +132,6 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
             genre = itemView.findViewById(R.id.search_result_genres);
             runtime = itemView.findViewById(R.id.search_result_runtime);
             poster = itemView.findViewById(R.id.imageView);
-        }
-
-        /**
-         * Binds the movie data to the ViewHolder.
-         *
-         * @param movie The MovieDetailsResponse object containing movie data.
-         */
-        public void bind(MovieDetailsResponse movie) {
-            name.setText(movie.getTitle());
-            overView.setText(movie.getOverview());
-            if (VERSION.SDK_INT >= VERSION_CODES.N) {
-                language.setText("\u2022    Language: " + LanguageMapper.getLanguageName(movie.getOriginalLanguage()));
-            }
-            releaseDate.setText("Release Date: " + movie.getReleaseDate());
-
-            // Convert list of genres to a comma-separated string
-            List<String> genres = new ArrayList<>();
-            if (movie.getGenres() != null) {
-                for (Genre genre : movie.getGenres()) {
-                    genres.add(genre.getName());
-                }
-            }
-            String genresString = String.join(" | ", genres);
-            genre.setText(genresString);
-
-            runtime.setText("\u2022    Runtime: " + movie.getRuntime() + " min");
-
-            // Handle null or empty poster path
-            if (movie.getPosterPath() != null && !movie.getPosterPath().isEmpty()) {
-                // Load the poster path
-                Glide.with(itemView.getContext())
-                        .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
-                        .placeholder(R.drawable.placeholder_image)
-                        .into(poster);
-            } else if (movie.getBackdropPath() != null && !movie.getBackdropPath().isEmpty()) {
-                // Load the backdrop path
-                Glide.with(itemView.getContext())
-                        .load("https://image.tmdb.org/t/p/w500/" + movie.getBackdropPath())
-                        .placeholder(R.drawable.placeholder_image)
-                        .into(poster);
-            } else {
-                // Load a drawable resource as a fallback when both paths are null or empty
-                Glide.with(itemView.getContext())
-                        .load(R.drawable.placeholder_image)
-                        .into(poster);
-            }
-
-
         }
     }
 }

@@ -51,10 +51,23 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
             // Load cast profile image using Glide
             RequestOptions options = new RequestOptions().circleCrop();
-            Glide.with(context)
-                    .load("https://image.tmdb.org/t/p/w500" + castModel.getProfilePath())
-                    .apply(options)
-                    .into(holder.profileImageView);
+            String profilePath = castModel.getProfilePath(); // Get the profile path
+
+            if (profilePath != null && !profilePath.isEmpty()) {
+                // If profile path is not null, load the image
+                Glide.with(context)
+                        .load("https://image.tmdb.org/t/p/w500" + profilePath)
+                        .apply(options)
+                        .placeholder(R.drawable.avatar) // Set a placeholder while loading
+                        .into(holder.profileImageView);
+            } else {
+                // If profile path is null or empty, load a default image or placeholder
+                Glide.with(context)
+                        .load(R.drawable.avatar) // Default image when path is null
+                        .apply(options)
+                        .into(holder.profileImageView);
+            }
+
         }
     }
 

@@ -63,6 +63,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         notifyDataSetChanged();
     }
 
+    @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(mContext).inflate(R.layout.movie_item, parent, false);
@@ -74,32 +75,21 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
         MovieModel movie = mData.get(position);
 
         // Handle null or empty poster path
+        String imageUrl = null;
         if (movie.getPosterPath() != null && !movie.getPosterPath().isEmpty()) {
-            // Load the poster path
-            Glide.with(mContext)
-                    .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.img);
+            imageUrl = "https://image.tmdb.org/t/p/w500/" + movie.getPosterPath();
         } else if (movie.getBackdropPath() != null && !movie.getBackdropPath().isEmpty()) {
-            // Load the backdrop path
-            Glide.with(mContext)
-                    .load("https://image.tmdb.org/t/p/w500/" + movie.getBackdropPath())
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.img);
-        } else {
-            // Load a drawable resource as a fallback when both paths are null or empty
-            Glide.with(mContext)
-                    .load(R.drawable.placeholder_image)
-                    .into(holder.img);
+            imageUrl = "https://image.tmdb.org/t/p/w500/" + movie.getBackdropPath();
         }
 
+        Glide.with(mContext)
+                .load(imageUrl != null ? imageUrl : R.drawable.placeholder_image)
+                .placeholder(R.drawable.placeholder_image)
+                .into(holder.img);
 
-        // Bind the item
-        holder.bind(movie, onItemClickListener);
+        // Set click listener directly
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movie));
     }
-
-
-
 
     @Override
     public int getItemCount() {
@@ -119,19 +109,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MyViewHolder
          */
         public MyViewHolder(View itemView) {
             super(itemView);
-
             img = itemView.findViewById(R.id.header);
-        }
-
-        /**
-         * Binds the item and click listener to the ViewHolder.
-         *
-         * @param item                The MovieModel object to bind.
-         * @param onItemClickListener The listener for click events.
-         */
-        public void bind(MovieModel item, OnItemClickListener onItemClickListener) {
-            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(item));
         }
     }
 }
-

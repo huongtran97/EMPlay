@@ -26,7 +26,6 @@ public class MovieLikedAdapter extends RecyclerView.Adapter<MovieLikedAdapter.My
     private final OnItemClickListener onItemClickListener;
     private final DatabaseHelper databaseHelper;
 
-
     public MovieLikedAdapter(Context context, List<MovieModel> movies, OnItemClickListener onItemClickListener, DatabaseHelper databaseHelper) {
         this.mContext = context;
         this.mData = movies;
@@ -74,7 +73,13 @@ public class MovieLikedAdapter extends RecyclerView.Adapter<MovieLikedAdapter.My
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MovieModel movie = mData.get(position);
-        holder.bind(movie);
+
+        // Load the poster and set the title directly
+        String fullUrl = movie.getPosterPath() != null ? "https://image.tmdb.org/t/p/w500" + movie.getPosterPath() : null;
+        Glide.with(mContext)
+                .load(fullUrl)
+                .into(holder.img);
+        holder.name.setText(movie.getTitle());
 
         holder.itemView.setOnClickListener(v -> {
             if (onItemClickListener != null) {
@@ -96,14 +101,6 @@ public class MovieLikedAdapter extends RecyclerView.Adapter<MovieLikedAdapter.My
             super(itemView);
             img = itemView.findViewById(R.id.liked_poster);
             name = itemView.findViewById(R.id.liked_name);
-        }
-
-        public void bind(MovieModel movie) {
-            String fullUrl = movie.getPosterPath() != null ? "https://image.tmdb.org/t/p/w500" + movie.getPosterPath() : null;
-            Glide.with(itemView.getContext())
-                    .load(fullUrl)
-                    .into(img);
-            name.setText(movie.getTitle());
         }
     }
 }

@@ -54,26 +54,23 @@ public class TVShowAdapter extends RecyclerView.Adapter<TVShowAdapter.MyViewHold
 
         // Handle null or empty poster path
         if (tv.getPosterPath() != null && !tv.getPosterPath().isEmpty()) {
-            // Load the poster path
             Glide.with(mContext)
                     .load("https://image.tmdb.org/t/p/w500/" + tv.getPosterPath())
                     .placeholder(R.drawable.placeholder_image)
                     .into(holder.img);
         } else if (tv.getBackdropPath() != null && !tv.getBackdropPath().isEmpty()) {
-            // Load the backdrop path
             Glide.with(mContext)
                     .load("https://image.tmdb.org/t/p/w500/" + tv.getBackdropPath())
                     .placeholder(R.drawable.placeholder_image)
                     .into(holder.img);
         } else {
-            // Load a drawable resource as a fallback when both paths are null or empty
             Glide.with(mContext)
                     .load(R.drawable.placeholder_image)
                     .into(holder.img);
         }
 
-
-        holder.bind(tv, onItemClickListener);
+        // Set the click listener directly in onBindViewHolder
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(tv));
     }
 
     @Override
@@ -87,10 +84,6 @@ public class TVShowAdapter extends RecyclerView.Adapter<TVShowAdapter.MyViewHold
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             img = itemView.findViewById(R.id.header);
-        }
-
-        public void bind(final TVShowModel item, final OnItemClickListener onItemClickListener) {
-            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(item));
         }
     }
 }

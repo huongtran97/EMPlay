@@ -5,20 +5,27 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
 import com.bumptech.glide.Glide;
+
 import java.util.List;
+
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.TVShowModel;
 
 public class UpComingTVAdapter extends RecyclerView.Adapter<UpComingTVAdapter.MyViewHolder> {
     private final Context mContext;
     private final List<TVShowModel> mData;
-    private final TVShowAdapter.OnItemClickListener onItemClickListener;
+    private final OnItemClickListener onItemClickListener;
 
-    public UpComingTVAdapter(Context mContext, List<TVShowModel> mData, TVShowAdapter.OnItemClickListener onItemClickListener) {
+    public interface OnItemClickListener {
+        void onItemClick(TVShowModel tv);
+    }
+
+    public UpComingTVAdapter(Context mContext, List<TVShowModel> mData, OnItemClickListener onItemClickListener) {
         this.mContext = mContext;
         this.mData = mData;
         this.onItemClickListener = onItemClickListener;
@@ -32,9 +39,6 @@ public class UpComingTVAdapter extends RecyclerView.Adapter<UpComingTVAdapter.My
         }
     }
 
-    public interface OnItemClickListener {
-        void onItemClick(TVShowModel tv);
-    }
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -43,14 +47,15 @@ public class UpComingTVAdapter extends RecyclerView.Adapter<UpComingTVAdapter.My
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UpComingTVAdapter.MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         TVShowModel tv = mData.get(position);
 
         Glide.with(mContext)
                 .load("https://image.tmdb.org/t/p/w500/" + tv.getPosterPath())
                 .into(holder.img);
 
-        holder.bind(tv, onItemClickListener);
+        // Set the click listener directly in onBindViewHolder
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(tv));
     }
 
     @Override
@@ -58,14 +63,12 @@ public class UpComingTVAdapter extends RecyclerView.Adapter<UpComingTVAdapter.My
         return mData.size();
     }
 
-    public class MyViewHolder extends ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         ImageView img;
+
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             img = itemView.findViewById(R.id.header);
-        }
-        public void bind(final TVShowModel item, final TVShowAdapter.OnItemClickListener onItemClickListener) {
-            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(item));
         }
     }
 }

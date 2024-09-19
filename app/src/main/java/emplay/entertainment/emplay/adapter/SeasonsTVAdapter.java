@@ -47,13 +47,24 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
     public void onBindViewHolder(@NonNull SeasonsTVAdapter.SeasonsViewHolder holder, int position) {
         SeasonsModel seasonsModel = seasonsList.get(position);
         if (seasonsModel != null) {
+            // Set the name and number of episodes
             holder.name.setText(seasonsModel.getName());
-            holder.episode.setText(String.valueOf("Number of episode: "+seasonsModel.getNumberOfEpisodes()));
+            holder.episode.setText(String.valueOf("Number of episodes: " + seasonsModel.getNumberOfEpisodes()));
 
+            // Handle null or empty poster path
+            String posterUrl = null;
+            if (seasonsModel.getPosterPath() != null && !seasonsModel.getPosterPath().isEmpty()) {
+                // Use poster path if available
+                posterUrl = "https://image.tmdb.org/t/p/w500" + seasonsModel.getPosterPath();
+            }
+
+            // Load the image using Glide, fallback to placeholder if posterUrl is null
             Glide.with(context)
-                    .load("https://image.tmdb.org/t/p/w500" + seasonsModel.getPosterPath())
+                    .load(posterUrl != null ? posterUrl : R.drawable.placeholder_image) // If posterUrl is null, use the placeholder image
+                    .placeholder(R.drawable.placeholder_image) // Set placeholder image
                     .into(holder.poster);
         }
+
 
     }
 

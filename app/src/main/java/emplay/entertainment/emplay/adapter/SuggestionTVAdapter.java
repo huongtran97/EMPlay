@@ -42,30 +42,22 @@ public class SuggestionTVAdapter extends RecyclerView.Adapter<SuggestionTVAdapte
     @Override
     public void onBindViewHolder(@NonNull SuggestionTVViewHolder holder, int position) {
         TVShowModel tvModel = suggestionTVList.get(position);
-        // Handle null or empty poster path
-        if (tvModel.getPosterPath() != null && !tvModel.getPosterPath().isEmpty()) {
-            // Load the poster path
-            Glide.with(context)
-                    .load("https://image.tmdb.org/t/p/w500/" + tvModel.getPosterPath())
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.poster);
-        } else if (tvModel.getBackdropPath() != null && !tvModel.getBackdropPath().isEmpty()) {
-            // Load the backdrop path
-            Glide.with(context)
-                    .load("https://image.tmdb.org/t/p/w500/" + tvModel.getBackdropPath())
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.poster);
-        } else {
-            // Load a drawable resource as a fallback when both paths are null or empty
-            Glide.with(context)
-                    .load(R.drawable.placeholder_image)
-                    .into(holder.poster);
-        }
 
-        holder.bind(tvModel, onItemClickListener);
+        // Load the appropriate image
+        String posterUrl = tvModel.getPosterPath() != null && !tvModel.getPosterPath().isEmpty()
+                ? "https://image.tmdb.org/t/p/w500/" + tvModel.getPosterPath()
+                : tvModel.getBackdropPath() != null && !tvModel.getBackdropPath().isEmpty()
+                ? "https://image.tmdb.org/t/p/w500/" + tvModel.getBackdropPath()
+                : null;
+
+        Glide.with(context)
+                .load(posterUrl != null ? posterUrl : R.drawable.placeholder_image)
+                .placeholder(R.drawable.placeholder_image)
+                .into(holder.poster);
+
+        // Set the click listener directly here
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(tvModel));
     }
-
-
 
     @Override
     public int getItemCount() {
@@ -79,10 +71,5 @@ public class SuggestionTVAdapter extends RecyclerView.Adapter<SuggestionTVAdapte
             super(itemView);
             poster = itemView.findViewById(R.id.poster);
         }
-
-        public void bind(TVShowModel tv, OnItemClickListener onItemClickListener) {
-            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(tv));
-        }
     }
-
 }

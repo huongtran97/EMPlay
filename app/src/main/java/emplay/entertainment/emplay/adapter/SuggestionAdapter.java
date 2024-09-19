@@ -35,7 +35,7 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
     @NonNull
     @Override
     public SuggestionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.search_result_suggestion_item, parent,false);
+        View view = LayoutInflater.from(context).inflate(R.layout.search_result_suggestion_item, parent, false);
         return new SuggestionViewHolder(view);
     }
 
@@ -43,28 +43,23 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
     public void onBindViewHolder(@NonNull SuggestionViewHolder holder, int position) {
         MovieModel movieModel = suggestionList.get(position);
 
-        // Handle null or empty poster path
+        // Handle both poster path and backdrop path
+        String imageUrl = null;
+
         if (movieModel.getPosterPath() != null && !movieModel.getPosterPath().isEmpty()) {
-            // Load the poster path
-            Glide.with(context)
-                    .load("https://image.tmdb.org/t/p/w500/" + movieModel.getPosterPath())
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.poster);
+            imageUrl = "https://image.tmdb.org/t/p/w500/" + movieModel.getPosterPath();
         } else if (movieModel.getBackdropPath() != null && !movieModel.getBackdropPath().isEmpty()) {
-            // Load the backdrop path
-            Glide.with(context)
-                    .load("https://image.tmdb.org/t/p/w500/" + movieModel.getBackdropPath())
-                    .placeholder(R.drawable.placeholder_image)
-                    .into(holder.poster);
-        } else {
-            // Load a drawable resource as a fallback when both paths are null or empty
-            Glide.with(context)
-                    .load(R.drawable.placeholder_image)
-                    .into(holder.poster);
+            imageUrl = "https://image.tmdb.org/t/p/w500/" + movieModel.getBackdropPath();
         }
 
-        holder.bind(movieModel, onItemClickListener);
+        // Load image with Glide
+        Glide.with(context)
+                .load(imageUrl != null ? imageUrl : R.drawable.placeholder_image)
+                .placeholder(R.drawable.placeholder_image)
+                .into(holder.poster);
 
+        // Set click listener directly here
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movieModel));
     }
 
     @Override
@@ -74,13 +69,10 @@ public class SuggestionAdapter extends RecyclerView.Adapter<SuggestionAdapter.Su
 
     public class SuggestionViewHolder extends RecyclerView.ViewHolder {
         ImageView poster;
+
         public SuggestionViewHolder(@NonNull View itemView) {
             super(itemView);
             poster = itemView.findViewById(R.id.poster);
-        }
-
-        public void bind(MovieModel movie, OnItemClickListener onItemClickListener) {
-            itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movie));
         }
     }
 }
