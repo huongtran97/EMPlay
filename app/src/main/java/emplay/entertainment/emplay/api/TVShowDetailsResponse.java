@@ -2,14 +2,8 @@ package emplay.entertainment.emplay.api;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.io.Serializable;
 import java.util.List;
 
-import emplay.entertainment.emplay.api.MovieDetailsResponse.Cast;
-import emplay.entertainment.emplay.api.MovieDetailsResponse.Genre;
-import emplay.entertainment.emplay.models.MovieModel;
-import emplay.entertainment.emplay.models.ProductContries;
-import emplay.entertainment.emplay.models.Season;
 import emplay.entertainment.emplay.models.TVShowModel;
 
 public class TVShowDetailsResponse {
@@ -746,7 +740,5 @@ public class TVShowDetailsResponse {
         public void setName(String name) {
             this.name = name;
         }
-
-
     }
 }

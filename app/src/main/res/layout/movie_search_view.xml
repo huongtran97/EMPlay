@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
-    tools:context=".moviefragment.SearchMoviesFragment">
+    android:background="@color/black"
+    tools:context=".fragment.SearchMoviesFragment">
 
     <TextView
         android:id="@+id/movie_search"
@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif-condensed-medium"
+        android:fontFamily="sans-serif-smallcaps"
         android:text="Search"
         android:textColor="@color/white"
         android:textSize="20sp"
@@ -89,6 +89,7 @@
                 android:layout_marginStart="8dp"
                 android:gravity="center"
                 android:text="Movie"
+                android:fontFamily="sans-serif-smallcaps"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -115,8 +116,8 @@
                 android:id="@+id/menu_tvshow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:contentDescription="tv_show"
                 android:layout_marginStart="15dp"
+                android:contentDescription="tv_show"
                 android:src="@drawable/tv_show" />
 
             <TextView
@@ -125,6 +126,7 @@
                 android:layout_marginStart="8dp"
                 android:gravity="center"
                 android:text="TV Show"
+                android:fontFamily="sans-serif-smallcaps"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -132,11 +134,22 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/search_recycler_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="14dp"
+        android:layout_width="446dp"
+        android:layout_height="760dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/genres_recycler_view"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/genres_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/input_title" />
 

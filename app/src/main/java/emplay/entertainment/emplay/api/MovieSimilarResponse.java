@@ -1,7 +1,5 @@
 package emplay.entertainment.emplay.api;
 
-
-
 import java.util.List;
 import emplay.entertainment.emplay.models.MovieModel;
 

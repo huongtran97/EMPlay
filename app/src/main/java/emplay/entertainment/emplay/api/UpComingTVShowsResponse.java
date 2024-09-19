@@ -290,7 +290,6 @@ public class UpComingTVShowsResponse {
     public static class Genre {
         @SerializedName("id")
         private int id;
-
         @SerializedName("name")
         private String name;
 
@@ -315,10 +314,8 @@ public class UpComingTVShowsResponse {
     public static class Cast {
         @SerializedName("cast_id")
         private int castId;
-
         @SerializedName("name")
         private String castName;
-
         @SerializedName("profile_path")
         private String profilePath;
 

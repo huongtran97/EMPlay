@@ -5,28 +5,20 @@ import com.google.gson.annotations.SerializedName;
 public class TrailerModel {
     @SerializedName("id")
     private String id;
-
     @SerializedName("iso_639_1")
     private String iso_639_1;
-
     @SerializedName("iso_3166_1")
     private String iso_3166_1;
-
     @SerializedName("name")
     private String name;
-
     @SerializedName("key")
     private String key;
-
     @SerializedName("size")
     private int size;
-
     @SerializedName("type")
     private String type;
-
     @SerializedName("official")
     private boolean official;
-
     @SerializedName("published_at")
     private String published_at;
 

@@ -13,20 +13,15 @@ public class UpComingMovieResponse {
     private int page;
     @SerializedName("results")
     private List<MovieModel> results;
-
     public List<MovieModel> getResults() {
         return results;
     }
-
     public void setResults(List<MovieModel> results) {
         this.results = results;
     }
-
     public UpComingMovieResponse(List<MovieModel> results) {
         this.results = results;
     }
-
-
 
     // Getters and setters...
 
@@ -57,37 +52,26 @@ public class UpComingMovieResponse {
 
     @SerializedName("id")
     private int id;
-
     @SerializedName("title")
     private String title;
-
     @SerializedName("vote_average")
     private double voteAverage;
-
     @SerializedName("poster_path")
     private String posterPath;
-
     @SerializedName("backdrop_path")
     private String backdropPath;
-
     @SerializedName("overview")
     private String overview;
-
     @SerializedName("original_language")
     private String originalLanguage;
-
     @SerializedName("release_date")
     private String releaseDate;
-
     @SerializedName("runtime")
     private int runtime;
-
     @SerializedName("genres")
     private List<Genre> genres;
-
     @SerializedName("cast")
     private List<Cast> cast;
-
     @SerializedName("movie")
     private MovieModel movieDetails;
 
@@ -193,7 +177,6 @@ public class UpComingMovieResponse {
     public static class Genre {
         @SerializedName("id")
         private int id;
-
         @SerializedName("name")
         private String name;
 
@@ -218,10 +201,8 @@ public class UpComingMovieResponse {
     public static class Cast {
         @SerializedName("cast_id")
         private int castId;
-
         @SerializedName("name")
         private String castName;
-
         @SerializedName("profile_path")
         private String profilePath;
 

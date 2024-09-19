@@ -143,14 +143,13 @@ public class MovieDetailsResponse {
     }
 
 
-
-
     public static class Genre {
         @SerializedName("id")
         private int id;
 
         @SerializedName("name")
         private String name;
+
 
         // Getters and Setters
         public int getId() {
@@ -169,6 +168,8 @@ public class MovieDetailsResponse {
             this.name = name;
         }
     }
+
+
 
     public static class Cast {
         @SerializedName("cast_id")

@@ -7,7 +7,7 @@
     android:id="@+id/search_result_suggestion_item"
     android:layout_width="107dp"
     android:layout_height="160dp"
-    android:layout_margin="13dp"
+    android:layout_margin="20dp"
     android:backgroundTint="#90302E2E"
     cardview:cardCornerRadius="4dp">
 

@@ -13,6 +13,7 @@ public class SharedViewModel extends ViewModel {
     private final MutableLiveData<List<TVShowModel>> searchTVResults = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> isTVShowSearch = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> lastSearchWasTVShow = new MutableLiveData<>();
+    private final MutableLiveData<Integer> selectedGenreId = new MutableLiveData<>();
 
     // Getters for LiveData
     public LiveData<List<MovieModel>> getSearchResults() {
@@ -45,5 +46,13 @@ public class SharedViewModel extends ViewModel {
 
     public void setLastSearchWasTVShow(boolean wasTVShow) {
         this.lastSearchWasTVShow.setValue(wasTVShow);
+    }
+
+    public LiveData<Integer> getSelectedGenreId() {
+        return selectedGenreId;
+    }
+
+    public void setSelectedGenreId(int genreId) {
+        selectedGenreId.setValue(genreId);
     }
 }

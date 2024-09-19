@@ -3,6 +3,10 @@
 
     package="emplay.entertainment.emplay">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -13,7 +17,8 @@
         android:roundIcon="@drawable/e_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.EMPlay"
-        android:networkSecurityConfig="@xml/network_security_config">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -8,14 +8,12 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import emplay.entertainment.emplay.movieadapter.MovieLikedAdapter;
-import emplay.entertainment.emplay.movieadapter.TVLikedAdapter;
+import emplay.entertainment.emplay.adapter.MovieLikedAdapter;
+import emplay.entertainment.emplay.adapter.TVLikedAdapter;
 
 public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
-
     private final Paint paint = new Paint();
     private final RecyclerView recyclerView;
-
 
     public SwipeToDeleteCallback(RecyclerView recyclerView) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
@@ -66,6 +64,6 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        return makeMovementFlags(0, ItemTouchHelper.LEFT); // Allow both swipe directions
+        return makeMovementFlags(0, ItemTouchHelper.UP); // Allow both swipe directions
     }
 }

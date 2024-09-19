@@ -10,10 +10,10 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import emplay.entertainment.emplay.models.SharedViewModel;
-import emplay.entertainment.emplay.moviefragment.HomeFragment;
-import emplay.entertainment.emplay.moviefragment.ProfileFragment;
-import emplay.entertainment.emplay.moviefragment.SearchMoviesFragment;
-import emplay.entertainment.emplay.moviefragment.SearchTVShowsFragment;
+import emplay.entertainment.emplay.fragment.HomeFragment;
+import emplay.entertainment.emplay.fragment.ProfileFragment;
+import emplay.entertainment.emplay.fragment.SearchMoviesFragment;
+import emplay.entertainment.emplay.fragment.SearchTVShowsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (selectedFragment != null) {getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment)
-                            .addToBackStack(null)  // Add this line if you want to keep the previous fragment in the back stack
+                            .addToBackStack(null)  // Keep the previous fragment in the back stack
                             .commit();
                 }
                 return true;

@@ -9,39 +9,28 @@ import java.util.List;
 import emplay.entertainment.emplay.api.MovieDetailsResponse.Genre;
 
 public class MovieModel implements Serializable {
-
     @SerializedName("id")
     private int id;
-
     @SerializedName("title")
     private String title;
-
     @SerializedName("vote_average")
     private double voteAverage;
-
     @SerializedName("poster_path")
     private String posterPath;
-
     @SerializedName("backdrop_path")
     private String backdropPath;
-
     @SerializedName("overview")
     private String overview;
-
     @SerializedName("original_language")
     private String originalLanguage;
-
     @SerializedName("release_date")
     private String releaseDate;
-
     @SerializedName("runtime")
     private int runtime;
-
     @SerializedName("genres")
     private List<String> genres;
     @SerializedName("cast")
     private List<String> cast;
-
 
 
     // Constructor including genres

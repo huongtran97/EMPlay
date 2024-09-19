@@ -9,21 +9,21 @@
         android:id="@+id/search_result_title"
         android:layout_width="403dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-medium"
         android:text="Title goes here"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="154dp"
-        android:layout_height="233dp"
+        android:layout_height="239dp"
         android:layout_marginTop="36dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +34,6 @@
         android:id="@+id/ratingBar"
         android:layout_width="232dp"
         android:layout_height="44dp"
-        android:layout_marginTop="2dp"
         android:isIndicator="true"
         android:numStars="5"
         android:rating="0"
@@ -43,92 +42,94 @@
         android:stepSize="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_result_title" />
+        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
 
     <TextView
         android:id="@+id/search_result_genres"
         android:layout_width="265dp"
-        android:layout_height="30dp"
-        android:layout_marginTop="4dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:fontFamily="sans-serif-light"
         android:text="Geners goes here"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/add_to_library_btn"
-        app:layout_constraintStart_toStartOf="@+id/trailer_btn"
-        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_result_title" />
 
     <TextView
         android:id="@+id/search_result_language"
-        android:layout_width="110dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="48dp"
+        android:layout_width="129dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-light"
         android:text="Language goes here"
         android:textAlignment="viewStart"
         android:textColor="@color/white"
-        android:textSize="9sp"
+        android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
+        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
 
     <TextView
         android:id="@+id/search_result_release_date"
-        android:layout_width="105dp"
-        android:layout_height="22dp"
-        android:layout_marginStart="48dp"
+        android:layout_width="152dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-light"
         android:text="Runtime goes here"
         android:textAlignment="viewEnd"
         android:textColor="@color/white"
-        android:textSize="9sp"
+        android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toStartOf="@+id/search_result_runtime"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
+        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
 
     <TextView
         android:id="@+id/search_result_overview"
-        android:layout_width="394dp"
+        android:layout_width="422dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="4dp"
         android:fontFamily="sans-serif-medium"
         android:justificationMode="inter_word"
         android:text="Overview goes here"
         android:textAlignment="textStart"
         android:textColor="@color/white"
-        android:textSize="10sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.444"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/search_result_runtime" />
 
     <TextView
         android:id="@+id/search_result_runtime"
-        android:layout_width="102dp"
-        android:layout_height="21dp"
+        android:layout_width="129dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
         android:fontFamily="sans-serif-light"
         android:text="Runtime goes here"
         android:textAlignment="center"
         android:textColor="@color/white"
-        android:textSize="9sp"
+        android:textSize="12sp"
         android:textStyle="italic"
         app:layout_constraintEnd_toStartOf="@+id/search_result_language"
-        app:layout_constraintTop_toBottomOf="@+id/search_result_genres" />
+        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
 
     <ImageButton
         android:id="@+id/add_to_library_btn"
         android:layout_width="49dp"
         android:layout_height="41dp"
-        android:layout_marginEnd="124dp"
+        android:layout_marginEnd="144dp"
+        android:backgroundTint="#00302E2E"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ratingBar"
-        app:srcCompat="@drawable/baseline_favorite_border_24"
-        android:backgroundTint="#00302E2E"/>
+        app:srcCompat="@drawable/baseline_favorite_border_24" />
 
     <Button
         android:id="@+id/trailer_btn"
@@ -139,6 +140,7 @@
         android:backgroundTint="#6A302E2E"
         android:text="trailer"
         app:layout_constraintEnd_toStartOf="@+id/add_to_library_btn"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
 

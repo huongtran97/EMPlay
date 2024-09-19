@@ -9,7 +9,6 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import java.security.MessageDigest;
 
 public class CircleTransform extends BitmapTransformation {
-
     private static final String ID = "emplay.entertainment.emplay.CircleTransform";
     private static final byte[] ID_BYTES = ID.getBytes(CHARSET);
 

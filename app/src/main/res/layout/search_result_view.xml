@@ -9,14 +9,13 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".moviefragment.MovieResultFragment"
+        tools:context=".fragment.MovieResultFragment"
         android:background="@color/black">
 
         <ScrollView
             android:id="@+id/scrollView"
-            android:layout_width="407dp"
-            android:layout_height="778dp"
-
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -30,18 +29,26 @@
                     android:id="@+id/search_result_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"/>
+                    android:layout_marginTop="16dp" />
+
+                <View
+                    android:id="@+id/view"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="20dp"
+                    android:background="#4E4B4B" />
 
                 <TextView
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:padding="10dp"
                     android:text="Cast"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     android:textStyle="bold" />
+
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_result_cast_recyclerview"
@@ -49,11 +56,18 @@
                     android:layout_height="wrap_content"
                     android:scrollbars="horizontal" />
 
+                <View
+                    android:id="@+id/view2"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="20dp"
+                    android:background="#4E4B4B" />
+
                 <TextView
                     android:id="@+id/textView3"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:padding="10dp"
                     android:text="Suggestion"
                     android:textColor="@color/white"
@@ -63,7 +77,7 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_result_suggestion_recyclerview"
                     android:layout_width="match_parent"
-                    android:layout_height="720dp"/>
+                    android:layout_height="750dp"/>
 
             </LinearLayout>
         </ScrollView>

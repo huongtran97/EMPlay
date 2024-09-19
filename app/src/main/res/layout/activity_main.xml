@@ -2,10 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/movie_home_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/movie_home_fragment"
-    android:background="@drawable/background">
+    android:background="@color/black">
 
 
     <ScrollView
@@ -25,28 +25,41 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/tv_trending"
+                android:id="@+id/textView5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="  Up Coming TV Shows "
+                android:fontFamily="sans-serif-smallcaps"
+                android:text="Trending this week"
+                android:textAlignment="center"
                 android:textColor="@color/white"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Movies"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="italic" />
+
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/up_coming_tv_recyclerview"
+                android:id="@+id/movie_popular_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="horizontal" />
+
 
             <TextView
                 android:id="@+id/movie_trending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="  Popular TV Shows "
+                android:text="TV shows"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="normal|italic" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/tvshow_popular_recyclerview"
@@ -54,37 +67,57 @@
                 android:layout_height="wrap_content"
                 android:scrollbars="horizontal" />
 
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="20dp"
+                android:background="#4E4B4B" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="sans-serif-smallcaps"
+                android:text="Up Coming "
+                android:textAlignment="center"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/up_coming_movie"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
-                android:text="  Up Coming Movies"
+                android:text="Movies"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="italic" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/up_coming_movie_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="horizontal"/>
-
+                android:scrollbars="horizontal" />
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/tv_trending"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="  Popular Movies"
+                android:text="TV Shows "
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="italic" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/movie_popular_recyclerview"
+                android:id="@+id/up_coming_tv_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="horizontal" />
+
+
         </LinearLayout>
     </ScrollView>
 

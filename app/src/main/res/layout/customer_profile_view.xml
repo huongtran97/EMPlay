@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:background="@color/black"
     android:padding="16dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -28,7 +28,7 @@
                     android:layout_width="103dp"
                     android:layout_height="106dp"
                     android:layout_marginLeft="140dp"
-                    android:background="@drawable/avatar"/>
+                    android:background="@drawable/avatar" />
 
                 <TextView
                     android:id="@+id/profile_username"
@@ -36,7 +36,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="170dp"
                     android:fontFamily="sans-serif-light"
-                    android:text="Username goes here"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -44,10 +43,9 @@
                     android:id="@+id/profile_email"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
                     android:layout_marginLeft="115dp"
+                    android:layout_marginTop="8dp"
                     android:fontFamily="sans-serif-light"
-                    android:text="Email goes here"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -63,7 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:fontFamily="sans-serif-medium"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:text="Your Movies"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -80,7 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:fontFamily="sans-serif-medium"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:text="Your TV Shows"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -97,14 +95,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="12dp"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:text="Logout" />
 
                 <Button
                     android:id="@+id/delete_account_btn"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:text="Delete Account" />
 
             </LinearLayout>

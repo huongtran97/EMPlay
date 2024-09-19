@@ -2,55 +2,44 @@ package emplay.entertainment.emplay.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 public class TVShowModel implements Serializable {
-
     @SerializedName("id")
     private int id;
-
     @SerializedName("name")
     private String name;
-
     @SerializedName("vote_average")
     private double voteAverage;
-
     @SerializedName("poster_path")
     private String posterPath;
-
+    @SerializedName("backdrop_path")
+    private String backdropPath;
     @SerializedName("overview")
     private String overview;
-
     @SerializedName("original_language")
     private String originalLanguage;
-
     @SerializedName("first_air_date")
     private String firstAirDate;
-
     @SerializedName("genres")
-    private List<String> genres; // Consider changing to List<Genre> if using complex objects
-
+    private List<String> genres;
     @SerializedName("crew")
-    private List<String> crew; // Consider changing to List<Crew> if using complex objects
-
+    private List<String> crew;
     @SerializedName("seasons")
-    private List<String> seasons; // Consider changing to List<Season> if using complex objects
-
+    private List<String> seasons;
     @SerializedName("production_countries")
-    private List<String> productionCountries; // Consider changing to List<ProductionCountry> if using complex objects
-
+    private List<String> productionCountries;
     @SerializedName("number_of_episodes")
     private int numberOfEpisodes;
-
     @SerializedName("number_of_seasons")
     private int numberOfSeasons;
 
-    public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview, String originalLanguage, String firstAirDate, List<String> seasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
+    public TVShowModel(int id, String name, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String firstAirDate, List<String> seasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
         this.id = id;
         this.name = name;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
         this.overview = overview;
         this.originalLanguage = originalLanguage;
         this.firstAirDate = firstAirDate;
@@ -86,6 +75,29 @@ public class TVShowModel implements Serializable {
     }
 
 
+    public TVShowModel(int id, String name, String posterPath, List<String> seasons, int numberOfEpisodes) {
+        this.id = id;
+        this.name = name;
+        this.posterPath = posterPath;
+        this.seasons = seasons;
+        this.numberOfEpisodes = numberOfEpisodes;
+    }
+
+    public TVShowModel(int id, String name, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String firstAirDate, int numberOfSeasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
+        this.id = id;
+        this.name = name;
+        this.voteAverage = voteAverage;
+        this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
+        this.overview = overview;
+        this.originalLanguage = originalLanguage;
+        this.firstAirDate = firstAirDate;
+        this.genres = genres;
+        this.productionCountries = productionCountries;
+        this.numberOfEpisodes = numberOfEpisodes;
+        this.numberOfSeasons = numberOfSeasons;
+    }
+
 
     // Getters and Setters
     public int getId() {
@@ -118,6 +130,13 @@ public class TVShowModel implements Serializable {
 
     public void setPosterPath(String posterPath) {
         this.posterPath = posterPath;
+    }
+    public String getBackdropPath() {
+        return backdropPath;
+    }
+
+    public void setBackdropPath(String backdropPath) {
+        this.backdropPath = backdropPath;
     }
 
     public String getOverview() {

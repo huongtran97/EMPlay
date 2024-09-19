@@ -18,9 +18,6 @@ public class TVShowCreditsResponses {
         this.cast = cast;
     }
 
-
-
-
     public static class Cast {
         @SerializedName("id")
         private int castId;
@@ -30,8 +27,6 @@ public class TVShowCreditsResponses {
         private String profilePath;
         @SerializedName("character")
         private String character;
-
-
 
         public Cast(int castId, String name, String profilePath, String character) {
             this.castId = castId;

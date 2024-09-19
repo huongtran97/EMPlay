@@ -9,7 +9,7 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "emplay.db";
-    private static final int DATABASE_VERSION = 2; // Increment version if you make schema changes
+    private static final int DATABASE_VERSION = 2;
 
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_TVSHOWS = "tvshows";
@@ -63,9 +63,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Log.d("DatabaseHelper", "Tables created: " + CREATE_TABLE_MOVIES + ", " + CREATE_TABLE_TVSHOWS + ", " + CREATE_TABLE_USER_PROFILE);
     }
 
-
-
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         if (oldVersion < 2) {
@@ -75,9 +72,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             onCreate(db);
         }
     }
-
-
-
 
     public void deleteMovie(int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -115,7 +109,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.insert("users", null, values);
         }
     }
-
-
-
 }
