@@ -13,8 +13,8 @@
 
         <ImageView
             android:id="@+id/poster"
-            android:layout_width="100dp"
-            android:layout_height="150dp"
+            android:layout_width="107dp"
+            android:layout_height="160dp"
             android:scaleType="centerCrop"
             cardview:layout_constraintBottom_toBottomOf="parent"
             cardview:layout_constraintEnd_toEndOf="parent"
