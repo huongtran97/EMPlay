@@ -41,7 +41,7 @@
             android:fontFamily="sans-serif-light"
             android:textAlignment="center"
             android:textColor="#FFFFFF"
-            android:textSize="12sp" />
+            android:textSize="10sp" />
 
     </LinearLayout>
 

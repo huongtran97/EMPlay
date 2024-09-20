@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
@@ -88,7 +89,7 @@ public class SearchMoviesFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(searchAdapter);
 
-        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 5));
+        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
         genresRecyclerView.setAdapter(genresAdapter);
 
 
@@ -232,15 +233,28 @@ public class SearchMoviesFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     searchMovieList.clear();
                     List<MovieModel> movies = response.body().getResults();
+
                     if (movies != null && !movies.isEmpty()) {
-                        for (MovieModel movie : movies) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                movie.setOriginalLanguage(LanguageMapper.getLanguageName(movie.getOriginalLanguage()));
-                            }
+                        // Filter out movies with null posterPath
+                        List<MovieModel> filteredMovies = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            filteredMovies = movies.stream()
+                                    .filter(movie -> movie.getPosterPath() != null)
+                                    .collect(Collectors.toList());
                         }
-                        searchMovieList.addAll(movies);
-                        searchAdapter.notifyDataSetChanged();
-                        viewModel.setSearchResults(movies);
+
+                        if (!filteredMovies.isEmpty()) {
+                            for (MovieModel movie : filteredMovies) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    movie.setOriginalLanguage(LanguageMapper.getLanguageName(movie.getOriginalLanguage()));
+                                }
+                            }
+                            searchMovieList.addAll(filteredMovies);
+                            searchAdapter.notifyDataSetChanged();
+                            viewModel.setSearchResults(filteredMovies);
+                        } else {
+                            Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
@@ -263,6 +277,7 @@ public class SearchMoviesFragment extends Fragment {
             }
         });
     }
+
 
 
     private void hideKeyboard() {

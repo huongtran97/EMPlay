@@ -12,7 +12,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -111,32 +110,31 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
 
+
+
+
         // Initialize RecyclerViews
         movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
         tvRecyclerView2 = view.findViewById(R.id.tvshow_popular_recyclerview);
         upComingRecyclerView = view.findViewById(R.id.up_coming_movie_recyclerview);
         upComingTVRecyclerview = view.findViewById(R.id.up_coming_tv_recyclerview);
 
-        // Initialize movie list and adapters
-        movieList = new ArrayList<>();
-        movieAdapter = new MovieAdapter(getContext(), movieList, this::onItemClicked);
+        // Initialize movie list and adapters with the filtered movie list
+        movieAdapter = new MovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
         movieRecyclerView.setAdapter(movieAdapter);
-        movieRecyclerView.setLayoutManager((new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)));
+        movieRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        tvList = new ArrayList<>();
-        tvShowAdapter = new TVShowAdapter(getContext(), tvList, this::onItemClicked);
+        tvShowAdapter = new TVShowAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
         tvRecyclerView2.setAdapter(tvShowAdapter);
         tvRecyclerView2.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        upComingMoviesList = new ArrayList<>();
-        upcomingMovieAdapter = new UpcomingMovieAdapter(getContext(),upComingMoviesList, this::onItemClicked);
+        upcomingMovieAdapter = new UpcomingMovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
         upComingRecyclerView.setAdapter(upcomingMovieAdapter);
-        upComingRecyclerView.setLayoutManager((new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)));
+        upComingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        upComingTVList = new ArrayList<>();
-        upComingTVAdapter = new UpComingTVAdapter(getContext(),upComingTVList,this::onItemClicked);
+        upComingTVAdapter = new UpComingTVAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
         upComingTVRecyclerview.setAdapter(upComingTVAdapter);
-        upComingTVRecyclerview.setLayoutManager((new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)));
+        upComingTVRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         // Initialize API service
         apiService = ApiClient.getClient().create(MovieApiService.class);
@@ -150,123 +148,131 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-    private void fetchUpComingMovie() {
+
+    private List<MovieModel> fetchUpComingMovie() {
         Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(API_KEY);
         call.enqueue(new Callback<UpComingMovieResponse>() {
             @Override
             public void onResponse(Call<UpComingMovieResponse> call, Response<UpComingMovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    // Filter movies with non-null posterPath
                     List<MovieModel> movieList = response.body().getResults();
-                    upcomingMovieAdapter.updateData(movieList);
-                } else {
-                    Log.e("HomeFragment", "Failed to load movie data. Status code: " + response.code());
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("HomeFragment", "Error response: " + errorBody);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    List<MovieModel> filteredMovies = new ArrayList<>();
+                    for (MovieModel movie : movieList) {
+                        if (movie.getPosterPath() != null) {
+                            filteredMovies.add(movie);
+                        }
                     }
-                    Toast.makeText(getContext(), "Failed to load movie data", Toast.LENGTH_SHORT).show();
+                    upcomingMovieAdapter.updateData(filteredMovies);
                 }
             }
 
             @Override
             public void onFailure(Call<UpComingMovieResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load movie data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("HomeFragment", "Error fetching movie data", t);
             }
         });
+        return null;
     }
 
-    private void fetchUpComingTV() {
+    private List<TVShowModel> fetchUpComingTV() {
         Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(API_KEY);
         call.enqueue(new Callback<UpComingTVShowsResponse>() {
             @Override
             public void onResponse(Call<UpComingTVShowsResponse> call, Response<UpComingTVShowsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    // Filter TV shows with non-null posterPath
                     List<TVShowModel> tvList = response.body().getResults();
-                    upComingTVAdapter.updateData(tvList);
-                } else {
-                    Log.e("HomeFragment", "Failed to load TV show data. Status code: " + response.code());
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("HomeFragment", "Error response: " + errorBody);
-                    } catch (IOException e) {
-                        Log.e("HomeFragment", "Error reading error body", e);
+                    List<TVShowModel> filteredTVShows = new ArrayList<>();
+                    for (TVShowModel tv : tvList) {
+                        if (tv.getPosterPath() != null) {
+                            filteredTVShows.add(tv);
+                        }
                     }
-                    Toast.makeText(getContext(), "Failed to load TV show data", Toast.LENGTH_SHORT).show();
+                    upComingTVAdapter.updateData(filteredTVShows);
                 }
             }
 
             @Override
             public void onFailure(Call<UpComingTVShowsResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load TV show data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("HomeFragment", "Error fetching TV show data", t);
             }
         });
+        return null;
     }
 
     /**
      * Fetches the initial list of popular movies from the API and updates the movie adapter.
-     *
+     * <p>
      * This method makes an API call to retrieve popular movies and updates the MovieAdapter with the fetched data.
      * Displays a Toast message if the data loading fails.
+     *
+     * @return
      */
-    private void fetchPopularMovies() {
+    private void fetchPopularMovies() { // Change the return type to void
         Call<MovieResponse> call = apiService.getTrendingMovies(API_KEY);
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<MovieModel> movieList = response.body().getResults();
-                    movieAdapter.updateData(movieList);
-                } else {
-                    Log.e("HomeFragment", "Failed to load movie data. Status code: " + response.code());
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("HomeFragment", "Error response: " + errorBody);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                if (response.isSuccessful()) {
+                    if (response.body() != null) {
+                        // Filter popular movies with non-null posterPath
+                        List<MovieModel> movieList = response.body().getResults();
+                        List<MovieModel> filteredMovies = new ArrayList<>();
+                        for (MovieModel movie : movieList) {
+                            if (movie.getPosterPath() != null) {
+                                filteredMovies.add(movie);
+                            }
+                        }
+                        movieAdapter.updateData(filteredMovies);
+                    } else {
+                        Log.e("HomeFragment", "Response body is null");
                     }
-                    Toast.makeText(getContext(), "Failed to load movie data", Toast.LENGTH_SHORT).show();
+                } else {
+                    try {
+                        // Log the error response if not successful
+                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
+                        Log.e("HomeFragment", "Error fetching movies: " + response.code() + " - " + errorBody);
+                    } catch (IOException e) {
+                        Log.e("HomeFragment", "Error reading error body", e);
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<MovieResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load movie data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("HomeFragment", "Error fetching movie data", t);
             }
         });
     }
 
-    private void fetchPopularTV() {
+
+    private List<TVShowModel> fetchPopularTV() {
         Call<TVShowResponse> call = apiService.getTrendingTVShows(API_KEY);
         call.enqueue(new Callback<TVShowResponse>() {
             @Override
             public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    // Filter popular TV shows with non-null posterPath
                     List<TVShowModel> tvList = response.body().getResults();
-                    tvShowAdapter.updateData(tvList);
-                } else {
-                    Log.e("HomeFragment", "Failed to load TV show data. Status code: " + response.code());
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("HomeFragment", "Error response: " + errorBody);
-                    } catch (IOException e) {
-                        Log.e("HomeFragment", "Error reading error body", e);
+                    List<TVShowModel> filteredTVShows = new ArrayList<>();
+                    for (TVShowModel tv : tvList) {
+                        if (tv.getPosterPath() != null) {
+                            filteredTVShows.add(tv);
+                        }
                     }
-                    Toast.makeText(getContext(), "Failed to load TV show data", Toast.LENGTH_SHORT).show();
+                    tvShowAdapter.updateData(filteredTVShows);
                 }
             }
 
             @Override
             public void onFailure(Call<TVShowResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load TV show data: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("HomeFragment", "Error fetching TV show data", t);
             }
         });
+        return null;
     }
+
 
 
     /**
@@ -278,28 +284,24 @@ public class HomeFragment extends Fragment {
      */
     public void onItemClicked(Object item) {
         if (item instanceof MovieModel) {
-            MovieModel movie = (MovieModel) item;
-            if (movie != null) {
-                Log.d("ItemClicked", "Clicked item is a Movie: " + movie.getTitle());
-                ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, showResultDetailsFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
+            MovieModel selectedMovie = (MovieModel) item;
+
+            // Start a new fragment or activity to display movie details
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            ShowResultDetailsFragment movieDetailsFragment = ShowResultDetailsFragment.newInstance(selectedMovie.getId()); // Assume you have a method to pass movie ID
+            transaction.replace(R.id.fragment_container, movieDetailsFragment);  // Replace with the appropriate container ID
+            transaction.addToBackStack(null);
+            transaction.commit();
         } else if (item instanceof TVShowModel) {
-            TVShowModel tvShow = (TVShowModel) item;
-            if (tvShow != null) {
-                Log.d("ItemClicked", "Clicked item is a TV Show: " + tvShow.getName());
-                ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getId());
-                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
-                transaction.addToBackStack(null);
-                transaction.commit();
-            }
-        } else {
-            Log.d("ItemClicked", "Unknown item type clicked");
-            Toast.makeText(getContext(), "Unknown item type", Toast.LENGTH_SHORT).show();
+            TVShowModel selectedTVShow = (TVShowModel) item;
+
+            // Start a new fragment or activity to display TV show details
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            ShowResultTVShowDetailsFragment tvShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(selectedTVShow.getId()); // Assume you have a method to pass TV show ID
+            transaction.replace(R.id.fragment_container, tvShowDetailsFragment);  // Replace with the appropriate container ID
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
     }
+
 }

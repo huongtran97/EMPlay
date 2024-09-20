@@ -365,17 +365,24 @@ public class ShowResultDetailsFragment extends Fragment {
 
                     List<MovieModel> recommendations = recommendationsResponse.getResults();
                     if (recommendations != null && !recommendations.isEmpty()) {
+                        // Filter out movies with null posterPath
                         for (MovieModel movie : recommendations) {
-                            suggestionList.add(new MovieModel(
-                                    movie.getId(),
-                                    movie.getTitle(),
-                                    movie.getVoteAverage(),
-                                    movie.getPosterPath(),
-                                    movie.getOverview(),
-                                    movie.getOriginalLanguage(),
-                                    movie.getReleaseDate()
-                            ));
+                            if (movie.getPosterPath() != null) {
+                                suggestionList.add(new MovieModel(
+                                        movie.getId(),
+                                        movie.getTitle(),
+                                        movie.getVoteAverage(),
+                                        movie.getPosterPath(),
+                                        movie.getOverview(),
+                                        movie.getOriginalLanguage(),
+                                        movie.getReleaseDate()
+                                ));
+                                // Log each item added to the suggestion list
+                                Log.d("Suggestion Item", "Movie added: " + movie.getTitle());
+                            }
                         }
+                        // Log the size of the suggestion list
+                        Log.d("Suggestion List", "Total Movies added: " + suggestionList.size());
                         suggestionAdapter.notifyDataSetChanged();
                         Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
                     } else {
@@ -398,7 +405,6 @@ public class ShowResultDetailsFragment extends Fragment {
             }
         });
     }
-
 }
 
 

@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif-smallcaps"
+        android:fontFamily="@font/black_han_sans"
         android:text="Search"
         android:textColor="@color/white"
         android:textSize="20sp"
@@ -23,7 +23,7 @@
 
     <EditText
         android:id="@+id/input_title"
-        android:layout_width="380dp"
+        android:layout_width="match_parent"
         android:layout_height="33dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/rounded_edittext"
@@ -89,7 +89,7 @@
                 android:layout_marginStart="8dp"
                 android:gravity="center"
                 android:text="Movie"
-                android:fontFamily="sans-serif-smallcaps"
+                android:fontFamily="@font/black_han_sans"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
@@ -126,22 +126,28 @@
                 android:layout_marginStart="8dp"
                 android:gravity="center"
                 android:text="TV Show"
-                android:fontFamily="sans-serif-smallcaps"
+                android:fontFamily="@font/black_han_sans"
                 android:textColor="@android:color/white" />
         </LinearLayout>
 
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/search_recycler_view"
-        android:layout_width="446dp"
-        android:layout_height="760dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/genres_recycler_view"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- RecyclerView inside NestedScrollView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintHorizontal_bias="0.0"
+            />
+    </androidx.core.widget.NestedScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/genres_recycler_view"

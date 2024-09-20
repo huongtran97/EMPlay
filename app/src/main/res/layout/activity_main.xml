@@ -28,7 +28,7 @@
                 android:id="@+id/textView5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-smallcaps"
+                android:fontFamily="@font/black_han_sans"
                 android:text="Trending this week"
                 android:textAlignment="center"
                 android:textColor="@color/white"
@@ -39,11 +39,11 @@
                 android:id="@+id/textView4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-smallcaps"
                 android:text="Movies"
                 android:textAllCaps="false"
                 android:textColor="@color/white"
-                android:textSize="20sp"
-                android:textStyle="italic" />
+                android:textSize="20sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/movie_popular_recyclerview"
@@ -59,7 +59,7 @@
                 android:text="TV shows"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="normal|italic" />
+                android:fontFamily="sans-serif-smallcaps" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/tvshow_popular_recyclerview"
@@ -79,7 +79,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:fontFamily="sans-serif-smallcaps"
+                android:fontFamily="@font/black_han_sans"
                 android:text="Up Coming "
                 android:textAlignment="center"
                 android:textColor="@color/white"
@@ -94,7 +94,7 @@
                 android:text="Movies"
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="italic" />
+                android:fontFamily="sans-serif-smallcaps" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/up_coming_movie_recyclerview"
@@ -109,7 +109,7 @@
                 android:text="TV Shows "
                 android:textColor="@color/white"
                 android:textSize="20sp"
-                android:textStyle="italic" />
+                android:fontFamily="sans-serif-smallcaps" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/up_coming_tv_recyclerview"

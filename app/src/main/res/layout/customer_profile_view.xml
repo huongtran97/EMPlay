@@ -35,7 +35,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="170dp"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -45,7 +45,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="115dp"
                     android:layout_marginTop="8dp"
-                    android:fontFamily="sans-serif-light"
+                    android:fontFamily="sans-serif-smallcaps"
                     android:textColor="@color/white"
                     android:textSize="16sp" />
 
@@ -61,7 +61,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:fontFamily="sans-serif-smallcaps"
+                    android:fontFamily="@font/black_han_sans"
                     android:text="Your Movies"
                     android:textColor="@color/white"
                     android:textSize="16sp"
@@ -78,7 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:fontFamily="sans-serif-smallcaps"
+                    android:fontFamily="@font/black_han_sans"
                     android:text="Your TV Shows"
                     android:textColor="@color/white"
                     android:textSize="16sp"

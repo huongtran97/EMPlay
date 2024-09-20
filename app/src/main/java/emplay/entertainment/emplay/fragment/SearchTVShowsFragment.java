@@ -28,6 +28,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
@@ -87,7 +88,7 @@ public class SearchTVShowsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(searchAdapter);
 
-        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 5));
+        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
         genresRecyclerView.setAdapter(genresAdapter);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
@@ -235,15 +236,30 @@ public class SearchTVShowsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     searchTVList.clear();
                     List<TVShowModel> tvShows = response.body().getResults();
+
                     if (tvShows != null && !tvShows.isEmpty()) {
-                        for (TVShowModel tv : tvShows) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                tv.setOriginalLanguage(LanguageMapper.getLanguageName(tv.getOriginalLanguage()));
-                            }
+                        // Filter out TV shows with null posterPath
+                        List<TVShowModel> filteredTVShows = null;
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                            filteredTVShows = tvShows.stream()
+                                    .filter(tv -> tv.getPosterPath() != null)
+                                    .collect(Collectors.toList());
                         }
-                        searchTVList.addAll(tvShows);
-                        searchAdapter.notifyDataSetChanged();
-                        viewModel.setSearchTVResults(tvShows);
+
+                        if (!filteredTVShows.isEmpty()) {
+                            for (TVShowModel tv : filteredTVShows) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    tv.setOriginalLanguage(LanguageMapper.getLanguageName(tv.getOriginalLanguage()));
+                                }
+                            }
+                            searchTVList.addAll(filteredTVShows);
+                            searchAdapter.notifyDataSetChanged();
+                            viewModel.setSearchTVResults(filteredTVShows);
+                        } else {
+                            Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     Log.e("SearchTVShows", "Failed to get results. Status code: " + response.code());
@@ -264,6 +280,7 @@ public class SearchTVShowsFragment extends Fragment {
             }
         });
     }
+
 
 
     private void hideKeyboard() {

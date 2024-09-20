@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.adapter;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +39,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresView
     @NonNull
     @Override
     public GenresViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.movie_genres_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.genres_item, parent, false);
         return new GenresViewHolder(view);
     }
 

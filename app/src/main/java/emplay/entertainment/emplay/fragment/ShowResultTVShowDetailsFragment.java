@@ -397,19 +397,24 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                     suggestionList.clear();
                     List<TVShowModel> suggestion = suggestionResponse.getResults();
                     if (suggestion != null) {
+                        // Filter out TV shows with null posterPath
+                        List<TVShowModel> filteredSuggestions = new ArrayList<>();
                         for (TVShowModel tv : suggestion) {
-                            suggestionList.add(new TVShowModel(
-                                    tv.getId(),
-                                    tv.getName(),
-                                    tv.getVoteAverage(),
-                                    tv.getPosterPath(),
-                                    tv.getOverview(),
-                                    tv.getOriginalLanguage(),
-                                    tv.getFirstAirDate()
-                            ));
-                            // Log each item added to the suggestion list
-                            Log.d("Suggestion Item", "TV Show added: " + tv.getName());
+                            if (tv.getPosterPath() != null) {
+                                filteredSuggestions.add(new TVShowModel(
+                                        tv.getId(),
+                                        tv.getName(),
+                                        tv.getVoteAverage(),
+                                        tv.getPosterPath(),
+                                        tv.getOverview(),
+                                        tv.getOriginalLanguage(),
+                                        tv.getFirstAirDate()
+                                ));
+                                // Log each item added to the filtered suggestion list
+                                Log.d("Suggestion Item", "TV Show added: " + tv.getName());
+                            }
                         }
+                        suggestionList.addAll(filteredSuggestions);
                         // Log the size of the suggestion list
                         Log.d("Suggestion List", "Total TV Shows added: " + suggestionList.size());
                     } else {
@@ -436,6 +441,8 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
         });
     }
+
+
 
 }
 

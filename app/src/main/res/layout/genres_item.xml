@@ -17,9 +17,10 @@
             android:id="@+id/movie_genres"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-smallcaps"
             android:textAlignment="center"
             android:textColor="@color/white"
-            android:textSize="10sp" />
+            android:textSize="12sp" />
     </androidx.cardview.widget.CardView>
 
 </RelativeLayout>

@@ -12,6 +12,7 @@ public class UpComingMovieResponse {
     @SerializedName("page")
     private int page;
     @SerializedName("results")
+
     private List<MovieModel> results;
     public List<MovieModel> getResults() {
         return results;
@@ -22,6 +23,23 @@ public class UpComingMovieResponse {
     public UpComingMovieResponse(List<MovieModel> results) {
         this.results = results;
     }
+
+    public Dates getDates() {
+        return dates;
+    }
+
+    public void setDates(Dates dates) {
+        this.dates = dates;
+    }
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
 
     // Getters and setters...
 
