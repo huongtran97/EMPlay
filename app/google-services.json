@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "244216604840",
+    "project_id": "emplay-project-firebase",
+    "storage_bucket": "emplay-project-firebase.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:244216604840:android:7cce8122bc9c45a905ba9d",
+        "android_client_info": {
+          "package_name": "emplay.entertainment.emplay"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGN0eWjtfLJ9gjGuJffXZ_WkO7bDndzDo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
