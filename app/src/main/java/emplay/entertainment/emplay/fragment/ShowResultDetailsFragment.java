@@ -31,6 +31,8 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import emplay.entertainment.emplay.BuildConfig;
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.MovieApiService;
@@ -54,7 +56,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ShowResultDetailsFragment extends Fragment {
 
     private static final String ARG_MOVIE_ID = "MOVIE_ID";
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private static final String BASE_URL = "https://api.themoviedb.org/";
 
     private int movieId;
@@ -68,6 +70,12 @@ public class ShowResultDetailsFragment extends Fragment {
     private CastAdapter castAdapter;
     private SuggestionAdapter suggestionAdapter;
     private MovieApiService apiService;
+
+    public String useApiKey() {
+        String apiKey = BuildConfig.API_KEY;
+        System.out.println("API Key: " + apiKey);
+        return apiKey;
+    }
 
     public static ShowResultDetailsFragment newInstance(int movieId) {
         ShowResultDetailsFragment fragment = new ShowResultDetailsFragment();
@@ -139,7 +147,7 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void fetchTrailersForMovie() {
-        Call<MoviesTrailerResponses> call = apiService.getMoviesTrailer(movieId, API_KEY);
+        Call<MoviesTrailerResponses> call = apiService.getMoviesTrailer(movieId, useApiKey());
         call.enqueue(new Callback<MoviesTrailerResponses>() {
             @Override
             public void onResponse(Call<MoviesTrailerResponses> call, Response<MoviesTrailerResponses> response) {
@@ -204,7 +212,7 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void fetchMovieDetails() {
-        Call<MovieDetailsResponse> call = apiService.getMovieDetails(movieId, API_KEY);
+        Call<MovieDetailsResponse> call = apiService.getMovieDetails(movieId, useApiKey());
         call.enqueue(new Callback<MovieDetailsResponse>() {
             @Override
             public void onResponse(Call<MovieDetailsResponse> call, Response<MovieDetailsResponse> response) {
@@ -310,7 +318,7 @@ public class ShowResultDetailsFragment extends Fragment {
 
 
     private void fetchCastList() {
-        Call<MovieCreditsResponse> call = apiService.getMovieCredits(movieId, API_KEY);
+        Call<MovieCreditsResponse> call = apiService.getMovieCredits(movieId, useApiKey());
         call.enqueue(new Callback<MovieCreditsResponse>() {
             @Override
             public void onResponse(Call<MovieCreditsResponse> call, Response<MovieCreditsResponse> response) {
@@ -349,7 +357,7 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void fetchSuggestionList() {
-        Call<MovieSimilarResponse> call = apiService.getMovieSimilar(movieId, API_KEY);
+        Call<MovieSimilarResponse> call = apiService.getMovieSimilar(movieId, useApiKey());
         call.enqueue(new Callback<MovieSimilarResponse>() {
             @Override
             public void onResponse(Call<MovieSimilarResponse> call, Response<MovieSimilarResponse> response) {

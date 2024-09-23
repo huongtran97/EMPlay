@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import emplay.entertainment.emplay.BuildConfig;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.MovieApiService;
 
@@ -56,7 +57,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private static final String ARG_TV_ID = "TV_ID";
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private static final String BASE_URL = "https://api.themoviedb.org/";
 
     private int tvId;
@@ -73,6 +74,12 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     private CastAdapter castAdapter;
     private SuggestionTVAdapter suggestionAdapter;
     private MovieApiService apiService;
+
+    public String useApiKey() {
+        String apiKey = BuildConfig.API_KEY;
+        System.out.println("API Key: " + apiKey);
+        return apiKey;
+    }
 
     public static ShowResultTVShowDetailsFragment newInstance(int movieId) {
         ShowResultTVShowDetailsFragment fragment = new ShowResultTVShowDetailsFragment();
@@ -154,7 +161,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     }
 
     private void fetchTrailersForMovie() {
-        Call<TVShowsTrailerResponses> call = apiService.getTVShowsTrailer(tvId, API_KEY);
+        Call<TVShowsTrailerResponses> call = apiService.getTVShowsTrailer(tvId, useApiKey());
         call.enqueue(new Callback<TVShowsTrailerResponses>() {
             @Override
             public void onResponse(Call<TVShowsTrailerResponses> call, Response<TVShowsTrailerResponses> response) {
@@ -222,7 +229,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
 
     private void fetchTVDetails() {
-        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(tvId, API_KEY);
+        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(tvId, useApiKey());
         call.enqueue(new Callback<TVShowDetailsResponse>() {
             @Override
             public void onResponse(Call<TVShowDetailsResponse> call, Response<TVShowDetailsResponse> response) {
@@ -276,7 +283,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     }
 
     private void fetchTVSeasons() {
-        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(tvId, API_KEY);
+        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(tvId, useApiKey());
         call.enqueue(new Callback<TVShowDetailsResponse>() {
             @Override
             public void onResponse(Call<TVShowDetailsResponse> call, Response<TVShowDetailsResponse> response) {
@@ -346,7 +353,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
 
     private void fetchTVCastList() {
-        Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(tvId, API_KEY);
+        Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(tvId, useApiKey());
         call.enqueue(new Callback<TVShowCreditsResponses>() {
             @Override
             public void onResponse(Call<TVShowCreditsResponses> call, Response<TVShowCreditsResponses> response) {
@@ -387,7 +394,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
 
     private void fetchTVSuggestionList() {
-        Call<TVShowSimilarResponse> call = apiService.getTVShowSimilar(tvId, API_KEY);
+        Call<TVShowSimilarResponse> call = apiService.getTVShowSimilar(tvId, useApiKey());
         call.enqueue(new Callback<TVShowSimilarResponse>() {
             @Override
             public void onResponse(Call<TVShowSimilarResponse> call, Response<TVShowSimilarResponse> response) {

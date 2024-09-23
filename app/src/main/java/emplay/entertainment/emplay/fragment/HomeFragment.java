@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import emplay.entertainment.emplay.BuildConfig;
 import emplay.entertainment.emplay.activity.AboutActivity;
 import emplay.entertainment.emplay.activity.LoginActivity;
 import emplay.entertainment.emplay.api.TVShowResponse;
@@ -54,15 +55,19 @@ import retrofit2.Call;
  */
 
 public class HomeFragment extends Fragment {
-    private List<MovieModel> movieList, upComingMoviesList;
-    private List<TVShowModel> tvList, upComingTVList;
     private RecyclerView movieRecyclerView, tvRecyclerView2, upComingRecyclerView, upComingTVRecyclerview;
     private MovieAdapter movieAdapter;
     private TVShowAdapter tvShowAdapter;
     private UpcomingMovieAdapter upcomingMovieAdapter;
     private UpComingTVAdapter upComingTVAdapter;
     private MovieApiService apiService;
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
+
+    public String useApiKey() {
+        String apiKey = BuildConfig.API_KEY;
+        System.out.println("API Key: " + apiKey);
+        return apiKey;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -111,8 +116,6 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.activity_main, container, false);
 
 
-
-
         // Initialize RecyclerViews
         movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
         tvRecyclerView2 = view.findViewById(R.id.tvshow_popular_recyclerview);
@@ -150,7 +153,7 @@ public class HomeFragment extends Fragment {
 
 
     private List<MovieModel> fetchUpComingMovie() {
-        Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(API_KEY);
+        Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(useApiKey());
         call.enqueue(new Callback<UpComingMovieResponse>() {
             @Override
             public void onResponse(Call<UpComingMovieResponse> call, Response<UpComingMovieResponse> response) {
@@ -176,7 +179,7 @@ public class HomeFragment extends Fragment {
     }
 
     private List<TVShowModel> fetchUpComingTV() {
-        Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(API_KEY);
+        Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(useApiKey());
         call.enqueue(new Callback<UpComingTVShowsResponse>() {
             @Override
             public void onResponse(Call<UpComingTVShowsResponse> call, Response<UpComingTVShowsResponse> response) {
@@ -210,7 +213,7 @@ public class HomeFragment extends Fragment {
      * @return
      */
     private void fetchPopularMovies() { // Change the return type to void
-        Call<MovieResponse> call = apiService.getTrendingMovies(API_KEY);
+        Call<MovieResponse> call = apiService.getTrendingMovies(useApiKey());
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
@@ -248,7 +251,7 @@ public class HomeFragment extends Fragment {
 
 
     private List<TVShowModel> fetchPopularTV() {
-        Call<TVShowResponse> call = apiService.getTrendingTVShows(API_KEY);
+        Call<TVShowResponse> call = apiService.getTrendingTVShows(useApiKey());
         call.enqueue(new Callback<TVShowResponse>() {
             @Override
             public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {

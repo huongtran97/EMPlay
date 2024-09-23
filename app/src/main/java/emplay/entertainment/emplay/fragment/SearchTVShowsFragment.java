@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import emplay.entertainment.emplay.BuildConfig;
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.GenresAdapter;
@@ -46,7 +47,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SearchTVShowsFragment extends Fragment {
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private SearchTVAdapter searchAdapter;
     private GenresAdapter genresAdapter;
     private List<GenresModel> genresList;
@@ -58,6 +59,12 @@ public class SearchTVShowsFragment extends Fragment {
     private LinearLayout searchMovieLayout;
     private LinearLayout searchTVShowLayout;
     private boolean isMoviesSearch = false;
+
+    public String useApiKey() {
+        String apiKey = BuildConfig.API_KEY;
+        System.out.println("API Key: " + apiKey);
+        return apiKey;
+    }
 
     @Nullable
     @Override
@@ -154,7 +161,7 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     private void fetchGenresForTVShows() {
-        Call<GenresResponse> call = apiService.getGenresTVShows(API_KEY);
+        Call<GenresResponse> call = apiService.getGenresTVShows(useApiKey());
         call.enqueue(new Callback<GenresResponse>() {
             @Override
             public void onResponse(Call<GenresResponse> call, Response<GenresResponse> response) {
@@ -229,7 +236,7 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     void searchTVShows(String query) {
-        Call<TVShowResponse> call = apiService.searchTVShows(API_KEY, query);
+        Call<TVShowResponse> call = apiService.searchTVShows(useApiKey(), query);
         call.enqueue(new Callback<TVShowResponse>() {
             @Override
             public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {

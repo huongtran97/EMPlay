@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import emplay.entertainment.emplay.BuildConfig;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.TVShowByGenreAdapter;
 import emplay.entertainment.emplay.api.ApiClient;
@@ -32,7 +33,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class TVShowsByGenresFragment extends Fragment {
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private static final String ARG_GENRE_ID = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
     private RecyclerView tvByGenreRecyclerview;
@@ -43,6 +44,12 @@ public class TVShowsByGenresFragment extends Fragment {
     private List<GenresModel> genresList;
     private MovieApiService apiService;
     private int genreId;
+
+    public String useApiKey() {
+        String apiKey = BuildConfig.API_KEY;
+        System.out.println("API Key: " + apiKey);
+        return apiKey;
+    }
 
     public static TVShowsByGenresFragment newInstance(int genreId, String genreName) {
         TVShowsByGenresFragment fragment = new TVShowsByGenresFragment();
@@ -99,7 +106,7 @@ public class TVShowsByGenresFragment extends Fragment {
     }
 
     private void fetchTVShowsByGenre(int genreId) {
-        Call<TVShowResponse> call = apiService.getTVShowsByGenre(API_KEY, genreId);
+        Call<TVShowResponse> call = apiService.getTVShowsByGenre(useApiKey(), genreId);
         Log.d("MovieByGenresFragment", "Request URL: " + call.request().url());
 
         call.enqueue(new Callback<TVShowResponse>() {

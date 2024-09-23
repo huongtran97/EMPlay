@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import emplay.entertainment.emplay.BuildConfig;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.MovieByGenreAdapter;
 import emplay.entertainment.emplay.api.ApiClient;
@@ -32,18 +33,23 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieByGenresFragment extends Fragment {
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private static final String ARG_GENRE_ID = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
     private RecyclerView movieByGenreRecyclerview;
     private SharedViewModel viewModel;
     private MovieByGenreAdapter movieByGenreAdapter;
     private TextView genreName;
-
     private List<MovieModel> movieByGenreList;
     private List<GenresModel> genresList;
     private MovieApiService apiService;
     private int genreId;
+
+    public String useApiKey() {
+        String apiKey = BuildConfig.API_KEY;
+        System.out.println("API Key: " + apiKey);
+        return apiKey;
+    }
 
     public static MovieByGenresFragment newInstance(int genreId, String genreName) {
         MovieByGenresFragment fragment = new MovieByGenresFragment();
@@ -100,7 +106,7 @@ public class MovieByGenresFragment extends Fragment {
     }
 
     private void fetchMoviesByGenre(int genreId) {
-        Call<MovieResponse> call = apiService.getMoviesByGenre(API_KEY, genreId);
+        Call<MovieResponse> call = apiService.getMoviesByGenre(useApiKey(), genreId);
         Log.d("MovieByGenresFragment", "Request URL: " + call.request().url());
 
         call.enqueue(new Callback<MovieResponse>() {
