@@ -63,7 +63,6 @@ public class SearchMoviesFragment extends Fragment {
 
     public String useApiKey() {
         String apiKey = BuildConfig.API_KEY;
-        System.out.println("API Key: " + apiKey);
         return apiKey;
     }
 

@@ -89,13 +89,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void deleteUserProfile(int itemId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String whereClause = "id = ?";
-        String[] whereArgs = { String.valueOf(itemId) };
-        db.delete("profile", whereClause, whereArgs);
-        db.close();
-    }
 
     public void insertOrUpdateUser(String username, String email) {
         SQLiteDatabase db = this.getWritableDatabase();

@@ -128,8 +128,6 @@ public class ProfileFragment extends Fragment {
                                     Toast.makeText(requireContext(), "Failed to delete account", Toast.LENGTH_SHORT).show();
                                 }
                             });
-                        } else {
-                            Toast.makeText(requireContext(), "No user is signed in", Toast.LENGTH_SHORT).show();
                         }
                     })
                     .setNegativeButton("No", null)
@@ -151,10 +149,17 @@ public class ProfileFragment extends Fragment {
 
             usernameTextView.setText(username != null ? username : "No username set");
             emailTextView.setText(email != null ? email : "No email set");
-        }
-        else {
+
+            // User is logged in, change button text to "Log Out"
+            logOutBtn.setText("Log Out");
+            deleteAccountBtn.setVisibility(View.VISIBLE); // Show delete account button
+        } else {
             usernameTextView.setText("Hi there!");
             emailTextView.setText("Do you want to login?");
+
+            // User is not logged in, change button text to "Log In"
+            logOutBtn.setText("Log In");
+            deleteAccountBtn.setVisibility(View.GONE); // Hide delete account button
         }
 
         new Thread(() -> {
@@ -166,6 +171,9 @@ public class ProfileFragment extends Fragment {
             });
         }).start();
     }
+
+
+
 
     private void onItemClicked(Object item) {
         if (item instanceof MovieModel) {

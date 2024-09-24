@@ -47,7 +47,6 @@ public class TVShowsByGenresFragment extends Fragment {
 
     public String useApiKey() {
         String apiKey = BuildConfig.API_KEY;
-        System.out.println("API Key: " + apiKey);
         return apiKey;
     }
 

@@ -27,6 +27,8 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +46,14 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
     private DatabaseHelper databaseHelper;
     private Context context;
     private List<TVShowsTrailerResponses.TrailerModel> trailers = new ArrayList<>();
+    private FirebaseAuth firebaseAuth;
 
     public TVShowInformationAdapter(List<TVShowModel> tvInformationList, FragmentActivity fragmentActivity) {
         this.tvInformationList = tvInformationList;
         this.fragmentActivity = fragmentActivity;
         this.context = fragmentActivity;
         this.databaseHelper = new DatabaseHelper(context);
+        this.firebaseAuth = FirebaseAuth.getInstance();
     }
 
     @NonNull
@@ -103,18 +107,24 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
         }
 
         holder.addBtn.setOnClickListener(v -> {
-            if (isTVShowSaved(tv.getId())) {
-                removeTVShowFromDatabase(tv.getId());
-                holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
-                Toast.makeText(context, "TV Show removed from library", Toast.LENGTH_SHORT).show();
-            } else {
-                long result = saveTVShowToDatabase(tv);
-                if (result != -1) {
-                    holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
-                    Toast.makeText(context, "TV Show added to library", Toast.LENGTH_SHORT).show();
+            FirebaseUser currentUser = firebaseAuth.getCurrentUser();  // Get current user
+
+            if (currentUser != null) {  // Check if user is logged in
+                if (isTVShowSaved(tv.getId())) {
+                    removeTVShowFromDatabase(tv.getId());
+                    holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+                    Toast.makeText(context, "TV Show removed from library", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(context, "Failed to add TV Show", Toast.LENGTH_SHORT).show();
+                    long result = saveTVShowToDatabase(tv);
+                    if (result != -1) {
+                        holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
+                        Toast.makeText(context, "Added to library", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "Failed to add TV Show", Toast.LENGTH_SHORT).show();
+                    }
                 }
+            } else {
+                Toast.makeText(context, "You must be logged in to save it!", Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -15,21 +15,20 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
+
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.BuildConfig;
-import emplay.entertainment.emplay.activity.AboutActivity;
-import emplay.entertainment.emplay.activity.LoginActivity;
+
 import emplay.entertainment.emplay.api.TVShowResponse;
 import emplay.entertainment.emplay.api.UpComingTVShowsResponse;
 import emplay.entertainment.emplay.api.UpComingMovieResponse;
@@ -65,38 +64,14 @@ public class HomeFragment extends Fragment {
 
     public String useApiKey() {
         String apiKey = BuildConfig.API_KEY;
-        System.out.println("API Key: " + apiKey);
+
         return apiKey;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);  // Enables options menu in fragment
-    }
 
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.popupmenu, menu);  // Inflate the menu
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @SuppressLint("NonConstantResourceId")
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.about) {
-            Intent aboutPage = new Intent(requireActivity(), AboutActivity.class);
-            startActivity(aboutPage);
-            return true;
-        } else if (itemId == R.id.logout) {
-            FirebaseAuth.getInstance().signOut();
-            Intent loginPage = new Intent(requireActivity(), LoginActivity.class);
-            startActivity(loginPage);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     /**

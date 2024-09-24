@@ -73,7 +73,6 @@ public class ShowResultDetailsFragment extends Fragment {
 
     public String useApiKey() {
         String apiKey = BuildConfig.API_KEY;
-        System.out.println("API Key: " + apiKey);
         return apiKey;
     }
 
@@ -392,7 +391,6 @@ public class ShowResultDetailsFragment extends Fragment {
                         // Log the size of the suggestion list
                         Log.d("Suggestion List", "Total Movies added: " + suggestionList.size());
                         suggestionAdapter.notifyDataSetChanged();
-                        Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(getContext(), "No suggestions available", Toast.LENGTH_SHORT).show();
                     }

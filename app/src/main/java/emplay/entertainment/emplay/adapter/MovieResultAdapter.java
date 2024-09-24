@@ -26,6 +26,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,12 +45,14 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
     private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private FragmentActivity fragmentActivity;
     private DatabaseHelper databaseHelper;
+    private FirebaseAuth mAuth;
 
     // Constructor
     public MovieResultAdapter(List<MovieModel> movieList, FragmentActivity fragmentActivity) {
         this.movieList = movieList;
         this.fragmentActivity = fragmentActivity;
         this.databaseHelper = new DatabaseHelper(fragmentActivity);
+        this.mAuth = FirebaseAuth.getInstance();
     }
 
     @NonNull
@@ -81,7 +85,7 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
 
             Glide.with(holder.itemView.getContext())
                     .load("https://image.tmdb.org/t/p/w500" + movieModel.getPosterPath())
-                    .error(R.drawable.placeholder_image) // Replace with your placeholder image
+                    .error(R.drawable.placeholder_image)
                     .into(holder.resultPoster);
 
             // Check if the movie is already saved and update the icon
@@ -94,33 +98,35 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
             // Trailer button logic
             holder.trailerBtn.setOnClickListener(v -> {
                 if (!trailers.isEmpty()) {
-                    // Get the trailer key
                     String videoKey = trailers.get(0).getKey();
-
-                    // Start TrailerActivity with the videoKey
                     Intent intent = new Intent(holder.itemView.getContext(), TrailerActivity.class);
-                    intent.putExtra("MOVIE_ID", videoKey);  // Pass the trailer key to TrailerActivity
+                    intent.putExtra("MOVIE_ID", videoKey);
                     holder.itemView.getContext().startActivity(intent);
                 } else {
                     Toast.makeText(fragmentActivity, "No trailer available", Toast.LENGTH_SHORT).show();
                 }
             });
 
-
-            // Add/Remove movie logic
+            // Add/Remove movie logic with authentication check
             holder.addBtn.setOnClickListener(v -> {
-                if (isMovieSaved(movieModel.getId())) {
-                    removeMovieFromDatabase(movieModel.getId());
-                    holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
-                    Toast.makeText(fragmentActivity, "Movie removed from library", Toast.LENGTH_SHORT).show();
-                } else {
-                    long result = saveMovieToDatabase(movieModel);
-                    if (result != -1) {
-                        holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
-                        Toast.makeText(fragmentActivity, "Movie added to library", Toast.LENGTH_SHORT).show();
+                FirebaseUser currentUser = mAuth.getCurrentUser(); // Check if user is logged in
+                if (currentUser != null) {
+                    // User is logged in
+                    if (isMovieSaved(movieModel.getId())) {
+                        removeMovieFromDatabase(movieModel.getId());
+                        holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+                        Toast.makeText(fragmentActivity, "Movie removed from library", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(fragmentActivity, "Failed to add movie", Toast.LENGTH_SHORT).show();
+                        long result = saveMovieToDatabase(movieModel);
+                        if (result != -1) {
+                            holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
+                            Toast.makeText(fragmentActivity, "Added to library", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(fragmentActivity, "Failed to add movie", Toast.LENGTH_SHORT).show();
+                        }
                     }
+                } else {
+                    Toast.makeText(fragmentActivity, "You must be logged in to save it!", Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -135,7 +141,6 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
     public int getItemCount() {
         return movieList.size();
     }
-
 
     // Check if the movie is already saved in the database
     private boolean isMovieSaved(long movieId) {
@@ -181,7 +186,6 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         this.trailers = adapterTrailers != null ? adapterTrailers : new ArrayList<>();
         notifyDataSetChanged();
     }
-
 
     // ViewHolder class for the RecyclerView
     public static class MovieResultViewHolder extends RecyclerView.ViewHolder {

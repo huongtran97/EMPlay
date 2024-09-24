@@ -77,7 +77,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
     public String useApiKey() {
         String apiKey = BuildConfig.API_KEY;
-        System.out.println("API Key: " + apiKey);
         return apiKey;
     }
 
@@ -428,7 +427,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                         Log.d("API Response", "Recommendations are null");
                     }
                     suggestionAdapter.notifyDataSetChanged();
-                    Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
                 } else {
                     Log.e("ShowResultTVShowDetailsFragment", "Failed to load TV show recommendations. Status code: " + response.code());
                     try {
