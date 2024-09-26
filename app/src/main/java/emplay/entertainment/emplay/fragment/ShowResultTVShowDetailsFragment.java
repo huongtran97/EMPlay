@@ -149,7 +149,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private void onItemClicked(TVShowModel tvShow) {
         if (tvShow != null) {
-            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getId());
+            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getTvShowId());
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
             transaction.addToBackStack(null);
@@ -316,9 +316,10 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         });
     }
 
+    // Handle case where backdropPath is null or empty
     private void setRecyclerViewBackground(String backdropPath) {
         if (backdropPath == null || backdropPath.isEmpty()) {
-            return; // Handle case where backdropPath is null or empty
+            return;
         }
 
         // Create the URL for the backdrop image
@@ -408,7 +409,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                         for (TVShowModel tv : suggestion) {
                             if (tv.getPosterPath() != null) {
                                 filteredSuggestions.add(new TVShowModel(
-                                        tv.getId(),
+                                        tv.getTvShowId(),
                                         tv.getName(),
                                         tv.getVoteAverage(),
                                         tv.getPosterPath(),
@@ -446,8 +447,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
         });
     }
-
-
 
 }
 

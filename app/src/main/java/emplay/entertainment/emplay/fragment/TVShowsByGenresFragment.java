@@ -62,7 +62,6 @@ public class TVShowsByGenresFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d("MovieByGenresFragment", "onCreateView called");
         View view = inflater.inflate(R.layout.tv_by_genre_view, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
@@ -97,7 +96,7 @@ public class TVShowsByGenresFragment extends Fragment {
     }
 
     private void onItemClick(TVShowModel tvShowModel) {
-        ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShowModel.getId());
+        ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShowModel.getTvShowId());
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
         transaction.addToBackStack(null);

@@ -106,10 +106,6 @@ public class SignUpActivity extends AppCompatActivity {
                                                                     "Account created! Welcome, " + username,
                                                                     Toast.LENGTH_SHORT).show();
 
-                                                            // Optionally, pass the username to the next activity
-                                                            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                                                            intent.putExtra("username", username);
-                                                            startActivity(intent);
                                                             finish();
                                                         }
                                                     }

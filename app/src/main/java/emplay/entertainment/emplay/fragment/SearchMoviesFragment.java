@@ -296,7 +296,7 @@ public class SearchMoviesFragment extends Fragment {
 
     private void showMovieDetails(MovieModel movie) {
         if (movie != null) {
-            ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
+            ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getMovieId());
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultDetailsFragment);
             transaction.addToBackStack(null);

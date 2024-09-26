@@ -1,9 +1,9 @@
 package emplay.entertainment.emplay.fragment;
 
-import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_ID;
+import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_MOVIE_ID;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_POSTER_PATH;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TITLE;
-import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_TVSHOWS;
+import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TVSHOW_ID;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -101,6 +101,8 @@ public class ProfileFragment extends Fragment {
         ItemTouchHelper tvShowItemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(tvShowsRecyclerView));
         tvShowItemTouchHelper.attachToRecyclerView(tvShowsRecyclerView);
 
+
+
         logOutBtn = view.findViewById(R.id.logout_account_btn);
         logOutBtn.setOnClickListener(v -> {
             // Sign out the user
@@ -119,8 +121,15 @@ public class ProfileFragment extends Fragment {
                     .setPositiveButton("Yes", (dialog, which) -> {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
+                            String userEmail = user.getEmail(); // Get user's email to delete from SQLite
                             user.delete().addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
+                                    // Delete from local SQLite database
+                                    DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireContext());
+                                    if (userEmail != null) {
+                                        dbHelper.deleteUserProfile(userEmail); // Deleting profile by email
+                                    }
+
                                     Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show();
                                     startActivity(new Intent(requireContext(), LoginActivity.class));
                                     requireActivity().finish();
@@ -133,6 +142,7 @@ public class ProfileFragment extends Fragment {
                     .setNegativeButton("No", null)
                     .show();
         });
+
 
         return view;
     }
@@ -163,8 +173,8 @@ public class ProfileFragment extends Fragment {
         }
 
         new Thread(() -> {
-            List<MovieModel> likedMovies = getAllMoviesFromDatabase();
-            List<TVShowModel> likedTVShows = getSavedTVShows();
+            List<MovieModel> likedMovies = getAllMovies();
+            List<TVShowModel> likedTVShows = getAllTVShows();
             requireActivity().runOnUiThread(() -> {
                 movieLikedAdapter.updateData(likedMovies);
                 tvShowLikedAdapter.updateData(likedTVShows);
@@ -172,17 +182,14 @@ public class ProfileFragment extends Fragment {
         }).start();
     }
 
-
-
-
     private void onItemClicked(Object item) {
         if (item instanceof MovieModel) {
             MovieModel movie = (MovieModel) item;
-            ShowResultDetailsFragment fragment = ShowResultDetailsFragment.newInstance(movie.getId());
+            ShowResultDetailsFragment fragment = ShowResultDetailsFragment.newInstance(movie.getMovieId());
             replaceFragment(fragment);
         } else if (item instanceof TVShowModel) {
             TVShowModel tvShow = (TVShowModel) item;
-            ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getId());
+            ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getTvShowId());
             replaceFragment(fragment);
         }
     }
@@ -194,58 +201,72 @@ public class ProfileFragment extends Fragment {
         transaction.commit();
     }
 
-    public List<MovieModel> getAllMoviesFromDatabase() {
+    public List<MovieModel> getAllMovies() {
         List<MovieModel> movies = new ArrayList<>();
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM movies", null);
+        String currentUserId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
 
-        if (cursor.moveToFirst()) {
-            do {
-                int idIndex = cursor.getColumnIndex(COLUMN_ID);
-                int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
-                int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
-                if (idIndex == -1 || posterPathIndex == -1 || titleIndex == -1) {
-                    Log.e("Database", "Column missing in database table");
-                    return movies;
-                }
-                int id = cursor.getInt(idIndex);
-                String title = cursor.getString(titleIndex);
-                String posterPath = cursor.getString(posterPathIndex);
-                Log.d("Database", "Movie ID: " + id + ", Poster Path: " + posterPath);
-                MovieModel movie = new MovieModel(id, title, posterPath);
-                movies.add(movie);
-            } while (cursor.moveToNext());
+        // Check if user is logged in before querying
+        if (currentUserId != null) {
+
+            // Select only TV shows saved by the current user
+            Cursor cursor = db.rawQuery("SELECT * FROM user_movies WHERE user_id = ?", new String[]{currentUserId});
+            Log.d("Database", "Number of liked movies found: " + cursor.getCount());
+
+            if (cursor.moveToFirst()) {
+                do {
+                    int idIndex = cursor.getColumnIndex(COLUMN_MOVIE_ID);
+                    int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
+                    int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
+                    int id = cursor.getInt(idIndex);
+                    String title = cursor.getString(titleIndex);
+                    String posterPath = cursor.getString(posterPathIndex);
+                    Log.d("Database", "Movie ID: " + id + ", Title: " + title + ", Poster Path: " + posterPath);
+
+                    MovieModel movie = new MovieModel(id, title, posterPath);
+                    movies.add(movie);
+                } while (cursor.moveToNext());
+            } else {
+                Log.d("Database", "No liked movies found for user: " + currentUserId);
+            }
+            cursor.close();
+        } else {
+            Log.w("Database", "User is not logged in; returning empty list");
         }
-        cursor.close();
-        db.close();
         return movies;
     }
 
-    public List<TVShowModel> getSavedTVShows() {
+
+    public List<TVShowModel> getAllTVShows() {
         List<TVShowModel> tvShows = new ArrayList<>();
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TVSHOWS, null);
+        String currentUserId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
 
-        if (cursor.moveToFirst()) {
-            do {
-                int idIndex = cursor.getColumnIndex(COLUMN_ID);
-                int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
-                int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
-                if (idIndex == -1 || posterPathIndex == -1 || titleIndex == -1) {
-                    Log.e("Database", "Column missing in database table");
-                    return tvShows;
-                }
-                int id = cursor.getInt(idIndex);
-                String title = cursor.getString(titleIndex);
-                String posterPath = cursor.getString(posterPathIndex);
-                Log.d("Database", "TV Show ID: " + id + ", Poster Path: " + posterPath);
-                TVShowModel tvShow = new TVShowModel(id, title, posterPath);
-                tvShows.add(tvShow);
-            } while (cursor.moveToNext());
+        // Check if user is logged in before querying
+        if (currentUserId != null) {
+            // Select only TV shows saved by the current user
+            Cursor cursor = db.rawQuery("SELECT * FROM user_tvshows WHERE user_id = ?", new String[]{currentUserId});
+
+            if (cursor.moveToFirst()) {
+                do {
+                    int idIndex = cursor.getColumnIndex(COLUMN_TVSHOW_ID);
+                    int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
+                    int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
+                    int id = cursor.getInt(idIndex);
+                    String title = cursor.getString(titleIndex);
+                    String posterPath = cursor.getString(posterPathIndex);
+                    Log.d("Database", "TV Show ID: " + id + ", Poster Path: " + posterPath);
+
+                    TVShowModel tvShow = new TVShowModel(id, title, posterPath);
+                    tvShows.add(tvShow);
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        } else {
+            Log.w("Database", "User is not logged in; returning empty list");
         }
-        cursor.close();
-        db.close();
         return tvShows;
     }
+
 }
 

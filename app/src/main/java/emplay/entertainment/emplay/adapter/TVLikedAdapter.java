@@ -1,7 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,16 +32,13 @@ public class TVLikedAdapter extends RecyclerView.Adapter<TVLikedAdapter.MyViewHo
     }
 
     public void removeItem(int position) {
-        if (position >= 0 && position < mData.size()) {
-            TVShowModel tvDelete = mData.get(position);
-            mData.remove(position);
-            notifyItemRemoved(position);
-            if (tvDelete != null) {
-                databaseHelper.deleteTV(tvDelete.getId());
-            }
-        } else {
-            Log.e("TVLikedAdapter", "Invalid position: " + position);
-        }
+        // Remove the item from the database
+        TVShowModel tvShowToDelete = mData.get(position);
+        databaseHelper.deleteTV(tvShowToDelete.getTvShowId());
+
+        // Remove the item from the list and notify the adapter
+        mData.remove(position);
+        notifyItemRemoved(position);
     }
 
     public interface OnItemClickListener {
@@ -51,9 +47,7 @@ public class TVLikedAdapter extends RecyclerView.Adapter<TVLikedAdapter.MyViewHo
 
     public void updateData(List<TVShowModel> newTVShows) {
         mData.clear();
-        if (newTVShows != null) {
-            mData.addAll(newTVShows);
-        }
+        mData.addAll(newTVShows);
         notifyDataSetChanged();
     }
 

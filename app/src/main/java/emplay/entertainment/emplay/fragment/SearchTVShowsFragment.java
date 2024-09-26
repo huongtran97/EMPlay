@@ -199,14 +199,12 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     private void onTVShowClick() {
-        // Handle the TV Show item click
         viewModel.setIsTVShowSearch(true);
         updateMenuSelection();
         replaceFragment(new SearchTVShowsFragment(), "SearchTVShowsFragment");
     }
 
     private void onMovieClick() {
-        // Handle the movie item click
         viewModel.setIsTVShowSearch(false);
         updateMenuSelection();
         replaceFragment(new SearchMoviesFragment(), "SearchMoviesFragment");
@@ -287,8 +285,6 @@ public class SearchTVShowsFragment extends Fragment {
         });
     }
 
-
-
     private void hideKeyboard() {
         View view = getActivity().getCurrentFocus();
         if (view != null) {
@@ -299,7 +295,7 @@ public class SearchTVShowsFragment extends Fragment {
 
     private void showTVDetails(TVShowModel tv) {
         if (tv != null) {
-            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tv.getId());
+            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tv.getTvShowId());
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
             transaction.addToBackStack(null);

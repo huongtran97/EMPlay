@@ -97,7 +97,7 @@ public class MovieByGenresFragment extends Fragment {
 
 
     private void onItemClick(MovieModel movieModel) {
-        ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movieModel.getId());
+        ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movieModel.getMovieId());
         FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, showResultDetailsFragment);
         transaction.addToBackStack(null);

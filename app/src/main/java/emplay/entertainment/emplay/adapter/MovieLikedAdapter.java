@@ -1,7 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,23 +33,13 @@ public class MovieLikedAdapter extends RecyclerView.Adapter<MovieLikedAdapter.My
     }
 
     public void removeItem(int position) {
-        // Check if position is within the valid range
-        if (position >= 0 && position < mData.size()) {
-            // Retrieve the movie to be deleted
-            MovieModel movieDelete = mData.get(position);
+        // Remove the item from the database
+        MovieModel movieToDelete = mData.get(position);
+        databaseHelper.deleteMovie(movieToDelete.getMovieId());
 
-            // Remove the movie from the list
-            mData.remove(position);
-            notifyItemRemoved(position);
-
-            // Delete the movie from the database
-            if (movieDelete != null) {
-                databaseHelper.deleteMovie(movieDelete.getId());
-            }
-        } else {
-            // Handle the case where position is out of bounds
-            Log.e("MovieLikedAdapter", "Invalid position: " + position);
-        }
+        // Remove the item from the list and notify the adapter
+        mData.remove(position);
+        notifyItemRemoved(position);
     }
 
     public interface OnItemClickListener {
@@ -74,7 +63,6 @@ public class MovieLikedAdapter extends RecyclerView.Adapter<MovieLikedAdapter.My
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         MovieModel movie = mData.get(position);
 
-        // Load the poster and set the title directly
         String fullUrl = movie.getPosterPath() != null ? "https://image.tmdb.org/t/p/w500" + movie.getPosterPath() : null;
         Glide.with(mContext)
                 .load(fullUrl)

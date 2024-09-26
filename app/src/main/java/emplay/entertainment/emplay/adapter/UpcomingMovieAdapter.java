@@ -46,21 +46,18 @@ public class UpcomingMovieAdapter extends RecyclerView.Adapter<UpcomingMovieAdap
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Inflate the layout for a movie item and create a ViewHolder
         View v = LayoutInflater.from(mContext).inflate(R.layout.movie_item, parent, false);
         return new MyViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(MyViewHolder holder, int position) {
-        // Bind data to the ViewHolder
         MovieModel movie = mData.get(position);
 
         Glide.with(mContext)
                 .load("https://image.tmdb.org/t/p/w500/" + movie.getPosterPath())
                 .into(holder.img);
 
-        // Set the click listener directly in onBindViewHolder
         holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movie));
     }
 

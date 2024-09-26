@@ -1,15 +1,9 @@
 package emplay.entertainment.emplay.fragment;
 
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -21,14 +15,11 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.BuildConfig;
-
 import emplay.entertainment.emplay.api.TVShowResponse;
 import emplay.entertainment.emplay.api.UpComingTVShowsResponse;
 import emplay.entertainment.emplay.api.UpComingMovieResponse;
@@ -89,7 +80,6 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
-
 
         // Initialize RecyclerViews
         movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
@@ -264,19 +254,17 @@ public class HomeFragment extends Fragment {
         if (item instanceof MovieModel) {
             MovieModel selectedMovie = (MovieModel) item;
 
-            // Start a new fragment or activity to display movie details
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            ShowResultDetailsFragment movieDetailsFragment = ShowResultDetailsFragment.newInstance(selectedMovie.getId()); // Assume you have a method to pass movie ID
-            transaction.replace(R.id.fragment_container, movieDetailsFragment);  // Replace with the appropriate container ID
+            ShowResultDetailsFragment movieDetailsFragment = ShowResultDetailsFragment.newInstance(selectedMovie.getMovieId());
+            transaction.replace(R.id.fragment_container, movieDetailsFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         } else if (item instanceof TVShowModel) {
             TVShowModel selectedTVShow = (TVShowModel) item;
 
-            // Start a new fragment or activity to display TV show details
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            ShowResultTVShowDetailsFragment tvShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(selectedTVShow.getId()); // Assume you have a method to pass TV show ID
-            transaction.replace(R.id.fragment_container, tvShowDetailsFragment);  // Replace with the appropriate container ID
+            ShowResultTVShowDetailsFragment tvShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(selectedTVShow.getTvShowId());
+            transaction.replace(R.id.fragment_container, tvShowDetailsFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         }

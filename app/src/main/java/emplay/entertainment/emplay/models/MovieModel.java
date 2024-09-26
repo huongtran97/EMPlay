@@ -2,15 +2,12 @@ package emplay.entertainment.emplay.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import emplay.entertainment.emplay.api.MovieDetailsResponse.Genre;
-
 public class MovieModel implements Serializable {
     @SerializedName("id")
-    private int id;
+    private int movieId;
     @SerializedName("title")
     private String title;
     @SerializedName("vote_average")
@@ -31,11 +28,21 @@ public class MovieModel implements Serializable {
     private List<String> genres;
     @SerializedName("cast")
     private List<String> cast;
+    private String username;
+
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
 
     // Constructor including genres
     public MovieModel(int id, String title, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String releaseDate, int runtime, List<String> genres) {
-        this.id = id;
+        this.movieId = id;
         this.title = title;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -48,7 +55,7 @@ public class MovieModel implements Serializable {
     }
 
     public MovieModel(int id, String title, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String releaseDate, int runtime, List<String> genres, List<String> cast) {
-        this.id = id;
+        this.movieId = id;
         this.title = title;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -64,7 +71,7 @@ public class MovieModel implements Serializable {
 
 
     public MovieModel(int id, String title, double voteAverage, String posterPath, String overview, String originalLanguage, String release_date) {
-        this.id = id;
+        this.movieId = id;
         this.title = title;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -75,14 +82,14 @@ public class MovieModel implements Serializable {
     }
 
     public MovieModel(int id, String title,  String posterPath, String releaseDate){
-        this.id = id;
+        this.movieId = id;
         this.title = title;
         this.posterPath = posterPath;
         this.releaseDate = releaseDate;
     }
 
     public MovieModel(int id, String title, String posterPath) {
-        this.id = id;
+        this.movieId = id;
         this.title = title;
         this.posterPath = posterPath;
     }
@@ -91,12 +98,12 @@ public class MovieModel implements Serializable {
 
 
     // Getters and setters
-    public int getId() {
-        return id;
+    public int getMovieId() {
+        return movieId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setMovieId(int movieId) {
+        this.movieId = movieId;
     }
 
     public String getTitle() {

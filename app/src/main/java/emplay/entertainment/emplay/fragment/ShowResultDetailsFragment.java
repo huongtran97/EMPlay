@@ -135,7 +135,7 @@ public class ShowResultDetailsFragment extends Fragment {
 
     private void onItemClicked(MovieModel movie) {
         if (movie != null) {
-            ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
+            ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getMovieId());
             FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultDetailsFragment);
             transaction.addToBackStack(null);
@@ -314,8 +314,6 @@ public class ShowResultDetailsFragment extends Fragment {
         }
     }
 
-
-
     private void fetchCastList() {
         Call<MovieCreditsResponse> call = apiService.getMovieCredits(movieId, useApiKey());
         call.enqueue(new Callback<MovieCreditsResponse>() {
@@ -349,7 +347,6 @@ public class ShowResultDetailsFragment extends Fragment {
 
             @Override
             public void onFailure(Call<MovieCreditsResponse> call, Throwable t) {
-
                 Toast.makeText(getContext(), "Error fetching cast list: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
@@ -376,7 +373,7 @@ public class ShowResultDetailsFragment extends Fragment {
                         for (MovieModel movie : recommendations) {
                             if (movie.getPosterPath() != null) {
                                 suggestionList.add(new MovieModel(
-                                        movie.getId(),
+                                        movie.getMovieId(),
                                         movie.getTitle(),
                                         movie.getVoteAverage(),
                                         movie.getPosterPath(),

@@ -6,7 +6,7 @@ import java.util.List;
 
 public class TVShowModel implements Serializable {
     @SerializedName("id")
-    private int id;
+    private int tvShowId;
     @SerializedName("name")
     private String name;
     @SerializedName("vote_average")
@@ -34,8 +34,19 @@ public class TVShowModel implements Serializable {
     @SerializedName("number_of_seasons")
     private int numberOfSeasons;
 
+    private String username;
+
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public TVShowModel(int id, String name, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String firstAirDate, List<String> seasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
-        this.id = id;
+        this.tvShowId = id;
         this.name = name;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -51,7 +62,7 @@ public class TVShowModel implements Serializable {
     }
 
     public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview) {
-        this.id = id;
+        this.tvShowId = id;
         this.name = name;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -59,7 +70,7 @@ public class TVShowModel implements Serializable {
     }
 
     public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview, String originalLanguage, String firstAirDate) {
-        this.id = id;
+        this.tvShowId = id;
         this.name = name;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -69,14 +80,14 @@ public class TVShowModel implements Serializable {
     }
 
     public TVShowModel(int id, String name, String posterPath) {
-        this.id = id;
+        this.tvShowId = id;
         this.name = name;
         this.posterPath = posterPath;
     }
 
 
     public TVShowModel(int id, String name, String posterPath, List<String> seasons, int numberOfEpisodes) {
-        this.id = id;
+        this.tvShowId = id;
         this.name = name;
         this.posterPath = posterPath;
         this.seasons = seasons;
@@ -84,7 +95,7 @@ public class TVShowModel implements Serializable {
     }
 
     public TVShowModel(int id, String name, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String firstAirDate, int numberOfSeasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
-        this.id = id;
+        this.tvShowId = id;
         this.name = name;
         this.voteAverage = voteAverage;
         this.posterPath = posterPath;
@@ -100,12 +111,12 @@ public class TVShowModel implements Serializable {
 
 
     // Getters and Setters
-    public int getId() {
-        return id;
+    public int getTvShowId() {
+        return tvShowId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setTvShowId(int tvShowId) {
+        this.tvShowId = tvShowId;
     }
 
     public String getName() {
