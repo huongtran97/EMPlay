@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.activity;
 
-
 import android.os.Bundle;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -47,7 +46,6 @@ public class TrailerActivity extends AppCompatActivity {
                 }
             });
 
-
             // Get the video ID from the Intent
             String videoId = getIntent().getStringExtra(ARG_MOVIE_ID);
             if (videoId != null && !videoId.isEmpty()) {
@@ -63,5 +61,16 @@ public class TrailerActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        WebView webView = findViewById(R.id.webview_trailer);
 
+        if (webView != null) {
+            webView.clearCache(true);
+            webView.clearHistory();
+            webView.removeAllViews();
+            webView.destroy();
+        }
+        super.onDestroy();
+    }
 }

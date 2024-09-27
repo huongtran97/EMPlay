@@ -210,6 +210,7 @@ public class ShowResultDetailsFragment extends Fragment {
         return adapterTrailers;
     }
 
+
     private void fetchMovieDetails() {
         Call<MovieDetailsResponse> call = apiService.getMovieDetails(movieId, useApiKey());
         call.enqueue(new Callback<MovieDetailsResponse>() {
