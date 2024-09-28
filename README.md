@@ -78,10 +78,7 @@ https://github.com/user-attachments/assets/1bf8c0fc-5bad-427f-93d7-b61b22aa9d99
 1. Clone the Repository:
   - Open a terminal or command prompt on your machine.
 Navigate to the directory where you want to store the project.
-Run the following command to clone the project from GitHub:
-  
-```git clone https://github.com/your-username/EMPlay.git```
-
+Run the following command to clone the project from GitHub:  ```git clone https://github.com/your-username/EMPlay.git```
   - Replace your username with your GitHub username or the repository owner’s name.
   
 2. Open the Project in Android Studio:
@@ -93,7 +90,6 @@ Run the following command to clone the project from GitHub:
 4. Add TMDB API Key:
   - In your project directory, locate the local.properties file.
   - Add your TMDB API key as follows:  ```local.properties```
-<br><br>
   - Add:   ```API_KEY=your_tmdb_api_key```
   - Replace your_tmdb_api_key with the actual API key from TMDB.
   
