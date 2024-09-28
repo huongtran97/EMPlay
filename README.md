@@ -94,7 +94,7 @@ Run the following command to clone the project from GitHub:
   - In your project directory, locate the local.properties file.
   - Add your TMDB API key as follows:
   
-  ```properties```
+  ```local.properties```
 <br><br>
   ```API_KEY=your_tmdb_api_key```
 
