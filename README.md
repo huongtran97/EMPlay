@@ -2,7 +2,7 @@
 A mobile application that allows users to search, view, and save information about movies and TV shows, including details like cast, genres, ratings, and release dates. 
 The app supports movies and TV shows, with options to save favorite content and retrieve detailed information using various APIs.
 
-## Features
+## 1. Features
 - Search for Movies & TV Shows: Users can search movies and TV shows using an intuitive search interface.
 - View Details: Display detailed information such as title, rating, cast, genres, and overview of selected content.
 - Toggle Between Movies and TV Shows: A toggle button lets you easily switch between movie and TV show data views.
@@ -10,7 +10,7 @@ The app supports movies and TV shows, with options to save favorite content and 
 - View Cast Information: Explore the cast names and characters for movies and TV shows.
 - Firebase Authentication: Users can sign up and log in with Firebase Authentication. Profile details are updated and saved through Firebase.
 
-## Screenshot
+## 2. Screenshot
 - Home Page: This is the app's home page, where users can see the top trends of the week and upcoming  movies and TV shows.
   <br>
 <img src="https://github.com/user-attachments/assets/fd564b29-c3cc-48ec-8a7b-452452bc3495" alt="Screenshot_Home_Page" width="150"/>
@@ -42,7 +42,7 @@ The app supports movies and TV shows, with options to save favorite content and 
 <img src="https://github.com/user-attachments/assets/e7c282dd-a9a9-4461-912e-a38d42409df2" alt="Screenshot_Favorite_Page" width="150"/>
 <br><br>
 
-## Demo
+## 3. Demo
 
 
 
@@ -50,7 +50,7 @@ https://github.com/user-attachments/assets/1bf8c0fc-5bad-427f-93d7-b61b22aa9d99
 
 
 
-## Tech Stack
+## 4. Tech Stack
 - Programming Language: Java
 - Android SDK: Android API 34 (UpsideDownCake) and above
 - Libraries & Dependencies:
@@ -63,44 +63,44 @@ https://github.com/user-attachments/assets/1bf8c0fc-5bad-427f-93d7-b61b22aa9d99
 - CardView: For better layout of movie/TV show details
 - ConstraintLayout: For flexible and efficient UI design
 
-## API Integration
+## 5. API Integration
 - The app integrates with TMDB API to fetch movie and TV show data. You will need an API key to use this feature.
   
-## How to Install
+## 6. How to Install
 - Prerequisites:
-1. Before installing the app, ensure that you have the following set up:
-2. Android Studio (Latest version recommended)
-3. Android SDK (API 34 or above)
-4. Git installed on your system
-5. TMDB API Key: To fetch movie and TV show data, you must generate a TMDB API key. Sign up and generate an API key [here](https://www.themoviedb.org/).
+  - Before installing the app, ensure that you have the following set up:
+  - Android Studio (Latest version recommended)
+  - Android SDK (API 34 or above)
+  - Git installed on your system
+  - TMDB API Key: To fetch movie and TV show data, you must generate a TMDB API key. Sign up and generate an API key [here](https://www.themoviedb.org/).
 
 ## Steps to Install the App:
 1. Clone the Repository:
-Open a terminal or command prompt on your machine.
+  - Open a terminal or command prompt on your machine.
 Navigate to the directory where you want to store the project.
 Run the following command to clone the project from GitHub:
   
 ```git clone https://github.com/your-username/EMPlay.git```
 
-Replace your username with your GitHub username or the repository owner’s name.
+  - Replace your username with your GitHub username or the repository owner’s name.
   
 2. Open the Project in Android Studio:
-Launch Android Studio.
-From the Welcome Screen, select Open an Existing Project.
-Navigate to the directory where the project was cloned and select the project folder.
-Android Studio will automatically configure the project, sync the Gradle files, and install the necessary dependencies.
+- Launch Android Studio.
+  - From the Welcome Screen, select Open an Existing Project.
+  - Navigate to the directory where the project was cloned and select the project folder.
+  - Android Studio will automatically configure the project, sync the Gradle files, and install the necessary dependencies.
   
-3. Add TMDB API Key:
-In your project directory, locate the local.properties file.
-Add your TMDB API key as follows:
+4. Add TMDB API Key:
+  - In your project directory, locate the local.properties file.
+  - Add your TMDB API key as follows:
   
-```properties```
+  ```properties```
 <br><br>
-```API_KEY=your_tmdb_api_key```
+  ```API_KEY=your_tmdb_api_key```
 
-Replace your_tmdb_api_key with the actual API key from TMDB.
+  - Replace your_tmdb_api_key with the actual API key from TMDB.
   
-4. Build the Project:
+5. Build the Project:
 Once the API key is added, click the Sync Project with Gradle Files button in Android Studio (usually located at the top right corner).
 After the sync, click Build > Build APK or Run to install the app on an emulator or a physical device connected to your machine.
 
