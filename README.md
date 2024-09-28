@@ -44,7 +44,11 @@ The app supports movies and TV shows, with options to save favorite content and 
 
 ## Demo
 
-Uploading EMPlay_Demo1.mp4…
+
+
+https://github.com/user-attachments/assets/1bf8c0fc-5bad-427f-93d7-b61b22aa9d99
+
+
 
 ## Tech Stack
 - Programming Language: Java
