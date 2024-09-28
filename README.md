@@ -72,7 +72,7 @@ https://github.com/user-attachments/assets/1bf8c0fc-5bad-427f-93d7-b61b22aa9d99
 2. Android Studio (Latest version recommended)
 3. Android SDK (API 34 or above)
 4. Git installed on your system
-5. TMDB API Key: To fetch movie and TV show data, you must generate a TMDB API key. You can sign up and generate an API key here.
+5. TMDB API Key: To fetch movie and TV show data, you must generate a TMDB API key. Sign up and generate an API key [here](https://www.themoviedb.org/).
 
 ## Steps to Install the App:
 1. Clone the Repository:
