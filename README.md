@@ -109,8 +109,7 @@ After the sync, click Build > Build APK or Run to install the app on an emulator
 Choose a device (emulator or physical Android device) and press the Run button in Android Studio. The app will be installed and launched on the selected device.
 - Firebase Setup (Optional): If you wish to use Firebase Authentication, ensure that Firebase is set up in the project. Follow Firebase setup instructions, including adding google-services.json to the app’s app/ directory. You can find instructions on how to set up Firebase here.
   
-- Known Issues: For the app to run properly, ensure the API key and Firebase configurations are correctly set up. Images may fail to load if invalid or       
-missing URLs are returned from the API.
+- Known Issues: For the app to run properly, ensure the API key and Firebase configurations are correctly set up. Images may fail to load if invalid or missing URLs are returned from the API.
 
 
 
