@@ -6,7 +6,7 @@
     android:layout_width="85dp"
     android:layout_height="175dp"
     android:layout_margin="4dp"
-    android:backgroundTint="#000000"
+    android:backgroundTint="@color/black"
     cardview:cardCornerRadius="4dp">
 
     <LinearLayout

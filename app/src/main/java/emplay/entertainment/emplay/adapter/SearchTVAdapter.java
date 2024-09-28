@@ -57,7 +57,7 @@ public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVView
     @NonNull
     @Override
     public TVViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_movie_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.search_item, parent, false);
         return new TVViewHolder(view);
     }
 

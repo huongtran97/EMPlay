@@ -11,30 +11,29 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="195dp"
+        android:layout_height="164dp"
         android:background="@drawable/rounded_search_items_bg">
 
         <TextView
             android:id="@+id/search_title"
             android:layout_width="254dp"
-            android:layout_height="62dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:layout_marginEnd="8dp"
             android:fontFamily="sans-serif-medium"
             android:text="Title goes here"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.666"
+            app:layout_constraintHorizontal_bias="0.34"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_percent="0.7" />
 
         <ImageView
             android:id="@+id/search_poster"
-            android:layout_width="117dp"
-            android:layout_height="157dp"
+            android:layout_width="88dp"
+            android:layout_height="123dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:scaleType="centerCrop"
@@ -44,8 +43,9 @@
 
         <TextView
             android:id="@+id/search_release_date"
-            android:layout_width="235dp"
-            android:layout_height="25dp"
+            android:layout_width="249dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:fontFamily="sans-serif-medium"
             android:inputType="text"
             android:text="Release date goes here"
@@ -53,7 +53,7 @@
             android:textSize="14sp"
             android:textStyle="italic"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.266"
+            app:layout_constraintHorizontal_bias="0.314"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toBottomOf="@+id/search_ratingBar"
             app:layout_constraintWidth_percent="0.7" />
@@ -88,7 +88,7 @@
             android:stepSize="0.5"
             android:theme="@style/CustomRatingBar"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.44"
+            app:layout_constraintHorizontal_bias="0.284"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/search_title"
             app:layout_constraintWidth_percent="0.7" />

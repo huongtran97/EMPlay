@@ -71,7 +71,7 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
             populateMovieData(holder, movieModel);
             setUpTrailerButton(holder);
             handleAddToLibrary(holder, movieModel);
-            setItemClickListener(holder, movieModel);
+
         } else {
             Log.e("MovieResultAdapter", "MovieModel at position " + position + " is null");
         }
@@ -156,15 +156,7 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         }
     }
 
-    private void setItemClickListener(@NonNull MovieResultViewHolder holder, MovieModel movieModel) {
-        holder.itemView.setOnClickListener(v -> {
-            ProfileFragment profileFragment = ProfileFragment.newInstance(movieModel.getMovieId());
-            FragmentTransaction transaction = fragmentActivity.getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, profileFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        });
-    }
+
 
 
     public long saveMovieToUserMovies(String userId, int movieId, String title, String posterPath) {
