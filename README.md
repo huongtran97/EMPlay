@@ -3,12 +3,12 @@ A mobile application that allows users to search, view, and save information abo
 The app supports movies and TV shows, with options to save favorite content and retrieve detailed information using various APIs.
 
 ## Features
-Search for Movies & TV Shows: Users can search movies and TV shows using an intuitive search interface.
-View Details: Display detailed information such as title, rating, cast, genres, and overview of selected content.
-Toggle Between Movies and TV Shows: A toggle button allows you to easily switch between movie and TV show data views.
-Favorite Movies/TV Shows: Save favorite movies and TV shows to a local database using SQLite.
-View Cast Information: Explore the cast names and characters for movies and TV shows.
-Firebase Authentication: Users can sign up and log in with Firebase Authentication. Profile details are updated and saved through Firebase.
+- Search for Movies & TV Shows: Users can search movies and TV shows using an intuitive search interface.
+- View Details: Display detailed information such as title, rating, cast, genres, and overview of selected content.
+- Toggle Between Movies and TV Shows: A toggle button allows you to easily switch between movie and TV show data views.
+- Favorite Movies/TV Shows: Save favorite movies and TV shows to a local database using SQLite.
+- View Cast Information: Explore the cast names and characters for movies and TV shows.
+- Firebase Authentication: Users can sign up and log in with Firebase Authentication. Profile details are updated and saved through Firebase.
 
 ## Tech Stack
 - Programming Language: Java
