@@ -42,6 +42,39 @@ The app supports movies and TV shows, with options to save favorite content and 
 <img src="https://github.com/user-attachments/assets/e7c282dd-a9a9-4461-912e-a38d42409df2" alt="Screenshot_Favorite_Page" width="150"/>
 <br><br>
 
+## 3. Demo
+
+https://github.com/user-attachments/assets/2e5abfcf-15fb-4e14-b361-381008bcb62b
+
+
+https://github.com/user-attachments/assets/27618a7c-2841-42f1-9a42-38c21a85577c
+
+
+https://github.com/user-attachments/assets/4cc2ae23-9df8-46bd-b590-2b8e9b345743
+
+
+https://github.com/user-attachments/assets/24a736ba-cb4b-488b-a066-489311a29bd7
+
+
+
+
+https://github.com/user-attachments/assets/57da15c8-19f2-485c-91b2-c8e87d934b2a
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 4. Tech Stack
 - Programming Language: Java
