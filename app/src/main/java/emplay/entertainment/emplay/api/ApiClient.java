@@ -39,6 +39,7 @@ ApiClient {
                         // provides malformed or truncated compressed responses.
                         Request request = chain.request().newBuilder()
                                 .header("Accept-Encoding", "identity")
+                                .header("X-App-Token", BuildConfig.APP_TOKEN)
                                 .build();
                         return chain.proceed(request);
                     })
