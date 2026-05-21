@@ -64,7 +64,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseHelper = new DatabaseHelper(getContext());
+        databaseHelper = DatabaseHelper.getInstance(getContext());
         mAuth = FirebaseAuth.getInstance();
     }
 
@@ -100,25 +100,31 @@ public class ProfileFragment extends Fragment {
                 startActivity(new Intent(requireContext(), AboutActivity.class)));
 
         logOutBtn = view.findViewById(R.id.logout_account_btn);
-        logOutBtn.setOnClickListener(v -> {
-            mAuth.signOut();
-            Intent intent = new Intent(requireContext(), MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
-
         deleteAccountBtn = view.findViewById(R.id.delete_account_btn);
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
+            logOutBtn.setText("Log Out");
+            logOutBtn.setOnClickListener(v -> {
+                mAuth.signOut();
+                Intent intent = new Intent(requireContext(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            });
+
+            deleteAccountBtn.setVisibility(View.VISIBLE);
             deleteAccountBtn.setText("Delete Account");
             deleteAccountBtn.setOnClickListener(v -> {
                 new AlertDialog.Builder(requireContext())
                         .setTitle("Delete Account")
                         .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
                         .setPositiveButton("Yes", (dialog, which) -> {
+                            String email = currentUser.getEmail();
                             currentUser.delete().addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
+                                    if (email != null) {
+                                        databaseHelper.deleteUserProfile(email);
+                                    }
                                     Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show();
                                     startActivity(new Intent(requireContext(), LoginActivity.class));
                                     requireActivity().finish();
@@ -158,16 +164,18 @@ public class ProfileFragment extends Fragment {
         }
         else {
             usernameTextView.setText("Hi there!");
-            emailTextView.setText(" ");
+            emailTextView.setText("Do you want to login?");
         }
 
         new Thread(() -> {
             List<MovieModel> likedMovies = getAllMoviesFromDatabase();
             List<TVShowModel> likedTVShows = getSavedTVShows();
-            requireActivity().runOnUiThread(() -> {
-                movieLikedAdapter.updateData(likedMovies);
-                tvShowLikedAdapter.updateData(likedTVShows);
-            });
+            if (isAdded()) {
+                requireActivity().runOnUiThread(() -> {
+                    movieLikedAdapter.updateData(likedMovies);
+                    tvShowLikedAdapter.updateData(likedTVShows);
+                });
+            }
         }).start();
     }
 
@@ -254,4 +262,3 @@ public class ProfileFragment extends Fragment {
         return tvShows;
     }
 }
-

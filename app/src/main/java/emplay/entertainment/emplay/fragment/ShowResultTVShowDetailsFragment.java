@@ -47,10 +47,10 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private static final String ARG_TV_ID = "TV_ID";
-
     private static final int PAGE_SIZE = 9;
 
     private int tvId;
@@ -59,6 +59,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     private List<CastModel> castList;
     private List<TVShowModel> allSuggestions = new ArrayList<>();
     private int suggestionPage = 1;
+    
     private RecyclerView detailRecyclerView;
     private RecyclerView seasonsRecyclerview;
     private RecyclerView castRecyclerView;
@@ -67,6 +68,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     private TextView suggestionPageIndicator;
     private ImageButton suggestionBtnPrev;
     private ImageButton suggestionBtnNext;
+    
     private TVShowInformationAdapter tvAdapter;
     private SeasonsTVAdapter seasonAdapter;
     private CastAdapter castAdapter;
@@ -187,7 +189,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                         return;
                     }
 
-                    // Prefer official YouTube trailers; fall back to any YouTube video if none found
                     List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
                     for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
                         if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
@@ -214,11 +215,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         }
     }
 
-
-    /**
-     * Fetches TV show details and seasons in a single API call.
-     * Previously split into fetchTVDetails() + fetchTVSeasons() — both hit the same endpoint.
-     */
     private void fetchTVDetailsAndSeasons() {
         Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvId));
         call.enqueue(new Callback<TVShowDetailsResponse>() {
@@ -227,7 +223,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     TVShowDetailsResponse tvDetails = response.body();
 
-                    // --- Populate TV info ---
                     List<String> genres = new ArrayList<>();
                     if (tvDetails.getGenres() != null) {
                         for (TVShowDetailsResponse.Genre genre : tvDetails.getGenres()) {
@@ -240,7 +235,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                             productionCountries.add(pc.getName());
                         }
                     }
-                    // Populate seasons
+                    
                     List<TVShowDetailsResponse.Season> apiSeasons = tvDetails.getSeasons();
                     List<SeasonsModel> seasonsModels = new ArrayList<>();
                     if (apiSeasons != null && !apiSeasons.isEmpty()) {
@@ -255,7 +250,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                             seasonsModels.add(sm);
                         }
 
-                        // Sort by season number
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             seasonsModels.sort((a, b) -> Integer.compare(a.getSeasonNumber(), b.getSeasonNumber()));
                         }
@@ -310,18 +304,19 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                 .into(new CustomTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{
-                                resource,
-                                ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg)
-                        });
-                        detailRecyclerView.setBackground(layerDrawable);
+                        if (isAdded()) {
+                            LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{
+                                    resource,
+                                    ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg)
+                            });
+                            detailRecyclerView.setBackground(layerDrawable);
+                        }
                     }
 
                     @Override
                     public void onLoadCleared(@Nullable Drawable placeholder) { }
                 });
     }
-
 
     private void fetchTVCastList() {
         Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(TMDBpath.tvShowCredits(tvId));
@@ -361,7 +356,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         });
     }
 
-
     private void fetchTVSuggestionList() {
         Call<TVShowSimilarResponse> call = apiService.getTVShowSimilar(TMDBpath.tvShowSimilar(tvId));
         call.enqueue(new Callback<TVShowSimilarResponse>() {
@@ -397,7 +391,9 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         int fromIndex = (suggestionPage - 1) * PAGE_SIZE;
         int toIndex = Math.min(fromIndex + PAGE_SIZE, total);
 
-        suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+        if (fromIndex < total) {
+            suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+        }
 
         if (totalPages > 1) {
             suggestionPaginationBar.setVisibility(View.VISIBLE);
@@ -408,6 +404,4 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             suggestionPaginationBar.setVisibility(View.GONE);
         }
     }
-
 }
-

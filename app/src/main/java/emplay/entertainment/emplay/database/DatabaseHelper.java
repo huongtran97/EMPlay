@@ -53,9 +53,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_USER_PROFILE =
             "CREATE TABLE " + TABLE_USER_PROFILE + " (" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY, " +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     COLUMN_NAME + " TEXT, " +
-                    COLUMN_EMAIL + " TEXT)";
+                    COLUMN_EMAIL + " TEXT UNIQUE)";
 
     private static final String CREATE_TABLE_USER_MOVIES =
             "CREATE TABLE " + TABLE_USER_MOVIES + " (" +
@@ -63,7 +63,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_USER_ID + " TEXT, " +
                     COLUMN_MOVIE_ID + " INTEGER, " +
                     COLUMN_TITLE + " TEXT, " +
-                    COLUMN_POSTER_PATH + " TEXT)";
+                    COLUMN_POSTER_PATH + " TEXT, " +
+                    "FOREIGN KEY (" + COLUMN_MOVIE_ID + ") REFERENCES " + TABLE_MOVIES + "(" + COLUMN_ID + ") ON DELETE CASCADE)";
 
     private static final String CREATE_TABLE_USER_TVSHOWS =
             "CREATE TABLE " + TABLE_USER_TVSHOWS + " (" +
@@ -71,7 +72,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_USER_ID + " TEXT, " +
                     COLUMN_TVSHOW_ID + " INTEGER, " +
                     COLUMN_TITLE + " TEXT, " +
-                    COLUMN_POSTER_PATH + " TEXT)";
+                    COLUMN_POSTER_PATH + " TEXT, " +
+                    "FOREIGN KEY (" + COLUMN_TVSHOW_ID + ") REFERENCES " + TABLE_TVSHOWS + "(" + COLUMN_ID + ") ON DELETE CASCADE)";
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -96,19 +98,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deleteMovie(int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_MOVIES, COLUMN_ID + " = ?", new String[]{String.valueOf(itemId)});
+        db.delete(TABLE_USER_MOVIES, COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(itemId)});
         db.close();
     }
 
     public void deleteTV(int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_TVSHOWS, COLUMN_ID + " = ?", new String[]{String.valueOf(itemId)});
+        db.delete(TABLE_USER_TVSHOWS, COLUMN_TVSHOW_ID + " = ?", new String[]{String.valueOf(itemId)});
         db.close();
     }
 
-    public void deleteUserProfile(int itemId) {
+    public void deleteUserProfile(String email) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_USER_PROFILE, COLUMN_ID + " = ?", new String[]{String.valueOf(itemId)});
+        db.delete(TABLE_USER_PROFILE, COLUMN_EMAIL + " = ?", new String[]{email});
         db.close();
     }
 

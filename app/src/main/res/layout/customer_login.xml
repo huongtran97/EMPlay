@@ -2,6 +2,7 @@
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -19,74 +20,167 @@
         android:layout_height="match_parent"
         android:background="#B3000000"/>
 
-    <!-- Content: logo + title + buttons, centered vertically -->
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:paddingStart="32dp"
-        android:paddingEnd="32dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <ImageView
-            android:layout_width="71dp"
-            android:layout_height="77dp"
-            android:layout_marginBottom="12dp"
-            android:contentDescription="@null"
-            android:src="@drawable/e_logo" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EMPlay"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp"
-            android:fontFamily="@font/black_han_sans"
-            android:layout_marginBottom="4dp"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Your personal cinema"
-            android:textColor="#777777"
-            android:textSize="13sp"
-            android:fontFamily="sans-serif"
-            android:layout_marginBottom="40dp"/>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_google_sign_in"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#C82923"
-            android:fontFamily="sans-serif-medium"
-            android:stateListAnimator="@null"
-            app:cornerRadius="12dp"
-            app:icon="@drawable/ic_google"
-            app:iconGravity="textStart"
-            app:iconPadding="12dp"
-            app:iconTint="@null" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp">
 
-        <ProgressBar
-            android:id="@+id/progress_bar"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_marginBottom="4dp"
-            android:visibility="gone"/>
+            <ImageView
+                android:layout_width="71dp"
+                android:layout_height="77dp"
+                android:layout_marginBottom="12dp"
+                android:contentDescription="@null"
+                android:src="@drawable/e_logo" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_guest_continue"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="44dp"
-            android:fontFamily="sans-serif"
-            android:stateListAnimator="@null"
-            android:text="Continue as Guest"
-            android:textColor="#777777"
-            android:textSize="14sp"
-            app:cornerRadius="12dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EMPlay"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:fontFamily="@font/black_han_sans"
+                android:layout_marginBottom="4dp"/>
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your personal cinema"
+                android:textColor="#777777"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- Email Input -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:textColorHint="#999999"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/username"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Email"
+                    android:background="@drawable/customer_edittext"
+                    android:drawableStart="@drawable/baseline_alternate_email_24"
+                    android:drawablePadding="12dp"
+                    android:padding="12dp"
+                    android:textColor="#FFFFFF"
+                    android:inputType="textEmailAddress"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Password Input -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Password"
+                    android:background="@drawable/customer_edittext"
+                    android:drawableStart="@drawable/user_password"
+                    android:drawablePadding="12dp"
+                    android:padding="12dp"
+                    android:textColor="#FFFFFF"
+                    android:inputType="textPassword"/>
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/password_toggle"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="12dp"
+                    android:src="@drawable/baseline_visibility_off_24"
+                    android:tint="#777777"
+                    android:clickable="true"
+                    android:focusable="true"/>
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/forgot_password"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:text="Forgot Password?"
+                android:textColor="#777777"
+                android:textSize="13sp"
+                android:layout_marginBottom="24dp"
+                android:padding="4dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/login_btn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="LOGIN"
+                android:backgroundTint="#C82923"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="12dp"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OR"
+                android:textColor="#777777"
+                android:textSize="12sp"
+                android:layout_marginBottom="16dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_google_sign_in"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginBottom="16dp"
+                android:backgroundTint="#FFFFFF"
+                android:textColor="#000000"
+                android:text="Sign in with Google"
+                android:fontFamily="sans-serif-medium"
+                app:cornerRadius="12dp"
+                app:icon="@drawable/ic_google"
+                app:iconGravity="textStart"
+                app:iconPadding="12dp"
+                app:iconTint="@null" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/sign_up"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Don't have an account? Sign Up"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"
+                android:layout_marginBottom="16dp"
+                android:padding="8dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_guest_continue"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="Continue as Guest"
+                android:textColor="#777777"
+                android:textSize="14sp"
+                app:cornerRadius="12dp" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </FrameLayout>

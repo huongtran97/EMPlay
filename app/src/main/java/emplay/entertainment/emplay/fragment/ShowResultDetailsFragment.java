@@ -54,7 +54,6 @@ import retrofit2.Response;
 public class ShowResultDetailsFragment extends Fragment {
 
     private static final String ARG_MOVIE_ID = "MOVIE_ID";
-
     private static final int PAGE_SIZE = 9;
 
     private int movieId;
@@ -62,6 +61,7 @@ public class ShowResultDetailsFragment extends Fragment {
     private List<CastModel> castList;
     private List<MovieModel> allSuggestions = new ArrayList<>();
     private int suggestionPage = 1;
+    
     private RecyclerView detailRecyclerView;
     private RecyclerView castRecyclerView;
     private RecyclerView suggestionRecyclerView;
@@ -69,6 +69,7 @@ public class ShowResultDetailsFragment extends Fragment {
     private TextView suggestionPageIndicator;
     private ImageButton suggestionBtnPrev;
     private ImageButton suggestionBtnNext;
+    
     private MovieResultAdapter movieResultAdapter;
     private CastAdapter castAdapter;
     private SuggestionAdapter suggestionAdapter;
@@ -173,7 +174,6 @@ public class ShowResultDetailsFragment extends Fragment {
                         return;
                     }
 
-                    // Prefer official YouTube trailers; fall back to any YouTube video if none found
                     List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
                     for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
                         if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
@@ -202,7 +202,6 @@ public class ShowResultDetailsFragment extends Fragment {
         }
     }
 
-
     private void fetchMovieDetails() {
         Call<MovieDetailsResponse> call = apiService.getMovieDetails(TMDBpath.movieDetails(movieId));
         call.enqueue(new Callback<MovieDetailsResponse>() {
@@ -226,32 +225,28 @@ public class ShowResultDetailsFragment extends Fragment {
                                 movieDetails.getPosterPath(),
                                 movieDetails.getBackdropPath(),
                                 movieDetails.getOverview(),
-                                LanguageMapper.getLanguageName(movieDetails.getOriginalLanguage()), // Language mapping
+                                LanguageMapper.getLanguageName(movieDetails.getOriginalLanguage()),
                                 movieDetails.getReleaseDate(),
                                 movieDetails.getRuntime(),
                                 genres
                         ));
                     }
                     movieResultAdapter.notifyDataSetChanged();
-                    // Set the background with the blurred poster image
-                    setRecyclerViewBackground(movieDetails.getBackdropPath(),movieDetails.getPosterPath());
+                    setRecyclerViewBackground(movieDetails.getBackdropPath(), movieDetails.getPosterPath());
 
                 } else {
-
                     Toast.makeText(getContext(), "Failed to retrieve movie details", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<MovieDetailsResponse> call, Throwable t) {
-
                 Toast.makeText(getContext(), "Error fetching movie details: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void setRecyclerViewBackground(String backdropPath, String posterPath) {
-        // Pick available image; fall back to placeholder
         Object imageSource;
         if (backdropPath != null && !backdropPath.isEmpty()) {
             imageSource = "https://image.tmdb.org/t/p/w500/" + backdropPath;
@@ -268,11 +263,13 @@ public class ShowResultDetailsFragment extends Fragment {
                 .into(new CustomTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{
-                                resource,
-                                ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg)
-                        });
-                        detailRecyclerView.setBackground(layerDrawable);
+                        if (isAdded()) {
+                            LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{
+                                    resource,
+                                    ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg)
+                            });
+                            detailRecyclerView.setBackground(layerDrawable);
+                        }
                     }
 
                     @Override
@@ -306,7 +303,6 @@ public class ShowResultDetailsFragment extends Fragment {
                         Toast.makeText(getContext(), "Cast list is empty", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-
                     Toast.makeText(getContext(), "Failed to retrieve cast list", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -353,7 +349,9 @@ public class ShowResultDetailsFragment extends Fragment {
         int fromIndex = (suggestionPage - 1) * PAGE_SIZE;
         int toIndex = Math.min(fromIndex + PAGE_SIZE, total);
 
-        suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+        if (fromIndex < total) {
+            suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+        }
 
         if (totalPages > 1) {
             suggestionPaginationBar.setVisibility(View.VISIBLE);
@@ -365,8 +363,3 @@ public class ShowResultDetailsFragment extends Fragment {
         }
     }
 }
-
-
-
-
-

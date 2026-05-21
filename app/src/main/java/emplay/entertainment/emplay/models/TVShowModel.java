@@ -7,31 +7,48 @@ import java.util.List;
 public class TVShowModel implements Serializable, MediaItem {
     @SerializedName("id")
     private int id;
+    
     @SerializedName("name")
     private String name;
+    
     @SerializedName("vote_average")
     private double voteAverage;
+    
     @SerializedName("poster_path")
     private String posterPath;
+    
     @SerializedName("backdrop_path")
     private String backdropPath;
+    
     @SerializedName("overview")
     private String overview;
+    
     @SerializedName("original_language")
     private String originalLanguage;
+    
     @SerializedName("first_air_date")
     private String firstAirDate;
+    
     @SerializedName("genres")
     private List<String> genres;
+    
     @SerializedName("crew")
     private List<String> crew;
+    
     @SerializedName("production_countries")
     private List<String> productionCountries;
+    
     @SerializedName("number_of_episodes")
     private int numberOfEpisodes;
+    
     @SerializedName("number_of_seasons")
     private int numberOfSeasons;
+    
     private List<SeasonsModel> seasonsInfo;
+    
+    private String username;
+
+    public TVShowModel() {}
 
     public TVShowModel(int id, String name, String posterPath) {
         this.id = id;
@@ -59,9 +76,11 @@ public class TVShowModel implements Serializable, MediaItem {
         this.seasonsInfo = seasonsInfo;
     }
 
+    // MediaItem implementation
     @Override
     public int getMediaId() { return id; }
 
+    // Getters and Setters
     public int getTVShowId() { return id; }
     public void setTVShowId(int id) { this.id = id; }
 
@@ -105,4 +124,7 @@ public class TVShowModel implements Serializable, MediaItem {
 
     public int getNumberOfSeasons() { return numberOfSeasons; }
     public void setNumberOfSeasons(int numberOfSeasons) { this.numberOfSeasons = numberOfSeasons; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 }

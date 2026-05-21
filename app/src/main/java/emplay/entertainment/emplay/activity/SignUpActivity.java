@@ -107,7 +107,7 @@ public class SignUpActivity extends AppCompatActivity {
         });
 
         user_login = findViewById(R.id.re_login);
-        String text = "Login";
+        String text = "Already have an account? Login";
         SpannableString spannableString = new SpannableString(text);
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
@@ -116,7 +116,11 @@ public class SignUpActivity extends AppCompatActivity {
                 startActivity(signUpPage);
             }
         };
-        spannableString.setSpan(clickableSpan, 0, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        
+        int start = text.indexOf("Login");
+        if (start != -1) {
+            spannableString.setSpan(clickableSpan, start, text.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
 
         user_login.setText(spannableString);
         user_login.setMovementMethod(LinkMovementMethod.getInstance());
