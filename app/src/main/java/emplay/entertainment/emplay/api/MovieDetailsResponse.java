@@ -46,7 +46,6 @@ public class MovieDetailsResponse {
     }
 
 
-    // Getters and Setters
     public int getId() {
         return id;
     }
@@ -151,8 +150,7 @@ public class MovieDetailsResponse {
         private String name;
 
 
-        // Getters and Setters
-        public int getId() {
+            public int getId() {
             return id;
         }
 
@@ -181,8 +179,7 @@ public class MovieDetailsResponse {
         @SerializedName("profile_path")
         private String profilePath;
 
-        // Getters and Setters
-        public int getCastId() {
+            public int getCastId() {
             return castId;
         }
 

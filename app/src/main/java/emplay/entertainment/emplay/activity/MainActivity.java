@@ -1,8 +1,11 @@
 package emplay.entertainment.emplay.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MovieOption", "BottomNavigationView is null");
         }
 
-        // Set initial fragment if there is no saved instance state
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
         }
@@ -44,10 +46,7 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.menu_movie_home) {
                     selectedFragment = new HomeFragment();
                 } else if (itemId == R.id.menu_movie_search) {
-                    // Retrieve the last search type from ViewModel
                     Boolean wasTVShowSearch = viewModel.getLastSearchWasTVShow().getValue();
-
-                    // Decide which fragment to show based on last search type
                     if (wasTVShowSearch != null && wasTVShowSearch) {
                         selectedFragment = new SearchTVShowsFragment();
                     } else {
@@ -58,12 +57,42 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 if (selectedFragment != null) {getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment)
-                            .addToBackStack(null)  // Keep the previous fragment in the back stack
+                            .addToBackStack(null)
                             .commit();
                 }
                 return true;
             }
 
         });
+
+        com.google.firebase.auth.FirebaseUser currentUser =
+                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) {
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_welcome, null);
+
+            android.app.Dialog dialog = new android.app.Dialog(this);
+            dialog.setContentView(dialogView);
+            dialog.setCancelable(false);
+
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                dialog.getWindow().setDimAmount(0.7f);
+            }
+
+            dialogView.findViewById(R.id.btn_login).setOnClickListener(v -> {
+                dialog.dismiss();
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            });
+
+            dialogView.findViewById(R.id.btn_guest).setOnClickListener(v -> {
+                dialog.dismiss();
+            });
+
+            dialog.show();
+        }
+
     }
+
 }

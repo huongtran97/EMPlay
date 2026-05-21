@@ -45,6 +45,8 @@ public class TVShowDetailsResponse {
     private List<CreatedBy> created_by;
     @SerializedName("last_episode_to_air")
     private LastEpisodeToAir last_episode_to_air;
+    @SerializedName("next_episode_to_air")
+    private LastEpisodeToAir next_episode_to_air;
     @SerializedName("networks")
     private List<Network> networks;
     @SerializedName("spoken_languages")
@@ -56,7 +58,7 @@ public class TVShowDetailsResponse {
 
 
 
-    public TVShowDetailsResponse(int id, String name, String original_name, String first_air_date, String overview, String poster_path, String backdrop_path, String original_language, double vote_average, int vote_count, boolean in_production, int number_of_episodes, int number_of_seasons, String status, String tagline, List<Genre> genres, List<Season> seasons, List<CreatedBy> created_by, LastEpisodeToAir last_episode_to_air, List<Network> networks, List<SpokenLanguage> spoken_languages, List<ProductionCountry> production_countries) {
+    public TVShowDetailsResponse(int id, String name, String original_name, String first_air_date, String overview, String poster_path, String backdrop_path, String original_language, double vote_average, int vote_count, boolean in_production, int number_of_episodes, int number_of_seasons, String status, String tagline, List<Genre> genres, List<Season> seasons, List<CreatedBy> created_by, LastEpisodeToAir last_episode_to_air, LastEpisodeToAir next_episode_to_air, List<Network> networks, List<SpokenLanguage> spoken_languages, List<ProductionCountry> production_countries) {
         this.id = id;
         this.name = name;
         this.original_name = original_name;
@@ -76,6 +78,7 @@ public class TVShowDetailsResponse {
         this.seasons = seasons;
         this.created_by = created_by;
         this.last_episode_to_air = last_episode_to_air;
+        this.next_episode_to_air = next_episode_to_air;
         this.networks = networks;
         this.spoken_languages = spoken_languages;
         this.production_countries = production_countries;
@@ -236,6 +239,14 @@ public class TVShowDetailsResponse {
 
     public void setLast_episode_to_air(LastEpisodeToAir last_episode_to_air) {
         this.last_episode_to_air = last_episode_to_air;
+    }
+
+    public LastEpisodeToAir getNext_episode_to_air() {
+        return next_episode_to_air;
+    }
+
+    public void setNext_episode_to_air(LastEpisodeToAir next_episode_to_air) {
+        this.next_episode_to_air = next_episode_to_air;
     }
 
     public List<Network> getNetworks() {

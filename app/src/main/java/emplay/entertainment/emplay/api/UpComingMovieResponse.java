@@ -41,7 +41,6 @@ public class UpComingMovieResponse {
     }
 
 
-    // Getters and setters...
 
     public static class Dates {
         @SerializedName("maximum")
@@ -49,7 +48,6 @@ public class UpComingMovieResponse {
         @SerializedName("minimum")
         private String minimum;
 
-        // Getters and setters
         public String getMaximum() {
             return maximum;
         }
@@ -198,7 +196,6 @@ public class UpComingMovieResponse {
         @SerializedName("name")
         private String name;
 
-        // Getters and Setters
         public int getId() {
             return id;
         }

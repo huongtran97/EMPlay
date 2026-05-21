@@ -20,7 +20,7 @@ public class TVShowCreditsResponses {
 
     public static class Cast {
         @SerializedName("id")
-        private int castId;
+        private int id;
         @SerializedName("name")
         private String name;
         @SerializedName("profile_path")
@@ -28,19 +28,19 @@ public class TVShowCreditsResponses {
         @SerializedName("character")
         private String character;
 
-        public Cast(int castId, String name, String profilePath, String character) {
-            this.castId = castId;
+        public Cast(int id, String name, String profilePath, String character) {
+            this.id = id;
             this.name = name;
             this.profilePath = profilePath;
             this.character = character;
         }
 
-        public int getCastId() {
-            return castId;
+        public int getId() {
+            return id;
         }
 
-        public void setCastId(int castId) {
-            this.castId = castId;
+        public void setId(int id) {
+            this.id = id;
         }
 
         public String getName() {

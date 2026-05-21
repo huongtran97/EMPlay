@@ -8,14 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SharedViewModel extends ViewModel {
-    // Initialize with empty lists to avoid null values
     private final MutableLiveData<List<MovieModel>> searchResults = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<List<TVShowModel>> searchTVResults = new MutableLiveData<>(new ArrayList<>());
     private final MutableLiveData<Boolean> isTVShowSearch = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> lastSearchWasTVShow = new MutableLiveData<>();
     private final MutableLiveData<Integer> selectedGenreId = new MutableLiveData<>();
 
-    // Getters for LiveData
     public LiveData<List<MovieModel>> getSearchResults() {
         return searchResults;
     }
@@ -28,7 +26,6 @@ public class SharedViewModel extends ViewModel {
         return isTVShowSearch;
     }
 
-    // Setters for MutableLiveData
     public void setSearchResults(List<MovieModel> results) {
         searchResults.setValue(results);
     }

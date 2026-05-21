@@ -19,6 +19,9 @@ public class MovieCreditsResponse {
 
     public static class Cast {
 
+        @SerializedName("id")
+        private int id;
+
         @SerializedName("cast_id")
         private int castId;
 
@@ -31,11 +34,16 @@ public class MovieCreditsResponse {
         @SerializedName("character")
         private String character;
 
-        public Cast(int castId, String name, String profilePath, String character) {
+        public Cast(int id, int castId, String name, String profilePath, String character) {
+            this.id = id;
             this.castId = castId;
             this.name = name;
             this.profilePath = profilePath;
             this.character = character;
+        }
+
+        public int getId() {
+            return id;
         }
 
         public int getCastId() {

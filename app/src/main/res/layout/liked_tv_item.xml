@@ -4,7 +4,7 @@
     android:clickable="true"
     android:id="@+id/movie_card_view"
     android:layout_width="110dp"
-    android:layout_height="210dp"
+    android:layout_height="160dp"
     android:layout_margin="5dp"
     android:backgroundTint="@android:color/transparent"
     cardview:cardCornerRadius="8dp">
@@ -17,16 +17,7 @@
         <ImageView
             android:id="@+id/liked_poster"
             android:layout_width="match_parent"
-            android:layout_height="160dp" />
-
-        <TextView
-            android:id="@+id/liked_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="viewStart"
-            android:textColor="@color/white"
-            android:textSize="12sp"
-            android:textStyle="bold" />
+            android:layout_height="match_parent" />
 
 
 

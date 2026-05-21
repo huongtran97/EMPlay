@@ -30,5 +30,10 @@
         <item name="android:textStyle">italic</item>
     </style>
 
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlActivated">#FFC107</item>
+        <item name="colorControlHighlight">#FFC107</item>
+    </style>
+
 
 </resources>

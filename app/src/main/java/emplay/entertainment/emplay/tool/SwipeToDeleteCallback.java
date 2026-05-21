@@ -29,13 +29,11 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
 
         View itemView = viewHolder.itemView;
         if (dX > 0) {
-            // Draw a red background with "DELETE" text for swipe right
             c.drawRect(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + dX, itemView.getBottom(), paint);
             paint.setColor(Color.WHITE);
             c.drawText("DELETE", itemView.getLeft() + 16, itemView.getTop() + 64, paint);
             paint.setColor(Color.RED);
         } else if (dX < 0) {
-            // Draw a red background with "DELETE" text for swipe left
             c.drawRect(itemView.getRight() + dX, itemView.getTop(), itemView.getRight(), itemView.getBottom(), paint);
             paint.setColor(Color.WHITE);
             c.drawText("DELETE", itemView.getRight() - 200, itemView.getTop() + 64, paint);
@@ -64,6 +62,6 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        return makeMovementFlags(0, ItemTouchHelper.UP); // Allow both swipe directions
+        return makeMovementFlags(0, ItemTouchHelper.UP);
     }
 }

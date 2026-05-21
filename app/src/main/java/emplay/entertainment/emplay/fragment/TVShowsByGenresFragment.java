@@ -1,10 +1,10 @@
 package emplay.entertainment.emplay.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,26 +22,29 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.TVShowByGenreAdapter;
 import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
+import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.api.TVShowResponse;
-import emplay.entertainment.emplay.models.GenresModel;
-import emplay.entertainment.emplay.models.SharedViewModel;
 import emplay.entertainment.emplay.models.TVShowModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class TVShowsByGenresFragment extends Fragment {
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private static final String ARG_GENRE_ID = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
     private RecyclerView tvByGenreRecyclerview;
-    private SharedViewModel viewModel;
     private TVShowByGenreAdapter tvByGenreAdapter;
     private TextView genreName;
+    private TextView pageIndicator;
+    private ImageButton btnPrev;
+    private ImageButton btnNext;
     private List<TVShowModel> tvByGenreList;
-    private List<GenresModel> genresList;
     private MovieApiService apiService;
     private int genreId;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private boolean isLoading = false;
 
     public static TVShowsByGenresFragment newInstance(int genreId, String genreName) {
         TVShowsByGenresFragment fragment = new TVShowsByGenresFragment();
@@ -56,24 +58,39 @@ public class TVShowsByGenresFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        Log.d("MovieByGenresFragment", "onCreateView called");
         View view = inflater.inflate(R.layout.tv_by_genre_view, container, false);
-
-        viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
         tvByGenreRecyclerview = view.findViewById(R.id.tv_by_genre_recyclerview);
         genreName = view.findViewById(R.id.tv_genres);
+        pageIndicator = view.findViewById(R.id.page_indicator);
+        btnPrev = view.findViewById(R.id.btn_prev);
+        btnNext = view.findViewById(R.id.btn_next);
 
         tvByGenreList = new ArrayList<>();
-        genresList = new ArrayList<>();
 
         tvByGenreAdapter = new TVShowByGenreAdapter(tvByGenreList, getContext(), this::onItemClick);
 
-        tvByGenreRecyclerview.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+        tvByGenreRecyclerview.setLayoutManager(layoutManager);
         tvByGenreRecyclerview.setAdapter(tvByGenreAdapter);
 
+        btnPrev.setOnClickListener(v -> {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchTVShowsByGenre(genreId);
+                tvByGenreRecyclerview.scrollToPosition(0);
+            }
+        });
+
+        btnNext.setOnClickListener(v -> {
+            if (currentPage < totalPages) {
+                currentPage++;
+                fetchTVShowsByGenre(genreId);
+                tvByGenreRecyclerview.scrollToPosition(0);
+            }
+        });
+
         apiService = ApiClient.getClient().create(MovieApiService.class);
-        Log.d("MovieByGenresFragment", "ViewModel setup complete");
 
         if (getArguments() != null) {
             genreId = getArguments().getInt(ARG_GENRE_ID, -1);
@@ -91,46 +108,42 @@ public class TVShowsByGenresFragment extends Fragment {
     }
 
     private void onItemClick(TVShowModel tvShowModel) {
-        ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShowModel.getId());
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
+        ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tvShowModel.getTVShowId());
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
     private void fetchTVShowsByGenre(int genreId) {
-        Call<TVShowResponse> call = apiService.getTVShowsByGenre(API_KEY, genreId);
-        Log.d("MovieByGenresFragment", "Request URL: " + call.request().url());
+        if (isLoading) return;
+        isLoading = true;
 
+        Call<TVShowResponse> call = apiService.getTVShowsByGenre(TMDBpath.discoverTVShows(), genreId, currentPage);
         call.enqueue(new Callback<TVShowResponse>() {
             @Override
-            public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
-                Log.d("MovieByGenresFragment", "API Response received. Code: " + response.code());
+            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
+                isLoading = false;
                 if (response.isSuccessful() && response.body() != null) {
-                    List<TVShowModel> tv = response.body().getResults();
-                    Log.d("MovieByGenresFragment", "Fetched movies count: " + (tv != null ? tv.size() : 0));
-                    if (tv != null && !tv.isEmpty()) {
+                    TVShowResponse body = response.body();
+                    totalPages = body.getTotal_pages();
+
+                    List<TVShowModel> tv = body.getResults();
+                    if (tv != null) {
                         tvByGenreAdapter.updateData(tv);
-                        Log.d("MovieByGenresFragment", "Movies updated in adapter");
-                    } else {
-                        Log.d("MovieByGenresFragment", "No movies found for this genre");
                     }
-                } else {
-                    Log.e("MovieByGenresFragment", "Error in response: " + response.code() + ", Message: " + response.message());
+
+                    pageIndicator.setText("Page " + currentPage + " of " + totalPages);
+                    btnPrev.setEnabled(currentPage > 1);
+                    btnNext.setEnabled(currentPage < totalPages);
                 }
             }
 
             @Override
-            public void onFailure(Call<TVShowResponse> call, Throwable t) {
-                Log.e("MovieByGenresFragment", "API call failed: " + t.getMessage());
-                Toast.makeText(getContext(), "Failed to load movies. Please try again.", Toast.LENGTH_SHORT).show();
-                handleApiFailure("MovieByGenresFragment", t);
+            public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                isLoading = false;
+                Toast.makeText(getContext(), "Failed to load TV shows.", Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void handleApiFailure(String tag, Throwable t) {
-        Log.e(tag, "API call failed: " + t.getMessage());
-        Toast.makeText(getContext(), "Failed to load data. Please try again.", Toast.LENGTH_SHORT).show();
     }
 }

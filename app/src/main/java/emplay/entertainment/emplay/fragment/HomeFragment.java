@@ -1,34 +1,21 @@
 package emplay.entertainment.emplay.fragment;
 
-
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import emplay.entertainment.emplay.activity.AboutActivity;
-import emplay.entertainment.emplay.activity.LoginActivity;
 import emplay.entertainment.emplay.api.TVShowResponse;
 import emplay.entertainment.emplay.api.UpComingTVShowsResponse;
 import emplay.entertainment.emplay.api.UpComingMovieResponse;
@@ -37,6 +24,7 @@ import emplay.entertainment.emplay.adapter.MovieAdapter;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
+import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.api.MovieResponse;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.adapter.TVShowAdapter;
@@ -46,80 +34,25 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Call;
 
-/**
- *  * @author Tran Ngoc Que Huong
- *  * @version 1.0
- *
- * Fragment that displays a list of popular movies and movie details.
- */
-
 public class HomeFragment extends Fragment {
-    private List<MovieModel> movieList, upComingMoviesList;
-    private List<TVShowModel> tvList, upComingTVList;
+
     private RecyclerView movieRecyclerView, tvRecyclerView2, upComingRecyclerView, upComingTVRecyclerview;
     private MovieAdapter movieAdapter;
     private TVShowAdapter tvShowAdapter;
     private UpcomingMovieAdapter upcomingMovieAdapter;
     private UpComingTVAdapter upComingTVAdapter;
     private MovieApiService apiService;
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);  // Enables options menu in fragment
-    }
-
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        inflater.inflate(R.menu.popupmenu, menu);  // Inflate the menu
-        super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @SuppressLint("NonConstantResourceId")
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.about) {
-            Intent aboutPage = new Intent(requireActivity(), AboutActivity.class);
-            startActivity(aboutPage);
-            return true;
-        } else if (itemId == R.id.logout) {
-            FirebaseAuth.getInstance().signOut();
-            Intent loginPage = new Intent(requireActivity(), LoginActivity.class);
-            startActivity(loginPage);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    /**
-     * Called to have the fragment instantiate its user interface view.
-     *
-     * Initializes the RecyclerView components, adapters, and API service.
-     * Starts fetching initial movie data from the API.
-     *
-     * @param inflater           The LayoutInflater object that can be used to inflate any views in the fragment.
-     * @param container          If non-null, this is the parent view that the fragment's UI should be attached to.
-     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state.
-     * @return The view for the fragment's UI, or null.
-     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
 
-
-
-
-        // Initialize RecyclerViews
         movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
         tvRecyclerView2 = view.findViewById(R.id.tvshow_popular_recyclerview);
         upComingRecyclerView = view.findViewById(R.id.up_coming_movie_recyclerview);
         upComingTVRecyclerview = view.findViewById(R.id.up_coming_tv_recyclerview);
 
-        // Initialize movie list and adapters with the filtered movie list
         movieAdapter = new MovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
         movieRecyclerView.setAdapter(movieAdapter);
         movieRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -136,10 +69,8 @@ public class HomeFragment extends Fragment {
         upComingTVRecyclerview.setAdapter(upComingTVAdapter);
         upComingTVRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        // Initialize API service
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        // Fetch initial movie data
         fetchPopularMovies();
         fetchPopularTV();
         fetchUpComingMovie();
@@ -148,160 +79,108 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-
-    private List<MovieModel> fetchUpComingMovie() {
-        Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(API_KEY);
-        call.enqueue(new Callback<UpComingMovieResponse>() {
-            @Override
-            public void onResponse(Call<UpComingMovieResponse> call, Response<UpComingMovieResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    // Filter movies with non-null posterPath
-                    List<MovieModel> movieList = response.body().getResults();
-                    List<MovieModel> filteredMovies = new ArrayList<>();
-                    for (MovieModel movie : movieList) {
-                        if (movie.getPosterPath() != null) {
-                            filteredMovies.add(movie);
-                        }
-                    }
-                    upcomingMovieAdapter.updateData(filteredMovies);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UpComingMovieResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Error fetching movie data", t);
-            }
-        });
-        return null;
-    }
-
-    private List<TVShowModel> fetchUpComingTV() {
-        Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(API_KEY);
-        call.enqueue(new Callback<UpComingTVShowsResponse>() {
-            @Override
-            public void onResponse(Call<UpComingTVShowsResponse> call, Response<UpComingTVShowsResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    // Filter TV shows with non-null posterPath
-                    List<TVShowModel> tvList = response.body().getResults();
-                    List<TVShowModel> filteredTVShows = new ArrayList<>();
-                    for (TVShowModel tv : tvList) {
-                        if (tv.getPosterPath() != null) {
-                            filteredTVShows.add(tv);
-                        }
-                    }
-                    upComingTVAdapter.updateData(filteredTVShows);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<UpComingTVShowsResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Error fetching TV show data", t);
-            }
-        });
-        return null;
-    }
-
-    /**
-     * Fetches the initial list of popular movies from the API and updates the movie adapter.
-     * <p>
-     * This method makes an API call to retrieve popular movies and updates the MovieAdapter with the fetched data.
-     * Displays a Toast message if the data loading fails.
-     *
-     * @return
-     */
-    private void fetchPopularMovies() { // Change the return type to void
-        Call<MovieResponse> call = apiService.getTrendingMovies(API_KEY);
+    private void fetchPopularMovies() {
+        Call<MovieResponse> call = apiService.getTrendingMovies(TMDBpath.trendingMovies());
         call.enqueue(new Callback<MovieResponse>() {
             @Override
             public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                if (response.isSuccessful()) {
-                    if (response.body() != null) {
-                        // Filter popular movies with non-null posterPath
-                        List<MovieModel> movieList = response.body().getResults();
-                        List<MovieModel> filteredMovies = new ArrayList<>();
-                        for (MovieModel movie : movieList) {
-                            if (movie.getPosterPath() != null) {
-                                filteredMovies.add(movie);
-                            }
-                        }
-                        movieAdapter.updateData(filteredMovies);
-                    } else {
-                        Log.e("HomeFragment", "Response body is null");
+                if (response.isSuccessful() && response.body() != null) {
+                    List<MovieModel> filtered = new ArrayList<>();
+                    for (MovieModel movie : response.body().getResults()) {
+                        if (movie.getPosterPath() != null) filtered.add(movie);
                     }
-                } else {
-                    try {
-                        // Log the error response if not successful
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "Unknown error";
-                        Log.e("HomeFragment", "Error fetching movies: " + response.code() + " - " + errorBody);
-                    } catch (IOException e) {
-                        Log.e("HomeFragment", "Error reading error body", e);
-                    }
+                    movieAdapter.updateData(filtered);
                 }
             }
 
             @Override
             public void onFailure(Call<MovieResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Error fetching movie data", t);
+                Log.e("HomeFragment", "Failed to fetch trending movies", t);
             }
         });
     }
 
-
-    private List<TVShowModel> fetchPopularTV() {
-        Call<TVShowResponse> call = apiService.getTrendingTVShows(API_KEY);
+    private void fetchPopularTV() {
+        Call<TVShowResponse> call = apiService.getTrendingTVShows(TMDBpath.trendingTVShows());
         call.enqueue(new Callback<TVShowResponse>() {
             @Override
             public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Filter popular TV shows with non-null posterPath
-                    List<TVShowModel> tvList = response.body().getResults();
-                    List<TVShowModel> filteredTVShows = new ArrayList<>();
-                    for (TVShowModel tv : tvList) {
-                        if (tv.getPosterPath() != null) {
-                            filteredTVShows.add(tv);
-                        }
+                    List<TVShowModel> filtered = new ArrayList<>();
+                    for (TVShowModel tv : response.body().getResults()) {
+                        if (tv.getPosterPath() != null) filtered.add(tv);
                     }
-                    tvShowAdapter.updateData(filteredTVShows);
+                    tvShowAdapter.updateData(filtered);
                 }
             }
 
             @Override
             public void onFailure(Call<TVShowResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Error fetching TV show data", t);
+                Log.e("HomeFragment", "Failed to fetch trending TV shows", t);
             }
         });
-        return null;
     }
 
+    private void fetchUpComingMovie() {
+        Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(
+                TMDBpath.discoverMovies(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
+                "popularity.desc", false, "en-US", 1);
+        call.enqueue(new Callback<UpComingMovieResponse>() {
+            @Override
+            public void onResponse(Call<UpComingMovieResponse> call, Response<UpComingMovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<MovieModel> filtered = new ArrayList<>();
+                    for (MovieModel movie : response.body().getResults()) {
+                        if (movie.getPosterPath() != null) filtered.add(movie);
+                    }
+                    upcomingMovieAdapter.updateData(filtered);
+                }
+            }
 
+            @Override
+            public void onFailure(Call<UpComingMovieResponse> call, Throwable t) {
+                Log.e("HomeFragment", "Failed to fetch upcoming movies", t);
+            }
+        });
+    }
 
-    /**
-     * Handles item clicks in the movie list.
-     * <p>
-     * When a Object item is clicked, this method fetches detailed information about the selected movie.
-     *
-     * @param item The MovieModel object representing the clicked movie.
-     */
+    private void fetchUpComingTV() {
+        Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(
+                TMDBpath.discoverTVShows(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
+                "popularity.desc", false, "en-US", 1);
+        call.enqueue(new Callback<UpComingTVShowsResponse>() {
+            @Override
+            public void onResponse(Call<UpComingTVShowsResponse> call, Response<UpComingTVShowsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<TVShowModel> filtered = new ArrayList<>();
+                    for (TVShowModel tv : response.body().getResults()) {
+                        if (tv.getPosterPath() != null) filtered.add(tv);
+                    }
+                    upComingTVAdapter.updateData(filtered);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<UpComingTVShowsResponse> call, Throwable t) {
+                Log.e("HomeFragment", "Failed to fetch upcoming TV shows", t);
+            }
+        });
+    }
+
     public void onItemClicked(Object item) {
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+        Fragment fragment;
+
         if (item instanceof MovieModel) {
-            MovieModel selectedMovie = (MovieModel) item;
-
-            // Start a new fragment or activity to display movie details
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            ShowResultDetailsFragment movieDetailsFragment = ShowResultDetailsFragment.newInstance(selectedMovie.getId()); // Assume you have a method to pass movie ID
-            transaction.replace(R.id.fragment_container, movieDetailsFragment);  // Replace with the appropriate container ID
-            transaction.addToBackStack(null);
-            transaction.commit();
+            fragment = ShowResultDetailsFragment.newInstance(((MovieModel) item).getId());
         } else if (item instanceof TVShowModel) {
-            TVShowModel selectedTVShow = (TVShowModel) item;
-
-            // Start a new fragment or activity to display TV show details
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            ShowResultTVShowDetailsFragment tvShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(selectedTVShow.getId()); // Assume you have a method to pass TV show ID
-            transaction.replace(R.id.fragment_container, tvShowDetailsFragment);  // Replace with the appropriate container ID
-            transaction.addToBackStack(null);
-            transaction.commit();
+            fragment = ShowResultTVShowDetailsFragment.newInstance(((TVShowModel) item).getTVShowId());
+        } else {
+            return;
         }
-    }
 
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
 }

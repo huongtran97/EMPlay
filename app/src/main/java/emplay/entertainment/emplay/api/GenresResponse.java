@@ -9,7 +9,6 @@ public class GenresResponse {
     @SerializedName("genres")
     private List<GenresModel> genres;
 
-    // Getter and Setter for genres
     public List<GenresModel> getGenres() {
         return genres;
     }

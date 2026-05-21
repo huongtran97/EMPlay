@@ -1,28 +1,110 @@
 package emplay.entertainment.emplay.api;
 
+import androidx.annotation.NonNull;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import emplay.entertainment.emplay.BuildConfig;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- *  * @author Tran Ngoc Que Huong
- *  * @version 1.0
- *
- * Provides a singleton instance of the Retrofit client for making API requests.
- */
-public class ApiClient {
+public class
+ApiClient {
 
-    private static final String BASE_URL = "https://api.themoviedb.org/";
+    // Set to true to route through the Railway proxy (key lives server-side).
+    // Set to false to call TMDB directly using the key from local.properties (key is baked into the APK).
+    public static boolean USE_PROXY = true;
+    private static final String TMDB_API_KEY = BuildConfig.API_KEY;
+
+    private static final String BASE_URL = "https://emplay-proxy-production.up.railway.app/";
     static Retrofit retrofit;
 
     public static Retrofit getClient() {
         if (retrofit == null) {
+            OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                    .connectTimeout(30, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
+                    .addInterceptor(chain -> {
+                        // Force 'identity' encoding to fix "gzip finished without exhausting source" error.
+                        // This prevents OkHttp from requesting GZIP and helps when the server/proxy
+                        // provides malformed or truncated compressed responses.
+                        Request request = chain.request().newBuilder()
+                                .header("Accept-Encoding", "identity")
+                                .build();
+                        return chain.proceed(request);
+                    })
+                    .addInterceptor(new TMDBInterceptor());
+
+            if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+                clientBuilder.addInterceptor(loggingInterceptor);
+            }
+
+            OkHttpClient okHttpClient = clientBuilder.build();
+
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
+                    .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
         return retrofit;
     }
-}
 
+    public static void resetClient() {
+        retrofit = null;
+    }
+
+    public static class TMDBInterceptor implements Interceptor {
+        @Override
+        @NonNull
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Request request = chain.request();
+            if (!USE_PROXY) {
+                HttpUrl url = request.url();
+
+                if (url.encodedPath().contains("/api/tmdb")) {
+                    String path = url.queryParameter("path");
+                    if (path != null) {
+                        HttpUrl directBase = HttpUrl.parse("https://api.themoviedb.org/");
+                        if (directBase != null) {
+                            HttpUrl.Builder newUrlBuilder = directBase.newBuilder();
+
+                            for (String segment : path.split("/")) {
+                                if (!segment.isEmpty()) {
+                                    newUrlBuilder.addPathSegment(segment);
+                                }
+                            }
+
+                            for (int i = 0; i < url.querySize(); i++) {
+                                String name = url.queryParameterName(i);
+                                if (!"path".equals(name)) {
+                                    String value = url.queryParameterValue(i);
+                                    if (value != null) {
+                                        newUrlBuilder.setQueryParameter(name, value);
+                                    }
+                                }
+                            }
+
+                            newUrlBuilder.setQueryParameter("api_key", TMDB_API_KEY);
+                            request = request.newBuilder()
+                                    .url(newUrlBuilder.build())
+                                    .build();
+                        }
+                    }
+                }
+            }
+            return chain.proceed(request);
+        }
+    }
+}

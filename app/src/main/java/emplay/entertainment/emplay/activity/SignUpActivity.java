@@ -38,10 +38,8 @@ public class SignUpActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        // Check if the user is already signed in
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            // If the user is signed in, navigate to MainActivity
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
@@ -92,7 +90,6 @@ public class SignUpActivity extends AppCompatActivity {
                                     FirebaseUser user = mAuth.getCurrentUser();
 
                                     if (user != null) {
-                                        // Update the user's profile with the username
                                         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                                 .setDisplayName(username)
                                                 .build();
@@ -106,7 +103,6 @@ public class SignUpActivity extends AppCompatActivity {
                                                                     "Account created! Welcome, " + username,
                                                                     Toast.LENGTH_SHORT).show();
 
-                                                            // Optionally, pass the username to the next activity
                                                             Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                                                             intent.putExtra("username", username);
                                                             startActivity(intent);

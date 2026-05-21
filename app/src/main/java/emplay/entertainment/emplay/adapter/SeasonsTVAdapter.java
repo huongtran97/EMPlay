@@ -9,25 +9,35 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
-import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.SeasonsModel;
 
 public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.SeasonsViewHolder> {
+
     private ArrayList<SeasonsModel> seasonsList;
     private Context context;
+    private OnSeasonClickListener onSeasonClickListener;
+
+    public interface OnSeasonClickListener {
+        void onSeasonClick(SeasonsModel season);
+    }
 
     public SeasonsTVAdapter(List<SeasonsModel> seasonsList, Context context) {
         this.seasonsList = (ArrayList<SeasonsModel>) seasonsList;
         this.context = context;
+    }
+
+    public SeasonsTVAdapter(List<SeasonsModel> seasonsList, Context context,
+                            OnSeasonClickListener listener) {
+        this.seasonsList = (ArrayList<SeasonsModel>) seasonsList;
+        this.context = context;
+        this.onSeasonClickListener = listener;
     }
 
     public void updateData(List<SeasonsModel> newSeasonsList) {
@@ -38,34 +48,34 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
 
     @NonNull
     @Override
-    public SeasonsTVAdapter.SeasonsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public SeasonsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.search_result_tv_season_item, parent, false);
         return new SeasonsViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SeasonsTVAdapter.SeasonsViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull SeasonsViewHolder holder, int position) {
         SeasonsModel seasonsModel = seasonsList.get(position);
         if (seasonsModel != null) {
-            // Set the name and number of episodes
             holder.name.setText(seasonsModel.getName());
-            holder.episode.setText(String.valueOf("Number of episodes: " + seasonsModel.getNumberOfEpisodes()));
+            holder.episode.setText("Number of episodes: " + seasonsModel.getNumberOfEpisodes());
 
-            // Handle null or empty poster path
             String posterUrl = null;
             if (seasonsModel.getPosterPath() != null && !seasonsModel.getPosterPath().isEmpty()) {
-                // Use poster path if available
                 posterUrl = "https://image.tmdb.org/t/p/w500" + seasonsModel.getPosterPath();
             }
 
-            // Load the image using Glide, fallback to placeholder if posterUrl is null
             Glide.with(context)
-                    .load(posterUrl != null ? posterUrl : R.drawable.placeholder_image) // If posterUrl is null, use the placeholder image
-                    .placeholder(R.drawable.placeholder_image) // Set placeholder image
+                    .load(posterUrl != null ? posterUrl : R.drawable.placeholder_image)
+                    .placeholder(R.drawable.placeholder_image)
                     .into(holder.poster);
+
+            holder.itemView.setOnClickListener(v -> {
+                if (onSeasonClickListener != null) {
+                    onSeasonClickListener.onSeasonClick(seasonsModel);
+                }
+            });
         }
-
-
     }
 
     @Override
@@ -73,10 +83,11 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
         return seasonsList.size();
     }
 
-    public class SeasonsViewHolder extends ViewHolder {
+    public class SeasonsViewHolder extends RecyclerView.ViewHolder {
         TextView name;
         TextView episode;
         ImageView poster;
+
         public SeasonsViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.name);

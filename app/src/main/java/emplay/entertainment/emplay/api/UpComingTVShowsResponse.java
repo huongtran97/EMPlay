@@ -31,7 +31,6 @@ public class UpComingTVShowsResponse {
         @SerializedName("minimum")
         private String minimum;
 
-        // Getters and setters
         public String getMaximum() {
             return maximum;
         }
@@ -293,7 +292,6 @@ public class UpComingTVShowsResponse {
         @SerializedName("name")
         private String name;
 
-        // Getters and Setters
         public int getId() {
             return id;
         }

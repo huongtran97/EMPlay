@@ -5,31 +5,74 @@
     android:id="@+id/movie_by_genres_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
+    android:background="#0A0A0A"
     tools:context=".fragment.MovieByGenresFragment">
 
     <TextView
         android:id="@+id/tv_genres"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-smallcaps"
-        android:padding="10dp"
+        android:fontFamily="@font/black_han_sans"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp"
         android:text="Genre name goes here"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:textSize="22sp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tv_by_genre_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:scrollbars="horizontal"
+        android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/tv_genres"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/pagination_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Pagination Bar -->
+    <LinearLayout
+        android:id="@+id/pagination_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="#0A0A0A"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/btn_prev"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="@drawable/rounded_btn_bg"
+            android:contentDescription="Previous page"
+            android:enabled="false" />
+
+        <TextView
+            android:id="@+id/page_indicator"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Page 1"
+            android:textColor="#888888"
+            android:textSize="13sp" />
+
+        <ImageButton
+            android:id="@+id/btn_next"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_arrow_forward"
+            android:background="@drawable/rounded_btn_bg"
+            android:contentDescription="Next page" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

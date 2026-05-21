@@ -38,7 +38,6 @@ public class TVShowGenresAdapter extends RecyclerView.Adapter<TVShowGenresAdapte
         GenresModel genre = genresList.get(position);
         holder.genres.setText(genre.getName());
         holder.itemView.setOnClickListener(v -> {
-            // Pass both genre ID and genre name
             TVShowsByGenresFragment fragment = TVShowsByGenresFragment.newInstance(genre.getId(), genre.getName());
             FragmentTransaction transaction = ((FragmentActivity) context).getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, fragment);

@@ -2,7 +2,6 @@ package emplay.entertainment.emplay.api;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
-import emplay.entertainment.emplay.models.TrailerModel;
 
 public class MoviesTrailerResponses {
 
@@ -13,7 +12,6 @@ public class MoviesTrailerResponses {
     private List<TrailerModel> results;
 
 
-    // Parameterized constructor
     public MoviesTrailerResponses(int id, List<TrailerModel> results) {
         this.id = id;
         this.results = results;
@@ -35,7 +33,6 @@ public class MoviesTrailerResponses {
         this.results = results;
     }
 
-    // Nested TrailerModel class
     public static class TrailerModel {
         @SerializedName("id")
         private String id;
@@ -49,6 +46,8 @@ public class MoviesTrailerResponses {
         private String key;
         @SerializedName("size")
         private int size;
+        @SerializedName("site")
+        private String site;
         @SerializedName("type")
         private String type;
         @SerializedName("official")
@@ -57,13 +56,14 @@ public class MoviesTrailerResponses {
         private String published_at;
 
 
-        public TrailerModel(String id, String iso_639_1, String iso_3166_1, String name, String key, int size, String type, boolean official, String published_at) {
+        public TrailerModel(String id, String iso_639_1, String iso_3166_1, String name, String key, int size, String site, String type, boolean official, String published_at) {
             this.id = id;
             this.iso_639_1 = iso_639_1;
             this.iso_3166_1 = iso_3166_1;
             this.name = name;
             this.key = key;
             this.size = size;
+            this.site = site;
             this.type = type;
             this.official = official;
             this.published_at = published_at;
@@ -120,6 +120,14 @@ public class MoviesTrailerResponses {
 
         public void setSize(int size) {
             this.size = size;
+        }
+
+        public String getSite() {
+            return site;
+        }
+
+        public void setSite(String site) {
+            this.site = site;
         }
 
         public String getType() {

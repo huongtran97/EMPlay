@@ -20,35 +20,15 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.TVShowModel;
 
 
-/**
- *  * @author Tran Ngoc Que Huong
- *  * @version 1.0
- *
- * Adapter for displaying a list of movies in a Search Movie RecyclerView.
- */
 public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVViewHolder> {
 
     private final List<TVShowModel> tvList;
     private final OnItemClickListener onItemClickListener;
 
-    /**
-     * Interface for handling item click events.
-     */
     public interface OnItemClickListener {
-        /**
-         * Called when a movie item is clicked.
-         *
-         * @param tv The movie that was clicked.
-         */
         void onItemClick(TVShowModel tv);
     }
 
-    /**
-     * Constructor for the SearchMovieAdapter.
-     *
-     * @param tvList          The list of movies to be displayed.
-     * @param onItemClickListener The listener for item click events.
-     */
     public SearchTVAdapter(List<TVShowModel> tvList, OnItemClickListener onItemClickListener) {
         this.tvList = tvList;
         this.onItemClickListener = onItemClickListener;
@@ -86,9 +66,6 @@ public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVView
         return tvList.size();
     }
 
-    /**
-     * ViewHolder for movie items in the RecyclerView.
-     */
     public static class TVViewHolder extends RecyclerView.ViewHolder {
         TextView title;
         TextView firstAirDate;
@@ -96,11 +73,6 @@ public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVView
         ImageView poster;
         RatingBar ratingBar;
 
-        /**
-         * Constructor for the MovieViewHolder.
-         *
-         * @param itemView The view for each movie item.
-         */
         public TVViewHolder(@NonNull View itemView) {
             super(itemView);
             title = itemView.findViewById(R.id.search_title);

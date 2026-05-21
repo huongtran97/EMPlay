@@ -14,7 +14,6 @@ public class CastModel {
         this.character = character;
     }
 
-    // Getters and setters
     public int getId() {
         return id;
     }

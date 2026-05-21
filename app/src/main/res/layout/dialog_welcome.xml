@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_rounded_bg"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <!-- Logo -->
+    <ImageView
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/e_logo"
+        android:contentDescription="EMPlay logo"
+        android:layout_marginBottom="12dp" />
+
+    <!-- App Name -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Welcome to EMPlay"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Message -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Login to save your favourite movies and TV shows, or continue as a guest."
+        android:textColor="#BBBBBB"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="24dp"
+        android:paddingHorizontal="8dp"/>
+
+    <!-- Login Button -->
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Login / Register"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:backgroundTint="#E53935"
+        android:layout_marginBottom="12dp"
+        android:stateListAnimator="@null"/>
+
+    <!-- Guest Button -->
+    <Button
+        android:id="@+id/btn_guest"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="Continue as Guest"
+        android:textColor="#BBBBBB"
+        android:textSize="15sp"
+        android:backgroundTint="#2A2A2A"
+        android:stateListAnimator="@null"/>
+
+</LinearLayout>

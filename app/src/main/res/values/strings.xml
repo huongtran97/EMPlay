@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">EMPlay</string>
+    <!-- Replace with Web Client ID from Firebase Console → Authentication → Sign-in method → Google -->
+    <string name="google_web_client_id">244216604840-an9q5ck78228ekf8ge38sg7al6ls12ou.apps.googleusercontent.com</string>
     <string name="movie_Btn">Movie</string>
     <string name="music_Btn">Music</string>
     <string name="open" />

@@ -1,186 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- Poster — left side -->
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:elevation="8dp"
+        app:layout_constraintWidth_percent="0.32"
+        app:layout_constraintDimensionRatio="2:3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Title -->
     <TextView
         android:id="@+id/tvshow_information_title"
-        android:layout_width="233dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="13dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="sans-serif-smallcaps"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="@font/black_han_sans"
         android:text="Title goes here"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="154dp"
-        android:layout_height="239dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+    <!-- Genres -->
+    <TextView
+        android:id="@+id/tvshow_result_genres"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="sans-serif"
+        android:text="Genre goes here"
+        android:textColor="#777777"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_title" />
 
+    <!-- Rating Bar -->
     <RatingBar
         android:id="@+id/tvshow_ratingBar"
-        android:layout_width="232dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:isIndicator="true"
         android:numStars="5"
         android:rating="0"
-        android:scaleX="0.4"
-        android:scaleY="0.4"
+        android:scaleX="0.45"
+        android:scaleY="0.45"
         android:stepSize="0.5"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.259"
+        android:theme="@style/RatingBar"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/tvshow_result_genres" />
 
-    <TextView
-        android:id="@+id/tvshow_result_genres"
-        android:layout_width="210dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="sans-serif-light"
-        android:text="Geners goes here"
-        android:textAlignment="center"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.474"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_title" />
-
-    <TextView
-        android:id="@+id/tvshow_information_seasons"
-        android:layout_width="254dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="4dp"
-        android:fontFamily="sans-serif-light"
-        android:text="Seasons goes here"
-        android:textAlignment="viewStart"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_language" />
-
-    <TextView
-        android:id="@+id/tvshow_information_first_air_date"
-        android:layout_width="139dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="4dp"
-        android:fontFamily="sans-serif-light"
-        android:text="First air date goes here"
-        android:textAlignment="viewStart"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_product_country" />
-
-    <ImageButton
-        android:id="@+id/add_to_library_btn"
-        android:layout_width="37dp"
-        android:layout_height="35dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="36dp"
-        android:backgroundTint="#00302E2E"
-        app:layout_constraintEnd_toStartOf="@+id/tvshow_information_first_air_date"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:srcCompat="@drawable/baseline_favorite_border_24" />
-
-    <Button
-        android:id="@+id/trailer_btn"
-        android:layout_width="89dp"
-        android:layout_height="36dp"
-        android:layout_marginTop="8dp"
-        android:backgroundTint="#6A302E2E"
-        android:fontFamily="sans-serif-smallcaps"
-        android:text="trailer"
-        app:layout_constraintEnd_toStartOf="@+id/add_to_library_btn"
-        app:layout_constraintHorizontal_bias="0.941"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-    <TextView
-        android:id="@+id/tvshow_result_overview"
-        android:layout_width="410dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="26dp"
-        android:fontFamily="sans-serif-medium"
-        android:justificationMode="inter_word"
-        android:text="Overview goes here"
-        android:textAlignment="textStart"
-        android:textColor="@color/white"
-        android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/trailer_btn" />
-
+    <!-- Meta info -->
     <TextView
         android:id="@+id/tvshow_result_language"
-        android:layout_width="203dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:fontFamily="sans-serif-light"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="sans-serif"
         android:text="Language goes here"
-        android:textAlignment="viewStart"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
+        android:textColor="#555555"
+        android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/tvshow_ratingBar" />
 
     <TextView
-        android:id="@+id/tvshow_result_episodes"
-        android:layout_width="229dp"
+        android:id="@+id/tvshow_information_seasons"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="4dp"
-        android:text="episodes goes here"
-        android:textAlignment="viewStart"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="sans-serif"
+        android:text="Seasons goes here"
+        android:textColor="#555555"
+        android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_language" />
+
+    <TextView
+        android:id="@+id/tvshow_result_episodes"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="sans-serif"
+        android:text="Episodes goes here"
+        android:textColor="#555555"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/tvshow_information_seasons" />
 
     <TextView
         android:id="@+id/tvshow_result_product_country"
-        android:layout_width="229dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="28dp"
-        android:layout_marginTop="4dp"
-        android:text="Product country goes here"
-        android:textColor="@color/white"
-        android:textSize="12sp"
-        android:textStyle="italic"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="sans-serif"
+        android:text="Country goes here"
+        android:textColor="#555555"
+        android:textSize="11sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/imageView"
         app:layout_constraintTop_toBottomOf="@+id/tvshow_result_episodes" />
+
+    <TextView
+        android:id="@+id/tvshow_information_first_air_date"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginEnd="12dp"
+        android:fontFamily="sans-serif"
+        android:text="First air date goes here"
+        android:textColor="#555555"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_product_country" />
+
+    <!-- Trailer + Favourite buttons -->
+    <LinearLayout
+        android:id="@+id/action_buttons"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="12dp"
+        android:orientation="horizontal"
+        android:gravity="start"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_first_air_date">
+
+        <Button
+            android:id="@+id/trailer_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginEnd="10dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:backgroundTint="#E53935"
+            android:text="▶  Trailer"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-medium"
+            android:stateListAnimator="@null"
+            app:cornerRadius="20dp"/>
+
+        <ImageButton
+            android:id="@+id/add_to_library_btn"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@android:color/transparent"
+            android:padding="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:srcCompat="@drawable/baseline_favorite_border_24" />
+
+    </LinearLayout>
+
+    <!-- Overview -->
+    <TextView
+        android:id="@+id/tvshow_result_overview"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:fontFamily="sans-serif"
+        android:lineSpacingExtra="4dp"
+        android:text="Overview goes here"
+        android:textColor="#BBBBBB"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -19,10 +19,12 @@
         android:id="@+id/movie_bottom_navigation_view"
         android:layout_width="0dp"
         android:layout_height="50dp"
-        android:background="#A18C8C"
+        android:background="@color/bottom_nav_background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:menu="@menu/movie_bottom_navigate_menu" />
+        app:menu="@menu/movie_bottom_navigate_menu"
+        app:itemIconTint="@color/bottom_nav_selector"
+        app:itemTextColor="@color/bottom_nav_selector"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

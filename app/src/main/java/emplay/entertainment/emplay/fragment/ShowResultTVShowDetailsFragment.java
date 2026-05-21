@@ -1,16 +1,16 @@
 package emplay.entertainment.emplay.fragment;
 
-
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -19,27 +19,23 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.gson.Gson;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
-
+import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.api.TVShowCreditsResponses;
 import emplay.entertainment.emplay.api.TVShowDetailsResponse;
 import emplay.entertainment.emplay.api.TVShowSimilarResponse;
+import emplay.entertainment.emplay.api.MoviesTrailerResponses;
 import emplay.entertainment.emplay.api.TVShowsTrailerResponses;
-import emplay.entertainment.emplay.api.TVShowsTrailerResponses.TrailerModel;
 import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.SeasonsModel;
 import emplay.entertainment.emplay.models.TVShowModel;
@@ -51,23 +47,26 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private static final String ARG_TV_ID = "TV_ID";
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
-    private static final String BASE_URL = "https://api.themoviedb.org/";
+
+    private static final int PAGE_SIZE = 9;
 
     private int tvId;
     private List<TVShowModel> tvInformationList;
     private List<SeasonsModel> seasonsList;
     private List<CastModel> castList;
-    private List<TVShowModel> suggestionList;
+    private List<TVShowModel> allSuggestions = new ArrayList<>();
+    private int suggestionPage = 1;
     private RecyclerView detailRecyclerView;
     private RecyclerView seasonsRecyclerview;
     private RecyclerView castRecyclerView;
     private RecyclerView suggestionRecyclerView;
+    private LinearLayout suggestionPaginationBar;
+    private TextView suggestionPageIndicator;
+    private ImageButton suggestionBtnPrev;
+    private ImageButton suggestionBtnNext;
     private TVShowInformationAdapter tvAdapter;
     private SeasonsTVAdapter seasonAdapter;
     private CastAdapter castAdapter;
@@ -87,54 +86,75 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.search_result_tv_view, container, false);
 
-        // Initialize RecyclerViews
         detailRecyclerView = view.findViewById(R.id.search_result_recyclerview);
         seasonsRecyclerview = view.findViewById(R.id.search_result_seasons_recyclerview);
         castRecyclerView = view.findViewById(R.id.search_result_cast_recyclerview);
         suggestionRecyclerView = view.findViewById(R.id.search_result_suggestion_recyclerview);
+        suggestionPaginationBar = view.findViewById(R.id.suggestion_pagination_bar);
+        suggestionPageIndicator = view.findViewById(R.id.suggestion_page_indicator);
+        suggestionBtnPrev = view.findViewById(R.id.suggestion_btn_prev);
+        suggestionBtnNext = view.findViewById(R.id.suggestion_btn_next);
 
-        // Set layout managers for RecyclerViews
         detailRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         seasonsRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         castRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         suggestionRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
 
-        // Initialize lists for data
         tvInformationList = new ArrayList<>();
         seasonsList = new ArrayList<>();
         castList = new ArrayList<>();
-        suggestionList = new ArrayList<>();
 
-        // Initialize adapters and pass the lists
-        tvAdapter = new TVShowInformationAdapter(tvInformationList, getActivity());
-        seasonAdapter = new SeasonsTVAdapter(seasonsList, getContext());
-        castAdapter = new CastAdapter(castList, getContext());
-        suggestionAdapter = new SuggestionTVAdapter(suggestionList, getContext(), this::onItemClicked);
+        tvAdapter = new TVShowInformationAdapter(tvInformationList, requireActivity());
 
-        // Set adapters to RecyclerViews
+        seasonAdapter = new SeasonsTVAdapter(seasonsList, requireActivity(), season -> {
+            SeasonDetailFragment fragment = SeasonDetailFragment.newInstance(
+                    tvId, season.getSeasonNumber());
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+
+        castAdapter = new CastAdapter(castList, requireActivity(), cast -> {
+            CastDetailFragment fragment = CastDetailFragment.newInstance(cast.getId());
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+
+        suggestionAdapter = new SuggestionTVAdapter(new ArrayList<>(), getContext(), this::onItemClicked);
+
+        suggestionBtnPrev.setOnClickListener(v -> {
+            suggestionPage--;
+            showSuggestionPage();
+            suggestionRecyclerView.scrollToPosition(0);
+        });
+        suggestionBtnNext.setOnClickListener(v -> {
+            suggestionPage++;
+            showSuggestionPage();
+            suggestionRecyclerView.scrollToPosition(0);
+        });
+
         detailRecyclerView.setAdapter(tvAdapter);
         seasonsRecyclerview.setAdapter(seasonAdapter);
         castRecyclerView.setAdapter(castAdapter);
         suggestionRecyclerView.setAdapter(suggestionAdapter);
 
-        // Initialize API service
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        detailRecyclerView.setNestedScrollingEnabled(false);
+        suggestionRecyclerView.setNestedScrollingEnabled(false);
 
-        apiService = retrofit.create(MovieApiService.class);
+        apiService = ApiClient.getClient().create(MovieApiService.class);
 
         if (getArguments() != null) {
             tvId = getArguments().getInt(ARG_TV_ID, -1);
             if (tvId != -1) {
-                fetchTVDetails();
-                fetchTVSeasons();
+                fetchTVDetailsAndSeasons();
                 fetchTVCastList();
                 fetchTVSuggestionList();
                 fetchTrailersForMovie();
             } else {
-                Toast.makeText(getContext(), "Invalid movie ID", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Invalid TV show ID", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -143,8 +163,8 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private void onItemClicked(TVShowModel tvShow) {
         if (tvShow != null) {
-            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getId());
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getTVShowId());
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
             transaction.addToBackStack(null);
             transaction.commit();
@@ -154,81 +174,60 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     }
 
     private void fetchTrailersForMovie() {
-        Call<TVShowsTrailerResponses> call = apiService.getTVShowsTrailer(tvId, API_KEY);
+        Call<TVShowsTrailerResponses> call = apiService.getTVShowsTrailer(TMDBpath.tvShowTrailer(tvId));
         call.enqueue(new Callback<TVShowsTrailerResponses>() {
             @Override
             public void onResponse(Call<TVShowsTrailerResponses> call, Response<TVShowsTrailerResponses> response) {
                 if (response.isSuccessful()) {
                     TVShowsTrailerResponses trailerResponses = response.body();
-                    List<TVShowsTrailerResponses.TrailerModel> trailers = trailerResponses != null ? trailerResponses.getResults() : null;
+                    List<MoviesTrailerResponses.TrailerModel> allTrailers = trailerResponses != null ? trailerResponses.getResults() : null;
 
-                    Log.d("TrailerFetchSuccess", "Raw JSON Response: " + new Gson().toJson(trailerResponses));
+                    if (allTrailers == null || allTrailers.isEmpty()) {
+                        updateAdapterWithTrailers(new ArrayList<>());
+                        return;
+                    }
 
-                    List<TVShowsTrailerResponses.TrailerModel> teaserTrailers = new ArrayList<>();
-                    if (trailers != null) {
-                        for (TVShowsTrailerResponses.TrailerModel trailer : trailers) {
-                            Log.d("TrailerFetchSuccess", "Trailer Type: " + trailer.getType() + ", Key: " + trailer.getKey());
-                            if ("Trailer".equalsIgnoreCase(trailer.getType())) {
-                                teaserTrailers.add(trailer);
-                            } else {
-
-                            }
+                    // Prefer official YouTube trailers; fall back to any YouTube video if none found
+                    List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
+                    for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
+                        if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
+                            filtered.add(trailer);
                         }
                     }
-
-                    Log.d("TrailerFetchSuccess", "Filtered Teaser trailers size: " + teaserTrailers.size());
-
-                    // Update the adapter with the filtered teaser trailers
-                    List<TrailerModel> adapterTrailers = convertToTrailerModels(teaserTrailers);
-                    if (tvAdapter != null) {
-                        tvAdapter.setTeaserTrailers(adapterTrailers);
+                    if (filtered.isEmpty()) {
+                        for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
+                            if ("YouTube".equalsIgnoreCase(trailer.getSite())) filtered.add(trailer);
+                        }
                     }
-
-                    // Handle the first trailer, if available
-                    if (!teaserTrailers.isEmpty()) {
-                        TVShowsTrailerResponses.TrailerModel firstTeaser = teaserTrailers.get(0);
-                        firstTeaser.getKey();
-                    } else {
-                        Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.e("TrailerFetchError", "Response Code: " + response.code() + ", Message: " + response.message());
-                    Toast.makeText(getContext(), "Failed to retrieve trailers. Response Code: " + response.code(), Toast.LENGTH_SHORT).show();
+                    updateAdapterWithTrailers(filtered);
                 }
             }
 
             @Override
-            public void onFailure(Call<TVShowsTrailerResponses> call, Throwable t) {
-                Log.e("TrailerFetchError", "Error fetching trailers: " + t.getMessage());
-                Toast.makeText(getContext(), "Error fetching trailers: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
+            public void onFailure(Call<TVShowsTrailerResponses> call, Throwable t) { }
         });
     }
 
-    private List<TVShowsTrailerResponses.TrailerModel> convertToTrailerModels(List<TVShowsTrailerResponses.TrailerModel> apiTrailers) {
-        List<TVShowsTrailerResponses.TrailerModel> adapterTrailers = new ArrayList<>();
-
-        if (apiTrailers != null) {
-            for (TVShowsTrailerResponses.TrailerModel apiTrailer : apiTrailers) {
-                TVShowsTrailerResponses.TrailerModel trailerModel = new TVShowsTrailerResponses.TrailerModel(
-                        apiTrailer.getKey(),
-                        apiTrailer.getName());
-                adapterTrailers.add(trailerModel);
-            }
+    private void updateAdapterWithTrailers(List<MoviesTrailerResponses.TrailerModel> trailers) {
+        if (tvAdapter != null) {
+            tvAdapter.setTeaserTrailers(trailers);
         }
-
-        return adapterTrailers;
     }
 
 
-    private void fetchTVDetails() {
-        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(tvId, API_KEY);
+    /**
+     * Fetches TV show details and seasons in a single API call.
+     * Previously split into fetchTVDetails() + fetchTVSeasons() — both hit the same endpoint.
+     */
+    private void fetchTVDetailsAndSeasons() {
+        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvId));
         call.enqueue(new Callback<TVShowDetailsResponse>() {
             @Override
             public void onResponse(Call<TVShowDetailsResponse> call, Response<TVShowDetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     TVShowDetailsResponse tvDetails = response.body();
 
+                    // --- Populate TV info ---
                     List<String> genres = new ArrayList<>();
                     if (tvDetails.getGenres() != null) {
                         for (TVShowDetailsResponse.Genre genre : tvDetails.getGenres()) {
@@ -237,9 +236,33 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                     }
                     List<String> productionCountries = new ArrayList<>();
                     if (tvDetails.getProduction_countries() != null) {
-                        for (TVShowDetailsResponse.ProductionCountry productionCountry : tvDetails.getProduction_countries()) {
-                            productionCountries.add(productionCountry.getName());
+                        for (TVShowDetailsResponse.ProductionCountry pc : tvDetails.getProduction_countries()) {
+                            productionCountries.add(pc.getName());
                         }
+                    }
+                    // Populate seasons
+                    List<TVShowDetailsResponse.Season> apiSeasons = tvDetails.getSeasons();
+                    List<SeasonsModel> seasonsModels = new ArrayList<>();
+                    if (apiSeasons != null && !apiSeasons.isEmpty()) {
+                        for (TVShowDetailsResponse.Season season : apiSeasons) {
+                            SeasonsModel sm = new SeasonsModel(
+                                    season.getId(),
+                                    season.getName(),
+                                    season.getPoster_path(),
+                                    season.getEpisode_count(),
+                                    season.getSeason_number()
+                            );
+                            seasonsModels.add(sm);
+                        }
+
+                        // Sort by season number
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                            seasonsModels.sort((a, b) -> Integer.compare(a.getSeasonNumber(), b.getSeasonNumber()));
+                        }
+
+                        ShowResultTVShowDetailsFragment.this.seasonsList.clear();
+                        ShowResultTVShowDetailsFragment.this.seasonsList.addAll(seasonsModels);
+                        seasonAdapter.notifyDataSetChanged();
                     }
 
                     tvInformationList.clear();
@@ -256,11 +279,11 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                                 tvDetails.getNumber_of_seasons(),
                                 tvDetails.getNumber_of_episodes(),
                                 productionCountries,
-                                genres
+                                genres,
+                                seasonsModels
                         ));
                     }
                     tvAdapter.notifyDataSetChanged();
-                    // Set the background with the blurred poster image
                     setRecyclerViewBackground(tvDetails.getBackdrop_path());
 
                 } else {
@@ -275,78 +298,33 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         });
     }
 
-    private void fetchTVSeasons() {
-        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(tvId, API_KEY);
-        call.enqueue(new Callback<TVShowDetailsResponse>() {
-            @Override
-            public void onResponse(Call<TVShowDetailsResponse> call, Response<TVShowDetailsResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    TVShowDetailsResponse tvDetails = response.body();
-
-                    List<TVShowDetailsResponse.Season> seasonList = tvDetails.getSeasons();
-                    if (seasonList != null && !seasonList.isEmpty()) {
-                        seasonsList.clear();
-
-                        for (TVShowDetailsResponse.Season season : seasonList) {
-                            SeasonsModel seasonsModel = new SeasonsModel(
-                                    season.getId(),
-                                    season.getName(),
-                                    season.getPoster_path(),
-                                    season.getEpisode_count()
-                            );
-                            seasonsList.add(seasonsModel);
-                        }
-                        seasonAdapter.notifyDataSetChanged();
-                    }
-                } else {
-                    Toast.makeText(getContext(), "Failed to retrieve TV show seasons", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<TVShowDetailsResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Error fetching TV show seasons: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
     private void setRecyclerViewBackground(String backdropPath) {
         if (backdropPath == null || backdropPath.isEmpty()) {
-            return; // Handle case where backdropPath is null or empty
+            return;
         }
 
-        // Create the URL for the backdrop image
-        String posterUrl = "https://image.tmdb.org/t/p/w500/" + backdropPath;
-
-        // Load the image with Glide and apply the blur transformation
         Glide.with(this)
-                .load(posterUrl)
+                .load("https://image.tmdb.org/t/p/w500/" + backdropPath)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
                 .into(new CustomTarget<Drawable>() {
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        // Combine the blurred image with the gradient drawable
-                        Drawable[] layers = new Drawable[2];
-                        layers[0] = resource; // Blurred image
-
-                        // Use ContextCompat.getDrawable or Resources.getDrawable with theme
-                        layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg); // Gradient drawable
-
-                        LayerDrawable layerDrawable = new LayerDrawable(layers);
+                        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{
+                                resource,
+                                ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg)
+                        });
                         detailRecyclerView.setBackground(layerDrawable);
                     }
 
                     @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-                        // Handle when the load is cleared
-                    }
+                    public void onLoadCleared(@Nullable Drawable placeholder) { }
                 });
     }
 
 
     private void fetchTVCastList() {
-        Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(tvId, API_KEY);
+        Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(TMDBpath.tvShowCredits(tvId));
         call.enqueue(new Callback<TVShowCreditsResponses>() {
             @Override
             public void onResponse(Call<TVShowCreditsResponses> call, Response<TVShowCreditsResponses> response) {
@@ -358,7 +336,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                         List<CastModel> castModels = new ArrayList<>();
                         for (TVShowCreditsResponses.Cast cast : castList) {
                             CastModel castModel = new CastModel(
-                                    cast.getCastId(),
+                                    cast.getId(),
                                     cast.getName(),
                                     cast.getProfilePath(),
                                     cast.getCharacter()
@@ -373,63 +351,35 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                     }
                 } else {
                     Toast.makeText(requireContext(), "Failed to retrieve cast list", Toast.LENGTH_SHORT).show();
-                    Log.e("TVShowDetails", "Response Error: " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<TVShowCreditsResponses> call, Throwable t) {
                 Toast.makeText(requireContext(), "Error fetching cast list: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("TVShowDetails", "Fetch Error", t);
             }
         });
     }
 
 
     private void fetchTVSuggestionList() {
-        Call<TVShowSimilarResponse> call = apiService.getTVShowSimilar(tvId, API_KEY);
+        Call<TVShowSimilarResponse> call = apiService.getTVShowSimilar(TMDBpath.tvShowSimilar(tvId));
         call.enqueue(new Callback<TVShowSimilarResponse>() {
             @Override
             public void onResponse(Call<TVShowSimilarResponse> call, Response<TVShowSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    TVShowSimilarResponse suggestionResponse = response.body();
-
-                    suggestionList.clear();
-                    List<TVShowModel> suggestion = suggestionResponse.getResults();
-                    if (suggestion != null) {
-                        // Filter out TV shows with null posterPath
-                        List<TVShowModel> filteredSuggestions = new ArrayList<>();
-                        for (TVShowModel tv : suggestion) {
+                    List<TVShowModel> results = response.body().getResults();
+                    allSuggestions.clear();
+                    if (results != null) {
+                        for (TVShowModel tv : results) {
                             if (tv.getPosterPath() != null) {
-                                filteredSuggestions.add(new TVShowModel(
-                                        tv.getId(),
-                                        tv.getName(),
-                                        tv.getVoteAverage(),
-                                        tv.getPosterPath(),
-                                        tv.getOverview(),
-                                        tv.getOriginalLanguage(),
-                                        tv.getFirstAirDate()
-                                ));
-                                // Log each item added to the filtered suggestion list
-                                Log.d("Suggestion Item", "TV Show added: " + tv.getName());
+                                allSuggestions.add(tv);
                             }
                         }
-                        suggestionList.addAll(filteredSuggestions);
-                        // Log the size of the suggestion list
-                        Log.d("Suggestion List", "Total TV Shows added: " + suggestionList.size());
-                    } else {
-                        Log.d("API Response", "Recommendations are null");
                     }
-                    suggestionAdapter.notifyDataSetChanged();
-                    Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
+                    suggestionPage = 1;
+                    showSuggestionPage();
                 } else {
-                    Log.e("ShowResultTVShowDetailsFragment", "Failed to load TV show recommendations. Status code: " + response.code());
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("ShowResultTVShowDetailsFragment", "Error response: " + errorBody);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     Toast.makeText(getContext(), "Failed to load TV show recommendations", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -437,12 +387,27 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             @Override
             public void onFailure(Call<TVShowSimilarResponse> call, Throwable t) {
                 Toast.makeText(getContext(), "Failed to load TV show recommendations: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("ShowResultTVShowDetailsFragment", "Error fetching TV show recommendations", t);
             }
         });
     }
 
+    private void showSuggestionPage() {
+        int total = allSuggestions.size();
+        int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
+        int fromIndex = (suggestionPage - 1) * PAGE_SIZE;
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, total);
 
+        suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+
+        if (totalPages > 1) {
+            suggestionPaginationBar.setVisibility(View.VISIBLE);
+            suggestionPageIndicator.setText("Page " + suggestionPage + " of " + totalPages);
+            suggestionBtnPrev.setEnabled(suggestionPage > 1);
+            suggestionBtnNext.setEnabled(suggestionPage < totalPages);
+        } else {
+            suggestionPaginationBar.setVisibility(View.GONE);
+        }
+    }
 
 }
 

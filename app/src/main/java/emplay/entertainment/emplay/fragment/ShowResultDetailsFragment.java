@@ -9,6 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,19 +29,18 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.google.gson.Gson;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.MovieCreditsResponse;
 import emplay.entertainment.emplay.api.MovieDetailsResponse;
 import emplay.entertainment.emplay.api.MovieSimilarResponse;
 import emplay.entertainment.emplay.api.MoviesTrailerResponses;
-import emplay.entertainment.emplay.api.MoviesTrailerResponses.TrailerModel;
 import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.adapter.CastAdapter;
@@ -48,22 +50,25 @@ import jp.wasabeef.glide.transformations.BlurTransformation;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ShowResultDetailsFragment extends Fragment {
 
     private static final String ARG_MOVIE_ID = "MOVIE_ID";
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
-    private static final String BASE_URL = "https://api.themoviedb.org/";
+
+    private static final int PAGE_SIZE = 9;
 
     private int movieId;
     private List<MovieModel> movieList;
     private List<CastModel> castList;
-    private List<MovieModel> suggestionList;
+    private List<MovieModel> allSuggestions = new ArrayList<>();
+    private int suggestionPage = 1;
     private RecyclerView detailRecyclerView;
     private RecyclerView castRecyclerView;
     private RecyclerView suggestionRecyclerView;
+    private LinearLayout suggestionPaginationBar;
+    private TextView suggestionPageIndicator;
+    private ImageButton suggestionBtnPrev;
+    private ImageButton suggestionBtnNext;
     private MovieResultAdapter movieResultAdapter;
     private CastAdapter castAdapter;
     private SuggestionAdapter suggestionAdapter;
@@ -85,7 +90,10 @@ public class ShowResultDetailsFragment extends Fragment {
         detailRecyclerView = view.findViewById(R.id.search_result_recyclerview);
         castRecyclerView = view.findViewById(R.id.search_result_cast_recyclerview);
         suggestionRecyclerView = view.findViewById(R.id.search_result_suggestion_recyclerview);
-
+        suggestionPaginationBar = view.findViewById(R.id.suggestion_pagination_bar);
+        suggestionPageIndicator = view.findViewById(R.id.suggestion_page_indicator);
+        suggestionBtnPrev = view.findViewById(R.id.suggestion_btn_prev);
+        suggestionBtnNext = view.findViewById(R.id.suggestion_btn_next);
 
         detailRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         castRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -93,23 +101,36 @@ public class ShowResultDetailsFragment extends Fragment {
 
         movieList = new ArrayList<>();
         castList = new ArrayList<>();
-        suggestionList = new ArrayList<>();
 
-        movieResultAdapter = new MovieResultAdapter(movieList, getActivity());
-        castAdapter = new CastAdapter(castList, getActivity());
-        suggestionAdapter = new SuggestionAdapter(suggestionList, getContext(), this::onItemClicked);
+        movieResultAdapter = new MovieResultAdapter(movieList, requireActivity());
+        castAdapter = new CastAdapter(castList, requireActivity(), cast -> {
+            CastDetailFragment fragment = CastDetailFragment.newInstance(cast.getId());
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+        suggestionAdapter = new SuggestionAdapter(new ArrayList<>(), getContext(), this::onItemClicked);
+
+        suggestionBtnPrev.setOnClickListener(v -> {
+            suggestionPage--;
+            showSuggestionPage();
+            suggestionRecyclerView.scrollToPosition(0);
+        });
+        suggestionBtnNext.setOnClickListener(v -> {
+            suggestionPage++;
+            showSuggestionPage();
+            suggestionRecyclerView.scrollToPosition(0);
+        });
 
         detailRecyclerView.setAdapter(movieResultAdapter);
         castRecyclerView.setAdapter(castAdapter);
         suggestionRecyclerView.setAdapter(suggestionAdapter);
 
-        // Initialize Retrofit and MovieApiService
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        detailRecyclerView.setNestedScrollingEnabled(false);
+        suggestionRecyclerView.setNestedScrollingEnabled(false);
 
-        apiService = retrofit.create(MovieApiService.class);
+        apiService = ApiClient.getClient().create(MovieApiService.class);
 
         if (getArguments() != null) {
             movieId = getArguments().getInt(ARG_MOVIE_ID, -1);
@@ -129,7 +150,7 @@ public class ShowResultDetailsFragment extends Fragment {
     private void onItemClicked(MovieModel movie) {
         if (movie != null) {
             ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, showResultDetailsFragment);
             transaction.addToBackStack(null);
             transaction.commit();
@@ -139,72 +160,51 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void fetchTrailersForMovie() {
-        Call<MoviesTrailerResponses> call = apiService.getMoviesTrailer(movieId, API_KEY);
+        Call<MoviesTrailerResponses> call = apiService.getMoviesTrailer(TMDBpath.movieTrailer(movieId));
         call.enqueue(new Callback<MoviesTrailerResponses>() {
             @Override
             public void onResponse(Call<MoviesTrailerResponses> call, Response<MoviesTrailerResponses> response) {
                 if (response.isSuccessful()) {
                     MoviesTrailerResponses trailerResponses = response.body();
-                    List<MoviesTrailerResponses.TrailerModel> trailers = trailerResponses != null ? trailerResponses.getResults() : null;
+                    List<MoviesTrailerResponses.TrailerModel> allTrailers = trailerResponses != null ? trailerResponses.getResults() : null;
 
-                    Log.d("TrailerFetchSuccess", "Raw JSON Response: " + new Gson().toJson(trailerResponses));
+                    if (allTrailers == null || allTrailers.isEmpty()) {
+                        updateAdapterWithTrailers(new ArrayList<>());
+                        return;
+                    }
 
-                    List<MoviesTrailerResponses.TrailerModel> teaserTrailers = new ArrayList<>();
-                    if (trailers != null) {
-                        for (MoviesTrailerResponses.TrailerModel trailer : trailers) {
-                            Log.d("TrailerFetchSuccess", "Trailer Type: " + trailer.getType() + ", Key: " + trailer.getKey());
-                            if ("Official Trailer".equalsIgnoreCase(trailer.getName())) {
-                                teaserTrailers.add(trailer);
-                            }
+                    // Prefer official YouTube trailers; fall back to any YouTube video if none found
+                    List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
+                    for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
+                        if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
+                            filtered.add(trailer);
                         }
                     }
-
-                    Log.d("TrailerFetchSuccess", "Filtered Teaser trailers size: " + teaserTrailers.size());
-
-                    List<TrailerModel> adapterTrailers = convertToTrailerModels(teaserTrailers);
-                    if (movieResultAdapter != null) {
-                        movieResultAdapter.setTeaserTrailers(adapterTrailers);
+                    if (filtered.isEmpty()) {
+                        for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
+                            if ("YouTube".equalsIgnoreCase(trailer.getSite())) filtered.add(trailer);
+                        }
                     }
-
-                    // Handle the first trailer, if available
-                    if (!teaserTrailers.isEmpty()) {
-                        MoviesTrailerResponses.TrailerModel firstTeaser = teaserTrailers.get(0);
-                        firstTeaser.getKey();
-
-                    } else {
-                        Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Log.e("TrailerFetchError", "Response Code: " + response.code() + ", Message: " + response.message());
-                    Toast.makeText(getContext(), "Failed to retrieve trailers. Response Code: " + response.code(), Toast.LENGTH_SHORT).show();
+                    updateAdapterWithTrailers(filtered);
                 }
             }
 
             @Override
             public void onFailure(Call<MoviesTrailerResponses> call, Throwable t) {
-                Log.e("TrailerFetchError", "Error fetching trailers: " + t.getMessage());
-                Toast.makeText(getContext(), "Error fetching trailers: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("ShowResultDetails", "Failed to fetch trailers", t);
             }
         });
     }
 
-    private List<MoviesTrailerResponses.TrailerModel> convertToTrailerModels(List<MoviesTrailerResponses.TrailerModel> apiTrailers) {
-        List<MoviesTrailerResponses.TrailerModel> adapterTrailers = new ArrayList<>();
-
-        if (apiTrailers != null) {
-            for (MoviesTrailerResponses.TrailerModel apiTrailer : apiTrailers) {
-                MoviesTrailerResponses.TrailerModel trailerModel = new MoviesTrailerResponses.TrailerModel(
-                        apiTrailer.getKey(),
-                        apiTrailer.getName());
-                adapterTrailers.add(trailerModel);
-            }
+    private void updateAdapterWithTrailers(List<MoviesTrailerResponses.TrailerModel> trailers) {
+        if (movieResultAdapter != null) {
+            movieResultAdapter.setTeaserTrailers(trailers);
         }
-
-        return adapterTrailers;
     }
 
+
     private void fetchMovieDetails() {
-        Call<MovieDetailsResponse> call = apiService.getMovieDetails(movieId, API_KEY);
+        Call<MovieDetailsResponse> call = apiService.getMovieDetails(TMDBpath.movieDetails(movieId));
         call.enqueue(new Callback<MovieDetailsResponse>() {
             @Override
             public void onResponse(Call<MovieDetailsResponse> call, Response<MovieDetailsResponse> response) {
@@ -251,66 +251,37 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void setRecyclerViewBackground(String backdropPath, String posterPath) {
-        String imageUrl = null;
-
-        // Check if backdropPath is available and valid
+        // Pick available image; fall back to placeholder
+        Object imageSource;
         if (backdropPath != null && !backdropPath.isEmpty()) {
-            imageUrl = "https://image.tmdb.org/t/p/w500/" + backdropPath;
-        }
-        // If backdropPath is not available, check for posterPath
-        else if (posterPath != null && !posterPath.isEmpty()) {
-            imageUrl = "https://image.tmdb.org/t/p/w500/" + posterPath;
-        }
-
-        // If both backdropPath and posterPath are null/empty, load the placeholder image
-        if (imageUrl == null) {
-            Glide.with(this)
-                    .load(R.drawable.placeholder_image)  // Load the placeholder image
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
-                    .into(new CustomTarget<Drawable>() {
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                            Drawable[] layers = new Drawable[2];
-                            layers[0] = resource;
-                            layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg);
-                            LayerDrawable layerDrawable = new LayerDrawable(layers);
-                            detailRecyclerView.setBackground(layerDrawable);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                            // Handle when the load is cleared
-                        }
-                    });
+            imageSource = "https://image.tmdb.org/t/p/w500/" + backdropPath;
+        } else if (posterPath != null && !posterPath.isEmpty()) {
+            imageSource = "https://image.tmdb.org/t/p/w500/" + posterPath;
         } else {
-            // Load the valid image URL
-            Glide.with(this)
-                    .load(imageUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
-                    .into(new CustomTarget<Drawable>() {
-                        @Override
-                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                            Drawable[] layers = new Drawable[2];
-                            layers[0] = resource;
-                            layers[1] = ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg);
-                            LayerDrawable layerDrawable = new LayerDrawable(layers);
-                            detailRecyclerView.setBackground(layerDrawable);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                            // Handle when the load is cleared
-                        }
-                    });
+            imageSource = R.drawable.placeholder_image;
         }
+
+        Glide.with(this)
+                .load(imageSource)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
+                .into(new CustomTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        LayerDrawable layerDrawable = new LayerDrawable(new Drawable[]{
+                                resource,
+                                ContextCompat.getDrawable(requireContext(), R.drawable.gradient_bg)
+                        });
+                        detailRecyclerView.setBackground(layerDrawable);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) { }
+                });
     }
 
-
-
     private void fetchCastList() {
-        Call<MovieCreditsResponse> call = apiService.getMovieCredits(movieId, API_KEY);
+        Call<MovieCreditsResponse> call = apiService.getMovieCredits(TMDBpath.movieCredits(movieId));
         call.enqueue(new Callback<MovieCreditsResponse>() {
             @Override
             public void onResponse(Call<MovieCreditsResponse> call, Response<MovieCreditsResponse> response) {
@@ -321,7 +292,7 @@ public class ShowResultDetailsFragment extends Fragment {
                         List<CastModel> castModels = new ArrayList<>();
                         for (MovieCreditsResponse.Cast cast : castList) {
                             CastModel castModel = new CastModel(
-                                    cast.getCastId(),
+                                    cast.getId(),
                                     cast.getCastName(),
                                     cast.getProfilePath(),
                                     cast.getCharacter()
@@ -342,59 +313,29 @@ public class ShowResultDetailsFragment extends Fragment {
 
             @Override
             public void onFailure(Call<MovieCreditsResponse> call, Throwable t) {
-
                 Toast.makeText(getContext(), "Error fetching cast list: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchSuggestionList() {
-        Call<MovieSimilarResponse> call = apiService.getMovieSimilar(movieId, API_KEY);
+        Call<MovieSimilarResponse> call = apiService.getMovieSimilar(TMDBpath.movieSimilar(movieId));
         call.enqueue(new Callback<MovieSimilarResponse>() {
             @Override
             public void onResponse(Call<MovieSimilarResponse> call, Response<MovieSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    MovieSimilarResponse recommendationsResponse = response.body();
-                    Log.d("API Response", "Response body: " + recommendationsResponse.toString());
-
-                    // Ensure suggestionList is initialized
-                    if (suggestionList == null) {
-                        suggestionList = new ArrayList<>();
-                    }
-                    suggestionList.clear();
-
-                    List<MovieModel> recommendations = recommendationsResponse.getResults();
-                    if (recommendations != null && !recommendations.isEmpty()) {
-                        // Filter out movies with null posterPath
+                    List<MovieModel> recommendations = response.body().getResults();
+                    allSuggestions.clear();
+                    if (recommendations != null) {
                         for (MovieModel movie : recommendations) {
                             if (movie.getPosterPath() != null) {
-                                suggestionList.add(new MovieModel(
-                                        movie.getId(),
-                                        movie.getTitle(),
-                                        movie.getVoteAverage(),
-                                        movie.getPosterPath(),
-                                        movie.getOverview(),
-                                        movie.getOriginalLanguage(),
-                                        movie.getReleaseDate()
-                                ));
-                                // Log each item added to the suggestion list
-                                Log.d("Suggestion Item", "Movie added: " + movie.getTitle());
+                                allSuggestions.add(movie);
                             }
                         }
-                        // Log the size of the suggestion list
-                        Log.d("Suggestion List", "Total Movies added: " + suggestionList.size());
-                        suggestionAdapter.notifyDataSetChanged();
-                        Toast.makeText(getContext(), "Suggestions fetched successfully", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getContext(), "No suggestions available", Toast.LENGTH_SHORT).show();
                     }
+                    suggestionPage = 1;
+                    showSuggestionPage();
                 } else {
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("API Error", errorBody);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     Toast.makeText(getContext(), "Failed to load movie recommendations", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -404,6 +345,24 @@ public class ShowResultDetailsFragment extends Fragment {
                 Toast.makeText(getContext(), "Failed to load movie recommendations: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void showSuggestionPage() {
+        int total = allSuggestions.size();
+        int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
+        int fromIndex = (suggestionPage - 1) * PAGE_SIZE;
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, total);
+
+        suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+
+        if (totalPages > 1) {
+            suggestionPaginationBar.setVisibility(View.VISIBLE);
+            suggestionPageIndicator.setText("Page " + suggestionPage + " of " + totalPages);
+            suggestionBtnPrev.setEnabled(suggestionPage > 1);
+            suggestionBtnNext.setEnabled(suggestionPage < totalPages);
+        } else {
+            suggestionPaginationBar.setVisibility(View.GONE);
+        }
     }
 }
 

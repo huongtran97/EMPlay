@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_margin="4dp"
+    android:orientation="vertical">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/movie_card_view"
+    <TextView
+        android:id="@+id/movie_genres"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:layout_marginTop="10dp"
-        app:cardCornerRadius="10dp"
-        app:cardBackgroundColor="#BE302E2E">
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:background="@drawable/genre_chip_bg"
+        android:fontFamily="sans-serif-medium"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="11sp"
+        android:letterSpacing="0.05"
+        android:singleLine="true"/>
 
-        <TextView
-            android:id="@+id/movie_genres"
-            android:layout_width="80dp"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-smallcaps"
-            android:textAlignment="center"
-            android:textColor="@color/white"
-            android:textSize="12sp" />
-    </androidx.cardview.widget.CardView>
-
-</RelativeLayout>
+</LinearLayout>

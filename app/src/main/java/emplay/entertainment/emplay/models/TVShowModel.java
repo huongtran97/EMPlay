@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.List;
 
-public class TVShowModel implements Serializable {
+public class TVShowModel implements Serializable, MediaItem {
     @SerializedName("id")
     private int id;
     @SerializedName("name")
@@ -25,48 +25,13 @@ public class TVShowModel implements Serializable {
     private List<String> genres;
     @SerializedName("crew")
     private List<String> crew;
-    @SerializedName("seasons")
-    private List<String> seasons;
     @SerializedName("production_countries")
     private List<String> productionCountries;
     @SerializedName("number_of_episodes")
     private int numberOfEpisodes;
     @SerializedName("number_of_seasons")
     private int numberOfSeasons;
-
-    public TVShowModel(int id, String name, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String firstAirDate, List<String> seasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
-        this.id = id;
-        this.name = name;
-        this.voteAverage = voteAverage;
-        this.posterPath = posterPath;
-        this.backdropPath = backdropPath;
-        this.overview = overview;
-        this.originalLanguage = originalLanguage;
-        this.firstAirDate = firstAirDate;
-        this.seasons = seasons;
-        this.numberOfEpisodes = numberOfEpisodes;
-        this.productionCountries = productionCountries;
-        this.genres = genres;
-
-    }
-
-    public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview) {
-        this.id = id;
-        this.name = name;
-        this.voteAverage = voteAverage;
-        this.posterPath = posterPath;
-        this.overview = overview;
-    }
-
-    public TVShowModel(int id, String name, double voteAverage, String posterPath, String overview, String originalLanguage, String firstAirDate) {
-        this.id = id;
-        this.name = name;
-        this.voteAverage = voteAverage;
-        this.posterPath = posterPath;
-        this.overview = overview;
-        this.originalLanguage = originalLanguage;
-        this.firstAirDate = firstAirDate;
-    }
+    private List<SeasonsModel> seasonsInfo;
 
     public TVShowModel(int id, String name, String posterPath) {
         this.id = id;
@@ -74,16 +39,11 @@ public class TVShowModel implements Serializable {
         this.posterPath = posterPath;
     }
 
-
-    public TVShowModel(int id, String name, String posterPath, List<String> seasons, int numberOfEpisodes) {
-        this.id = id;
-        this.name = name;
-        this.posterPath = posterPath;
-        this.seasons = seasons;
-        this.numberOfEpisodes = numberOfEpisodes;
-    }
-
-    public TVShowModel(int id, String name, double voteAverage, String posterPath, String backdropPath, String overview, String originalLanguage, String firstAirDate, int numberOfSeasons, int numberOfEpisodes, List<String> productionCountries, List<String> genres) {
+    public TVShowModel(int id, String name, double voteAverage, String posterPath,
+                       String backdropPath, String overview, String originalLanguage,
+                       String firstAirDate, int numberOfSeasons, int numberOfEpisodes,
+                       List<String> productionCountries, List<String> genres,
+                       List<SeasonsModel> seasonsInfo) {
         this.id = id;
         this.name = name;
         this.voteAverage = voteAverage;
@@ -92,122 +52,57 @@ public class TVShowModel implements Serializable {
         this.overview = overview;
         this.originalLanguage = originalLanguage;
         this.firstAirDate = firstAirDate;
-        this.genres = genres;
-        this.productionCountries = productionCountries;
-        this.numberOfEpisodes = numberOfEpisodes;
         this.numberOfSeasons = numberOfSeasons;
-    }
-
-
-    // Getters and Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public double getVoteAverage() {
-        return voteAverage;
-    }
-
-    public void setVoteAverage(double voteAverage) {
-        this.voteAverage = voteAverage;
-    }
-
-    public String getPosterPath() {
-        return posterPath;
-    }
-
-    public void setPosterPath(String posterPath) {
-        this.posterPath = posterPath;
-    }
-    public String getBackdropPath() {
-        return backdropPath;
-    }
-
-    public void setBackdropPath(String backdropPath) {
-        this.backdropPath = backdropPath;
-    }
-
-    public String getOverview() {
-        return overview;
-    }
-
-    public void setOverview(String overview) {
-        this.overview = overview;
-    }
-
-    public String getOriginalLanguage() {
-        return originalLanguage;
-    }
-
-    public void setOriginalLanguage(String originalLanguage) {
-        this.originalLanguage = originalLanguage;
-    }
-
-    public String getFirstAirDate() {
-        return firstAirDate;
-    }
-
-    public void setFirstAirDate(String firstAirDate) {
-        this.firstAirDate = firstAirDate;
-    }
-
-    public List<String> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(List<String> genres) {
-        this.genres = genres;
-    }
-
-    public List<String> getCrew() {
-        return crew;
-    }
-
-    public void setCrew(List<String> crew) {
-        this.crew = crew;
-    }
-
-    public List<String> getSeasons() {
-        return seasons;
-    }
-
-    public void setSeasons(List<String> seasons) {
-        this.seasons = seasons;
-    }
-
-    public List<String> getProductionCountries() {
-        return productionCountries;
-    }
-
-    public void setProductionCountries(List<String> productionCountries) {
-        this.productionCountries = productionCountries;
-    }
-
-    public int getNumberOfEpisodes() {
-        return numberOfEpisodes;
-    }
-
-    public void setNumberOfEpisodes(int numberOfEpisodes) {
         this.numberOfEpisodes = numberOfEpisodes;
+        this.productionCountries = productionCountries;
+        this.genres = genres;
+        this.seasonsInfo = seasonsInfo;
     }
 
-    public int getNumberOfSeasons() {
-        return numberOfSeasons;
-    }
+    @Override
+    public int getMediaId() { return id; }
 
-    public void setNumberOfSeasons(int numberOfSeasons) {
-        this.numberOfSeasons = numberOfSeasons;
-    }
+    public int getTVShowId() { return id; }
+    public void setTVShowId(int id) { this.id = id; }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public double getVoteAverage() { return voteAverage; }
+    public void setVoteAverage(double voteAverage) { this.voteAverage = voteAverage; }
+
+    @Override
+    public String getPosterPath() { return posterPath; }
+    public void setPosterPath(String posterPath) { this.posterPath = posterPath; }
+
+    @Override
+    public String getBackdropPath() { return backdropPath; }
+    public void setBackdropPath(String backdropPath) { this.backdropPath = backdropPath; }
+
+    public String getOverview() { return overview; }
+    public void setOverview(String overview) { this.overview = overview; }
+
+    public String getOriginalLanguage() { return originalLanguage; }
+    public void setOriginalLanguage(String originalLanguage) { this.originalLanguage = originalLanguage; }
+
+    public String getFirstAirDate() { return firstAirDate; }
+    public void setFirstAirDate(String firstAirDate) { this.firstAirDate = firstAirDate; }
+
+    public List<String> getGenres() { return genres; }
+    public void setGenres(List<String> genres) { this.genres = genres; }
+
+    public List<String> getCrew() { return crew; }
+    public void setCrew(List<String> crew) { this.crew = crew; }
+
+    public List<SeasonsModel> getSeasonsInfo() { return seasonsInfo; }
+    public void setSeasonsInfo(List<SeasonsModel> seasonsInfo) { this.seasonsInfo = seasonsInfo; }
+
+    public List<String> getProductionCountries() { return productionCountries; }
+    public void setProductionCountries(List<String> productionCountries) { this.productionCountries = productionCountries; }
+
+    public int getNumberOfEpisodes() { return numberOfEpisodes; }
+    public void setNumberOfEpisodes(int numberOfEpisodes) { this.numberOfEpisodes = numberOfEpisodes; }
+
+    public int getNumberOfSeasons() { return numberOfSeasons; }
+    public void setNumberOfSeasons(int numberOfSeasons) { this.numberOfSeasons = numberOfSeasons; }
 }

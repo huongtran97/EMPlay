@@ -5,7 +5,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +24,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
@@ -36,6 +33,7 @@ import emplay.entertainment.emplay.adapter.GenresAdapter;
 import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.GenresResponse;
 import emplay.entertainment.emplay.api.MovieApiService;
+import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.api.TVShowResponse;
 import emplay.entertainment.emplay.models.GenresModel;
 import emplay.entertainment.emplay.models.SharedViewModel;
@@ -46,7 +44,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class SearchTVShowsFragment extends Fragment {
-    private static final String API_KEY = "ff3dce8592d15d036bf53cbedeca224b";
+
     private SearchTVAdapter searchAdapter;
     private GenresAdapter genresAdapter;
     private List<GenresModel> genresList;
@@ -57,25 +55,24 @@ public class SearchTVShowsFragment extends Fragment {
     private SharedViewModel viewModel;
     private LinearLayout searchMovieLayout;
     private LinearLayout searchTVShowLayout;
-    private boolean isMoviesSearch = false;
+    private android.widget.TextView genresLabel;
+    private String lastQuery = "";
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.movie_search_view, container, false);
 
-        // Initialize the ViewModel
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
 
-        // Initialize UI elements
         inputSearch = view.findViewById(R.id.input_title);
-        RecyclerView recyclerView = view.findViewById(R.id.search_recycler_view);
-        ImageButton searchButton = view.findViewById(R.id.search_movie_btn);
+        recyclerView = view.findViewById(R.id.search_recycler_view);
         genresRecyclerView = view.findViewById(R.id.genres_recycler_view);
+        genresLabel = view.findViewById(R.id.genres_label);
+        ImageButton searchButton = view.findViewById(R.id.search_movie_btn);
         searchMovieLayout = view.findViewById(R.id.menu_movie_layout);
         searchTVShowLayout = view.findViewById(R.id.menu_tvshow_layout);
 
-        // Initialize menu item clicks
         searchMovieLayout.setOnClickListener(v -> onMovieClick());
         searchTVShowLayout.setOnClickListener(v -> onTVShowClick());
 
@@ -88,36 +85,29 @@ public class SearchTVShowsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(searchAdapter);
 
-        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         genresRecyclerView.setAdapter(genresAdapter);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        // Set up TextWatcher for real-time search
         inputSearch.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // Empty action
-            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void afterTextChanged(Editable s) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Perform the search as text changes
+                boolean hasText = s.length() > 0;
+                genresRecyclerView.setVisibility(hasText ? View.GONE : View.VISIBLE);
+                genresLabel.setVisibility(hasText ? View.GONE : View.VISIBLE);
                 performSearch();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                // Empty action
             }
         });
 
         searchButton.setOnClickListener(v -> {
             performSearch();
-            hideKeyboard(); // Hide the keyboard when search button is clicked
+            hideKeyboard();
         });
 
-        // Set up OnEditorActionListener to hide the keyboard when Enter is pressed
         inputSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
                 performSearch();
@@ -127,16 +117,12 @@ public class SearchTVShowsFragment extends Fragment {
             return false;
         });
 
-        // Restore state
         if (savedInstanceState != null) {
-            isMoviesSearch = savedInstanceState.getBoolean("isMoviesSearch", false);
             inputSearch.setText(savedInstanceState.getString("searchQuery", ""));
         }
 
-        // Set initial selected state
         updateMenuSelection();
-
-        // Observe LiveData from ViewModel
+        updateToggleUI(false);
         setupObservers();
         fetchGenresForTVShows();
 
@@ -144,17 +130,16 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     private void onItemClick(GenresModel genre) {
-        if (genre != null) {
-            TVShowsByGenresFragment tvByGenresFragment = TVShowsByGenresFragment.newInstance(genre.getId(), genre.getName());
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, tvByGenresFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        }
+        if (genre == null) return;
+        TVShowsByGenresFragment fragment = TVShowsByGenresFragment.newInstance(genre.getId(), genre.getName());
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void fetchGenresForTVShows() {
-        Call<GenresResponse> call = apiService.getGenresTVShows(API_KEY);
+        Call<GenresResponse> call = apiService.getGenresTVShows(TMDBpath.genresTVShows());
         call.enqueue(new Callback<GenresResponse>() {
             @Override
             public void onResponse(Call<GenresResponse> call, Response<GenresResponse> response) {
@@ -164,143 +149,105 @@ public class SearchTVShowsFragment extends Fragment {
                         genresList.clear();
                         genresList.addAll(genres);
                         genresAdapter.notifyDataSetChanged();
-                        Log.d("Adapter Update", "Genres list updated, size: " + genresList.size());
-                        Log.d("API Response", "Genres fetched: " + genres.size());
-                    } else {
-                        Log.e("API Response", "Genres list is null");
                     }
-                } else {
-                    Log.e("API Error", "Response code: " + response.code() + ", message: " + response.message());
                 }
             }
 
             @Override
             public void onFailure(Call<GenresResponse> call, Throwable t) {
-                Log.e("API Failure", "Error: " + t.getMessage());
                 Toast.makeText(getContext(), "Failed to fetch genres", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void updateMenuSelection() {
-        if (viewModel.getIsTVShowSearch().getValue() != null && viewModel.getIsTVShowSearch().getValue()) {
-            searchMovieLayout.setSelected(false);
-            searchTVShowLayout.setSelected(true);
-        } else {
-            searchMovieLayout.setSelected(true);
-            searchTVShowLayout.setSelected(false);
-        }
+        boolean isTVShow = Boolean.TRUE.equals(viewModel.getIsTVShowSearch().getValue());
+        searchMovieLayout.setSelected(!isTVShow);
+        searchTVShowLayout.setSelected(isTVShow);
     }
 
     private void onTVShowClick() {
-        // Handle the TV Show item click
         viewModel.setIsTVShowSearch(true);
         updateMenuSelection();
+        updateToggleUI(false);
         replaceFragment(new SearchTVShowsFragment(), "SearchTVShowsFragment");
     }
 
     private void onMovieClick() {
-        // Handle the movie item click
         viewModel.setIsTVShowSearch(false);
         updateMenuSelection();
+        updateToggleUI(true);
         replaceFragment(new SearchMoviesFragment(), "SearchMoviesFragment");
     }
 
     private void performSearch() {
         String query = inputSearch.getText().toString().trim();
         if (!query.isEmpty()) {
-            if (isMoviesSearch) {
-                Fragment tvShowsFragment = getParentFragmentManager().findFragmentByTag("SearchTVShowsFragment");
-                if (tvShowsFragment instanceof SearchTVShowsFragment) {
-                    ((SearchTVShowsFragment) tvShowsFragment).searchTVShows(query);
-                } else {
-                    Log.e("PerformSearch", "SearchTVShowsFragment is not found or not of the correct type");
-                }
-            } else {
-                // Call searchTVShows method
-                searchTVShows(query);
-            }
-            viewModel.setLastSearchWasTVShow(isMoviesSearch); // Update ViewModel with the correct search type
+            if (query.equals(lastQuery)) return;
+            lastQuery = query;
+            searchTVShows(query);
+            viewModel.setLastSearchWasTVShow(true);
         } else {
-            // Handle empty query case
+            lastQuery = "";
             searchTVList.clear();
             searchAdapter.notifyDataSetChanged();
+            viewModel.setSearchTVResults(new ArrayList<>());
         }
     }
 
     void searchTVShows(String query) {
-        Call<TVShowResponse> call = apiService.searchTVShows(API_KEY, query);
+        Call<TVShowResponse> call = apiService.searchTVShows(TMDBpath.searchTVShows(), query);
         call.enqueue(new Callback<TVShowResponse>() {
             @Override
             public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    searchTVList.clear();
                     List<TVShowModel> tvShows = response.body().getResults();
-
                     if (tvShows != null && !tvShows.isEmpty()) {
-                        // Filter out TV shows with null posterPath
-                        List<TVShowModel> filteredTVShows = null;
-                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                            filteredTVShows = tvShows.stream()
-                                    .filter(tv -> tv.getPosterPath() != null)
-                                    .collect(Collectors.toList());
-                        }
-
-                        if (!filteredTVShows.isEmpty()) {
-                            for (TVShowModel tv : filteredTVShows) {
+                        List<TVShowModel> filtered = new ArrayList<>();
+                        for (TVShowModel tv : tvShows) {
+                            if (tv.getPosterPath() != null) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                                     tv.setOriginalLanguage(LanguageMapper.getLanguageName(tv.getOriginalLanguage()));
                                 }
+                                filtered.add(tv);
                             }
-                            searchTVList.addAll(filteredTVShows);
-                            searchAdapter.notifyDataSetChanged();
-                            viewModel.setSearchTVResults(filteredTVShows);
-                        } else {
-                            Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
                         }
+                        viewModel.setSearchTVResults(filtered.isEmpty() ? new ArrayList<>() : filtered);
+                        if (filtered.isEmpty()) Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
                     } else {
+                        viewModel.setSearchTVResults(new ArrayList<>());
                         Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    Log.e("SearchTVShows", "Failed to get results. Status code: " + response.code());
-                    try {
-                        String errorBody = response.errorBody() != null ? response.errorBody().string() : "No error body";
-                        Log.e("SearchTVShows", "Error response: " + errorBody);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     Toast.makeText(getContext(), "Failed to get results", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onFailure(Call<TVShowResponse> call, Throwable t) {
-                Log.e("SearchTVShows", "Failed to load TV shows", t);
                 Toast.makeText(getContext(), "Failed to load TV shows", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-
-
     private void hideKeyboard() {
-        View view = getActivity().getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        View focused = requireActivity().getCurrentFocus();
+        if (focused != null) {
+            InputMethodManager imm = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
         }
     }
 
     private void showTVDetails(TVShowModel tv) {
-        if (tv != null) {
-            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tv.getId());
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        } else {
+        if (tv == null) {
             Toast.makeText(getContext(), "TV show details are not available", Toast.LENGTH_SHORT).show();
+            return;
         }
+        ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tv.getTVShowId());
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void setupObservers() {
@@ -310,15 +257,18 @@ public class SearchTVShowsFragment extends Fragment {
             searchAdapter.notifyDataSetChanged();
         });
 
-        viewModel.getIsTVShowSearch().observe(getViewLifecycleOwner(), isTVShowSearch -> {
-            this.isMoviesSearch = !isTVShowSearch;
-        });
+        viewModel.getIsTVShowSearch().observe(getViewLifecycleOwner(), isTVShowSearch -> updateMenuSelection());
     }
 
     private void replaceFragment(Fragment fragment, String tag) {
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment,tag);
+        transaction.replace(R.id.fragment_container, fragment, tag);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    private void updateToggleUI(boolean isMovie) {
+        searchMovieLayout.setBackgroundResource(isMovie ? R.drawable.toggle_selected_bg : android.R.color.transparent);
+        searchTVShowLayout.setBackgroundResource(isMovie ? android.R.color.transparent : R.drawable.toggle_selected_bg);
     }
 }

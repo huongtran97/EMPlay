@@ -6,103 +6,115 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
- * Interface for defining the API endpoints for movie-related operations.
+ * API endpoints routed through the Vercel proxy.
+ *
+ * All requests go to: GET /api/tmdb?path=<tmdb_path>&<other_params>
+ * The proxy injects the TMDB API key server-side — no key in APK.
+ *
+ * NOTE: @Query("api_key") is removed from all methods.
+ *       The proxy handles authentication automatically.
  */
 public interface MovieApiService {
 
-    @GET("3/trending/movie/week")
+    @GET("api/tmdb")
     Call<MovieResponse> getTrendingMovies(
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/movie/{id}")
+    @GET("api/tmdb")
     Call<MovieDetailsResponse> getMovieDetails(
-            @Path("id") int movieId,
-            @Query("api_key") String apiKey
-    );
+            @Query("path") String path);
 
-    @GET("3/search/movie")
+    @GET("api/tmdb")
     Call<MovieResponse> searchMovies(
-            @Query("api_key") String apiKey,
-            @Query("query") String query
-    );
+            @Query("path") String path,
+            @Query("query") String query);
 
-    @GET("3/search/tv")
+    @GET("api/tmdb")
     Call<TVShowResponse> searchTVShows(
-            @Query("api_key") String apiKey,
-            @Query("query") String query
-    );
+            @Query("path") String path,
+            @Query("query") String query);
 
-    @GET("3/movie/{id}/credits")
+    @GET("api/tmdb")
     Call<MovieCreditsResponse> getMovieCredits(
-            @Path("id") int movieId,
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/movie/{id}/similar")
+    @GET("api/tmdb")
     Call<MovieSimilarResponse> getMovieSimilar(
-            @Path("id") int movieId,
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/trending/tv/week")
+    @GET("api/tmdb")
     Call<TVShowResponse> getTrendingTVShows(
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/tv/{id}")
+    @GET("api/tmdb")
     Call<TVShowDetailsResponse> getTVShowDetails(
-            @Path("id") int tvId,
-            @Query("api_key") String apiKey
-    );
+            @Query("path") String path);
 
-    @GET("3/tv/{id}/credits")
+    @GET("api/tmdb")
     Call<TVShowCreditsResponses> getTVShowCredits(
-            @Path("id") int tvId,
-            @Query("api_key") String apiKey
-    );
+            @Query("path") String path);
 
-    @GET("3/tv/{id}/similar")
+    @GET("api/tmdb")
     Call<TVShowSimilarResponse> getTVShowSimilar(
-            @Path("id") int tvId,
-            @Query("api_key") String apiKey
-    );
+            @Query("path") String path);
 
-    @GET("3/discover/movie?include_video=false&language=en-US&page=1&primary_release_date.gte=2024-09-19&primary_release_date.lte=2024-10-19&sort_by=popularity.desc")
+    @GET("api/tmdb")
     Call<UpComingMovieResponse> getUpcomingMovies(
-            @Query("api_key") String apiKey
-    );
+            @Query("path") String path,
+            @Query("primary_release_date.gte") String dateGte,
+            @Query("primary_release_date.lte") String dateLte,
+            @Query("sort_by") String sortBy,
+            @Query("include_video") boolean includeVideo,
+            @Query("language") String language,
+            @Query("page") int page);
 
-    @GET("3/discover/tv?include_video=false&language=en-US&page=1&first_air_date.gte=2024-09-19&first_air_date.lte=2024-10-19&sort_by=popularity.desc")
+    @GET("api/tmdb")
     Call<UpComingTVShowsResponse> getUpcomingTVShows(
-            @Query("api_key") String apiKey
-    );
+            @Query("path") String path,
+            @Query("first_air_date.gte") String dateGte,
+            @Query("first_air_date.lte") String dateLte,
+            @Query("sort_by") String sortBy,
+            @Query("include_video") boolean includeVideo,
+            @Query("language") String language,
+            @Query("page") int page);
 
-    @GET("3/movie/{movie_id}/videos")
+    @GET("api/tmdb")
     Call<MoviesTrailerResponses> getMoviesTrailer(
-            @Path("movie_id") int movieId,
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/tv/{tv_id}/videos")
+    @GET("api/tmdb")
     Call<TVShowsTrailerResponses> getTVShowsTrailer(
-            @Path("tv_id") int movieId,
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/genre/movie/list")
+    @GET("api/tmdb")
     Call<GenresResponse> getGenresMovie(
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/genre/tv/list")
+    @GET("api/tmdb")
     Call<GenresResponse> getGenresTVShows(
-            @Query("api_key") String apiKey);
+            @Query("path") String path);
 
-    @GET("3/discover/movie")
+    @GET("api/tmdb")
+    Call<SeasonDetailResponse> getTVSeasonDetails(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<PersonDetailsResponse> getPersonDetails(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<PersonCreditsResponse> getPersonCredits(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
     Call<MovieResponse> getMoviesByGenre(
-            @Query("api_key") String apiKey,
-            @Query("with_genres") int genreId);
+            @Query("path") String path,
+            @Query("with_genres") int genreId,
+            @Query("page") int page);
 
-    @GET("3/discover/tv")
+    @GET("api/tmdb")
     Call<TVShowResponse> getTVShowsByGenre(
-            @Query("api_key") String apiKey,
-            @Query("with_genres") int genreId);
-
-
-
-
+            @Query("path") String path,
+            @Query("with_genres") int genreId,
+            @Query("page") int page);
 }

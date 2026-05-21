@@ -1,10 +1,5 @@
 package emplay.entertainment.emplay.fragment;
 
-import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_ID;
-import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_POSTER_PATH;
-import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TITLE;
-import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_TVSHOWS;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -33,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.activity.AboutActivity;
+import emplay.entertainment.emplay.activity.MainActivity;
 import emplay.entertainment.emplay.tool.SwipeToDeleteCallback;
 import emplay.entertainment.emplay.activity.LoginActivity;
 import emplay.entertainment.emplay.database.DatabaseHelper;
@@ -76,11 +73,9 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.customer_profile_view, container, false);
 
-        // Initialize lists
         likedMoviesList = new ArrayList<>();
         likedTVShowsList = new ArrayList<>();
 
-        // Initialize RecyclerViews and adapters
         moviesRecyclerView = view.findViewById(R.id.liked_movie_recyclerview);
         tvShowsRecyclerView = view.findViewById(R.id.liked_tv_recyclerview);
         usernameTextView = view.findViewById(R.id.profile_username);
@@ -101,25 +96,28 @@ public class ProfileFragment extends Fragment {
         ItemTouchHelper tvShowItemTouchHelper = new ItemTouchHelper(new SwipeToDeleteCallback(tvShowsRecyclerView));
         tvShowItemTouchHelper.attachToRecyclerView(tvShowsRecyclerView);
 
+        view.findViewById(R.id.about_btn).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), AboutActivity.class)));
+
         logOutBtn = view.findViewById(R.id.logout_account_btn);
         logOutBtn.setOnClickListener(v -> {
-            // Sign out the user
             mAuth.signOut();
-
-            // Redirect to login activity or another activity
-            startActivity(new Intent(requireContext(), LoginActivity.class));
-            requireActivity().finish();
+            Intent intent = new Intent(requireContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         });
 
         deleteAccountBtn = view.findViewById(R.id.delete_account_btn);
-        deleteAccountBtn.setOnClickListener(v -> {
-            new AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Account")
-                    .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            user.delete().addOnCompleteListener(task -> {
+
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            deleteAccountBtn.setText("Delete Account");
+            deleteAccountBtn.setOnClickListener(v -> {
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Delete Account")
+                        .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                        .setPositiveButton("Yes", (dialog, which) -> {
+                            currentUser.delete().addOnCompleteListener(task -> {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show();
                                     startActivity(new Intent(requireContext(), LoginActivity.class));
@@ -128,13 +126,20 @@ public class ProfileFragment extends Fragment {
                                     Toast.makeText(requireContext(), "Failed to delete account", Toast.LENGTH_SHORT).show();
                                 }
                             });
-                        } else {
-                            Toast.makeText(requireContext(), "No user is signed in", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
-        });
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+            });
+        } else {
+            logOutBtn.setText("Login / Register");
+            logOutBtn.setOnClickListener(v -> {
+                Intent intent = new Intent(requireContext(), LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            });
+            deleteAccountBtn.setText("Continue Browsing");
+            deleteAccountBtn.setOnClickListener(v -> replaceFragment(new HomeFragment()));
+        }
 
         return view;
     }
@@ -143,7 +148,6 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Display user information
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             String username = user.getDisplayName();
@@ -154,7 +158,7 @@ public class ProfileFragment extends Fragment {
         }
         else {
             usernameTextView.setText("Hi there!");
-            emailTextView.setText("Do you want to login?");
+            emailTextView.setText(" ");
         }
 
         new Thread(() -> {
@@ -174,13 +178,13 @@ public class ProfileFragment extends Fragment {
             replaceFragment(fragment);
         } else if (item instanceof TVShowModel) {
             TVShowModel tvShow = (TVShowModel) item;
-            ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getId());
+            ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getTVShowId());
             replaceFragment(fragment);
         }
     }
 
     private void replaceFragment(Fragment fragment) {
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
@@ -188,55 +192,65 @@ public class ProfileFragment extends Fragment {
 
     public List<MovieModel> getAllMoviesFromDatabase() {
         List<MovieModel> movies = new ArrayList<>();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return movies;
+
+        String userId = user.getUid();
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM movies", null);
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + DatabaseHelper.TABLE_USER_MOVIES +
+                        " WHERE " + DatabaseHelper.COLUMN_USER_ID + " = ?",
+                new String[]{userId}
+        );
 
         if (cursor.moveToFirst()) {
             do {
-                int idIndex = cursor.getColumnIndex(COLUMN_ID);
-                int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
-                int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
-                if (idIndex == -1 || posterPathIndex == -1 || titleIndex == -1) {
-                    Log.e("Database", "Column missing in database table");
-                    return movies;
+                int idIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_MOVIE_ID);
+                int titleIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_TITLE);
+                int posterPathIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_POSTER_PATH);
+                if (idIndex == -1 || titleIndex == -1 || posterPathIndex == -1) {
+                    Log.e("Database", "Column missing in user_movies table");
+                    break;
                 }
                 int id = cursor.getInt(idIndex);
                 String title = cursor.getString(titleIndex);
                 String posterPath = cursor.getString(posterPathIndex);
-                Log.d("Database", "Movie ID: " + id + ", Poster Path: " + posterPath);
-                MovieModel movie = new MovieModel(id, title, posterPath);
-                movies.add(movie);
+                movies.add(new MovieModel(id, title, posterPath));
             } while (cursor.moveToNext());
         }
         cursor.close();
-        db.close();
         return movies;
     }
 
     public List<TVShowModel> getSavedTVShows() {
         List<TVShowModel> tvShows = new ArrayList<>();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) return tvShows;
+
+        String userId = user.getUid();
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TVSHOWS, null);
+        Cursor cursor = db.rawQuery(
+                "SELECT * FROM " + DatabaseHelper.TABLE_USER_TVSHOWS +
+                        " WHERE " + DatabaseHelper.COLUMN_USER_ID + " = ?",
+                new String[]{userId}
+        );
 
         if (cursor.moveToFirst()) {
             do {
-                int idIndex = cursor.getColumnIndex(COLUMN_ID);
-                int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
-                int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
-                if (idIndex == -1 || posterPathIndex == -1 || titleIndex == -1) {
-                    Log.e("Database", "Column missing in database table");
-                    return tvShows;
+                int idIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_TVSHOW_ID);
+                int titleIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_TITLE);
+                int posterPathIndex = cursor.getColumnIndex(DatabaseHelper.COLUMN_POSTER_PATH);
+                if (idIndex == -1 || titleIndex == -1 || posterPathIndex == -1) {
+                    Log.e("Database", "Column missing in user_tvshows table");
+                    break;
                 }
                 int id = cursor.getInt(idIndex);
                 String title = cursor.getString(titleIndex);
                 String posterPath = cursor.getString(posterPathIndex);
-                Log.d("Database", "TV Show ID: " + id + ", Poster Path: " + posterPath);
-                TVShowModel tvShow = new TVShowModel(id, title, posterPath);
-                tvShows.add(tvShow);
+                tvShows.add(new TVShowModel(id, title, posterPath));
             } while (cursor.moveToNext());
         }
         cursor.close();
-        db.close();
         return tvShows;
     }
 }

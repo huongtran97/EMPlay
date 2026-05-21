@@ -1,9 +1,10 @@
 package emplay.entertainment.emplay.adapter;
 
-import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_ID;
+import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_MOVIE_ID;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_POSTER_PATH;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TITLE;
-import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_MOVIES;
+import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_USER_ID;
+import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_USER_MOVIES;
 
 import android.content.ContentValues;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +38,7 @@ import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.api.MoviesTrailerResponses;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.models.MovieModel;
-import emplay.entertainment.emplay.fragment.ProfileFragment;
+import emplay.entertainment.emplay.fragment.ShowResultDetailsFragment;
 
 public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.MovieResultViewHolder> {
 
@@ -43,12 +46,13 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
     private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private FragmentActivity fragmentActivity;
     private DatabaseHelper databaseHelper;
+    private FirebaseAuth mAuth;
 
-    // Constructor
     public MovieResultAdapter(List<MovieModel> movieList, FragmentActivity fragmentActivity) {
         this.movieList = movieList;
         this.fragmentActivity = fragmentActivity;
         this.databaseHelper = new DatabaseHelper(fragmentActivity);
+        this.mAuth = FirebaseAuth.getInstance();
     }
 
     @NonNull
@@ -61,60 +65,47 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
     @Override
     public void onBindViewHolder(@NonNull MovieResultViewHolder holder, int position) {
         MovieModel movieModel = movieList.get(position);
-        if (movieModel != null) {
-            holder.resultTitle.setText(movieModel.getTitle());
-            holder.resultReleaseDate.setText("Release Date: " + movieModel.getReleaseDate());
-            holder.resultLanguage.setText("\u2022 Language: " + movieModel.getOriginalLanguage());
-            holder.resultRatingBar.setRating((float) (movieModel.getVoteAverage() / 2));
-            holder.resultOverview.setText(movieModel.getOverview());
-            holder.resultRuntime.setText("\u2022 Runtime: " + movieModel.getRuntime() + " min");
+        if (movieModel == null) {
+            Log.e("MovieResultAdapter", "MovieModel at position " + position + " is null");
+            return;
+        }
 
-            List<String> genres = movieModel.getGenres() != null ? movieModel.getGenres() : new ArrayList<>();
-            StringBuilder genreNames = new StringBuilder();
-            for (String genre : genres) {
-                if (genreNames.length() > 0) {
-                    genreNames.append(" | ");
-                }
-                genreNames.append(genre);
-            }
-            holder.genreNames.setText(genreNames.toString());
+        holder.resultTitle.setText(movieModel.getTitle());
+        holder.resultReleaseDate.setText("Release Date: " + movieModel.getReleaseDate());
+        holder.resultLanguage.setText("\u2022 Language: " + movieModel.getOriginalLanguage());
+        holder.resultRatingBar.setRating((float) (movieModel.getVoteAverage() / 2));
+        holder.resultOverview.setText(movieModel.getOverview());
+        holder.resultRuntime.setText("\u2022 Runtime: " + movieModel.getRuntime() + " min");
 
-            Glide.with(holder.itemView.getContext())
-                    .load("https://image.tmdb.org/t/p/w500" + movieModel.getPosterPath())
-                    .error(R.drawable.placeholder_image) // Replace with your placeholder image
-                    .into(holder.resultPoster);
+        List<String> genres = movieModel.getGenres() != null ? movieModel.getGenres() : new ArrayList<>();
+        StringBuilder genreNames = new StringBuilder();
+        for (String genre : genres) {
+            if (genreNames.length() > 0) genreNames.append(" | ");
+            genreNames.append(genre);
+        }
+        holder.genreNames.setText(genreNames.toString());
 
-            // Check if the movie is already saved and update the icon
-            if (isMovieSaved(movieModel.getId())) {
-                holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
-            } else {
-                holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
-            }
+        Glide.with(holder.itemView.getContext())
+                .load("https://image.tmdb.org/t/p/w500" + movieModel.getPosterPath())
+                .error(R.drawable.placeholder_image)
+                .into(holder.resultPoster);
 
-            // Trailer button logic
-            holder.trailerBtn.setOnClickListener(v -> {
-                if (!trailers.isEmpty()) {
-                    // Get the trailer key
-                    String videoKey = trailers.get(0).getKey();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+            holder.addBtn.setOnClickListener(v ->
+                    Toast.makeText(fragmentActivity, "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
+        } else {
+            String userId = currentUser.getUid();
+            updateSaveButtonState(holder, userId, movieModel.getId());
 
-                    // Start TrailerActivity with the videoKey
-                    Intent intent = new Intent(holder.itemView.getContext(), TrailerActivity.class);
-                    intent.putExtra("MOVIE_ID", videoKey);  // Pass the trailer key to TrailerActivity
-                    holder.itemView.getContext().startActivity(intent);
-                } else {
-                    Toast.makeText(fragmentActivity, "No trailer available", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-
-            // Add/Remove movie logic
             holder.addBtn.setOnClickListener(v -> {
-                if (isMovieSaved(movieModel.getId())) {
-                    removeMovieFromDatabase(movieModel.getId());
+                if (isMovieSavedByUser(userId, movieModel.getId())) {
+                    removeMovieFromUserMovies(userId, movieModel.getId());
                     holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
                     Toast.makeText(fragmentActivity, "Movie removed from library", Toast.LENGTH_SHORT).show();
                 } else {
-                    long result = saveMovieToDatabase(movieModel);
+                    long result = saveMovieToUserMovies(userId, movieModel.getId(), movieModel.getTitle(), movieModel.getPosterPath());
                     if (result != -1) {
                         holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
                         Toast.makeText(fragmentActivity, "Movie added to library", Toast.LENGTH_SHORT).show();
@@ -123,25 +114,55 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
                     }
                 }
             });
+        }
 
-            // Item click logic for displaying movie details
-            holder.itemView.setOnClickListener(v -> onItemClick(movieModel));
+        holder.trailerBtn.setOnClickListener(v -> {
+            if (!trailers.isEmpty()) {
+                String videoKey = trailers.get(0).getKey();
+                Intent intent = new Intent(holder.itemView.getContext(), TrailerActivity.class);
+                intent.putExtra("MOVIE_ID", videoKey);
+                holder.itemView.getContext().startActivity(intent);
+            } else {
+                Toast.makeText(fragmentActivity, "No trailer available", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        holder.itemView.setOnClickListener(v -> {
+            ShowResultDetailsFragment fragment = ShowResultDetailsFragment.newInstance(movieModel.getId());
+            FragmentTransaction transaction = fragmentActivity.getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        });
+    }
+
+    private void updateSaveButtonState(MovieResultViewHolder holder, String userId, int movieId) {
+        if (isMovieSavedByUser(userId, movieId)) {
+            holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
         } else {
-            Log.e("MovieResultAdapter", "MovieModel at position " + position + " is null");
+            holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return movieList.size();
+    public long saveMovieToUserMovies(String userId, int movieId, String title, String posterPath) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_USER_ID, userId);
+        values.put(COLUMN_MOVIE_ID, movieId);
+        values.put(COLUMN_TITLE, title);
+        values.put(COLUMN_POSTER_PATH, posterPath);
+        long result = db.insert(TABLE_USER_MOVIES, null, values);
+        Log.d("MovieSave", "Saved movie: " + title + ", result: " + result + ", userId: " + userId);
+        return result;
     }
 
-
-    // Check if the movie is already saved in the database
-    private boolean isMovieSaved(long movieId) {
+    public boolean isMovieSavedByUser(String userId, int movieId) {
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        String query = "SELECT COUNT(*) FROM " + TABLE_MOVIES + " WHERE " + COLUMN_ID + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{String.valueOf(movieId)});
+        Cursor cursor = db.rawQuery(
+                "SELECT COUNT(*) FROM " + TABLE_USER_MOVIES +
+                        " WHERE " + COLUMN_USER_ID + " = ? AND " + COLUMN_MOVIE_ID + " = ?",
+                new String[]{userId, String.valueOf(movieId)}
+        );
         boolean isSaved = false;
         if (cursor.moveToFirst()) {
             isSaved = cursor.getInt(0) > 0;
@@ -150,31 +171,17 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         return isSaved;
     }
 
-    // Remove a movie from the database
-    private void removeMovieFromDatabase(long movieId) {
+    private void removeMovieFromUserMovies(String userId, int movieId) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete(TABLE_MOVIES, COLUMN_ID + " = ?", new String[]{String.valueOf(movieId)});
+        db.delete(TABLE_USER_MOVIES,
+                COLUMN_USER_ID + " = ? AND " + COLUMN_MOVIE_ID + " = ?",
+                new String[]{userId, String.valueOf(movieId)}
+        );
     }
 
-    // Save a movie to the database
-    public long saveMovieToDatabase(MovieModel movie) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, movie.getId());
-        values.put(COLUMN_TITLE, movie.getTitle());
-        values.put(COLUMN_POSTER_PATH, movie.getPosterPath());
-
-        return db.insertWithOnConflict(TABLE_MOVIES, null, values, SQLiteDatabase.CONFLICT_REPLACE);
-    }
-
-    // Handle item click for navigating to movie details
-    private void onItemClick(MovieModel movieModel) {
-        ProfileFragment profileFragment = ProfileFragment.newInstance(movieModel.getId());
-
-        FragmentTransaction transaction = fragmentActivity.getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, profileFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+    @Override
+    public int getItemCount() {
+        return movieList.size();
     }
 
     public void setTeaserTrailers(List<MoviesTrailerResponses.TrailerModel> adapterTrailers) {
@@ -182,8 +189,6 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         notifyDataSetChanged();
     }
 
-
-    // ViewHolder class for the RecyclerView
     public static class MovieResultViewHolder extends RecyclerView.ViewHolder {
         TextView resultTitle;
         TextView resultReleaseDate;
@@ -211,4 +216,3 @@ public class MovieResultAdapter extends RecyclerView.Adapter<MovieResultAdapter.
         }
     }
 }
-

@@ -20,11 +20,9 @@ public class CircleTransform extends BitmapTransformation {
 
         int size = Math.min(toTransform.getWidth(), toTransform.getHeight());
 
-        // Create a square bitmap
         Bitmap squaredBitmap = Bitmap.createBitmap(toTransform, (toTransform.getWidth() - size) / 2,
                 (toTransform.getHeight() - size) / 2, size, size);
 
-        // Create a new bitmap with a circle
         Bitmap bitmap = pool.get(size, size, Bitmap.Config.ARGB_8888);
         if (bitmap == null) {
             bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
@@ -36,7 +34,6 @@ public class CircleTransform extends BitmapTransformation {
         paint.setShader(shader);
         paint.setAntiAlias(true);
 
-        // Draw the circle
         float r = size / 2f;
         canvas.drawCircle(r, r, r, paint);
 

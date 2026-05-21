@@ -23,10 +23,21 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
     private ArrayList<CastModel> castList;
     private Context context;
+    private OnCastClickListener onCastClickListener;
+
+    public interface OnCastClickListener {
+        void onCastClick(CastModel cast);
+    }
 
     public CastAdapter(List<CastModel> castList, Context context) {
         this.castList = (ArrayList<CastModel>) castList;
         this.context = context;
+    }
+
+    public CastAdapter(List<CastModel> castList, Context context, OnCastClickListener listener) {
+        this.castList = (ArrayList<CastModel>) castList;
+        this.context = context;
+        this.onCastClickListener = listener;
     }
 
     public void updateData(List<CastModel> newCastList) {
@@ -49,25 +60,27 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
             holder.nameTextView.setText(castModel.getName());
             holder.characterTextView.setText(castModel.getCharacter());
 
-            // Load cast profile image using Glide
             RequestOptions options = new RequestOptions().circleCrop();
-            String profilePath = castModel.getProfilePath(); // Get the profile path
+            String profilePath = castModel.getProfilePath();
 
             if (profilePath != null && !profilePath.isEmpty()) {
-                // If profile path is not null, load the image
                 Glide.with(context)
                         .load("https://image.tmdb.org/t/p/w500" + profilePath)
                         .apply(options)
-                        .placeholder(R.drawable.avatar) // Set a placeholder while loading
+                        .placeholder(R.drawable.avatar)
                         .into(holder.profileImageView);
             } else {
-                // If profile path is null or empty, load a default image or placeholder
                 Glide.with(context)
-                        .load(R.drawable.avatar) // Default image when path is null
+                        .load(R.drawable.avatar)
                         .apply(options)
                         .into(holder.profileImageView);
             }
 
+            holder.itemView.setOnClickListener(v -> {
+                if (onCastClickListener != null) {
+                    onCastClickListener.onCastClick(castModel);
+                }
+            });
         }
     }
 

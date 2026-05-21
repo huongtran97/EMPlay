@@ -23,7 +23,6 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresView
         this.onItemClickListener = onItemClickListener;
     }
 
-    // Method to update genres and notify the adapter
     public void setGenres(List<GenresModel> genres) {
         if (genres != null) {
             genresList.clear();

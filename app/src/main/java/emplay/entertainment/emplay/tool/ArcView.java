@@ -19,7 +19,7 @@ public class ArcView extends View {
     private void init() {
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
-        paint.setColor(0xFF000000); // Change to your desired color
+        paint.setColor(0xFF000000);
         path = new Path();
     }
 

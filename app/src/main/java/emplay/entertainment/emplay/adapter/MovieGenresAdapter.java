@@ -38,7 +38,6 @@ public class MovieGenresAdapter extends RecyclerView.Adapter<MovieGenresAdapter.
         GenresModel genre = genresList.get(position);
         holder.genres.setText(genre.getName());
         holder.itemView.setOnClickListener(v -> {
-            // Pass both genre ID and genre name
             MovieByGenresFragment fragment = MovieByGenresFragment.newInstance(genre.getId(), genre.getName());
             FragmentTransaction transaction = ((FragmentActivity) context).getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, fragment);

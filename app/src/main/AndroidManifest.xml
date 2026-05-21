@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-
+    xmlns:tools="http://schemas.android.com/tools"
     package="emplay.entertainment.emplay">
 
     <uses-feature
@@ -10,8 +10,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        tools:replace="android:allowBackup"
         android:icon="@drawable/e_logo"
         android:label="@string/app_name"
         android:roundIcon="@drawable/e_logo"
@@ -30,12 +32,11 @@
         </activity>
         <activity android:name=".activity.LoginActivity"
             android:theme="@style/HiddenTitleTheme"></activity>
-        <activity android:name=".activity.SignUpActivity"
-            android:theme="@style/HiddenTitleTheme">
-        </activity>
         <activity android:name=".activity.TrailerActivity"
             android:theme="@style/HiddenTitleTheme">
         </activity>
+        <activity android:name=".activity.AboutActivity"
+            android:theme="@style/HiddenTitleTheme" />
 
     </application>
 
