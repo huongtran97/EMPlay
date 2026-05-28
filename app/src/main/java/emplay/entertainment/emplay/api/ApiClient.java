@@ -15,15 +15,18 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class
-ApiClient {
+public class ApiClient {
 
-    // Set to true to route through the Railway proxy (key lives server-side).
-    // Set to false to call TMDB directly using the key from local.properties (key is baked into the APK).
+    // Switch to false to bypass the proxy and hit TMDB directly (debug only).
+    // When true, the API key never leaves the server — safer for release builds.
     public static boolean USE_PROXY = true;
+
+    // Only used when USE_PROXY = false (direct TMDB calls).
     private static final String TMDB_API_KEY = BuildConfig.API_KEY;
 
     private static final String BASE_URL = "https://emplay-proxy-production.up.railway.app/";
+
+    // Lazily created — one instance shared across the whole app.
     static Retrofit retrofit;
 
     public static Retrofit getClient() {
@@ -34,17 +37,18 @@ ApiClient {
                     .writeTimeout(30, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
                     .addInterceptor(chain -> {
-                        // Force 'identity' encoding to fix "gzip finished without exhausting source" error.
-                        // This prevents OkHttp from requesting GZIP and helps when the server/proxy
-                        // provides malformed or truncated compressed responses.
+                        // "Accept-Encoding: identity" disables gzip on every request.
+                        // Without this, some proxy responses came back with malformed
+                        // compressed data and OkHttp threw "gzip finished without exhausting source".
                         Request request = chain.request().newBuilder()
                                 .header("Accept-Encoding", "identity")
-                                .header("X-App-Token", BuildConfig.APP_TOKEN)
+                                .header("X-App-Token", BuildConfig.APP_TOKEN) // authenticates with our proxy
                                 .build();
                         return chain.proceed(request);
                     })
                     .addInterceptor(new TMDBInterceptor());
 
+            // Only log in debug so we don't accidentally print tokens in production.
             if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
                 loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
@@ -62,10 +66,22 @@ ApiClient {
         return retrofit;
     }
 
+    // Call this if you need to force a fresh Retrofit instance (e.g. after toggling USE_PROXY).
     public static void resetClient() {
         retrofit = null;
     }
 
+    /**
+     * Rewrites proxy-style requests to direct TMDB calls when USE_PROXY = false.
+     *
+     * All requests in MovieApiService look like:
+     *   GET /api/tmdb?path=3/movie/123&...
+     *
+     * This interceptor transforms that into:
+     *   GET https://api.themoviedb.org/3/movie/123?api_key=...&...
+     *
+     * When USE_PROXY = true it's a no-op — the proxy handles the rewrite on the server side.
+     */
     public static class TMDBInterceptor implements Interceptor {
         @Override
         @NonNull
@@ -81,12 +97,14 @@ ApiClient {
                         if (directBase != null) {
                             HttpUrl.Builder newUrlBuilder = directBase.newBuilder();
 
+                            // Reconstruct the path segments from the "path" query parameter.
                             for (String segment : path.split("/")) {
                                 if (!segment.isEmpty()) {
                                     newUrlBuilder.addPathSegment(segment);
                                 }
                             }
 
+                            // Copy all other query params (skip "path" — it was just a routing key).
                             for (int i = 0; i < url.querySize(); i++) {
                                 String name = url.queryParameterName(i);
                                 if (!"path".equals(name)) {

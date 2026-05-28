@@ -2,10 +2,16 @@
     <string name="app_name">EMPlay</string>
     <!-- Replace with Web Client ID from Firebase Console → Authentication → Sign-in method → Google -->
     <string name="google_web_client_id">244216604840-an9q5ck78228ekf8ge38sg7al6ls12ou.apps.googleusercontent.com</string>
-    <string name="movie_Btn">Movie</string>
-    <string name="music_Btn">Music</string>
     <string name="open" />
     <string name="close" />
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!--Privacy Policy Message-->
+    <string name="privacy_policy_text"><i>Last updated: May 2025</i>\n\nEMPlay does not collect or share personal data with third parties.\n\n<b>Account &amp; Authentication</b>\nIf you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n<b>Local Storage</b>\nSaved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n<b>Third-Party Services</b>\nMovie and TV show data is fetched from The Movie Database (TMDB) API. Please refer to TMDB\'s privacy policy for details on their data practices.\n\n<b>Contact</b>\nFor any privacy concerns, contact us through our GitHub repository:\nhttps://github.com/huongtran97/EMPlay</string>
+
+    <string name="items_count">%d items</string>
+    <string name="saved_recently">Saved recently</string>
+    <string name="just_now">Just now</string>
+    <string name="saved_ago">Saved %s ago</string>
+    <string name="rating_format">★ %.1f</string>
+    <string name="log_in">Login</string>
+    <string name="log_out">Log out</string>
 </resources>

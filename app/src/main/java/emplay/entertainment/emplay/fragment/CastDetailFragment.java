@@ -1,6 +1,6 @@
 package emplay.entertainment.emplay.fragment;
 
-import android.graphics.text.LineBreaker;
+import android.annotation.SuppressLint;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,7 +15,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,31 +31,28 @@ import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.PersonCreditsResponse;
 import emplay.entertainment.emplay.api.PersonDetailsResponse;
 import emplay.entertainment.emplay.api.TMDBpath;
+import emplay.entertainment.emplay.tool.ReadHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class CastDetailFragment extends Fragment {
+/**
+ *  Cast member detail screen: photo, biography (with Read More/Less), and a paginated
+ *  grid of movies/TV shows the person has appeared in.
+ */
+public class CastDetailFragment extends BaseFragment {
 
     private static final String ARG_PERSON_ID = "PERSON_ID";
-
-    private static final int PAGE_SIZE = 9;
-
+    private static final int PAGE_SIZE = 9; // 3-column grid × 3 rows per page
     private int personId;
     private MovieApiService apiService;
     private ImageView profileImage;
-    private TextView nameText;
-    private TextView departmentText;
-    private TextView birthdayText;
-    private TextView placeOfBirthText;
-    private TextView biographyText, readMoreText;
+    private TextView nameText, departmentText, birthdayText, placeOfBirthText, biographyText, creditsPageIndicator, readMoreText;
     private RecyclerView creditsRecyclerView;
     private LinearLayout creditsPaginationBar;
-    private TextView creditsPageIndicator;
-    private ImageButton creditsBtnPrev;
-    private ImageButton creditsBtnNext;
+    private ImageButton creditsBtnPrev, creditsBtnNext;
     private CreditAdapter creditAdapter;
-    private List<PersonCreditsResponse.CreditItem> allCredits = new ArrayList<>();
+    private final List<PersonCreditsResponse.CreditItem> allCredits = new ArrayList<>();
     private int creditsPage = 1;
     private boolean isExpanded = false;
 
@@ -87,23 +83,8 @@ public class CastDetailFragment extends Fragment {
         creditsBtnPrev = view.findViewById(R.id.credits_btn_prev);
         creditsBtnNext = view.findViewById(R.id.credits_btn_next);
 
-        readMoreText.setOnClickListener(v -> {
-            if (isExpanded) {
-                biographyText.setMaxLines(5);
-                readMoreText.setText("Read More");
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    // Use literal values 1 for INTER_WORD and 0 for NONE to satisfy linter/API differences
-                    biographyText.setJustificationMode(android.graphics.text.LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
-                }
-            } else {
-                biographyText.setMaxLines(Integer.MAX_VALUE);
-                readMoreText.setText("Read Less");
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    biographyText.setJustificationMode(android.graphics.text.LineBreaker.JUSTIFICATION_MODE_NONE);
-                }
-            }
-            isExpanded = !isExpanded;
-        });
+        // Read More / Less
+        ReadHelper.setup(biographyText, readMoreText, isExpanded, expanded -> isExpanded = expanded);
 
         creditAdapter = new CreditAdapter(new ArrayList<>(), getContext(), this::onCreditClicked);
         creditsRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
@@ -135,10 +116,9 @@ public class CastDetailFragment extends Fragment {
     }
 
     private void fetchPersonDetails() {
-        Call<PersonDetailsResponse> call = apiService.getPersonDetails(TMDBpath.personDetails(personId));
-        call.enqueue(new Callback<PersonDetailsResponse>() {
+        safeEnqueue(apiService.getPersonDetails(TMDBpath.personDetails(personId)), new Callback<PersonDetailsResponse>() {
             @Override
-            public void onResponse(Call<PersonDetailsResponse> call, Response<PersonDetailsResponse> response) {
+            public void onResponse(@NonNull Call<PersonDetailsResponse> call, @NonNull Response<PersonDetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     PersonDetailsResponse person = response.body();
 
@@ -153,19 +133,10 @@ public class CastDetailFragment extends Fragment {
                             ? person.getBiography() : "No biography available.";
                     biographyText.setText(bio);
 
-                    // Force the text view to calculate its layout
-                    biographyText.post(() -> {
-                        int lineCount = biographyText.getLineCount();
-                        // If line count is > 5 OR text is long enough that it likely exceeds 5 lines
-                        if (lineCount > 5 || bio.length() > 250) {
-                            readMoreText.setVisibility(View.VISIBLE);
-                        } else {
-                            readMoreText.setVisibility(View.GONE);
-                        }
-                    });
+                    ReadHelper.bind(biographyText, readMoreText, isExpanded);
 
                     if (person.getProfilePath() != null) {
-                        Glide.with(requireContext())
+                        Glide.with(CastDetailFragment.this)
                                 .load("https://image.tmdb.org/t/p/w500" + person.getProfilePath())
                                 .apply(new RequestOptions().circleCrop())
                                 .placeholder(R.drawable.avatar)
@@ -175,17 +146,16 @@ public class CastDetailFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<PersonDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<PersonDetailsResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Failed to load person details", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchPersonCredits() {
-        Call<PersonCreditsResponse> call = apiService.getPersonCredits(TMDBpath.personCredits(personId));
-        call.enqueue(new Callback<PersonCreditsResponse>() {
+        safeEnqueue(apiService.getPersonCredits(TMDBpath.personCredits(personId)), new Callback<PersonCreditsResponse>() {
             @Override
-            public void onResponse(Call<PersonCreditsResponse> call, Response<PersonCreditsResponse> response) {
+            public void onResponse(@NonNull Call<PersonCreditsResponse> call, @NonNull Response<PersonCreditsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<PersonCreditsResponse.CreditItem> cast = response.body().getCast();
                     List<PersonCreditsResponse.CreditItem> crew = response.body().getCrew();
@@ -224,12 +194,13 @@ public class CastDetailFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<PersonCreditsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<PersonCreditsResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Failed to load credits", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    @SuppressLint("SetTextI18n")
     private void showCreditsPage() {
         int total = allCredits.size();
         int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
@@ -255,9 +226,6 @@ public class CastDetailFragment extends Fragment {
         } else {
             fragment = ShowResultDetailsFragment.newInstance(credit.getId());
         }
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        navigateTo(fragment);
     }
 }

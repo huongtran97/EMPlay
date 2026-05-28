@@ -7,6 +7,12 @@ import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
+/**
+ *  Draws a filled black semicircle — used as a decorative divider between sections
+ *  in some layouts. The arc spans the bottom half of the view's bounding box.
+ */
 public class ArcView extends View {
     private Paint paint;
     private Path path;
@@ -24,7 +30,7 @@ public class ArcView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         int width = getWidth();
         int height = getHeight();

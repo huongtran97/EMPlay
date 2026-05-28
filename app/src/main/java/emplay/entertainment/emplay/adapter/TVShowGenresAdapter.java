@@ -17,9 +17,13 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.fragment.TVShowsByGenresFragment;
 import emplay.entertainment.emplay.models.GenresModel;
 
+/**
+ *  Alternative genre chip adapter for TV shows that navigates to TVShowsByGenresFragment
+ *  directly without a callback. TV counterpart of MovieGenresAdapter.
+ */
 public class TVShowGenresAdapter extends RecyclerView.Adapter<TVShowGenresAdapter.GenresViewHolder> {
-    private List<GenresModel> genresList;
-    private Context context;
+    private final List<GenresModel> genresList;
+    private final Context context;
 
     public TVShowGenresAdapter(List<GenresModel> genresList, Context context) {
         this.genresList = genresList;
@@ -51,7 +55,7 @@ public class TVShowGenresAdapter extends RecyclerView.Adapter<TVShowGenresAdapte
         return genresList.size();
     }
 
-    public class GenresViewHolder extends RecyclerView.ViewHolder {
+    public static class GenresViewHolder extends RecyclerView.ViewHolder {
         TextView genres;
 
         public GenresViewHolder(@NonNull View itemView) {

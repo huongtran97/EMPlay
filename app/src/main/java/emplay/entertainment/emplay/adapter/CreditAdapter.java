@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +15,18 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.api.PersonCreditsResponse;
 
+/**
+ *  Horizontal filmography row on the cast detail screen.
+ *  Tapping one opens the movie or TV show detail for that credit.
+ */
 public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditViewHolder> {
 
     private List<PersonCreditsResponse.CreditItem> creditList;
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<PersonCreditsResponse.CreditItem> newList) {
         creditList = newList;
         notifyDataSetChanged();
@@ -51,9 +58,9 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
 
         String imageUrl = null;
         if (credit.getPosterPath() != null && !credit.getPosterPath().isEmpty()) {
-            imageUrl = "https://image.tmdb.org/t/p/w500" + credit.getPosterPath();
+            imageUrl = ImageUrl.THUMBNAIL + credit.getPosterPath();
         } else if (credit.getBackdropPath() != null && !credit.getBackdropPath().isEmpty()) {
-            imageUrl = "https://image.tmdb.org/t/p/w500" + credit.getBackdropPath();
+            imageUrl = ImageUrl.THUMBNAIL + credit.getBackdropPath();
         }
 
         Glide.with(context)

@@ -1,9 +1,7 @@
 package emplay.entertainment.emplay.adapter;
 
 import android.content.Context;
-
 import java.util.List;
-
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.TVShowModel;
 

@@ -86,11 +86,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
-                android:layout_marginBottom="20dp"
                 android:fontFamily="sans-serif"
                 android:lineSpacingExtra="4dp"
-                android:textColor="#BBBBBB"
-                android:textSize="13sp"/>
+                android:justificationMode="inter_word"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"
+                android:maxLines="4"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/read_more_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="4dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="12dp"
+                android:text="Read More"
+                android:textColor="#E53935"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
             <!-- Divider -->
             <View

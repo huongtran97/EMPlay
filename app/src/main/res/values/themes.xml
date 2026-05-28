@@ -35,5 +35,22 @@
         <item name="colorControlHighlight">#FFC107</item>
     </style>
 
+    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">13sp</item>
+    </style>
+
+    <!--Chip Style-->
+    <style name="ChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
+        <item name="android:textColor">#AAAAAA</item>
+        <item name="android:textSize">12sp</item>
+        <item name="chipBackgroundColor">@android:color/transparent</item>
+        <item name="chipStrokeColor">#2E2E2E</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipCornerRadius">20dp</item>
+        <item name="chipMinHeight">32dp</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="rippleColor">@android:color/transparent</item>
+    </style>
+
 
 </resources>

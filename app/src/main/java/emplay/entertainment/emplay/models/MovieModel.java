@@ -39,6 +39,7 @@ public class MovieModel implements Serializable, MediaItem {
     private List<String> cast;
     
     private String username;
+    private String savedTimestamp;
 
     public MovieModel() {}
 
@@ -66,6 +67,10 @@ public class MovieModel implements Serializable, MediaItem {
     // MediaItem implementation
     @Override
     public int getMediaId() { return id; }
+
+    @Override
+    public String getSavedTimestamp() { return savedTimestamp; }
+    public void setSavedTimestamp(String savedTimestamp) { this.savedTimestamp = savedTimestamp; }
 
     // Getters and Setters
     public int getId() { return id; }

@@ -55,4 +55,5 @@ public class TMDBpath {
         cal.add(Calendar.DAY_OF_YEAR, 30);
         return DATE_FORMAT.format(cal.getTime());
     }
+
 }

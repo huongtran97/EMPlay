@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="#E53935"
-                android:textSize="11sp"/>
+                android:textSize="12sp"/>
 
             <TextView
                 android:id="@+id/episode_title"
@@ -45,7 +45,7 @@
                 android:layout_marginTop="2dp"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="#FFFFFF"
-                android:textSize="13sp"
+                android:textSize="14sp"
                 android:maxLines="2"
                 android:ellipsize="end"/>
 
@@ -55,8 +55,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:fontFamily="sans-serif"
-                android:textColor="#555555"
-                android:textSize="11sp"/>
+                android:textColor="#888888"
+                android:textSize="12sp"/>
 
         </LinearLayout>
 
@@ -72,10 +72,25 @@
         android:layout_marginEnd="4dp"
         android:fontFamily="sans-serif"
         android:lineSpacingExtra="3dp"
-        android:textColor="#777777"
-        android:textSize="12sp"
-        android:maxLines="3"
+        android:justificationMode="inter_word"
+        android:textColor="#CCCCCC"
+        android:textSize="14sp"
+        android:maxLines="4"
         android:ellipsize="end"/>
+
+    <TextView
+        android:id="@+id/read_more_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp"
+        android:text="Read More"
+        android:textColor="#E53935"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"/>
 
     <!-- Divider -->
     <View

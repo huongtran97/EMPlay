@@ -1,18 +1,21 @@
 package emplay.entertainment.emplay.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.MenuItem;
-import android.view.View;
 
-import androidx.annotation.NonNull;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.fragment.WatchlistFragment;
 import emplay.entertainment.emplay.models.SharedViewModel;
 import emplay.entertainment.emplay.fragment.HomeFragment;
 import emplay.entertainment.emplay.fragment.ProfileFragment;
@@ -20,6 +23,8 @@ import emplay.entertainment.emplay.fragment.SearchMoviesFragment;
 import emplay.entertainment.emplay.fragment.SearchTVShowsFragment;
 
 public class MainActivity extends AppCompatActivity {
+
+    private android.app.Dialog welcomeDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,66 +38,72 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MovieOption", "BottomNavigationView is null");
         }
 
+        // Only load the home fragment on first launch — skip on config changes
+        // to avoid rebuilding the fragment stack unnecessarily.
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
         }
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment selectedFragment = null;
-                int itemId = item.getItemId();
+        assert bottomNavigationView != null;
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
+            int itemId = item.getItemId();
 
-                if (itemId == R.id.menu_movie_home) {
-                    selectedFragment = new HomeFragment();
-                } else if (itemId == R.id.menu_movie_search) {
-                    Boolean wasTVShowSearch = viewModel.getLastSearchWasTVShow().getValue();
-                    if (wasTVShowSearch != null && wasTVShowSearch) {
-                        selectedFragment = new SearchTVShowsFragment();
-                    } else {
-                        selectedFragment = new SearchMoviesFragment();
-                    }
-                } else if (itemId == R.id.menu_movie_profile) {
-                    selectedFragment = new ProfileFragment();
-                }
-
-                if (selectedFragment != null) {getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment)
-                            .addToBackStack(null)
-                            .commit();
-                }
-                return true;
+            if (itemId == R.id.menu_movie_home) {
+                selectedFragment = new HomeFragment();
+            } else if (itemId == R.id.menu_movie_search) {
+                Boolean wasTVShowSearch = viewModel.getLastSearchWasTVShow().getValue();
+                selectedFragment = (wasTVShowSearch != null && wasTVShowSearch)
+                        ? new SearchTVShowsFragment()
+                        : new SearchMoviesFragment();
+            } else if (itemId == R.id.menu_movie_watchlist) {
+                selectedFragment = new WatchlistFragment();
+            } else if (itemId == R.id.menu_movie_profile) {
+                selectedFragment = new ProfileFragment();
             }
 
+            if (selectedFragment != null) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, selectedFragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
+            return true;
         });
 
-        com.google.firebase.auth.FirebaseUser currentUser =
-                com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        // Show the welcome dialog if user isn't log in yet
+        FirebaseUser currentUser =
+                FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            View dialogView = getLayoutInflater().inflate(R.layout.dialog_welcome, null);
+            @SuppressLint("InflateParams") View dialogView = getLayoutInflater().inflate(R.layout.dialog_welcome, null);
 
-            android.app.Dialog dialog = new android.app.Dialog(this);
-            dialog.setContentView(dialogView);
-            dialog.setCancelable(false);
+            welcomeDialog = new android.app.Dialog(this);
+            welcomeDialog.setContentView(dialogView);
+            welcomeDialog.setCancelable(false); // user must make a choice, can't dismiss by tapping outside
 
-            if (dialog.getWindow() != null) {
-                dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
-                dialog.getWindow().setDimAmount(0.7f);
+            if (welcomeDialog.getWindow() != null) {
+                welcomeDialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+                welcomeDialog.getWindow().setDimAmount(0.7f);
             }
 
             dialogView.findViewById(R.id.btn_login).setOnClickListener(v -> {
-                dialog.dismiss();
+                welcomeDialog.dismiss();
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
                 finish();
             });
 
-            dialogView.findViewById(R.id.btn_guest).setOnClickListener(v -> {
-                dialog.dismiss();
-            });
+            dialogView.findViewById(R.id.btn_guest).setOnClickListener(v -> welcomeDialog.dismiss());
 
-            dialog.show();
+            welcomeDialog.show();
         }
-
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (welcomeDialog != null && welcomeDialog.isShowing()) {
+            welcomeDialog.dismiss();
+        }
+    }
 }

@@ -1,21 +1,25 @@
 package emplay.entertainment.emplay.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CustomCredential;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -25,24 +29,10 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
-
     private FirebaseAuth mAuth;
-    private GoogleSignInClient googleSignInClient;
     private ProgressBar progressBar;
     private DatabaseHelper dbHelper;
-
-    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
-            new ActivityResultContracts.StartActivityForResult(),
-            result -> {
-                Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(result.getData());
-                try {
-                    GoogleSignInAccount account = task.getResult(ApiException.class);
-                    firebaseAuthWithGoogle(account.getIdToken());
-                } catch (ApiException e) {
-                    progressBar.setVisibility(View.GONE);
-                    Toast.makeText(this, "Sign-in cancelled", Toast.LENGTH_SHORT).show();
-                }
-            });
+    private CredentialManager credentialManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,12 +42,7 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         dbHelper = DatabaseHelper.getInstance(this);
         progressBar = findViewById(R.id.progress_bar);
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.google_web_client_id))
-                .requestEmail()
-                .build();
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
+        credentialManager = CredentialManager.create(this);
 
         findViewById(R.id.btn_google_sign_in).setOnClickListener(v -> startGoogleSignIn());
         findViewById(R.id.btn_guest_continue).setOnClickListener(v -> navigateToMainActivity());
@@ -66,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // Skip the login screen if the user is already signed in.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             navigateToMainActivity();
@@ -74,7 +60,45 @@ public class LoginActivity extends AppCompatActivity {
 
     private void startGoogleSignIn() {
         progressBar.setVisibility(View.VISIBLE);
-        signInLauncher.launch(googleSignInClient.getSignInIntent());
+
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(false)
+                .setServerClientId(getString(R.string.google_web_client_id))
+                .setAutoSelectEnabled(true)
+                .build();
+
+        GetCredentialRequest request = new GetCredentialRequest.Builder()
+                .addCredentialOption(googleIdOption)
+                .build();
+
+        // Use the new CredentialManager to show the sign-in bottom sheet
+        credentialManager.getCredentialAsync(this, request, null, ContextCompat.getMainExecutor(this),
+                new androidx.credentials.CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(@NonNull GetCredentialResponse result) {
+                        handleSignInResult(result.getCredential());
+                    }
+
+                    @Override
+                    public void onError(@NonNull GetCredentialException e) {
+                        progressBar.setVisibility(View.GONE);
+                        Log.e("LoginActivity", "Credential Manager Error: " + e.getMessage());
+                        Toast.makeText(LoginActivity.this, "Sign-in failed", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void handleSignInResult(Credential credential) {
+        if (credential instanceof CustomCredential
+                && GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL.equals(credential.getType())) {
+            CustomCredential customCredential = (CustomCredential) credential;
+            GoogleIdTokenCredential googleIdTokenCredential =
+                    GoogleIdTokenCredential.createFrom(customCredential.getData());
+            firebaseAuthWithGoogle(googleIdTokenCredential.getIdToken());
+        } else {
+            progressBar.setVisibility(View.GONE);
+            Log.e("LoginActivity", "Unexpected credential type: " + credential.getType());
+        }
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
@@ -87,7 +111,17 @@ public class LoginActivity extends AppCompatActivity {
                         if (user != null) {
                             String name = user.getDisplayName() != null ? user.getDisplayName() : "User";
                             String email = user.getEmail() != null ? user.getEmail() : "";
+                            // Cache the profile locally
                             dbHelper.insertOrUpdateUser(name, email);
+
+                            if (user.getMetadata() != null) {
+                                long creationTime = user.getMetadata().getCreationTimestamp();
+                                SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+                                if (!prefs.contains("join_date")) {
+                                    prefs.edit().putLong("join_date", creationTime).apply();
+                                }
+                            }
+
                             Toast.makeText(this, "Welcome, " + name + "!", Toast.LENGTH_SHORT).show();
                             navigateToMainActivity();
                         }

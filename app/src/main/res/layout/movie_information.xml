@@ -5,17 +5,27 @@
     android:layout_height="match_parent">
 
     <!-- Poster -->
-    <ImageView
-        android:id="@+id/imageView"
+    <FrameLayout
+        android:id="@+id/poster_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="32dp"
         android:elevation="8dp"
+        android:background="@drawable/bg_poster_placeholder"
+        android:clipToOutline="true"
         app:layout_constraintWidth_percent="0.35"
         app:layout_constraintDimensionRatio="2:3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+    </FrameLayout>
 
     <!-- Title -->
     <TextView
@@ -32,7 +42,7 @@
         android:textSize="22sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
+        app:layout_constraintTop_toBottomOf="@+id/poster_container" />
 
     <!-- Genres -->
     <TextView
@@ -45,8 +55,8 @@
         android:fontFamily="sans-serif"
         android:text="Genre goes here"
         android:textAlignment="center"
-        android:textColor="#777777"
-        android:textSize="13sp"
+        android:textColor="#9E9E9E"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/search_result_title" />
@@ -125,40 +135,40 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Release Date"
-            android:textColor="#555555"
-            android:textSize="11sp"
+            android:textColor="#888888"
+            android:textSize="12sp"
             android:fontFamily="sans-serif"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="  •  "
-            android:textColor="#333333"
-            android:textSize="11sp"/>
+            android:textColor="#444444"
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/search_result_runtime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Runtime"
-            android:textColor="#555555"
-            android:textSize="11sp"
+            android:textColor="#888888"
+            android:textSize="12sp"
             android:fontFamily="sans-serif"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="  •  "
-            android:textColor="#333333"
-            android:textSize="11sp"/>
+            android:textColor="#444444"
+            android:textSize="12sp"/>
 
         <TextView
             android:id="@+id/search_result_language"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Language"
-            android:textColor="#555555"
-            android:textSize="11sp"
+            android:textColor="#888888"
+            android:textSize="12sp"
             android:fontFamily="sans-serif"/>
 
     </LinearLayout>
@@ -173,11 +183,29 @@
         android:layout_marginEnd="20dp"
         android:fontFamily="sans-serif"
         android:lineSpacingExtra="4dp"
+        android:justificationMode="inter_word"
         android:text="Overview goes here"
-        android:textColor="#BBBBBB"
-        android:textSize="13sp"
+        android:textColor="#CCCCCC"
+        android:textSize="14sp"
+        android:maxLines="4"
+        android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/meta_row" />
+
+    <TextView
+        android:id="@+id/read_more_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp"
+        android:text="Read More"
+        android:textColor="#E53935"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/search_result_overview"
+        app:layout_constraintTop_toBottomOf="@+id/search_result_overview"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

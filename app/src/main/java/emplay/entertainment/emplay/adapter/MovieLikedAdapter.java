@@ -5,9 +5,14 @@ import android.content.Context;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.models.MovieModel;
 
+/**
+ *  Liked movies row on the Profile screen. Overrides removeItem() so a swipe-to-delete
+ *  also removes the entry from the local SQLite database.
+ */
 public class MovieLikedAdapter extends BasePosterAdapter<MovieModel> {
 
     private final DatabaseHelper databaseHelper;
@@ -27,6 +32,9 @@ public class MovieLikedAdapter extends BasePosterAdapter<MovieModel> {
 
     @Override
     protected int getImageViewId() { return R.id.liked_poster; }
+
+    @Override
+    protected String getImagePrefix() { return ImageUrl.CARD; }
 
     @Override
     public void removeItem(int position) {

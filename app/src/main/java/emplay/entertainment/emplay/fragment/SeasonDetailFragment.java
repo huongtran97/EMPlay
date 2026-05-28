@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,7 +11,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,11 +25,16 @@ import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.SeasonDetailResponse;
 import emplay.entertainment.emplay.api.TMDBpath;
+import emplay.entertainment.emplay.tool.ReadHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class SeasonDetailFragment extends Fragment {
+/**
+ *  Shows the detail page for a single TV season: poster, overview (with Read More/Less),
+ *  and the full episode list below.
+ */
+public class SeasonDetailFragment extends BaseFragment {
 
     private static final String ARG_TV_ID = "TV_ID";
     private static final String ARG_SEASON_NUMBER = "SEASON_NUMBER";
@@ -42,10 +47,12 @@ public class SeasonDetailFragment extends Fragment {
     private TextView seasonName;
     private TextView airDate;
     private TextView overview;
+    private TextView readMoreText;
     private TextView episodeCount;
     private RecyclerView episodesRecyclerView;
     private EpisodeAdapter episodeAdapter;
     private List<SeasonDetailResponse.Episode> episodeList;
+    private boolean isExpanded = false;
 
     public static SeasonDetailFragment newInstance(int tvId, int seasonNumber) {
         SeasonDetailFragment fragment = new SeasonDetailFragment();
@@ -66,6 +73,7 @@ public class SeasonDetailFragment extends Fragment {
         seasonName = view.findViewById(R.id.season_detail_name);
         airDate = view.findViewById(R.id.season_detail_air_date);
         overview = view.findViewById(R.id.season_detail_overview);
+        readMoreText = view.findViewById(R.id.read_more_text);
         episodeCount = view.findViewById(R.id.season_detail_episode_count);
         episodesRecyclerView = view.findViewById(R.id.season_detail_episodes_recyclerview);
 
@@ -74,6 +82,9 @@ public class SeasonDetailFragment extends Fragment {
         episodesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         episodesRecyclerView.setAdapter(episodeAdapter);
         episodesRecyclerView.setNestedScrollingEnabled(false);
+
+        // Read More / Less
+        ReadHelper.setup(overview, readMoreText, isExpanded, expanded -> isExpanded = expanded);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
@@ -89,12 +100,12 @@ public class SeasonDetailFragment extends Fragment {
     }
 
     private void fetchSeasonDetails() {
-        Call<SeasonDetailResponse> call = apiService.getTVSeasonDetails(
-                TMDBpath.tvSeasonDetails(tvId, seasonNumber));
-        call.enqueue(new Callback<SeasonDetailResponse>() {
+        safeEnqueue(apiService.getTVSeasonDetails(
+                TMDBpath.tvSeasonDetails(tvId, seasonNumber)), new Callback<SeasonDetailResponse>() {
+            @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
             @Override
-            public void onResponse(Call<SeasonDetailResponse> call,
-                                   Response<SeasonDetailResponse> response) {
+            public void onResponse(@NonNull Call<SeasonDetailResponse> call,
+                                   @NonNull Response<SeasonDetailResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     SeasonDetailResponse season = response.body();
 
@@ -104,6 +115,8 @@ public class SeasonDetailFragment extends Fragment {
                             && !season.getOverview().isEmpty()
                             ? season.getOverview() : "No overview available.");
 
+                    ReadHelper.bind(overview, readMoreText, isExpanded);
+
                     if (season.getEpisodes() != null) {
                         episodeCount.setText(season.getEpisodes().size() + " Episodes");
                         episodeList.clear();
@@ -112,7 +125,7 @@ public class SeasonDetailFragment extends Fragment {
                     }
 
                     if (season.getPosterPath() != null) {
-                        Glide.with(requireContext())
+                        Glide.with(SeasonDetailFragment.this)
                                 .load("https://image.tmdb.org/t/p/w500" + season.getPosterPath())
                                 .placeholder(R.drawable.placeholder_image)
                                 .into(posterImage);
@@ -121,7 +134,7 @@ public class SeasonDetailFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<SeasonDetailResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<SeasonDetailResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Failed to load season details", Toast.LENGTH_SHORT).show();
             }
         });

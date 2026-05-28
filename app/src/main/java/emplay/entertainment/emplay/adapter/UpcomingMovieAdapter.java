@@ -7,6 +7,9 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.MovieModel;
 
+/**
+ * Upcoming movies row on the Home screen — thin wrapper over BasePosterAdapter.
+ */
 public class UpcomingMovieAdapter extends BasePosterAdapter<MovieModel> {
 
     public interface OnItemClickListener {

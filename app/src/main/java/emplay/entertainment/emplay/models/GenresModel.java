@@ -7,11 +7,12 @@ public class GenresModel {
     private int id;
     @SerializedName("name")
     private String name;
-    public GenresModel() {
-    }
-    public GenresModel(int id, String name) {
+    private final int colorRes;
+
+    public GenresModel(int id, String name, int colorRes) {
         this.id = id;
         this.name = name;
+        this.colorRes = colorRes;
     }
 
     public int getId() {
@@ -29,4 +30,7 @@ public class GenresModel {
     public void setName(String name) {
         this.name = name;
     }
+    public int getColorRes() {return colorRes;}
+
+
 }

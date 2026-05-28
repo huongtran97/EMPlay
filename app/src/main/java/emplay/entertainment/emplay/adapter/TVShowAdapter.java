@@ -7,6 +7,9 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.TVShowModel;
 
+/**
+ * Trending TV shows row on the Home screen — thin wrapper over BasePosterAdapter.
+ */
 public class TVShowAdapter extends BasePosterAdapter<TVShowModel> {
 
     public interface OnItemClickListener {

@@ -11,6 +11,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import emplay.entertainment.emplay.adapter.MovieLikedAdapter;
 import emplay.entertainment.emplay.adapter.TVLikedAdapter;
 
+/**
+ *  Swipe-to-delete for the liked movies and TV shows rows on the Profile screen.
+ *  Drawing the red "DELETE" label is done manually in onChildDraw — there's no built-in
+ *  support for custom swipe backgrounds in ItemTouchHelper.
+ */
 public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
     private final Paint paint = new Paint();
     private final RecyclerView recyclerView;

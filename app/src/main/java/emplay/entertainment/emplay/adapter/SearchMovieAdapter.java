@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.view.LayoutInflater;
@@ -17,9 +18,13 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.models.MovieModel;
 
-
+/**
+ *  Search results list for movies — compact row with poster, title, language, and rating.
+ *  Tapping a row opens the full movie detail screen via OnItemClickListener.
+ */
 public class SearchMovieAdapter extends RecyclerView.Adapter<SearchMovieAdapter.MovieViewHolder> {
 
     private final List<MovieModel> movieList;
@@ -41,6 +46,7 @@ public class SearchMovieAdapter extends RecyclerView.Adapter<SearchMovieAdapter.
         return new MovieViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull MovieViewHolder holder, int position) {
         MovieModel movie = movieList.get(position);
@@ -54,7 +60,7 @@ public class SearchMovieAdapter extends RecyclerView.Adapter<SearchMovieAdapter.
             holder.ratingBar.setRating((float) (movie.getVoteAverage() / 2));
 
             Glide.with(holder.itemView.getContext())
-                    .load("https://image.tmdb.org/t/p/w500" + movie.getPosterPath())
+                    .load(ImageUrl.THUMBNAIL + movie.getPosterPath())
                     .into(holder.poster);
 
             holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(movie));
@@ -67,9 +73,7 @@ public class SearchMovieAdapter extends RecyclerView.Adapter<SearchMovieAdapter.
     }
 
     public static class MovieViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView releaseDate;
-        TextView language;
+        TextView title, releaseDate, language;
         ImageView poster;
         RatingBar ratingBar;
 

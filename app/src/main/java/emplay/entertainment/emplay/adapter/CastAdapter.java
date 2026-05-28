@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +18,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.models.CastModel;
 
+/**
+ *  Horizontal cast row shown on both movie and TV detail screens.
+ *  Tapping a cast member opens CastDetailFragment via the OnCastClickListener callback.
+ */
 public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
 
-    private ArrayList<CastModel> castList;
-    private Context context;
+    private final ArrayList<CastModel> castList;
+    private final Context context;
     private OnCastClickListener onCastClickListener;
 
     public interface OnCastClickListener {
@@ -40,6 +46,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
         this.onCastClickListener = listener;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<CastModel> newCastList) {
         castList.clear();
         castList.addAll(newCastList);
@@ -65,7 +72,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
             if (profilePath != null && !profilePath.isEmpty()) {
                 Glide.with(context)
-                        .load("https://image.tmdb.org/t/p/w500" + profilePath)
+                        .load(ImageUrl.POSTER + profilePath)
                         .apply(options)
                         .placeholder(R.drawable.avatar)
                         .into(holder.profileImageView);
@@ -90,8 +97,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     public static class CastViewHolder extends RecyclerView.ViewHolder {
-        TextView nameTextView;
-        TextView characterTextView;
+        TextView nameTextView, characterTextView;
         ImageView profileImageView;
 
         public CastViewHolder(@NonNull View itemView) {

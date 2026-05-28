@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 public class TrailerActivity extends AppCompatActivity {
 
     private static final String ARG_MOVIE_ID = "MOVIE_ID";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,6 +22,7 @@ public class TrailerActivity extends AppCompatActivity {
             return;
         }
 
+        // Try the native YouTube app first, fall back to the browser if it's not installed.
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + videoId));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("https://www.youtube.com/watch?v=" + videoId));
@@ -32,7 +32,6 @@ public class TrailerActivity extends AppCompatActivity {
         } catch (Exception e) {
             startActivity(webIntent);
         }
-
         finish();
     }
 }

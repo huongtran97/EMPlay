@@ -6,13 +6,14 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
- * API endpoints routed through the Vercel proxy.
+ * Every network call in the app goes through here.
  *
- * All requests go to: GET /api/tmdb?path=<tmdb_path>&<other_params>
- * The proxy injects the TMDB API key server-side — no key in APK.
+ * All requests share the same endpoint: GET /api/tmdb?path=<tmdb_path>
+ * The "path" param tells the proxy which TMDB endpoint to forward to.
+ * Extra query params (query, page, genres, etc.) are passed alongside it.
  *
- * NOTE: @Query("api_key") is removed from all methods.
- *       The proxy handles authentication automatically.
+ * The API key is never included here — the proxy injects it server-side,
+ * so it's never baked into the APK.
  */
 public interface MovieApiService {
 

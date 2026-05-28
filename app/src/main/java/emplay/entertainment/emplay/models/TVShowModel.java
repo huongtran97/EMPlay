@@ -7,46 +7,33 @@ import java.util.List;
 public class TVShowModel implements Serializable, MediaItem {
     @SerializedName("id")
     private int id;
-    
     @SerializedName("name")
     private String name;
-    
     @SerializedName("vote_average")
     private double voteAverage;
-    
     @SerializedName("poster_path")
     private String posterPath;
-    
     @SerializedName("backdrop_path")
     private String backdropPath;
-    
     @SerializedName("overview")
     private String overview;
-    
     @SerializedName("original_language")
     private String originalLanguage;
-    
     @SerializedName("first_air_date")
     private String firstAirDate;
-    
     @SerializedName("genres")
     private List<String> genres;
-    
     @SerializedName("crew")
     private List<String> crew;
-    
     @SerializedName("production_countries")
     private List<String> productionCountries;
-    
     @SerializedName("number_of_episodes")
     private int numberOfEpisodes;
-    
     @SerializedName("number_of_seasons")
     private int numberOfSeasons;
-    
     private List<SeasonsModel> seasonsInfo;
-    
     private String username;
+    private String savedTimestamp;
 
     public TVShowModel() {}
 
@@ -80,10 +67,16 @@ public class TVShowModel implements Serializable, MediaItem {
     @Override
     public int getMediaId() { return id; }
 
+    @Override
+    public String getSavedTimestamp() { return savedTimestamp; }
+    public void setSavedTimestamp(String savedTimestamp) { this.savedTimestamp = savedTimestamp; }
+
     // Getters and Setters
     public int getTVShowId() { return id; }
     public void setTVShowId(int id) { this.id = id; }
 
+    @Override
+    public String getTitle() { return name; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

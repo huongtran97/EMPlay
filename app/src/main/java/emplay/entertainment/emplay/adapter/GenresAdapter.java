@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +15,11 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.GenresModel;
 
+/**
+ *  Genre chip grid on the Search tabs. Tapping a chip opens the genre browse screen.
+ */
 public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresViewHolder> {
-    private List<GenresModel> genresList;
+    private final List<GenresModel> genresList;
     private final OnItemClickListener onItemClickListener;
 
     public GenresAdapter(List<GenresModel> genresList, OnItemClickListener onItemClickListener) {
@@ -23,6 +27,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresView
         this.onItemClickListener = onItemClickListener;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setGenres(List<GenresModel> genres) {
         if (genres != null) {
             genresList.clear();
@@ -45,7 +50,13 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresView
     @Override
     public void onBindViewHolder(@NonNull GenresViewHolder holder, int position) {
         GenresModel genre = genresList.get(position);
-        holder.genres.setText(genre.getName());
+        holder.genreName.setText(genre.getName());
+
+
+        if (genre.getColorRes() != 0) {
+            holder.genreName.setTextColor(genre.getColorRes());
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (onItemClickListener != null && position != RecyclerView.NO_POSITION) {
                 onItemClickListener.onItemClick(genre);
@@ -53,21 +64,17 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresView
         });
     }
 
-
-
-
     @Override
     public int getItemCount() {
         return genresList.size();
     }
 
-    public class GenresViewHolder extends RecyclerView.ViewHolder {
-        TextView genres;
+    public static class GenresViewHolder extends RecyclerView.ViewHolder {
+        TextView genreName;
 
         public GenresViewHolder(@NonNull View itemView) {
             super(itemView);
-            genres = itemView.findViewById(R.id.movie_genres);
-
+            genreName = itemView.findViewById(R.id.genre_name);
         }
     }
 }

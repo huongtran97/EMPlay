@@ -1,11 +1,13 @@
 package emplay.entertainment.emplay.adapter;
 
+import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_GENRES;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_POSTER_PATH;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TITLE;
-import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_TVSHOW_ID;
+import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_SHOW_ID;
 import static emplay.entertainment.emplay.database.DatabaseHelper.COLUMN_USER_ID;
-import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_USER_TVSHOWS;
+import static emplay.entertainment.emplay.database.DatabaseHelper.TABLE_USER_SHOWS;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
@@ -31,22 +33,31 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.api.MoviesTrailerResponses;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.models.TVShowModel;
-import emplay.entertainment.emplay.models.SeasonsModel;
+import emplay.entertainment.emplay.tool.ReadHelper;
 
+/**
+ *  Adapter for the TV show detail card (single item — the show's poster, metadata, and overview).
+ *  Handles the favourite/save button and launching the trailer via TrailerActivity.
+ *  expandedItems tracks which overviews are currently showing in full (Read More state).
+ */
 public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInformationAdapter.TVShowInformationViewHolder> {
-    private List<TVShowModel> tvInformationList;
-    private FragmentActivity fragmentActivity;
-    private DatabaseHelper databaseHelper;
-    private FirebaseAuth mAuth;
+    private final List<TVShowModel> tvInformationList;
+    private final FragmentActivity fragmentActivity;
+    private final DatabaseHelper databaseHelper;
+    private final FirebaseAuth mAuth;
     private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
+    private final Set<Integer> expandedItems = new HashSet<>();
 
     public TVShowInformationAdapter(List<TVShowModel> tvInformationList, FragmentActivity fragmentActivity) {
         this.tvInformationList = tvInformationList;
@@ -62,6 +73,7 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
         return new TVShowInformationViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull TVShowInformationViewHolder holder, int position) {
         TVShowModel tv = tvInformationList.get(position);
@@ -70,33 +82,22 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
         holder.ratingBar.setRating((float) (tv.getVoteAverage() / 2));
         holder.overView.setText(tv.getOverview() != null ? tv.getOverview() : "N/A");
 
+        // Read More / Less 
+        ReadHelper.setup(holder.overView, holder.readMoreBtn, tv.getTVShowId(), expandedItems, holder, this);
+
         if (VERSION.SDK_INT >= VERSION_CODES.N) {
             holder.language.setText("Language: " + LanguageMapper.getLanguageName(tv.getOriginalLanguage()));
         }
         holder.firstAirDate.setText("Date: " + (tv.getFirstAirDate() != null ? tv.getFirstAirDate() : "N/A"));
         holder.genre.setText(tv.getGenres() != null && !tv.getGenres().isEmpty() ? String.join(" | ", tv.getGenres()) : "N/A");
-        holder.season.setText("Number of seasons: " + tv.getNumberOfSeasons());
-
-        StringBuilder episodesText = new StringBuilder("Episodes: " + tv.getNumberOfEpisodes());
-        if (tv.getSeasonsInfo() != null && !tv.getSeasonsInfo().isEmpty()) {
-            episodesText.append("\n(");
-            for (int i = 0; i < tv.getSeasonsInfo().size(); i++) {
-                SeasonsModel season = tv.getSeasonsInfo().get(i);
-                episodesText.append("S").append(season.getSeasonNumber()).append(": ").append(season.getNumberOfEpisodes());
-                if (i < tv.getSeasonsInfo().size() - 1) {
-                    episodesText.append( (i + 1) % 5 == 0 ? ",\n " : ", ");
-                }
-            }
-            episodesText.append(")");
-        }
-        holder.episodes.setText(episodesText.toString());
-
+        holder.season.setText("Seasons: " + tv.getNumberOfSeasons());
+        holder.episodes.setText("Episodes: " + tv.getNumberOfEpisodes());
         holder.productCountry.setText(tv.getProductionCountries() != null && !tv.getProductionCountries().isEmpty() ?
                 "Product from: " + String.join(", ", tv.getProductionCountries()) : "Product Country: N/A");
 
         String posterPath = tv.getPosterPath() != null && !tv.getPosterPath().isEmpty() ? tv.getPosterPath() : tv.getBackdropPath();
         Glide.with(fragmentActivity)
-                .load(posterPath != null ? "https://image.tmdb.org/t/p/w500/" + posterPath : R.drawable.placeholder_image)
+                .load(posterPath != null ? ImageUrl.POSTER + posterPath : R.drawable.placeholder_image)
                 .placeholder(R.drawable.placeholder_image)
                 .into(holder.poster);
 
@@ -125,7 +126,11 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
                 holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
                 Toast.makeText(fragmentActivity, "TV Show removed from library", Toast.LENGTH_SHORT).show();
             } else {
-                long result = saveTVShowToUserTVShows(userId, tvShowId, title, posterPath);
+                String genresString = "";
+                if (tvShowModel.getGenres() != null) {
+                    genresString = String.join(",", tvShowModel.getGenres());
+                }
+                long result = saveTVShowToUserTVShows(userId, tvShowId, title, posterPath, genresString);
                 if (result != -1) {
                     holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
                     Toast.makeText(fragmentActivity, "Added to library", Toast.LENGTH_SHORT).show();
@@ -157,19 +162,20 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
         });
     }
 
-    public long saveTVShowToUserTVShows(String userId, int tvId, String title, String posterPath) {
+    public long saveTVShowToUserTVShows(String userId, int tvId, String title, String posterPath, String genres) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_USER_ID, userId);
-        values.put(COLUMN_TVSHOW_ID, tvId);
+        values.put(COLUMN_SHOW_ID, tvId);
         values.put(COLUMN_TITLE, title);
         values.put(COLUMN_POSTER_PATH, posterPath);
-        return db.insert(TABLE_USER_TVSHOWS, null, values);
+        values.put(COLUMN_GENRES, genres);
+        return db.insert(TABLE_USER_SHOWS, null, values);
     }
 
     private boolean isTVShowSavedByUser(String userId, int tvShowId) {
         SQLiteDatabase db = databaseHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USER_TVSHOWS + " WHERE " + COLUMN_USER_ID + " = ? AND " + COLUMN_TVSHOW_ID + " = ?",
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USER_SHOWS + " WHERE " + COLUMN_USER_ID + " = ? AND " + COLUMN_SHOW_ID + " = ?",
                 new String[]{userId, String.valueOf(tvShowId)});
 
         boolean isSaved = false;
@@ -182,10 +188,11 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
 
     private void removeTVShowFromUserTVShow(String userId, int tvShowId) {
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        db.delete(TABLE_USER_TVSHOWS, COLUMN_USER_ID + " = ? AND " + COLUMN_TVSHOW_ID + " = ?", new String[]{userId, String.valueOf(tvShowId)});
+        db.delete(TABLE_USER_SHOWS, COLUMN_USER_ID + " = ? AND " + COLUMN_SHOW_ID + " = ?", new String[]{userId, String.valueOf(tvShowId)});
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setTeaserTrailers(List<MoviesTrailerResponses.TrailerModel> adapterTrailers) {
         this.trailers = adapterTrailers != null ? adapterTrailers : new ArrayList<>();
         notifyDataSetChanged();
@@ -196,15 +203,8 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
         return tvInformationList.size();
     }
 
-    public class TVShowInformationViewHolder extends RecyclerView.ViewHolder {
-        TextView name;
-        TextView overView;
-        TextView language;
-        TextView firstAirDate;
-        TextView genre;
-        TextView season;
-        TextView episodes;
-        TextView productCountry;
+    public static class TVShowInformationViewHolder extends RecyclerView.ViewHolder {
+        TextView name, overView, language, firstAirDate, genre, season, episodes, productCountry, readMoreBtn;
         ImageView poster;
         RatingBar ratingBar;
         ImageButton addBtn;
@@ -220,6 +220,7 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
             season = itemView.findViewById(R.id.tvshow_information_seasons);
             episodes = itemView.findViewById(R.id.tvshow_result_episodes);
             productCountry = itemView.findViewById(R.id.tvshow_result_product_country);
+            readMoreBtn = itemView.findViewById(R.id.read_more_text);
             poster = itemView.findViewById(R.id.imageView);
             ratingBar = itemView.findViewById(R.id.tvshow_ratingBar);
             addBtn = itemView.findViewById(R.id.add_to_library_btn);

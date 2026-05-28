@@ -7,6 +7,9 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.MovieModel;
 
+/**
+ * Poster grid for the movie genre browser — thin wrapper over BasePosterAdapter.
+ */
 public class MovieByGenreAdapter extends BasePosterAdapter<MovieModel> {
 
     public interface OnItemClickListener {

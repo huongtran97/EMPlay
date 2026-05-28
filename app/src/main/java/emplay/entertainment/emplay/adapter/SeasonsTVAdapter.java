@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,12 +17,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.models.SeasonsModel;
 
+/**
+ *  Horizontal seasons row on the TV show detail screen.
+ *  Tapping a season opens SeasonDetailFragment via the OnSeasonClickListener callback.
+ */
 public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.SeasonsViewHolder> {
 
-    private ArrayList<SeasonsModel> seasonsList;
-    private Context context;
+    private final ArrayList<SeasonsModel> seasonsList;
+    private final Context context;
     private OnSeasonClickListener onSeasonClickListener;
 
     public interface OnSeasonClickListener {
@@ -40,6 +46,7 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
         this.onSeasonClickListener = listener;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<SeasonsModel> newSeasonsList) {
         seasonsList.clear();
         seasonsList.addAll(newSeasonsList);
@@ -53,16 +60,17 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
         return new SeasonsViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull SeasonsViewHolder holder, int position) {
         SeasonsModel seasonsModel = seasonsList.get(position);
         if (seasonsModel != null) {
             holder.name.setText(seasonsModel.getName());
-            holder.episode.setText("Number of episodes: " + seasonsModel.getNumberOfEpisodes());
+            holder.episode.setText("Episodes: " + seasonsModel.getNumberOfEpisodes());
 
             String posterUrl = null;
             if (seasonsModel.getPosterPath() != null && !seasonsModel.getPosterPath().isEmpty()) {
-                posterUrl = "https://image.tmdb.org/t/p/w500" + seasonsModel.getPosterPath();
+                posterUrl = ImageUrl.THUMBNAIL + seasonsModel.getPosterPath();
             }
 
             Glide.with(context)
@@ -83,9 +91,8 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
         return seasonsList.size();
     }
 
-    public class SeasonsViewHolder extends RecyclerView.ViewHolder {
-        TextView name;
-        TextView episode;
+    public static class SeasonsViewHolder extends RecyclerView.ViewHolder {
+        TextView name, episode;
         ImageView poster;
 
         public SeasonsViewHolder(@NonNull View itemView) {

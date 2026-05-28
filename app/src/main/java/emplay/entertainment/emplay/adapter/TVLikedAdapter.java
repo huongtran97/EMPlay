@@ -5,9 +5,14 @@ import android.content.Context;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.models.TVShowModel;
 
+/**
+ *  Liked TV shows row on the Profile screen.
+ *  Swipe-to-delete removes the entry from the local SQLite database.
+ */
 public class TVLikedAdapter extends BasePosterAdapter<TVShowModel> {
 
     private final DatabaseHelper databaseHelper;
@@ -27,6 +32,8 @@ public class TVLikedAdapter extends BasePosterAdapter<TVShowModel> {
 
     @Override
     protected int getImageViewId() { return R.id.liked_poster; }
+    @Override
+    protected String getImagePrefix() { return ImageUrl.CARD; }
 
     @Override
     public void removeItem(int position) {

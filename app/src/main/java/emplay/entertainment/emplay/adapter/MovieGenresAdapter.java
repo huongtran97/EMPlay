@@ -14,10 +14,14 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.fragment.MovieByGenresFragment;
 import emplay.entertainment.emplay.models.GenresModel;
 
+/**
+ *  Alternative genre chip adapter that navigates to MovieByGenresFragment directly
+ *  without going through an external click callback. Used in older screens.
+ */
 public class MovieGenresAdapter extends RecyclerView.Adapter<MovieGenresAdapter.GenresViewHolder> {
 
-    private List<GenresModel> genresList;
-    private Context context;
+    private final List<GenresModel> genresList;
+    private final Context context;
 
 
     public MovieGenresAdapter(List<GenresModel> genresList, Context context) {
@@ -52,7 +56,7 @@ public class MovieGenresAdapter extends RecyclerView.Adapter<MovieGenresAdapter.
         return genresList.size();
     }
 
-    public class GenresViewHolder extends RecyclerView.ViewHolder {
+    public static class GenresViewHolder extends RecyclerView.ViewHolder {
         TextView genres;
 
         public GenresViewHolder(@NonNull View itemView) {

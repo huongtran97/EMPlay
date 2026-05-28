@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.fragment;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
@@ -14,7 +15,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -48,18 +48,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ShowResultTVShowDetailsFragment extends Fragment {
+/**
+ *  Detail screen for a single TV show. Loads info, seasons row, cast row, and
+ *  a paginated "more like this" grid — all in parallel since they're independent.
+ */
+public class ShowResultTVShowDetailsFragment extends BaseFragment {
 
     private static final String ARG_TV_ID = "TV_ID";
-    private static final int PAGE_SIZE = 9;
-
+    private static final int PAGE_SIZE = 9; // 3-column grid × 3 rows per page
     private int tvId;
     private List<TVShowModel> tvInformationList;
     private List<SeasonsModel> seasonsList;
     private List<CastModel> castList;
     private List<TVShowModel> allSuggestions = new ArrayList<>();
     private int suggestionPage = 1;
-    
     private RecyclerView detailRecyclerView;
     private RecyclerView seasonsRecyclerview;
     private RecyclerView castRecyclerView;
@@ -68,7 +70,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
     private TextView suggestionPageIndicator;
     private ImageButton suggestionBtnPrev;
     private ImageButton suggestionBtnNext;
-    
     private TVShowInformationAdapter tvAdapter;
     private SeasonsTVAdapter seasonAdapter;
     private CastAdapter castAdapter;
@@ -165,21 +166,16 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
 
     private void onItemClicked(TVShowModel tvShow) {
         if (tvShow != null) {
-            ShowResultTVShowDetailsFragment showResultTVShowDetailsFragment = ShowResultTVShowDetailsFragment.newInstance(tvShow.getTVShowId());
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, showResultTVShowDetailsFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+            navigateTo(ShowResultTVShowDetailsFragment.newInstance(tvShow.getTVShowId()));
         } else {
             Toast.makeText(getContext(), "TV show details are not available", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void fetchTrailersForMovie() {
-        Call<TVShowsTrailerResponses> call = apiService.getTVShowsTrailer(TMDBpath.tvShowTrailer(tvId));
-        call.enqueue(new Callback<TVShowsTrailerResponses>() {
+        safeEnqueue(apiService.getTVShowsTrailer(TMDBpath.tvShowTrailer(tvId)), new Callback<TVShowsTrailerResponses>() {
             @Override
-            public void onResponse(Call<TVShowsTrailerResponses> call, Response<TVShowsTrailerResponses> response) {
+            public void onResponse(@NonNull Call<TVShowsTrailerResponses> call, @NonNull Response<TVShowsTrailerResponses> response) {
                 if (response.isSuccessful()) {
                     TVShowsTrailerResponses trailerResponses = response.body();
                     List<MoviesTrailerResponses.TrailerModel> allTrailers = trailerResponses != null ? trailerResponses.getResults() : null;
@@ -189,6 +185,7 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                         return;
                     }
 
+                    // Prefer official "Trailer" videos; fall back to any YouTube video if none found.
                     List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
                     for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
                         if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
@@ -205,7 +202,8 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<TVShowsTrailerResponses> call, Throwable t) { }
+            public void onFailure(@NonNull Call<TVShowsTrailerResponses> call, @NonNull Throwable t) {
+            }
         });
     }
 
@@ -215,11 +213,11 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void fetchTVDetailsAndSeasons() {
-        Call<TVShowDetailsResponse> call = apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvId));
-        call.enqueue(new Callback<TVShowDetailsResponse>() {
+        safeEnqueue(apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvId)), new Callback<TVShowDetailsResponse>() {
             @Override
-            public void onResponse(Call<TVShowDetailsResponse> call, Response<TVShowDetailsResponse> response) {
+            public void onResponse(@NonNull Call<TVShowDetailsResponse> call, @NonNull Response<TVShowDetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     TVShowDetailsResponse tvDetails = response.body();
 
@@ -249,7 +247,6 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                             );
                             seasonsModels.add(sm);
                         }
-
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                             seasonsModels.sort((a, b) -> Integer.compare(a.getSeasonNumber(), b.getSeasonNumber()));
                         }
@@ -286,12 +283,15 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<TVShowDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<TVShowDetailsResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Error fetching TV show details: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     *  Same blurred-backdrop treatment as the movie detail screen.
+     */
     private void setRecyclerViewBackground(String backdropPath) {
         if (backdropPath == null || backdropPath.isEmpty()) {
             return;
@@ -318,11 +318,11 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
                 });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void fetchTVCastList() {
-        Call<TVShowCreditsResponses> call = apiService.getTVShowCredits(TMDBpath.tvShowCredits(tvId));
-        call.enqueue(new Callback<TVShowCreditsResponses>() {
+        safeEnqueue(apiService.getTVShowCredits(TMDBpath.tvShowCredits(tvId)), new Callback<TVShowCreditsResponses>() {
             @Override
-            public void onResponse(Call<TVShowCreditsResponses> call, Response<TVShowCreditsResponses> response) {
+            public void onResponse(@NonNull Call<TVShowCreditsResponses> call, @NonNull Response<TVShowCreditsResponses> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     TVShowCreditsResponses tvCreditsResponse = response.body();
 
@@ -350,17 +350,16 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<TVShowCreditsResponses> call, Throwable t) {
+            public void onFailure(@NonNull Call<TVShowCreditsResponses> call, @NonNull Throwable t) {
                 Toast.makeText(requireContext(), "Error fetching cast list: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchTVSuggestionList() {
-        Call<TVShowSimilarResponse> call = apiService.getTVShowSimilar(TMDBpath.tvShowSimilar(tvId));
-        call.enqueue(new Callback<TVShowSimilarResponse>() {
+        safeEnqueue(apiService.getTVShowSimilar(TMDBpath.tvShowSimilar(tvId)), new Callback<TVShowSimilarResponse>() {
             @Override
-            public void onResponse(Call<TVShowSimilarResponse> call, Response<TVShowSimilarResponse> response) {
+            public void onResponse(@NonNull Call<TVShowSimilarResponse> call, @NonNull Response<TVShowSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<TVShowModel> results = response.body().getResults();
                     allSuggestions.clear();
@@ -379,12 +378,17 @@ public class ShowResultTVShowDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<TVShowSimilarResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<TVShowSimilarResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Failed to load TV show recommendations: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     * Slices the full suggestion list into pages and updates the grid + nav buttons.
+     * Pagination bar is hidden entirely when there's only one page.
+     */
+    @SuppressLint("SetTextI18n")
     private void showSuggestionPage() {
         int total = allSuggestions.size();
         int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);

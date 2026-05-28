@@ -7,13 +7,16 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.MovieModel;
 
-public class SuggestionAdapter extends BasePosterAdapter<MovieModel> {
+/**
+ * "More like this" grid on the movie detail screen — poster-only tiles backed by BasePosterAdapter.
+ */
+public class SuggestionMovieAdapter extends BasePosterAdapter<MovieModel> {
 
     public interface OnItemClickListener {
         void onItemClick(MovieModel movie);
     }
 
-    public SuggestionAdapter(List<MovieModel> data, Context context, OnItemClickListener listener) {
+    public SuggestionMovieAdapter(List<MovieModel> data, Context context, OnItemClickListener listener) {
         super(context, data, listener::onItemClick);
     }
 

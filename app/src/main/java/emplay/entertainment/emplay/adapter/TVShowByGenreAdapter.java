@@ -7,6 +7,9 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.TVShowModel;
 
+/**
+ * Poster grid for the TV show genre browser — thin wrapper over BasePosterAdapter.
+ */
 public class TVShowByGenreAdapter extends BasePosterAdapter<TVShowModel> {
 
     public interface OnItemClickListener {

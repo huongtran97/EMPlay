@@ -1,12 +1,12 @@
 package emplay.entertainment.emplay.fragment;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,22 +29,24 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Shows movies filtered by a single genre in a paginated 3-column grid.
+ * Display 18 per page so items land on clean 3-column boundaries.
+ */
 public class MovieByGenresFragment extends Fragment {
 
     private static final String ARG_GENRE_ID = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
-
+    private static final int ITEMS_PER_PAGE = 18; // 6 rows of 3 items
     private RecyclerView movieByGenreRecyclerview;
     private MovieByGenreAdapter movieByGenreAdapter;
-    private TextView genreName;
     private TextView pageIndicator;
     private ImageButton btnPrev;
     private ImageButton btnNext;
-    private List<MovieModel> movieByGenreList;
     private MovieApiService apiService;
     private int genreId;
     private int currentPage = 1;
-    private int totalPages = 1;
+    private int totalCustomPages = 1;
     private boolean isLoading = false;
 
     public static MovieByGenresFragment newInstance(int genreId, String genreName) {
@@ -62,13 +64,12 @@ public class MovieByGenresFragment extends Fragment {
         View view = inflater.inflate(R.layout.movie_by_genres_view, container, false);
 
         movieByGenreRecyclerview = view.findViewById(R.id.movie_by_genre_recyclerview);
-        genreName = view.findViewById(R.id.movie_genres);
+        TextView genreNameHeader = view.findViewById(R.id.movie_genres);
         pageIndicator = view.findViewById(R.id.page_indicator);
         btnPrev = view.findViewById(R.id.btn_prev);
         btnNext = view.findViewById(R.id.btn_next);
 
-        movieByGenreList = new ArrayList<>();
-        movieByGenreAdapter = new MovieByGenreAdapter(movieByGenreList, getContext(), this::onItemClick);
+        movieByGenreAdapter = new MovieByGenreAdapter(new ArrayList<>(), getContext(), this::onItemClick);
 
         movieByGenreRecyclerview.setLayoutManager(new GridLayoutManager(getContext(), 3));
         movieByGenreRecyclerview.setAdapter(movieByGenreAdapter);
@@ -82,7 +83,7 @@ public class MovieByGenresFragment extends Fragment {
         });
 
         btnNext.setOnClickListener(v -> {
-            if (currentPage < totalPages) {
+            if (currentPage < totalCustomPages) {
                 currentPage++;
                 fetchMoviesByGenre(genreId);
                 movieByGenreRecyclerview.scrollToPosition(0);
@@ -93,7 +94,7 @@ public class MovieByGenresFragment extends Fragment {
 
         if (getArguments() != null) {
             genreId = getArguments().getInt(ARG_GENRE_ID, -1);
-            genreName.setText(getArguments().getString(ARG_GENRE_NAME, "Unknown Genre"));
+            genreNameHeader.setText(getArguments().getString(ARG_GENRE_NAME, "Unknown Genre"));
             if (genreId != -1) fetchMoviesByGenre(genreId);
         }
 
@@ -111,28 +112,62 @@ public class MovieByGenresFragment extends Fragment {
         if (isLoading) return;
         isLoading = true;
 
-        Call<MovieResponse> call = apiService.getMoviesByGenre(TMDBpath.discoverMovies(), genreId, currentPage);
+        // Work out which TMDB pages overlap with the 18 items.
+        // If the slice spans two TMDB pages, fetch both and trim to our 18 items window.
+        int startItemIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        int firstTmdbPage = (startItemIndex / 20) + 1;
+        int secondTmdbPage = ((startItemIndex + ITEMS_PER_PAGE - 1) / 20) + 1;
+
+        List<MovieModel> combinedResults = new ArrayList<>();
+
+        fetchTmdbPage(genreId, firstTmdbPage, combinedResults, () -> {
+            if (firstTmdbPage != secondTmdbPage) {
+                fetchTmdbPage(genreId, secondTmdbPage, combinedResults, () -> {
+                    processResults(combinedResults, startItemIndex);
+                });
+            } else {
+                processResults(combinedResults, startItemIndex);
+            }
+        });
+    }
+
+    private void fetchTmdbPage(int genreId, int page, List<MovieModel> accumulator, Runnable onDone) {
+        Call<MovieResponse> call = apiService.getMoviesByGenre(TMDBpath.discoverMovies(), genreId, page);
         call.enqueue(new Callback<MovieResponse>() {
             @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                isLoading = false;
+            public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MovieResponse body = response.body();
-                    totalPages = body.getTotal_pages();
+                    int totalResults = body.getTotal_results();
+                    totalCustomPages = (int) Math.ceil((double) totalResults / ITEMS_PER_PAGE);
+
                     if (body.getResults() != null) {
-                        movieByGenreAdapter.updateData(body.getResults());
+                        accumulator.addAll(body.getResults());
                     }
-                    pageIndicator.setText("Page " + currentPage + " of " + totalPages);
-                    btnPrev.setEnabled(currentPage > 1);
-                    btnNext.setEnabled(currentPage < totalPages);
                 }
+                onDone.run();
             }
 
             @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-                isLoading = false;
-                Toast.makeText(getContext(), "Failed to load movies.", Toast.LENGTH_SHORT).show();
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                onDone.run();
             }
         });
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void processResults(List<MovieModel> combinedResults, int startItemIndex) {
+        isLoading = false;
+        int offsetInFirstPage = startItemIndex % 20;
+        
+        List<MovieModel> subset = new ArrayList<>();
+        for (int i = offsetInFirstPage; i < offsetInFirstPage + ITEMS_PER_PAGE && i < combinedResults.size(); i++) {
+            subset.add(combinedResults.get(i));
+        }
+
+        movieByGenreAdapter.updateData(subset);
+        pageIndicator.setText("Page " + currentPage + " of " + totalCustomPages);
+        btnPrev.setEnabled(currentPage > 1);
+        btnNext.setEnabled(currentPage < totalCustomPages);
     }
 }

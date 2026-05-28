@@ -1,6 +1,9 @@
 package emplay.entertainment.emplay.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,13 +13,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -24,9 +26,18 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.textfield.TextInputEditText;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+import emplay.entertainment.emplay.adapter.TVShowAdapter;
+import emplay.entertainment.emplay.database.DatabaseHelper;
+import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.GenresAdapter;
@@ -43,20 +54,31 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ *  TV show search tab — mirrors SearchMoviesFragment but for TV.
+ */
 public class SearchTVShowsFragment extends Fragment {
 
     private SearchTVAdapter searchAdapter;
     private GenresAdapter genresAdapter;
-    private List<GenresModel> genresList;
-    private List<TVShowModel> searchTVList;
-    private RecyclerView genresRecyclerView, recyclerView;
+    private TVShowAdapter popularAdapter;
+    private SearchTVAdapter trendingAdapter;
+
+    private final List<TVShowModel> searchTVList = new ArrayList<>();
+    private final List<GenresModel> genresList = new ArrayList<>();
+    private final List<TVShowModel> popularList = new ArrayList<>();
+    private final List<TVShowModel> trendingList = new ArrayList<>();
+
+    private RecyclerView rvGenres, rvSearchResults, rvPopularNow, rvTrendingSearches;
     private MovieApiService apiService;
-    private EditText inputSearch;
+    private TextInputEditText etSearch;
     private SharedViewModel viewModel;
-    private LinearLayout searchMovieLayout;
-    private LinearLayout searchTVShowLayout;
-    private android.widget.TextView genresLabel;
+    private MaterialButton btnMovie, btnTvShow;
+    private ScrollView svSearchDefault;
+    private ChipGroup cgRecentSearches;
+    private DatabaseHelper dbHelper;
     private String lastQuery = "";
+    TextView tvClearAll, tvPopularSeeAll;
 
     @Nullable
     @Override
@@ -64,124 +86,196 @@ public class SearchTVShowsFragment extends Fragment {
         View view = inflater.inflate(R.layout.movie_search_view, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-
-        inputSearch = view.findViewById(R.id.input_title);
-        recyclerView = view.findViewById(R.id.search_recycler_view);
-        genresRecyclerView = view.findViewById(R.id.genres_recycler_view);
-        genresLabel = view.findViewById(R.id.genres_label);
-        ImageButton searchButton = view.findViewById(R.id.search_movie_btn);
-        searchMovieLayout = view.findViewById(R.id.menu_movie_layout);
-        searchTVShowLayout = view.findViewById(R.id.menu_tvshow_layout);
-
-        searchMovieLayout.setOnClickListener(v -> onMovieClick());
-        searchTVShowLayout.setOnClickListener(v -> onTVShowClick());
-
-        searchTVList = new ArrayList<>();
-        genresList = new ArrayList<>();
-
-        searchAdapter = new SearchTVAdapter(searchTVList, this::showTVDetails);
-        genresAdapter = new GenresAdapter(genresList, this::onItemClick);
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(searchAdapter);
-
-        genresRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
-        genresRecyclerView.setAdapter(genresAdapter);
-
+        dbHelper = DatabaseHelper.getInstance(requireContext());
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        inputSearch.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void afterTextChanged(Editable s) {}
+        etSearch = view.findViewById(R.id.etSearch);
+        rvSearchResults = view.findViewById(R.id.rvSearchResults);
+        rvGenres = view.findViewById(R.id.rvGenres);
+        rvPopularNow = view.findViewById(R.id.rvPopularNow);
+        rvTrendingSearches = view.findViewById(R.id.rvTrendingSearches);
+        svSearchDefault = view.findViewById(R.id.svSearchDefault);
+        cgRecentSearches = view.findViewById(R.id.cgRecentSearches);
+        tvClearAll = view.findViewById(R.id.tvClearAll);
+        if (tvClearAll != null) {
+            tvClearAll.setPaintFlags(tvClearAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+        tvPopularSeeAll = view.findViewById(R.id.tvPopularSeeAll);
+        if (tvPopularSeeAll != null) {
+            tvPopularSeeAll.setPaintFlags(tvPopularSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        }
+
+        btnMovie = view.findViewById(R.id.btnMovie);
+        btnTvShow = view.findViewById(R.id.btnTvShow);
+
+        btnMovie.setOnClickListener(v -> onMovieClick());
+        btnTvShow.setOnClickListener(v -> onTVShowClick());
+        tvClearAll.setOnClickListener(v -> clearHistory());
+
+        setupRecyclerViews();
+        setupSearchInput();
+        setupObservers();
+
+        loadDiscoveryData();
+
+        if (savedInstanceState != null) {
+            etSearch.setText(savedInstanceState.getString("searchQuery", ""));
+        }
+
+        updateToggleUI();
+
+        return view;
+    }
+
+    private void setupRecyclerViews() {
+        searchAdapter = new SearchTVAdapter(searchTVList, this::showTVDetails);
+        rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvSearchResults.setAdapter(searchAdapter);
+
+        genresAdapter = new GenresAdapter(genresList, this::onGenreClick);
+        rvGenres.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        rvGenres.setAdapter(genresAdapter);
+
+        popularAdapter = new TVShowAdapter(getContext(), popularList, this::showTVDetails);
+        rvPopularNow.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvPopularNow.setAdapter(popularAdapter);
+
+        trendingAdapter = new SearchTVAdapter(trendingList, this::showTVDetails);
+        rvTrendingSearches.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvTrendingSearches.setAdapter(trendingAdapter);
+    }
+
+    private void setupSearchInput() {
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
                 boolean hasText = s.length() > 0;
-                genresRecyclerView.setVisibility(hasText ? View.GONE : View.VISIBLE);
-                genresLabel.setVisibility(hasText ? View.GONE : View.VISIBLE);
+                svSearchDefault.setVisibility(hasText ? View.GONE : View.VISIBLE);
+                rvSearchResults.setVisibility(hasText ? View.VISIBLE : View.GONE);
                 performSearch();
             }
+            @Override public void afterTextChanged(Editable s) {}
         });
 
-        searchButton.setOnClickListener(v -> {
-            performSearch();
-            hideKeyboard();
-        });
-
-        inputSearch.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
-                performSearch();
+        etSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                String query = Objects.requireNonNull(etSearch.getText()).toString().trim();
+                if (!query.isEmpty()) {
+                    dbHelper.addRecentSearch(query);
+                    loadRecentSearches();
+                }
                 hideKeyboard();
                 return true;
             }
             return false;
         });
+    }
 
-        if (savedInstanceState != null) {
-            inputSearch.setText(savedInstanceState.getString("searchQuery", ""));
-        }
-
-        updateMenuSelection();
-        updateToggleUI(false);
-        setupObservers();
+    private void loadDiscoveryData() {
+        loadRecentSearches();
         fetchGenresForTVShows();
-
-        return view;
+        fetchTrendingTVShows();
+        fetchPopularTVShows();
     }
 
-    private void onItemClick(GenresModel genre) {
-        if (genre == null) return;
-        TVShowsByGenresFragment fragment = TVShowsByGenresFragment.newInstance(genre.getId(), genre.getName());
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+    private void loadRecentSearches() {
+        cgRecentSearches.removeAllViews();
+        List<String> searches = dbHelper.getRecentSearches();
+        for (String query : searches) {
+            Chip chip = new Chip(requireContext());
+            chip.setText(query);
+            chip.setOnClickListener(v -> {
+                etSearch.setText(query);
+                etSearch.setSelection(query.length());
+            });
+            cgRecentSearches.addView(chip);
+        }
     }
 
-    private void fetchGenresForTVShows() {
-        Call<GenresResponse> call = apiService.getGenresTVShows(TMDBpath.genresTVShows());
-        call.enqueue(new Callback<GenresResponse>() {
+    private void clearHistory() {
+        dbHelper.clearRecentSearches();
+        cgRecentSearches.removeAllViews();
+    }
+
+    private void fetchTrendingTVShows() {
+        apiService.getTrendingTVShows(TMDBpath.trendingTVShows()).enqueue(new Callback<TVShowResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onResponse(Call<GenresResponse> call, Response<GenresResponse> response) {
+            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<GenresModel> genres = response.body().getGenres();
-                    if (genres != null) {
-                        genresList.clear();
-                        genresList.addAll(genres);
-                        genresAdapter.notifyDataSetChanged();
-                    }
+                    trendingList.clear();
+                    List<TVShowModel> results = response.body().getResults();
+                    if (results != null) trendingList.addAll(results.subList(0, Math.min(results.size(), 3)));
+                    trendingAdapter.notifyDataSetChanged();
                 }
             }
-
-            @Override
-            public void onFailure(Call<GenresResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to fetch genres", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {}
         });
     }
 
-    private void updateMenuSelection() {
-        boolean isTVShow = Boolean.TRUE.equals(viewModel.getIsTVShowSearch().getValue());
-        searchMovieLayout.setSelected(!isTVShow);
-        searchTVShowLayout.setSelected(isTVShow);
+    private void fetchPopularTVShows() {
+        apiService.getTrendingTVShows(TMDBpath.trendingTVShows()).enqueue(new Callback<TVShowResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    popularList.clear();
+                    List<TVShowModel> results = response.body().getResults();
+                    if (results != null) popularList.addAll(results);
+                    popularAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {}
+        });
     }
 
+    private void onGenreClick(GenresModel genre) {
+        if (genre == null) return;
+        TVShowsByGenresFragment fragment = TVShowsByGenresFragment.newInstance(genre.getId(), genre.getName());
+        replaceFragment(fragment, "TVShowsByGenresFragment");
+    }
+
+    private void fetchGenresForTVShows() {
+        apiService.getGenresTVShows(TMDBpath.genresTVShows()).enqueue(new Callback<GenresResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
+            @Override
+            public void onResponse(@NonNull Call<GenresResponse> call, @NonNull Response<GenresResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    genresList.clear();
+                    for (GenresModel g : response.body().getGenres()) {
+                        genresList.add(new GenresModel(
+                                g.getId(), g.getName(),
+                                BadgeHelper.getGenreColor(requireContext(), g.getId())));
+                    }
+                    genresAdapter.notifyDataSetChanged();
+                }
+            }
+            @Override public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {}
+        });
+    }
+
+
+
+
     private void onTVShowClick() {
-        viewModel.setIsTVShowSearch(true);
-        updateMenuSelection();
-        updateToggleUI(false);
-        replaceFragment(new SearchTVShowsFragment(), "SearchTVShowsFragment");
+
     }
 
     private void onMovieClick() {
         viewModel.setIsTVShowSearch(false);
-        updateMenuSelection();
-        updateToggleUI(true);
         replaceFragment(new SearchMoviesFragment(), "SearchMoviesFragment");
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("searchQuery", Objects.requireNonNull(etSearch.getText()).toString());
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
     private void performSearch() {
-        String query = inputSearch.getText().toString().trim();
+        String query = Objects.requireNonNull(etSearch.getText()).toString().trim();
         if (!query.isEmpty()) {
             if (query.equals(lastQuery)) return;
             lastQuery = query;
@@ -196,14 +290,13 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     void searchTVShows(String query) {
-        Call<TVShowResponse> call = apiService.searchTVShows(TMDBpath.searchTVShows(), query);
-        call.enqueue(new Callback<TVShowResponse>() {
+        apiService.searchTVShows(TMDBpath.searchTVShows(), query).enqueue(new Callback<TVShowResponse>() {
             @Override
-            public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
+            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<TVShowModel> tvShows = response.body().getResults();
-                    if (tvShows != null && !tvShows.isEmpty()) {
-                        List<TVShowModel> filtered = new ArrayList<>();
+                    List<TVShowModel> filtered = new ArrayList<>();
+                    if (tvShows != null) {
                         for (TVShowModel tv : tvShows) {
                             if (tv.getPosterPath() != null) {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -212,21 +305,11 @@ public class SearchTVShowsFragment extends Fragment {
                                 filtered.add(tv);
                             }
                         }
-                        viewModel.setSearchTVResults(filtered.isEmpty() ? new ArrayList<>() : filtered);
-                        if (filtered.isEmpty()) Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
-                    } else {
-                        viewModel.setSearchTVResults(new ArrayList<>());
-                        Toast.makeText(getContext(), "No results found", Toast.LENGTH_SHORT).show();
                     }
-                } else {
-                    Toast.makeText(getContext(), "Failed to get results", Toast.LENGTH_SHORT).show();
+                    viewModel.setSearchTVResults(filtered);
                 }
             }
-
-            @Override
-            public void onFailure(Call<TVShowResponse> call, Throwable t) {
-                Toast.makeText(getContext(), "Failed to load TV shows", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {}
         });
     }
 
@@ -239,25 +322,18 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     private void showTVDetails(TVShowModel tv) {
-        if (tv == null) {
-            Toast.makeText(getContext(), "TV show details are not available", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (tv == null) return;
         ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tv.getTVShowId());
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        replaceFragment(fragment, "ShowResultTVShowDetailsFragment");
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void setupObservers() {
         viewModel.getSearchTVResults().observe(getViewLifecycleOwner(), tvShows -> {
             searchTVList.clear();
             searchTVList.addAll(tvShows);
             searchAdapter.notifyDataSetChanged();
         });
-
-        viewModel.getIsTVShowSearch().observe(getViewLifecycleOwner(), isTVShowSearch -> updateMenuSelection());
     }
 
     private void replaceFragment(Fragment fragment, String tag) {
@@ -267,8 +343,13 @@ public class SearchTVShowsFragment extends Fragment {
         transaction.commit();
     }
 
-    private void updateToggleUI(boolean isMovie) {
-        searchMovieLayout.setBackgroundResource(isMovie ? R.drawable.toggle_selected_bg : android.R.color.transparent);
-        searchTVShowLayout.setBackgroundResource(isMovie ? android.R.color.transparent : R.drawable.toggle_selected_bg);
+    private void updateToggleUI() {
+        btnMovie.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.toggle_bg));
+        btnMovie.setTextColor(Color.parseColor("#888888"));
+        btnMovie.setIconTint(ContextCompat.getColorStateList(requireContext(), android.R.color.darker_gray));
+
+        btnTvShow.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.red_primary));
+        btnTvShow.setTextColor(Color.WHITE);
+        btnTvShow.setIconTint(ContextCompat.getColorStateList(requireContext(), android.R.color.white));
     }
 }

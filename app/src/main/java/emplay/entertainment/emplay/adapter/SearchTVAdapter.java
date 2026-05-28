@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.view.LayoutInflater;
@@ -17,9 +18,13 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.models.TVShowModel;
 
-
+/**
+ *  Search results list for TV shows — same compact row layout as SearchMovieAdapter.
+ *  Tapping a row opens the TV show detail screen via OnItemClickListener.
+ */
 public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVViewHolder> {
 
     private final List<TVShowModel> tvList;
@@ -41,6 +46,7 @@ public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVView
         return new TVViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull TVViewHolder holder, int position) {
         TVShowModel tv = tvList.get(position);
@@ -54,7 +60,7 @@ public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVView
             holder.ratingBar.setRating((float) (tv.getVoteAverage() / 2));
 
             Glide.with(holder.itemView.getContext())
-                    .load("https://image.tmdb.org/t/p/w500" + tv.getPosterPath())
+                    .load(ImageUrl.THUMBNAIL + tv.getPosterPath())
                     .into(holder.poster);
 
             holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(tv));
@@ -67,9 +73,7 @@ public class SearchTVAdapter extends RecyclerView.Adapter<SearchTVAdapter.TVView
     }
 
     public static class TVViewHolder extends RecyclerView.ViewHolder {
-        TextView title;
-        TextView firstAirDate;
-        TextView language;
+        TextView title, firstAirDate, language;
         ImageView poster;
         RatingBar ratingBar;
 

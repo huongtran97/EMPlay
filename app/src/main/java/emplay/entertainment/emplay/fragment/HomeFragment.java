@@ -1,176 +1,266 @@
 package emplay.entertainment.emplay.fragment;
 
+import android.content.res.ColorStateList;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import emplay.entertainment.emplay.adapter.TrendingBannerAdapter;
 import emplay.entertainment.emplay.api.TVShowResponse;
-import emplay.entertainment.emplay.api.UpComingTVShowsResponse;
 import emplay.entertainment.emplay.api.UpComingMovieResponse;
+import emplay.entertainment.emplay.api.UpComingTVShowsResponse;
 import emplay.entertainment.emplay.models.TVShowModel;
-import emplay.entertainment.emplay.adapter.MovieAdapter;
+import emplay.entertainment.emplay.adapter.WhatsNewMovieAdapter;
+import emplay.entertainment.emplay.adapter.WhatsNewTVAdapter;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.api.MovieResponse;
 import emplay.entertainment.emplay.models.MovieModel;
-import emplay.entertainment.emplay.adapter.TVShowAdapter;
 import emplay.entertainment.emplay.adapter.UpComingTVAdapter;
 import emplay.entertainment.emplay.adapter.UpcomingMovieAdapter;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Call;
 
-public class HomeFragment extends Fragment {
-
-    private RecyclerView movieRecyclerView, tvRecyclerView2, upComingRecyclerView, upComingTVRecyclerview;
-    private MovieAdapter movieAdapter;
-    private TVShowAdapter tvShowAdapter;
+public class HomeFragment extends BaseFragment {
+    private ViewPager2 vpTrendingBanner;
+    private RecyclerView rvWhatsNew, rvUpcomingMovies, rvUpcomingTvShows;
+    private WhatsNewTVAdapter whatsNewTVAdapter;
+    private WhatsNewMovieAdapter whatsNewMovieAdapter;
     private UpcomingMovieAdapter upcomingMovieAdapter;
     private UpComingTVAdapter upComingTVAdapter;
     private MovieApiService apiService;
+    private TrendingBannerAdapter trendingAdapter;
+    private Runnable bannerRunnable;
+    private MaterialButton btnWhatsNewTvShow, btnWhatsNewMovie;
+    private boolean isWhatsNewShowingTV = true;
+    private final List<TVShowModel> cachedTVShows = new ArrayList<>();
+    private final List<MovieModel> cachedMovies = new ArrayList<>();
+    private final Handler bannerHandler = new Handler();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_main, container, false);
 
-        movieRecyclerView = view.findViewById(R.id.movie_popular_recyclerview);
-        tvRecyclerView2 = view.findViewById(R.id.tvshow_popular_recyclerview);
-        upComingRecyclerView = view.findViewById(R.id.up_coming_movie_recyclerview);
-        upComingTVRecyclerview = view.findViewById(R.id.up_coming_tv_recyclerview);
+        vpTrendingBanner = view.findViewById(R.id.vpTrendingBanner);
+        btnWhatsNewTvShow = view.findViewById(R.id.btnWhatsNewTvShow);
+        btnWhatsNewMovie = view.findViewById(R.id.btnWhatsNewMovie);
 
-        movieAdapter = new MovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
-        movieRecyclerView.setAdapter(movieAdapter);
-        movieRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        // ViewPager2 for trending banner
+        trendingAdapter = new TrendingBannerAdapter(getContext(), new ArrayList<>(), 
+                this::onItemClicked, this::navigateToWatchlist);
+        vpTrendingBanner.setAdapter(trendingAdapter);
 
-        tvShowAdapter = new TVShowAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
-        tvRecyclerView2.setAdapter(tvShowAdapter);
-        tvRecyclerView2.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        // Auto scroll setup
+        setupAutoScroll();
 
+        TextView tvWhatsNewSeeAll = view.findViewById(R.id.tvWhatsNewSeeAll);
+        if (tvWhatsNewSeeAll != null) {
+            tvWhatsNewSeeAll.setPaintFlags(tvWhatsNewSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            tvWhatsNewSeeAll.setOnClickListener(v -> navigateTo(WhatsNewFragment.newInstance(isWhatsNewShowingTV)));
+        }
+
+        // What's New toggle
+        rvWhatsNew = view.findViewById(R.id.rvWhatsNew);
+        whatsNewTVAdapter = new WhatsNewTVAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
+        whatsNewMovieAdapter = new WhatsNewMovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
+        rvWhatsNew.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvWhatsNew.setNestedScrollingEnabled(false);
+        rvWhatsNew.setAdapter(whatsNewTVAdapter);
+
+        btnWhatsNewTvShow.setOnClickListener(v -> switchWhatsNew(true));
+        btnWhatsNewMovie.setOnClickListener(v -> switchWhatsNew(false));
+
+        // Upcoming Movies
+        rvUpcomingMovies = view.findViewById(R.id.rvUpcomingMovies);
         upcomingMovieAdapter = new UpcomingMovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
-        upComingRecyclerView.setAdapter(upcomingMovieAdapter);
-        upComingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvUpcomingMovies.setAdapter(upcomingMovieAdapter);
+        rvUpcomingMovies.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
+        // Upcoming TV Shows
+        rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
         upComingTVAdapter = new UpComingTVAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
-        upComingTVRecyclerview.setAdapter(upComingTVAdapter);
-        upComingTVRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvUpcomingTvShows.setAdapter(upComingTVAdapter);
+        rvUpcomingTvShows.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        fetchPopularMovies();
-        fetchPopularTV();
+        fetchHeroMovie();
+        fetchWhatsNewTVShows();
+        fetchWhatsNewMovies();
         fetchUpComingMovie();
-        fetchUpComingTV();
+        fetchUpcomingTVShows();
 
         return view;
     }
 
-    private void fetchPopularMovies() {
-        Call<MovieResponse> call = apiService.getTrendingMovies(TMDBpath.trendingMovies());
-        call.enqueue(new Callback<MovieResponse>() {
+    private void setupAutoScroll() {
+        bannerRunnable = new Runnable() {
             @Override
-            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<MovieModel> filtered = new ArrayList<>();
-                    for (MovieModel movie : response.body().getResults()) {
-                        if (movie.getPosterPath() != null) filtered.add(movie);
-                    }
-                    movieAdapter.updateData(filtered);
+            public void run() {
+                if (trendingAdapter != null && trendingAdapter.getItemCount() > 0) {
+                    int current = vpTrendingBanner.getCurrentItem();
+                    int total = trendingAdapter.getItemCount();
+                    vpTrendingBanner.setCurrentItem(current < total - 1 ? current + 1 : 0);
+                }
+                bannerHandler.postDelayed(this, 4000);
+            }
+        };
+        bannerHandler.postDelayed(bannerRunnable, 4000);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        bannerHandler.removeCallbacks(bannerRunnable);
+    }
+
+    private void switchWhatsNew(boolean showTV) {
+        if (isWhatsNewShowingTV == showTV) return;
+        isWhatsNewShowingTV = showTV;
+        rvWhatsNew.setAdapter(showTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
+
+        btnWhatsNewTvShow.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFFE50914 : 0xFF1E1E1E));
+        btnWhatsNewTvShow.setTextColor(showTV ? 0xFFFFFFFF : 0xFF888888);
+        btnWhatsNewTvShow.setIconTint(ColorStateList.valueOf(showTV ? 0xFFFFFFFF : 0xFF888888));
+
+        btnWhatsNewMovie.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFF1E1E1E : 0xFFE50914));
+        btnWhatsNewMovie.setTextColor(showTV ? 0xFF888888 : 0xFFFFFFFF);
+        btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
+    }
+
+    // Data fetching
+    private void fetchHeroMovie() {
+        safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().getResults().isEmpty()) {
+                    List<MovieModel> results = response.body().getResults();
+                    // Show top 5 movies in banner
+                    List<MovieModel> bannerMovies = results.subList(0, Math.min(results.size(), 5));
+                    trendingAdapter.updateData(bannerMovies);
                 }
             }
 
             @Override
-            public void onFailure(Call<MovieResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Failed to fetch trending movies", t);
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                Log.e("HomeFragment", "Failed to fetch hero movie", t);
             }
         });
     }
 
-    private void fetchPopularTV() {
-        Call<TVShowResponse> call = apiService.getTrendingTVShows(TMDBpath.trendingTVShows());
-        call.enqueue(new Callback<TVShowResponse>() {
+    private void fetchWhatsNewTVShows() {
+        safeEnqueue(apiService.getTrendingTVShows(TMDBpath.trendingTVShows()), new Callback<TVShowResponse>() {
             @Override
-            public void onResponse(Call<TVShowResponse> call, Response<TVShowResponse> response) {
+            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<TVShowModel> filtered = new ArrayList<>();
+                    cachedTVShows.clear();
                     for (TVShowModel tv : response.body().getResults()) {
-                        if (tv.getPosterPath() != null) filtered.add(tv);
+                        if (tv.getPosterPath() != null) cachedTVShows.add(tv);
                     }
-                    tvShowAdapter.updateData(filtered);
+                    // Limit to 4 items for the Home screen
+                    List<TVShowModel> limited = cachedTVShows.subList(0, Math.min(cachedTVShows.size(), 4));
+                    whatsNewTVAdapter.updateData(new ArrayList<>(limited));
                 }
             }
 
             @Override
-            public void onFailure(Call<TVShowResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
                 Log.e("HomeFragment", "Failed to fetch trending TV shows", t);
             }
         });
     }
 
-    private void fetchUpComingMovie() {
-        Call<UpComingMovieResponse> call = apiService.getUpcomingMovies(
-                TMDBpath.discoverMovies(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
-                "popularity.desc", false, "en-US", 1);
-        call.enqueue(new Callback<UpComingMovieResponse>() {
+    private void fetchWhatsNewMovies() {
+        safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
             @Override
-            public void onResponse(Call<UpComingMovieResponse> call, Response<UpComingMovieResponse> response) {
+            public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<MovieModel> filtered = new ArrayList<>();
+                    cachedMovies.clear();
                     for (MovieModel movie : response.body().getResults()) {
-                        if (movie.getPosterPath() != null) filtered.add(movie);
+                        if (movie.getPosterPath() != null) cachedMovies.add(movie);
                     }
-                    upcomingMovieAdapter.updateData(filtered);
+                    // Limit to 4 items for the Home screen
+                    List<MovieModel> limited = cachedMovies.subList(0, Math.min(cachedMovies.size(), 4));
+                    whatsNewMovieAdapter.updateData(new ArrayList<>(limited));
                 }
             }
 
             @Override
-            public void onFailure(Call<UpComingMovieResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Failed to fetch upcoming movies", t);
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                Log.e("HomeFragment", "Failed to fetch trending movies", t);
             }
         });
     }
 
-    private void fetchUpComingTV() {
-        Call<UpComingTVShowsResponse> call = apiService.getUpcomingTVShows(
-                TMDBpath.discoverTVShows(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
-                "popularity.desc", false, "en-US", 1);
-        call.enqueue(new Callback<UpComingTVShowsResponse>() {
-            @Override
-            public void onResponse(Call<UpComingTVShowsResponse> call, Response<UpComingTVShowsResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<TVShowModel> filtered = new ArrayList<>();
-                    for (TVShowModel tv : response.body().getResults()) {
-                        if (tv.getPosterPath() != null) filtered.add(tv);
+    private void fetchUpComingMovie() {
+        safeEnqueue(apiService.getUpcomingMovies(
+                TMDBpath.discoverMovies(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
+                "popularity.desc", false, "en-US", 1),
+                new Callback<UpComingMovieResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UpComingMovieResponse> call, @NonNull Response<UpComingMovieResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<MovieModel> filtered = new ArrayList<>();
+                            for (MovieModel movie : response.body().getResults()) {
+                                if (movie.getPosterPath() != null) filtered.add(movie);
+                            }
+                            upcomingMovieAdapter.updateData(filtered);
+                        }
                     }
-                    upComingTVAdapter.updateData(filtered);
-                }
-            }
 
-            @Override
-            public void onFailure(Call<UpComingTVShowsResponse> call, Throwable t) {
-                Log.e("HomeFragment", "Failed to fetch upcoming TV shows", t);
-            }
-        });
+                    @Override
+                    public void onFailure(@NonNull Call<UpComingMovieResponse> call, @NonNull Throwable t) {
+                        Log.e("HomeFragment", "Failed to fetch upcoming movies", t);
+                    }
+                });
+    }
+
+    private void fetchUpcomingTVShows() {
+        safeEnqueue(apiService.getUpcomingTVShows(
+                TMDBpath.discoverTVShows(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
+                "popularity.desc", false, "en-US", 1),
+                new Callback<UpComingTVShowsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<UpComingTVShowsResponse> call, @NonNull Response<UpComingTVShowsResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<TVShowModel> filtered = new ArrayList<>();
+                            for (TVShowModel tv : response.body().getResults()) {
+                                if (tv.getPosterPath() != null) filtered.add(tv);
+                            }
+                            upComingTVAdapter.updateData(filtered);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<UpComingTVShowsResponse> call, @NonNull Throwable t) {
+                        Log.e("HomeFragment", "Failed to fetch upcoming TV shows", t);
+                    }
+                });
     }
 
     public void onItemClicked(Object item) {
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
         Fragment fragment;
-
         if (item instanceof MovieModel) {
             fragment = ShowResultDetailsFragment.newInstance(((MovieModel) item).getId());
         } else if (item instanceof TVShowModel) {
@@ -178,9 +268,10 @@ public class HomeFragment extends Fragment {
         } else {
             return;
         }
+        navigateTo(fragment);
+    }
 
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+    private void navigateToWatchlist() {
+        navigateTo(WatchlistFragment.newInstance(0));
     }
 }

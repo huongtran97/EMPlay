@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +16,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.ImageUrl;
 import emplay.entertainment.emplay.models.MediaItem;
 
+/**
+ * Base class for all the simple poster-grid/row adapters on the home screen
+ * (trending movies, trending TV, upcoming movies, upcoming TV).
+ * Subclasses only need to provide the layout resource and the ImageView id —
+ * everything else (Glide loading, click handling, data updates) lives here.
+ */
 public abstract class BasePosterAdapter<T extends MediaItem>
         extends RecyclerView.Adapter<BasePosterAdapter.PosterViewHolder> {
 
@@ -36,28 +44,25 @@ public abstract class BasePosterAdapter<T extends MediaItem>
 
     protected abstract int getLayoutRes();
     protected abstract int getImageViewId();
+    protected String getImagePrefix() { return ImageUrl.THUMBNAIL; }
 
+    // Prefer the poster, fall back to the backdrop if there's no poster.
     protected String getImageUrl(T item) {
+        String prefix = getImagePrefix();
         if (item.getPosterPath() != null && !item.getPosterPath().isEmpty()) {
-            return "https://image.tmdb.org/t/p/w500" + item.getPosterPath();
+            return prefix + item.getPosterPath();
         }
         if (item.getBackdropPath() != null && !item.getBackdropPath().isEmpty()) {
-            return "https://image.tmdb.org/t/p/w500" + item.getBackdropPath();
+            return prefix + item.getBackdropPath();
         }
         return null;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<T> newData) {
         mData.clear();
         if (newData != null) mData.addAll(newData);
         notifyDataSetChanged();
-    }
-
-    public void addData(List<T> more) {
-        if (more == null || more.isEmpty()) return;
-        int start = mData.size();
-        mData.addAll(more);
-        notifyItemRangeInserted(start, more.size());
     }
 
     public void removeItem(int position) {

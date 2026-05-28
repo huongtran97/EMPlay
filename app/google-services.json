@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "244216604840",
     "project_id": "emplay-project-firebase",
-    "storage_bucket": "emplay-project-firebase.appspot.com"
+    "storage_bucket": "emplay-project-firebase.firebasestorage.app"
   },
   "client": [
     {
@@ -12,7 +12,28 @@
           "package_name": "emplay.entertainment.emplay"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "244216604840-96faeaevd89cim0p9mobf6gh1lka9ltm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "emplay.entertainment.emplay",
+            "certificate_hash": "c9da7fc55eee87245037e330d4109ef9857643fb"
+          }
+        },
+        {
+          "client_id": "244216604840-ulgoke5f0ea3535jes5ha354ej01722i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "emplay.entertainment.emplay",
+            "certificate_hash": "202c082d8ea1531cace3f2c65d157c172f33025e"
+          }
+        },
+        {
+          "client_id": "244216604840-an9q5ck78228ekf8ge38sg7al6ls12ou.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAGN0eWjtfLJ9gjGuJffXZ_WkO7bDndzDo"
@@ -20,7 +41,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "244216604840-an9q5ck78228ekf8ge38sg7al6ls12ou.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.fragment;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build.VERSION;
@@ -17,7 +18,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,22 +44,26 @@ import emplay.entertainment.emplay.api.MoviesTrailerResponses;
 import emplay.entertainment.emplay.models.CastModel;
 import emplay.entertainment.emplay.models.MovieModel;
 import emplay.entertainment.emplay.adapter.CastAdapter;
-import emplay.entertainment.emplay.adapter.MovieResultAdapter;
-import emplay.entertainment.emplay.adapter.SuggestionAdapter;
+import emplay.entertainment.emplay.adapter.MovieInformationAdapter;
+import emplay.entertainment.emplay.adapter.SuggestionMovieAdapter;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ShowResultDetailsFragment extends Fragment {
+/**
+ *  Detail screen for a single movie. Loads the movie info, cast row, and a
+ *  paginated "more like this" grid — all in parallel.
+ */
+public class ShowResultDetailsFragment extends BaseFragment {
 
     private static final String ARG_MOVIE_ID = "MOVIE_ID";
-    private static final int PAGE_SIZE = 9;
+    private static final int PAGE_SIZE = 9; // 3-column grid × 3 rows per page
 
     private int movieId;
     private List<MovieModel> movieList;
     private List<CastModel> castList;
-    private List<MovieModel> allSuggestions = new ArrayList<>();
+    private final List<MovieModel> allSuggestions = new ArrayList<>();
     private int suggestionPage = 1;
     
     private RecyclerView detailRecyclerView;
@@ -70,9 +74,9 @@ public class ShowResultDetailsFragment extends Fragment {
     private ImageButton suggestionBtnPrev;
     private ImageButton suggestionBtnNext;
     
-    private MovieResultAdapter movieResultAdapter;
+    private MovieInformationAdapter movieInformationAdapter;
     private CastAdapter castAdapter;
-    private SuggestionAdapter suggestionAdapter;
+    private SuggestionMovieAdapter suggestionMovieAdapter;
     private MovieApiService apiService;
 
     public static ShowResultDetailsFragment newInstance(int movieId) {
@@ -86,7 +90,7 @@ public class ShowResultDetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.search_result_view, container, false);
+        View view = inflater.inflate(R.layout.search_result_movie_view, container, false);
 
         detailRecyclerView = view.findViewById(R.id.search_result_recyclerview);
         castRecyclerView = view.findViewById(R.id.search_result_cast_recyclerview);
@@ -103,7 +107,7 @@ public class ShowResultDetailsFragment extends Fragment {
         movieList = new ArrayList<>();
         castList = new ArrayList<>();
 
-        movieResultAdapter = new MovieResultAdapter(movieList, requireActivity());
+        movieInformationAdapter = new MovieInformationAdapter(movieList, requireActivity());
         castAdapter = new CastAdapter(castList, requireActivity(), cast -> {
             CastDetailFragment fragment = CastDetailFragment.newInstance(cast.getId());
             FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
@@ -111,7 +115,7 @@ public class ShowResultDetailsFragment extends Fragment {
             transaction.addToBackStack(null);
             transaction.commit();
         });
-        suggestionAdapter = new SuggestionAdapter(new ArrayList<>(), getContext(), this::onItemClicked);
+        suggestionMovieAdapter = new SuggestionMovieAdapter(new ArrayList<>(), getContext(), this::onItemClicked);
 
         suggestionBtnPrev.setOnClickListener(v -> {
             suggestionPage--;
@@ -124,9 +128,9 @@ public class ShowResultDetailsFragment extends Fragment {
             suggestionRecyclerView.scrollToPosition(0);
         });
 
-        detailRecyclerView.setAdapter(movieResultAdapter);
+        detailRecyclerView.setAdapter(movieInformationAdapter);
         castRecyclerView.setAdapter(castAdapter);
-        suggestionRecyclerView.setAdapter(suggestionAdapter);
+        suggestionRecyclerView.setAdapter(suggestionMovieAdapter);
 
         detailRecyclerView.setNestedScrollingEnabled(false);
         suggestionRecyclerView.setNestedScrollingEnabled(false);
@@ -150,21 +154,16 @@ public class ShowResultDetailsFragment extends Fragment {
 
     private void onItemClicked(MovieModel movie) {
         if (movie != null) {
-            ShowResultDetailsFragment showResultDetailsFragment = ShowResultDetailsFragment.newInstance(movie.getId());
-            FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, showResultDetailsFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+            navigateTo(ShowResultDetailsFragment.newInstance(movie.getId()));
         } else {
             Toast.makeText(getContext(), "Movie details are not available", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void fetchTrailersForMovie() {
-        Call<MoviesTrailerResponses> call = apiService.getMoviesTrailer(TMDBpath.movieTrailer(movieId));
-        call.enqueue(new Callback<MoviesTrailerResponses>() {
+        safeEnqueue(apiService.getMoviesTrailer(TMDBpath.movieTrailer(movieId)), new Callback<MoviesTrailerResponses>() {
             @Override
-            public void onResponse(Call<MoviesTrailerResponses> call, Response<MoviesTrailerResponses> response) {
+            public void onResponse(@NonNull Call<MoviesTrailerResponses> call, @NonNull Response<MoviesTrailerResponses> response) {
                 if (response.isSuccessful()) {
                     MoviesTrailerResponses trailerResponses = response.body();
                     List<MoviesTrailerResponses.TrailerModel> allTrailers = trailerResponses != null ? trailerResponses.getResults() : null;
@@ -174,6 +173,7 @@ public class ShowResultDetailsFragment extends Fragment {
                         return;
                     }
 
+                    // Prefer official "Trailer" videos; fall back to any YouTube video if none found.
                     List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
                     for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
                         if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
@@ -190,23 +190,23 @@ public class ShowResultDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<MoviesTrailerResponses> call, Throwable t) {
+            public void onFailure(@NonNull Call<MoviesTrailerResponses> call, @NonNull Throwable t) {
                 Log.e("ShowResultDetails", "Failed to fetch trailers", t);
             }
         });
     }
 
     private void updateAdapterWithTrailers(List<MoviesTrailerResponses.TrailerModel> trailers) {
-        if (movieResultAdapter != null) {
-            movieResultAdapter.setTeaserTrailers(trailers);
+        if (movieInformationAdapter != null) {
+            movieInformationAdapter.setTeaserTrailers(trailers);
         }
     }
 
     private void fetchMovieDetails() {
-        Call<MovieDetailsResponse> call = apiService.getMovieDetails(TMDBpath.movieDetails(movieId));
-        call.enqueue(new Callback<MovieDetailsResponse>() {
+        safeEnqueue(apiService.getMovieDetails(TMDBpath.movieDetails(movieId)), new Callback<MovieDetailsResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onResponse(Call<MovieDetailsResponse> call, Response<MovieDetailsResponse> response) {
+            public void onResponse(@NonNull Call<MovieDetailsResponse> call, @NonNull Response<MovieDetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MovieDetailsResponse movieDetails = response.body();
                     List<String> genres = new ArrayList<>();
@@ -231,7 +231,7 @@ public class ShowResultDetailsFragment extends Fragment {
                                 genres
                         ));
                     }
-                    movieResultAdapter.notifyDataSetChanged();
+                    movieInformationAdapter.notifyDataSetChanged();
                     setRecyclerViewBackground(movieDetails.getBackdropPath(), movieDetails.getPosterPath());
 
                 } else {
@@ -240,12 +240,16 @@ public class ShowResultDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<MovieDetailsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<MovieDetailsResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Error fetching movie details: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     * Blurs the backdrop (or poster if no backdrop) and layers it behind the detail card
+     * to give the screen a themed background without obscuring the content.
+     */
     private void setRecyclerViewBackground(String backdropPath, String posterPath) {
         Object imageSource;
         if (backdropPath != null && !backdropPath.isEmpty()) {
@@ -278,10 +282,10 @@ public class ShowResultDetailsFragment extends Fragment {
     }
 
     private void fetchCastList() {
-        Call<MovieCreditsResponse> call = apiService.getMovieCredits(TMDBpath.movieCredits(movieId));
-        call.enqueue(new Callback<MovieCreditsResponse>() {
+        safeEnqueue(apiService.getMovieCredits(TMDBpath.movieCredits(movieId)), new Callback<MovieCreditsResponse>() {
+            @SuppressLint("NotifyDataSetChanged")
             @Override
-            public void onResponse(Call<MovieCreditsResponse> call, Response<MovieCreditsResponse> response) {
+            public void onResponse(@NonNull Call<MovieCreditsResponse> call, @NonNull Response<MovieCreditsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     MovieCreditsResponse movieCreditsResponse = response.body();
                     List<MovieCreditsResponse.Cast> castList = movieCreditsResponse.getCast();
@@ -308,17 +312,16 @@ public class ShowResultDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<MovieCreditsResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<MovieCreditsResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Error fetching cast list: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchSuggestionList() {
-        Call<MovieSimilarResponse> call = apiService.getMovieSimilar(TMDBpath.movieSimilar(movieId));
-        call.enqueue(new Callback<MovieSimilarResponse>() {
+        safeEnqueue(apiService.getMovieSimilar(TMDBpath.movieSimilar(movieId)), new Callback<MovieSimilarResponse>() {
             @Override
-            public void onResponse(Call<MovieSimilarResponse> call, Response<MovieSimilarResponse> response) {
+            public void onResponse(@NonNull Call<MovieSimilarResponse> call, @NonNull Response<MovieSimilarResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<MovieModel> recommendations = response.body().getResults();
                     allSuggestions.clear();
@@ -337,12 +340,17 @@ public class ShowResultDetailsFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<MovieSimilarResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<MovieSimilarResponse> call, @NonNull Throwable t) {
                 Toast.makeText(getContext(), "Failed to load movie recommendations: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    /**
+     * Slices the full suggestion list into pages and updates the grid + nav buttons.
+     * Pagination bar is hidden entirely when there's only one page.
+     */
+    @SuppressLint("SetTextI18n")
     private void showSuggestionPage() {
         int total = allSuggestions.size();
         int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
@@ -350,7 +358,7 @@ public class ShowResultDetailsFragment extends Fragment {
         int toIndex = Math.min(fromIndex + PAGE_SIZE, total);
 
         if (fromIndex < total) {
-            suggestionAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
+            suggestionMovieAdapter.updateData(new ArrayList<>(allSuggestions.subList(fromIndex, toIndex)));
         }
 
         if (totalPages > 1) {

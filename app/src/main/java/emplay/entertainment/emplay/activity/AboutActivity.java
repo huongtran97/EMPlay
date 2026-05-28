@@ -1,10 +1,25 @@
 package emplay.entertainment.emplay.activity;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.text.LineBreaker;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.method.LinkMovementMethod;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.StyleSpan;
+import android.text.util.Linkify;
+import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AlertDialog;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import emplay.entertainment.emplay.BuildConfig;
@@ -12,6 +27,9 @@ import emplay.entertainment.emplay.R;
 
 public class AboutActivity extends AppCompatActivity {
 
+    private Dialog privacyPolicyDialog;
+
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,26 +41,59 @@ public class AboutActivity extends AppCompatActivity {
         ImageButton backBtn = findViewById(R.id.back_btn);
         backBtn.setOnClickListener(v -> finish());
 
-        findViewById(R.id.privacy_policy_row).setOnClickListener(v -> showPrivacyPolicy());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            findViewById(R.id.privacy_policy_row).setOnClickListener(v -> showPrivacyPolicy());
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.Q)
     private void showPrivacyPolicy() {
-        String policy =
-                "Last updated: May 2025\n\n" +
-                "EMPlay does not collect or share personal data with third parties.\n\n" +
-                "Account & Authentication\n" +
-                "If you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n" +
-                "Local Storage\n" +
-                "Saved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n" +
-                "Third-Party Services\n" +
-                "Movie and TV show data is fetched from The Movie Database (TMDB) API. Please refer to TMDB's privacy policy for details on their data practices.\n\n" +
-                "Contact\n" +
-                "For any privacy concerns, contact us through the app's GitHub repository.";
+        privacyPolicyDialog = new Dialog(this);
+        privacyPolicyDialog.setContentView(R.layout.dialog_privacy_policy);
 
-        new AlertDialog.Builder(this)
-                .setTitle("Privacy Policy")
-                .setMessage(policy)
-                .setPositiveButton("OK", null)
-                .show();
+        Window window = privacyPolicyDialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            // Force the dialog to be wider for better readability and justification
+            window.setLayout((int) (getResources().getDisplayMetrics().widthPixels * 0.90),
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        TextView messageText = privacyPolicyDialog.findViewById(R.id.dialog_message);
+        if (messageText != null) {
+            CharSequence rawText = getText(R.string.privacy_policy_text);
+            SpannableString spannable = new SpannableString(rawText);
+
+            // Find all bold spans and make them larger
+            StyleSpan[] styleSpans = spannable.getSpans(0, spannable.length(), StyleSpan.class);
+            for (StyleSpan span : styleSpans) {
+                if (span.getStyle() == Typeface.BOLD) {
+                    int start = spannable.getSpanStart(span);
+                    int end = spannable.getSpanEnd(span);
+                    // 1.2f = 120% size
+                    spannable.setSpan(new RelativeSizeSpan(1.2f), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                }
+            }
+            messageText.setText(spannable);
+
+            messageText.setAutoLinkMask(Linkify.WEB_URLS);
+            messageText.setMovementMethod(LinkMovementMethod.getInstance());
+            messageText.setLinkTextColor(Color.parseColor("#E53935"));
+
+            // Force justification programmatically (Android 8.0+)
+            // Use literal value 1 for JUSTIFICATION_MODE_INTER_WORD to satisfy linter across API levels
+            messageText.setJustificationMode(LineBreaker.JUSTIFICATION_MODE_INTER_WORD);
+        }
+
+        privacyPolicyDialog.findViewById(R.id.btn_close).setOnClickListener(v -> privacyPolicyDialog.dismiss());
+        privacyPolicyDialog.show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (privacyPolicyDialog != null && privacyPolicyDialog.isShowing()) {
+            privacyPolicyDialog.dismiss();
+        }
     }
 }
