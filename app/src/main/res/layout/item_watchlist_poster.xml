@@ -1,57 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="4dp"
     android:background="@drawable/bg_poster_placeholder"
-    android:clipToOutline="true">
+    android:clipToOutline="true"
+    tools:targetApi="s">
 
     <ImageView
         android:id="@+id/ivPoster"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:scaleType="centerCrop" />
+        android:contentDescription="@string/show_poster"
+        android:scaleType="centerCrop"
+        app:layout_constraintDimensionRatio="2:3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/gradient_bg" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/gradient_bg"
+        app:layout_constraintBottom_toBottomOf="@id/ivPoster"
+        app:layout_constraintEnd_toEndOf="@id/ivPoster"
+        app:layout_constraintStart_toStartOf="@id/ivPoster"
+        app:layout_constraintTop_toTopOf="@id/ivPoster" />
 
     <TextView
         android:id="@+id/tvPosterTitle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:ellipsize="end"
+        android:maxLines="2"
         android:padding="5dp"
         android:textColor="#FFFFFF"
-        android:textSize="9sp"
+        android:textSize="13sp"
         android:textStyle="bold"
-        android:maxLines="2"
-        android:ellipsize="end" />
+        app:layout_constraintBottom_toBottomOf="@id/ivPoster"
+        app:layout_constraintEnd_toEndOf="@id/ivPoster"
+        app:layout_constraintStart_toStartOf="@id/ivPoster" />
 
     <TextView
         android:id="@+id/tvPosterRating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="5dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/bg_rating_badge"
         android:paddingHorizontal="4dp"
         android:paddingVertical="1dp"
         android:textColor="#F5C518"
-        android:textSize="8sp" />
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvUpcomingDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:layout_margin="5dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/bg_badge_red"
         android:paddingHorizontal="4dp"
         android:paddingVertical="1dp"
         android:textColor="#FFFFFF"
-        android:textSize="8sp"
-        android:visibility="gone" />
+        android:textSize="11sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

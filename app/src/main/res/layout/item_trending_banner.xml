@@ -7,6 +7,7 @@
         android:id="@+id/ivHeroPoster"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="@string/show_poster"
         android:scaleType="centerCrop" />
 
     <View
@@ -29,9 +30,9 @@
             android:background="@drawable/bg_badge_red"
             android:paddingHorizontal="8dp"
             android:paddingVertical="3dp"
-            android:text="Featured"
+            android:text="@string/featured"
             android:textColor="#FFFFFF"
-            android:textSize="10sp"
+            android:textSize="11sp"
             android:textStyle="bold" />
 
         <TextView
@@ -86,12 +87,14 @@
         </LinearLayout>
 
         <LinearLayout
+            style="?android:attr/buttonBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <Button
                 android:id="@+id/btnHeroWatchlist"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
@@ -99,18 +102,19 @@
                 android:drawableStart="@drawable/movie_watchlist"
                 android:drawablePadding="4dp"
                 android:paddingHorizontal="16dp"
-                android:text="Watchlist"
+                android:text="@string/watch_list"
                 android:textColor="#000000"
                 android:textSize="12sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"/>
 
             <Button
                 android:id="@+id/btnHeroMoreInfo"
+                style="?android:attr/buttonBarButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:backgroundTint="#33FFFFFF"
                 android:paddingHorizontal="16dp"
-                android:text="More Info"
+                android:text="@string/info"
                 android:textColor="#FFFFFF"
                 android:textSize="12sp" />
 

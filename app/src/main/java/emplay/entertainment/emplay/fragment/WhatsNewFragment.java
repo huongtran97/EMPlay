@@ -60,7 +60,7 @@ public class WhatsNewFragment extends BaseFragment {
         recyclerView = view.findViewById(R.id.rvWhatsNewFull);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        TextView tvTitle = view.findViewById(R.id.tvTitle);
+        TextView tvTitle = view.findViewById(R.id.trendNow);
         tvTitle.setText(isTV ? "What's New in TV Shows" : "What's New in Movies");
 
         view.findViewById(R.id.btnBack).setOnClickListener(v -> getParentFragmentManager().popBackStack());

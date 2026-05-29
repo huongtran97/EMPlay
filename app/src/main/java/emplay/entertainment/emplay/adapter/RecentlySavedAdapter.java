@@ -29,7 +29,7 @@ public class RecentlySavedAdapter extends BasePosterAdapter<MediaItem> {
     public void onBindViewHolder(@androidx.annotation.NonNull PosterViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
         MediaItem item = mData.get(position);
-        android.widget.TextView titleView = holder.itemView.findViewById(R.id.tvTitle);
+        android.widget.TextView titleView = holder.itemView.findViewById(R.id.trendNow);
         if (titleView != null) {
             titleView.setText(item.getTitle());
         }

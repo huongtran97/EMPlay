@@ -2,8 +2,9 @@
     <string name="app_name">EMPlay</string>
     <!-- Replace with Web Client ID from Firebase Console → Authentication → Sign-in method → Google -->
     <string name="google_web_client_id">244216604840-an9q5ck78228ekf8ge38sg7al6ls12ou.apps.googleusercontent.com</string>
-    <string name="open" />
-    <string name="close" />
+    <string name="open">OPEN</string>
+    <string name="close">CLOSE</string>
+    <string name="back"/>
     <!--Privacy Policy Message-->
     <string name="privacy_policy_text"><i>Last updated: May 2025</i>\n\nEMPlay does not collect or share personal data with third parties.\n\n<b>Account &amp; Authentication</b>\nIf you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n<b>Local Storage</b>\nSaved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n<b>Third-Party Services</b>\nMovie and TV show data is fetched from The Movie Database (TMDB) API. Please refer to TMDB\'s privacy policy for details on their data practices.\n\n<b>Contact</b>\nFor any privacy concerns, contact us through our GitHub repository:\nhttps://github.com/huongtran97/EMPlay</string>
 
@@ -14,4 +15,40 @@
     <string name="rating_format">★ %.1f</string>
     <string name="log_in">Login</string>
     <string name="log_out">Log out</string>
+    <string name="movie">Movies</string>
+    <string name="tv_show">TV Shows</string>
+    <string name="recently_search">Recently search</string>
+    <string name="clear_all">Clear all</string>
+    <string name="see_all">See all</string>
+    <string name="input_text">Search movies, TV shows…</string>
+    <string name="trending_search">Trending</string>
+    <string name="trending_now">Trending now</string>
+    <string name="popular">Popular right now</string>
+    <string name="browse_by_genre">Browse by genre</string>
+    <string name="show_icon">Icon</string>
+    <string name="show_poster">Poster</string>
+    <string name="whats_new">What\'s new</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="trailer">▶  Trailer</string>
+    <string name="title">Title</string>
+    <string name="genre">Genre</string>
+    <string name="release_date">Release date</string>
+    <string name="space">  •  </string>
+    <string name="run_time">Runtime</string>
+    <string name="language">Language</string>
+    <string name="overview">Overview</string>
+    <string name="bio">BIOGRAPHY</string>
+    <string name="credit">KNOWN FOR</string>
+    <string name="read_more">Read more</string>
+    <string name="season">Season</string>
+    <string name="episode">EP</string>
+    <string name="country">Country</string>
+    <string name="pre_page">Previous page</string>
+    <string name="next_page">Next page</string>
+    <string name="policy">Privacy Policy</string>
+    <string name="watch_list">Watchlist</string>
+    <string name="info">More Info</string>
+    <string name="featured">Featured</string>
+
+
 </resources>

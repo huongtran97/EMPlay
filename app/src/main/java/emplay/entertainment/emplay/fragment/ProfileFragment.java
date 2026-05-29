@@ -62,7 +62,6 @@ public class ProfileFragment extends BaseFragment {
     private TextView tvProfileName, tvProfileEmail, tvMemberSince;
     private TextView tvMoviesCount, tvTvShowsCount, tvTopGenre;
     private LinearLayout llTasteProfile;
-    private RecyclerView rvRecentlySaved;
     private final List<MediaItem> recentlySavedList = new ArrayList<>();
     private RecentlySavedAdapter recentlySavedAdapter;
     private AlertDialog deleteAccountDialog;
@@ -96,7 +95,7 @@ public class ProfileFragment extends BaseFragment {
         tvTopGenre = view.findViewById(R.id.tvTopGenre);
         
         llTasteProfile = view.findViewById(R.id.llTasteProfile);
-        rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
+        RecyclerView rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
 
         TextView tvRecentlySavedSeeAll = view.findViewById(R.id.tvRecentlySavedSeeAll);
         if (tvRecentlySavedSeeAll != null) {

@@ -43,7 +43,7 @@ import retrofit2.Call;
 
 public class HomeFragment extends BaseFragment {
     private ViewPager2 vpTrendingBanner;
-    private RecyclerView rvWhatsNew, rvUpcomingMovies, rvUpcomingTvShows;
+    private RecyclerView rvWhatsNew, rvUpcomingMovies;
     private WhatsNewTVAdapter whatsNewTVAdapter;
     private WhatsNewMovieAdapter whatsNewMovieAdapter;
     private UpcomingMovieAdapter upcomingMovieAdapter;
@@ -98,7 +98,7 @@ public class HomeFragment extends BaseFragment {
         rvUpcomingMovies.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
 
         // Upcoming TV Shows
-        rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
+        RecyclerView rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
         upComingTVAdapter = new UpComingTVAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
         rvUpcomingTvShows.setAdapter(upComingTVAdapter);
         rvUpcomingTvShows.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -149,7 +149,9 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
     }
 
-    // Data fetching
+    /**
+     * Data fetching
+     */
     private void fetchHeroMovie() {
         safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
             @Override

@@ -130,13 +130,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public void deleteMovie(int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_USER_MOVIES, COLUMN_MOVIE_ID + " = ?", new String[]{String.valueOf(itemId)});
+        db.delete(TABLE_USER_MOVIES, COLUMN_MOVIE_ID + " = ?", new String[]{"" + itemId});
         db.close();
     }
 
     public void deleteTV(int itemId) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_USER_SHOWS, COLUMN_SHOW_ID + " = ?", new String[]{String.valueOf(itemId)});
+        db.delete(TABLE_USER_SHOWS, COLUMN_SHOW_ID + " = ?", new String[]{"" + itemId});
         db.close();
     }
 

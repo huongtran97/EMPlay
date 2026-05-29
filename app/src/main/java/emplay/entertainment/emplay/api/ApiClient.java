@@ -66,20 +66,12 @@ public class ApiClient {
         return retrofit;
     }
 
-    // Call this if you need to force a fresh Retrofit instance (e.g. after toggling USE_PROXY).
-    public static void resetClient() {
-        retrofit = null;
-    }
-
     /**
      * Rewrites proxy-style requests to direct TMDB calls when USE_PROXY = false.
-     *
      * All requests in MovieApiService look like:
      *   GET /api/tmdb?path=3/movie/123&...
-     *
      * This interceptor transforms that into:
      *   GET https://api.themoviedb.org/3/movie/123?api_key=...&...
-     *
      * When USE_PROXY = true it's a no-op — the proxy handles the rewrite on the server side.
      */
     public static class TMDBInterceptor implements Interceptor {

@@ -40,4 +40,5 @@
     <color name="bottom_nav_indicator">#E53935</color>
     <color name="red_primary">#E50914</color>
     <color name="toggle_bg">#1E1E1E</color>
+    <color name="pill_bg">#2E2E2E</color>
 </resources>

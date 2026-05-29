@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingTop="12dp"
     android:paddingBottom="12dp">
 
-    <!-- Episode still image + number + title -->
+    <!-- Episode poster + number + title -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,7 +20,7 @@
             android:layout_width="120dp"
             android:layout_height="68dp"
             android:scaleType="centerCrop"
-            android:contentDescription="Episode still"
+            android:contentDescription="@string/show_poster"
             android:background="#1E1E1E"/>
 
         <LinearLayout
@@ -73,6 +74,7 @@
         android:fontFamily="sans-serif"
         android:lineSpacingExtra="3dp"
         android:justificationMode="inter_word"
+        tools:targetApi="o"
         android:textColor="#CCCCCC"
         android:textSize="14sp"
         android:maxLines="4"
@@ -86,7 +88,7 @@
         android:layout_marginTop="4dp"
         android:paddingTop="4dp"
         android:paddingBottom="12dp"
-        android:text="Read More"
+        android:text="@string/read_more"
         android:textColor="#E53935"
         android:textSize="12sp"
         android:textStyle="bold"

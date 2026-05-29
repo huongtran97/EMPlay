@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -107,7 +106,8 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
 
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+            holder.addBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.movie_watchlist, 0, 0, 0);
+            holder.addBtn.setText(R.string.watch_list);
             holder.addBtn.setOnClickListener(v ->
                     Toast.makeText(fragmentActivity, "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
         } else {
@@ -117,7 +117,7 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
             holder.addBtn.setOnClickListener(v -> {
                 if (isMovieSavedByUser(userId, movieModel.getId())) {
                     removeMovieFromUserMovies(userId, movieModel.getId());
-                    holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+                    updateSaveButtonState(holder, userId, movieModel.getId());
                     Toast.makeText(fragmentActivity, "Movie removed from library", Toast.LENGTH_SHORT).show();
                 } else {
                     String genresString = "";
@@ -126,7 +126,7 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
                     }
                     long result = saveMovieToUserMovies(userId, movieModel.getId(), movieModel.getTitle(), movieModel.getPosterPath(), genresString);
                     if (result != -1) {
-                        holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
+                        updateSaveButtonState(holder, userId, movieModel.getId());
                         Toast.makeText(fragmentActivity, "Movie added to library", Toast.LENGTH_SHORT).show();
                     } else {
                         Toast.makeText(fragmentActivity, "Failed to add movie", Toast.LENGTH_SHORT).show();
@@ -157,9 +157,13 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
 
     private void updateSaveButtonState(MovieResultViewHolder holder, String userId, int movieId) {
         if (isMovieSavedByUser(userId, movieId)) {
-            holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
+            holder.addBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_favorite_24, 0, 0, 0);
+            holder.addBtn.setText("");
+            holder.addBtn.setPadding(0, 0, 0, 0);
         } else {
-            holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+            holder.addBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.movie_watchlist, 0, 0, 0);
+            holder.addBtn.setText(R.string.watch_list);
+            holder.addBtn.setPadding(16, 0, 16, 0);
         }
     }
 
@@ -214,7 +218,7 @@ public class MovieInformationAdapter extends RecyclerView.Adapter<MovieInformati
         TextView resultTitle, resultReleaseDate, resultLanguage, genreNames, resultOverview, resultRuntime, readMoreBtn;
         RatingBar resultRatingBar;
         ImageView resultPoster;
-        ImageButton addBtn;
+        Button addBtn;
         Button trailerBtn;
 
         public MovieResultViewHolder(@NonNull View itemView) {

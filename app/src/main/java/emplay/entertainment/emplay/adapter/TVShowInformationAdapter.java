@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -108,6 +107,8 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
     private void handleAddToLibrary(@NonNull TVShowInformationViewHolder holder, TVShowModel tvShowModel) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
+            holder.addBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.movie_watchlist, 0, 0, 0);
+            holder.addBtn.setText(R.string.watch_list);
             holder.addBtn.setOnClickListener(v ->
                     Toast.makeText(fragmentActivity, "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
             return;
@@ -123,7 +124,7 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
 
             if (isTVShowSavedByUser(userId, tvShowId)) {
                 removeTVShowFromUserTVShow(userId, tvShowId);
-                holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+                updateSaveButtonState(holder, userId, tvShowModel);
                 Toast.makeText(fragmentActivity, "TV Show removed from library", Toast.LENGTH_SHORT).show();
             } else {
                 String genresString = "";
@@ -132,7 +133,7 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
                 }
                 long result = saveTVShowToUserTVShows(userId, tvShowId, title, posterPath, genresString);
                 if (result != -1) {
-                    holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
+                    updateSaveButtonState(holder, userId, tvShowModel);
                     Toast.makeText(fragmentActivity, "Added to library", Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(fragmentActivity, "Failed to add TV Show", Toast.LENGTH_SHORT).show();
@@ -143,9 +144,13 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
 
     private void updateSaveButtonState(TVShowInformationViewHolder holder, String userId, TVShowModel tvShowModel) {
         if (isTVShowSavedByUser(userId, tvShowModel.getTVShowId())) {
-            holder.addBtn.setImageResource(R.drawable.baseline_favorite_24);
+            holder.addBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.baseline_favorite_24, 0, 0, 0);
+            holder.addBtn.setText("");
+            holder.addBtn.setPadding(0, 0, 0, 0);
         } else {
-            holder.addBtn.setImageResource(R.drawable.baseline_favorite_border_24);
+            holder.addBtn.setCompoundDrawablesWithIntrinsicBounds(R.drawable.movie_watchlist, 0, 0, 0);
+            holder.addBtn.setText(R.string.watch_list);
+            holder.addBtn.setPadding(16, 0, 16, 0);
         }
     }
 
@@ -207,7 +212,7 @@ public class TVShowInformationAdapter extends RecyclerView.Adapter<TVShowInforma
         TextView name, overView, language, firstAirDate, genre, season, episodes, productCountry, readMoreBtn;
         ImageView poster;
         RatingBar ratingBar;
-        ImageButton addBtn;
+        Button addBtn;
         Button trailerBtn;
 
         public TVShowInformationViewHolder(@NonNull View itemView) {

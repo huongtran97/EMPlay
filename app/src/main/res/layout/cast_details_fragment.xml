@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0A0A0A">
@@ -16,7 +17,7 @@
             android:orientation="vertical"
             android:paddingBottom="24dp">
 
-            <!-- Profile Image + Basic Info -->
+            <!-- Profile Image + info -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -27,7 +28,7 @@
                     android:id="@+id/cast_detail_image"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:contentDescription="Profile photo"/>
+                    android:contentDescription="@string/show_poster"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -84,7 +85,7 @@
                 android:layout_marginEnd="20dp"
                 android:background="#1E1E1E"/>
 
-            <!-- Biography Section -->
+            <!-- Biography -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -96,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="16dp"
-                    android:text="BIOGRAPHY"
+                    android:text="@string/bio"
                     android:textColor="#777777"
                     android:textSize="11sp"
                     android:letterSpacing="0.15"
@@ -120,6 +121,7 @@
                     android:breakStrategy="high_quality"
                     android:hyphenationFrequency="full"
                     android:justificationMode="inter_word"
+                    tools:targetApi="o"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/biography_title"/>
@@ -131,7 +133,7 @@
                     android:layout_marginTop="4dp"
                     android:paddingTop="4dp"
                     android:paddingBottom="12dp"
-                    android:text="Read More"
+                    android:text="@string/read_more"
                     android:textColor="#E53935"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -149,14 +151,14 @@
                 android:layout_marginTop="8dp"
                 android:background="#1E1E1E"/>
 
-            <!-- Known For -->
+            <!-- Known for -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
-                android:text="KNOWN FOR"
+                android:text="@string/credit"
                 android:textColor="#777777"
                 android:textSize="11sp"
                 android:letterSpacing="0.15"
@@ -168,7 +170,7 @@
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"/>
 
-            <!-- Known For Pagination Bar -->
+            <!-- "Known For" pagination bar -->
             <LinearLayout
                 android:id="@+id/credits_pagination_bar"
                 android:layout_width="match_parent"
@@ -185,7 +187,7 @@
                     android:layout_height="36dp"
                     android:src="@drawable/ic_arrow_back"
                     android:background="@drawable/rounded_btn_bg"
-                    android:contentDescription="Previous page"
+                    android:contentDescription="@string/pre_page"
                     android:enabled="false" />
 
                 <TextView
@@ -203,7 +205,7 @@
                     android:layout_height="36dp"
                     android:src="@drawable/ic_arrow_forward"
                     android:background="@drawable/rounded_btn_bg"
-                    android:contentDescription="Next page" />
+                    android:contentDescription="@string/next_page" />
 
             </LinearLayout>
 

@@ -49,7 +49,6 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MovieModel movie = movieList.get(position);
         holder.tvTitle.setText(movie.getTitle());
-        holder.tvThumbTitle.setText(movie.getTitle());
         
         String releaseDateStr = movie.getReleaseDate();
         String year = (releaseDateStr != null && releaseDateStr.length() >= 4) 
@@ -80,13 +79,12 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivThumb;
-        TextView tvTitle, tvThumbTitle, tvMeta, tvBadge;
+        TextView tvTitle, tvMeta, tvBadge;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivThumb = itemView.findViewById(R.id.ivMovieThumb);
             tvTitle = itemView.findViewById(R.id.tvMovieTitle);
-            tvThumbTitle = itemView.findViewById(R.id.tvMovieThumbTitle);
             tvMeta = itemView.findViewById(R.id.tvMovieMeta);
             tvBadge = itemView.findViewById(R.id.tvMovieBadge);
         }

@@ -13,7 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ScrollView;
+import androidx.core.widget.NestedScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,12 +26,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,12 +41,14 @@ import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.tool.LanguageMapper;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.GenresAdapter;
+import emplay.entertainment.emplay.adapter.TrendingSearchAdapter;
 import emplay.entertainment.emplay.api.ApiClient;
 import emplay.entertainment.emplay.api.GenresResponse;
 import emplay.entertainment.emplay.api.MovieApiService;
 import emplay.entertainment.emplay.api.TMDBpath;
 import emplay.entertainment.emplay.api.TVShowResponse;
 import emplay.entertainment.emplay.models.GenresModel;
+import emplay.entertainment.emplay.models.MediaItem;
 import emplay.entertainment.emplay.models.SharedViewModel;
 import emplay.entertainment.emplay.models.TVShowModel;
 import emplay.entertainment.emplay.adapter.SearchTVAdapter;
@@ -61,29 +63,26 @@ public class SearchTVShowsFragment extends Fragment {
 
     private SearchTVAdapter searchAdapter;
     private GenresAdapter genresAdapter;
-    private TVShowAdapter popularAdapter;
-    private SearchTVAdapter trendingAdapter;
+    private TrendingSearchAdapter trendingAdapter;
 
     private final List<TVShowModel> searchTVList = new ArrayList<>();
     private final List<GenresModel> genresList = new ArrayList<>();
-    private final List<TVShowModel> popularList = new ArrayList<>();
     private final List<TVShowModel> trendingList = new ArrayList<>();
-
-    private RecyclerView rvGenres, rvSearchResults, rvPopularNow, rvTrendingSearches;
+    private RecyclerView rvGenres, rvSearchResults, rvTrendingSearches;
     private MovieApiService apiService;
     private TextInputEditText etSearch;
     private SharedViewModel viewModel;
     private MaterialButton btnMovie, btnTvShow;
-    private ScrollView svSearchDefault;
-    private ChipGroup cgRecentSearches;
+    private NestedScrollView svSearchDefault;
+    private FlexboxLayout pillsContainer;
     private DatabaseHelper dbHelper;
     private String lastQuery = "";
-    TextView tvClearAll, tvPopularSeeAll;
+    TextView tvClearAll, btnSeeAll;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.movie_search_view, container, false);
+        View view = inflater.inflate(R.layout.search_view, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         dbHelper = DatabaseHelper.getInstance(requireContext());
@@ -92,25 +91,22 @@ public class SearchTVShowsFragment extends Fragment {
         etSearch = view.findViewById(R.id.etSearch);
         rvSearchResults = view.findViewById(R.id.rvSearchResults);
         rvGenres = view.findViewById(R.id.rvGenres);
-        rvPopularNow = view.findViewById(R.id.rvPopularNow);
         rvTrendingSearches = view.findViewById(R.id.rvTrendingSearches);
         svSearchDefault = view.findViewById(R.id.svSearchDefault);
-        cgRecentSearches = view.findViewById(R.id.cgRecentSearches);
-        tvClearAll = view.findViewById(R.id.tvClearAll);
+        pillsContainer = view.findViewById(R.id.pillsContainer);
+        tvClearAll = view.findViewById(R.id.btnClearAll);
         if (tvClearAll != null) {
             tvClearAll.setPaintFlags(tvClearAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         }
 
-        tvPopularSeeAll = view.findViewById(R.id.tvPopularSeeAll);
-        if (tvPopularSeeAll != null) {
-            tvPopularSeeAll.setPaintFlags(tvPopularSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        }
 
         btnMovie = view.findViewById(R.id.btnMovie);
         btnTvShow = view.findViewById(R.id.btnTvShow);
+        btnSeeAll = view.findViewById(R.id.btnSeeAll);
 
         btnMovie.setOnClickListener(v -> onMovieClick());
         btnTvShow.setOnClickListener(v -> onTVShowClick());
+        btnSeeAll.setOnClickListener(v -> navigateTo(TrendingSeeAllFragment.newInstance(true)));
         tvClearAll.setOnClickListener(v -> clearHistory());
 
         setupRecyclerViews();
@@ -128,6 +124,13 @@ public class SearchTVShowsFragment extends Fragment {
         return view;
     }
 
+    private void navigateTo(Fragment fragment) {
+        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
     private void setupRecyclerViews() {
         searchAdapter = new SearchTVAdapter(searchTVList, this::showTVDetails);
         rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -135,13 +138,10 @@ public class SearchTVShowsFragment extends Fragment {
 
         genresAdapter = new GenresAdapter(genresList, this::onGenreClick);
         rvGenres.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        rvGenres.setNestedScrollingEnabled(false);
         rvGenres.setAdapter(genresAdapter);
 
-        popularAdapter = new TVShowAdapter(getContext(), popularList, this::showTVDetails);
-        rvPopularNow.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvPopularNow.setAdapter(popularAdapter);
-
-        trendingAdapter = new SearchTVAdapter(trendingList, this::showTVDetails);
+        trendingAdapter = new TrendingSearchAdapter(getContext(), trendingList, this::onTrendingClick);
         rvTrendingSearches.setLayoutManager(new LinearLayoutManager(getContext()));
         rvTrendingSearches.setAdapter(trendingAdapter);
     }
@@ -176,26 +176,26 @@ public class SearchTVShowsFragment extends Fragment {
         loadRecentSearches();
         fetchGenresForTVShows();
         fetchTrendingTVShows();
-        fetchPopularTVShows();
     }
 
     private void loadRecentSearches() {
-        cgRecentSearches.removeAllViews();
+        pillsContainer.removeAllViews();
         List<String> searches = dbHelper.getRecentSearches();
         for (String query : searches) {
-            Chip chip = new Chip(requireContext());
-            chip.setText(query);
-            chip.setOnClickListener(v -> {
+            View pillView = LayoutInflater.from(requireContext()).inflate(R.layout.search_pill_item, pillsContainer, false);
+            TextView tvPill = pillView.findViewById(R.id.tvPillText);
+            tvPill.setText(query);
+            pillView.setOnClickListener(v -> {
                 etSearch.setText(query);
                 etSearch.setSelection(query.length());
             });
-            cgRecentSearches.addView(chip);
+            pillsContainer.addView(pillView);
         }
     }
 
     private void clearHistory() {
         dbHelper.clearRecentSearches();
-        cgRecentSearches.removeAllViews();
+        pillsContainer.removeAllViews();
     }
 
     private void fetchTrendingTVShows() {
@@ -206,7 +206,11 @@ public class SearchTVShowsFragment extends Fragment {
                 if (response.isSuccessful() && response.body() != null) {
                     trendingList.clear();
                     List<TVShowModel> results = response.body().getResults();
-                    if (results != null) trendingList.addAll(results.subList(0, Math.min(results.size(), 3)));
+                    if (results != null) {
+                        // Sort by rating highest to lowest
+                        Collections.sort(results, (t1, t2) -> Double.compare(t2.getVoteAverage(), t1.getVoteAverage()));
+                        trendingList.addAll(results.subList(0, Math.min(results.size(), 5)));
+                    }
                     trendingAdapter.notifyDataSetChanged();
                 }
             }
@@ -214,21 +218,6 @@ public class SearchTVShowsFragment extends Fragment {
         });
     }
 
-    private void fetchPopularTVShows() {
-        apiService.getTrendingTVShows(TMDBpath.trendingTVShows()).enqueue(new Callback<TVShowResponse>() {
-            @SuppressLint("NotifyDataSetChanged")
-            @Override
-            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    popularList.clear();
-                    List<TVShowModel> results = response.body().getResults();
-                    if (results != null) popularList.addAll(results);
-                    popularAdapter.notifyDataSetChanged();
-                }
-            }
-            @Override public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {}
-        });
-    }
 
     private void onGenreClick(GenresModel genre) {
         if (genre == null) return;
@@ -254,8 +243,6 @@ public class SearchTVShowsFragment extends Fragment {
             @Override public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {}
         });
     }
-
-
 
 
     private void onTVShowClick() {
@@ -324,6 +311,12 @@ public class SearchTVShowsFragment extends Fragment {
     private void showTVDetails(TVShowModel tv) {
         if (tv == null) return;
         ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(tv.getTVShowId());
+        replaceFragment(fragment, "ShowResultTVShowDetailsFragment");
+    }
+
+    private void onTrendingClick(MediaItem item) {
+        if (item == null) return;
+        ShowResultTVShowDetailsFragment fragment = ShowResultTVShowDetailsFragment.newInstance(item.getMediaId());
         replaceFragment(fragment, "ShowResultTVShowDetailsFragment");
     }
 

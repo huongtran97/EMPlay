@@ -7,6 +7,7 @@
     android:layout_height="210dp"
     android:layout_margin="10dp"
     android:backgroundTint="#90000000"
+    android:focusable="true"
     cardview:cardCornerRadius="4dp">
 
     <LinearLayout
@@ -17,7 +18,8 @@
         <ImageView
             android:id="@+id/header"
             android:layout_width="match_parent"
-            android:layout_height="160dp" />
+            android:layout_height="160dp"
+            android:contentDescription="@string/show_poster" />
 
         <TextView
             android:id="@+id/name"
@@ -25,7 +27,7 @@
             android:layout_height="wrap_content"
             android:textAlignment="viewStart"
             android:textColor="@color/white"
-            android:textSize="12sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
@@ -34,7 +36,7 @@
             android:layout_height="wrap_content"
             android:textAlignment="viewStart"
             android:textColor="@color/white"
-            android:textSize="10sp" />
+            android:textSize="13sp" />
 
     </LinearLayout>
 
