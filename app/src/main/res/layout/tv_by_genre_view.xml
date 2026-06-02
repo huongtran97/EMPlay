@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0A0A0A"
-    tools:context=".fragment.MovieByGenresFragment">
+    tools:context=".fragment.genre.MovieByGenresFragment">
 
     <TextView
         android:id="@+id/tv_genres"

@@ -8,8 +8,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
-import emplay.entertainment.emplay.adapter.MovieLikedAdapter;
-import emplay.entertainment.emplay.adapter.TVLikedAdapter;
+import emplay.entertainment.emplay.adapter.movie.MovieLikedAdapter;
+import emplay.entertainment.emplay.adapter.tvshow.TVLikedAdapter;
 
 /**
  *  Swipe-to-delete for the liked movies and TV shows rows on the Profile screen.

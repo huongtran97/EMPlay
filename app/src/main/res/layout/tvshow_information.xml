@@ -3,23 +3,74 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="#0D0D12">
 
-    <!-- Poster — left side -->
+    <!-- HERO BACKDROP  (16:9) -->
+    <ImageView
+        android:id="@+id/backdropView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/show_icon"
+        app:layout_constraintDimensionRatio="16:9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_percent="1.0" />
+
+    <!-- Gradient scrim (fades backdrop into background) -->
+    <View
+        android:id="@+id/backdropScrim"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/gradient_hero_overlay"
+        app:layout_constraintBottom_toBottomOf="@+id/backdropView"
+        app:layout_constraintEnd_toEndOf="@+id/backdropView"
+        app:layout_constraintStart_toStartOf="@+id/backdropView"
+        app:layout_constraintTop_toTopOf="@+id/backdropView" />
+
+    <!-- Back button -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/bg_circle_dark"
+        android:src="@drawable/ic_arrow_back"
+        android:contentDescription="@string/back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Share button -->
+    <ImageButton
+        android:id="@+id/btn_share"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="14dp"
+        android:background="@drawable/bg_circle_dark"
+        android:src="@drawable/ic_share"
+        android:contentDescription="@string/share"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- POSTER (left side, overlaps backdrop bottom)-->
     <FrameLayout
         android:id="@+id/poster_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="-56dp"
         android:elevation="8dp"
-        android:background="@drawable/bg_poster_placeholder"
+        android:background="@drawable/bg_poster"
         android:clipToOutline="true"
         tools:targetApi="s"
         app:layout_constraintWidth_percent="0.32"
         app:layout_constraintDimensionRatio="2:3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/backdropView">
 
         <ImageView
             android:id="@+id/imageView"
@@ -28,179 +79,300 @@
             android:contentDescription="@string/show_poster"
             android:scaleType="centerCrop" />
 
+        <!-- Coming Soon badge -->
+        <TextView
+            android:id="@+id/coming_soon_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:layout_marginTop="8dp"
+            android:text="@string/coming_soon"
+            android:textColor="@color/accent_amber"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.1"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:background="@drawable/bg_badge_amber"
+            android:visibility="gone" />
+
     </FrameLayout>
 
-    <!-- Title -->
+    <!-- TITLE (right of poster) -->
+
     <TextView
-        android:id="@+id/tvshow_information_title"
+        android:id="@+id/tvshow_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="14dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginTop="25dp"
+        android:layout_marginEnd="16dp"
         android:fontFamily="@font/black_han_sans"
         android:text="@string/title"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:textColor="@color/text_primary"
+        android:textSize="22sp"
+        android:lineSpacingMultiplier="1.15"
         app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Genres -->
-    <TextView
-        android:id="@+id/tvshow_result_genres"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/genre"
-        android:textColor="#9E9E9E"
-        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_title" />
+        app:layout_constraintTop_toBottomOf="@+id/backdropView"  />
 
-    <!-- Rating Bar -->
-    <RatingBar
-        android:id="@+id/tvshow_ratingBar"
+    <!-- Rating Row -->
+    <LinearLayout
+        android:id="@+id/rating_row"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:isIndicator="true"
-        android:numStars="5"
-        android:rating="0"
-        android:scaleX="0.45"
-        android:scaleY="0.45"
-        android:stepSize="0.5"
-        android:theme="@style/RatingBar"
-        app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_genres" />
-
-    <!-- Meta info -->
-    <TextView
-        android:id="@+id/tvshow_result_language"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:clipChildren="false"
+        android:layout_marginStart="6dp"
         android:layout_marginTop="4dp"
-        android:layout_marginEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/language"
-        android:textColor="#888888"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_ratingBar" />
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_title">
 
-    <TextView
-        android:id="@+id/tvshow_information_seasons"
+        <!-- Rating -->
+        <TextView
+            android:id="@+id/tvPosterRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="4dp"
+            android:text="@string/rating_format"
+            android:textColor="#FFC107"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- Genres chips -->
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/tvshow_info_genres"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="14dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/season"
-        android:textColor="#888888"
-        android:textSize="12sp"
+        android:layout_marginBottom="8dp"
+        app:flexWrap="wrap"
+        app:alignItems="flex_start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_language" />
+        app:layout_constraintTop_toBottomOf="@+id/rating_row" />
 
-    <TextView
-        android:id="@+id/tvshow_result_episodes"
+    <!-- META CHIPS (wraps automatically, no scrolling)-->
+    <com.google.android.flexbox.FlexboxLayout
+        android:id="@+id/meta_scroll"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="2dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/episode"
-        android:textColor="#888888"
-        android:textSize="12sp"
+        app:flexWrap="wrap"
+        app:alignItems="flex_start"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_seasons" />
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons">
 
-    <TextView
-        android:id="@+id/tvshow_result_product_country"
+        <TextView
+            android:id="@+id/tvshow_info_seasons"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/season"
+            android:textColor="#777777"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:background="@drawable/bg_meta_chip"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvshow_episodes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/episode"
+            android:textColor="#777777"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:background="@drawable/bg_meta_chip"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvshow_information_first_air_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/release_date"
+            android:textColor="#777777"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:background="@drawable/bg_meta_chip"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvshow_language"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/language"
+            android:textColor="#777777"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:background="@drawable/bg_meta_chip"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="6dp" />
+
+        <TextView
+            android:id="@+id/tvshow_product_country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/country"
+            android:textColor="#777777"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif"
+            android:background="@drawable/bg_meta_chip"
+            android:paddingStart="9dp"
+            android:paddingEnd="9dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:layout_marginBottom="6dp" />
+
+    </com.google.android.flexbox.FlexboxLayout>
+
+    <!-- Divider -->
+    <View
+        android:id="@+id/divider_meta"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/country"
-        android:textColor="#888888"
-        android:textSize="12sp"
+        android:layout_height="0.5dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="14dp"
+        android:background="#1E1E28"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_episodes" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/meta_scroll" />
 
-    <TextView
-        android:id="@+id/tvshow_information_first_air_date"
-        android:layout_width="0dp"
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/poster_genre_barrier"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="12dp"
-        android:fontFamily="sans-serif"
-        android:text="@string/release_date"
-        android:textColor="#888888"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_product_country" />
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="poster_container,tvshow_info_genres" />
 
-    <!-- Trailer + Favourite buttons -->
+    <!-- ACTION BUTTONS -->
+
     <LinearLayout
         android:id="@+id/action_buttons"
         style="?android:attr/buttonBarStyle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="12dp"
-        android:orientation="horizontal"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="200dp"
+        android:layout_marginTop="12dp"
         android:gravity="start"
+        android:orientation="horizontal"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/poster_container"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_information_first_air_date">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/poster_container">
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/trailer_btn"
-            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="5dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:backgroundTint="#E53935"
-            android:text="@string/trailer"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:fontFamily="sans-serif-medium"
-            android:stateListAnimator="@null"/>
-
-        <Button
-            android:id="@+id/add_to_library_btn"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:layout_marginEnd="8dp"
-            android:backgroundTint="#1E1E1E"
-            android:drawableStart="@drawable/movie_watchlist"
-            android:drawablePadding="4dp"
-            android:paddingHorizontal="16dp"
-            android:text="@string/watch_list"
-            android:textColor="#888888"
-            android:textSize="12sp"
-            android:textStyle="bold"/>
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:background="@drawable/bg_button_red"
+            android:fontFamily="sans-serif-medium"
+            android:stateListAnimator="@null"
+            android:text="@string/trailer"
+            android:textColor="@color/text_primary"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add_to_library_btn"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="10dp"
+            app:icon="@drawable/ic_watchlist"
+            app:iconGravity="textStart"
+            app:iconTint="@color/text_primary"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
     </LinearLayout>
 
-    <!-- Overview -->
+    <!-- BARRIER-->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/barrier_top_section"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="rating_row,meta_scroll" />
+
+    <!-- WHERE TO WATCH -->
+    <include
+        android:id="@+id/wtw_released"
+        layout="@layout/wtw_released_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="visible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier_top_section" />
+
+    <include
+        android:id="@+id/wtw_unreleased"
+        layout="@layout/wtw_unreleased_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/barrier_top_section" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/wtw_anchor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="wtw_released,wtw_unreleased" />
+
+    <!-- Second Divider -->
+    <View
+        android:id="@+id/divider_overview"
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:background="#1E1E28"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/wtw_anchor" />
+
+    <!-- OVERVIEW -->
     <TextView
         android:id="@+id/tvshow_result_overview"
         android:layout_width="0dp"
@@ -213,13 +385,13 @@
         android:justificationMode="inter_word"
         tools:targetApi="o"
         android:text="@string/overview"
-        android:textColor="#CCCCCC"
-        android:textSize="14sp"
+        android:textColor="@color/text_overview"
+        android:textSize="16sp"
         android:maxLines="4"
         android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/action_buttons" />
+        app:layout_constraintTop_toBottomOf="@+id/wtw_anchor" />
 
     <TextView
         android:id="@+id/read_more_text"
@@ -229,11 +401,11 @@
         android:paddingTop="4dp"
         android:paddingBottom="12dp"
         android:text="@string/read_more"
-        android:textColor="#E53935"
-        android:textSize="12sp"
+        android:textColor="@color/accent_red"
+        android:textSize="16sp"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="@+id/tvshow_result_overview"
-        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_overview"/>
+        app:layout_constraintTop_toBottomOf="@+id/tvshow_result_overview" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

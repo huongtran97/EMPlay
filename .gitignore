@@ -21,3 +21,4 @@ app/google-services.json
 .artifacts/
 CLAUDE.md
 /app/release/
+hs_err_pid*.log

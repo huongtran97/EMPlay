@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0A0A0A">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:ignore="UselessParent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,7 +31,7 @@
                     android:layout_centerVertical="true"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_arrow_back"
-                    android:contentDescription="Back" />
+                    android:contentDescription="@string/back" />
 
             </RelativeLayout>
 
@@ -43,16 +45,16 @@
                 android:paddingBottom="28dp">
 
                 <ImageView
-                    android:layout_width="108dp"
-                    android:layout_height="104dp"
-                    android:contentDescription="EMPlay logo"
+                    android:layout_width="128dp"
+                    android:layout_height="124dp"
+                    android:contentDescription="@string/emplay_logo"
                     android:src="@drawable/e_logo" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="EMPlay"
+                    android:text="@string/emplay"
                     android:textColor="#FFFFFF"
                     android:textSize="22sp"
                     android:fontFamily="sans-serif-medium"
@@ -75,9 +77,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="APP INFO"
+                android:text="@string/app_info"
                 android:textColor="#777777"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium" />
 
@@ -96,7 +98,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your movies and TV shows companion."
+                    android:text="@string/your_movies_and_tv_shows_companion"
                     android:textColor="#CCCCCC"
                     android:textSize="14sp"
                     android:fontFamily="sans-serif"
@@ -109,20 +111,12 @@
                     android:layout_marginBottom="12dp"
                     android:background="#1E1E1E" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Data provided by"
-                    android:textColor="#777777"
-                    android:textSize="12sp"
-                    android:fontFamily="sans-serif" />
-
                 <ImageView
                     android:layout_width="85dp"
                     android:layout_height="10dp"
                     android:layout_marginTop="6dp"
                     android:adjustViewBounds="true"
-                    android:contentDescription="The Movie Database"
+                    android:contentDescription="@string/the_movie_database"
                     android:src="@drawable/tmdb_logo"
                     app:tint="@null" />
 
@@ -130,9 +124,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="This product uses the TMDB API but is not endorsed or certified by TMDB."
+                    android:text="@string/tmdb"
                     android:textColor="#555555"
-                    android:textSize="12sp"
+                    android:textSize="14sp"
                     android:fontFamily="sans-serif"
                     android:lineSpacingExtra="3dp" />
 
@@ -145,9 +139,9 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
-                android:text="PRIVACY POLICY"
+                android:text="@string/privacy_policy"
                 android:textColor="#777777"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium" />
 
@@ -171,7 +165,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Privacy Policy"
+                    android:text="@string/policy_title"
                     android:textColor="#CCCCCC"
                     android:textSize="14sp"
                     android:fontFamily="sans-serif" />
@@ -179,7 +173,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="›"
+                    android:text="@string/ic"
                     android:textColor="#555555"
                     android:textSize="18sp" />
 
@@ -192,9 +186,9 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
-                android:text="CREDITS"
+                android:text="@string/credits"
                 android:textColor="#777777"
-                android:textSize="11sp"
+                android:textSize="14sp"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium" />
 
@@ -221,17 +215,17 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Developer"
+                        android:text="@string/developer"
                         android:textColor="#777777"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:fontFamily="sans-serif" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="huongtran97"
+                        android:text="@string/author"
                         android:textColor="#CCCCCC"
-                        android:textSize="13sp"
+                        android:textSize="14sp"
                         android:fontFamily="sans-serif-medium" />
 
                 </LinearLayout>
@@ -248,17 +242,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="Open Source Libraries"
+                    android:text="@string/libraries"
                     android:textColor="#777777"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:fontFamily="sans-serif" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Retrofit 2  •  OkHttp 4  •  Gson\nGlide 4  •  Firebase Auth\nAndroid Image Slider"
+                    android:text="@string/libs_source"
                     android:textColor="#CCCCCC"
-                    android:textSize="13sp"
+                    android:textSize="14sp"
                     android:fontFamily="sans-serif"
                     android:lineSpacingExtra="4dp" />
 

@@ -33,7 +33,7 @@
         android:fontFamily="sans-serif-black"
         android:textAlignment="center"
         android:textColor="#FFFFFF"
-        android:textSize="12sp"
+        android:textSize="15sp"
         android:maxLines="2"
         android:ellipsize="end" />
 
@@ -48,7 +48,7 @@
         android:fontFamily="sans-serif-light"
         android:textAlignment="center"
         android:textColor="#9E9E9E"
-        android:textSize="11sp"
+        android:textSize="15sp"
         android:maxLines="2"
         android:ellipsize="end" />
 

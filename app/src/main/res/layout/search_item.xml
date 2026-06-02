@@ -37,27 +37,22 @@
             android:fontFamily="sans-serif-medium"
             android:text="@string/title"
             android:textColor="#FFFFFF"
-            android:textSize="15sp"
+            android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Rating Bar -->
-        <RatingBar
-            android:id="@+id/search_ratingBar"
+        <TextView
+            android:id="@+id/tvPosterRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:isIndicator="true"
-            android:numStars="5"
-            android:rating="0"
-            android:scaleX="0.45"
-            android:scaleY="0.45"
-            android:stepSize="0.5"
-            android:theme="@style/RatingBar"
+            android:layout_marginStart="14dp"
+            android:text="@string/_0_0"
+            android:textColor="#FFC107"
+            android:textSize="15sp"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
-            app:layout_constraintTop_toBottomOf="@+id/search_title"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintTop_toBottomOf="@+id/search_title" />
 
         <!-- Release Date -->
         <TextView
@@ -69,10 +64,10 @@
             android:fontFamily="sans-serif"
             android:text="@string/release_date"
             android:textColor="#555555"
-            android:textSize="12sp"
+            android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
-            app:layout_constraintTop_toBottomOf="@+id/search_ratingBar" />
+            app:layout_constraintTop_toBottomOf="@+id/tvPosterRating" />
 
         <!-- Language -->
         <TextView
@@ -85,7 +80,7 @@
             android:fontFamily="sans-serif"
             android:text="@string/language"
             android:textColor="#555555"
-            android:textSize="12sp"
+            android:textSize="15sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toBottomOf="@+id/search_release_date" />

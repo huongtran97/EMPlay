@@ -1,0 +1,125 @@
+package emplay.entertainment.emplay.models.tvshow;
+
+import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
+import java.util.List;
+
+import emplay.entertainment.emplay.models.common.MediaItem;
+
+public class TVShowModel implements Serializable, MediaItem {
+    @SerializedName("id")
+    private int id;
+    @SerializedName("name")
+    private String name;
+    @SerializedName("vote_average")
+    private double voteAverage;
+    @SerializedName("poster_path")
+    private String posterPath;
+    @SerializedName("backdrop_path")
+    private String backdropPath;
+    @SerializedName("overview")
+    private String overview;
+    @SerializedName("original_language")
+    private String originalLanguage;
+    @SerializedName("first_air_date")
+    private String firstAirDate;
+    @SerializedName("genres")
+    private List<String> genres;
+    @SerializedName("crew")
+    private List<String> crew;
+    @SerializedName("production_countries")
+    private List<String> productionCountries;
+    @SerializedName("number_of_episodes")
+    private int numberOfEpisodes;
+    @SerializedName("number_of_seasons")
+    private int numberOfSeasons;
+    private List<SeasonsModel> seasonsInfo;
+    private String username;
+    private String savedTimestamp;
+
+    public TVShowModel() {}
+
+    public TVShowModel(int id, String name, String posterPath) {
+        this.id = id;
+        this.name = name;
+        this.posterPath = posterPath;
+    }
+
+    public TVShowModel(int id, String name, double voteAverage, String posterPath,
+                       String backdropPath, String overview, String originalLanguage,
+                       String firstAirDate, int numberOfSeasons, int numberOfEpisodes,
+                       List<String> productionCountries, List<String> genres,
+                       List<SeasonsModel> seasonsInfo) {
+        this.id = id;
+        this.name = name;
+        this.voteAverage = voteAverage;
+        this.posterPath = posterPath;
+        this.backdropPath = backdropPath;
+        this.overview = overview;
+        this.originalLanguage = originalLanguage;
+        this.firstAirDate = firstAirDate;
+        this.numberOfSeasons = numberOfSeasons;
+        this.numberOfEpisodes = numberOfEpisodes;
+        this.productionCountries = productionCountries;
+        this.genres = genres;
+        this.seasonsInfo = seasonsInfo;
+    }
+
+    // MediaItem implementation
+    @Override
+    public int getMediaId() { return id; }
+
+    @Override
+    public String getSavedTimestamp() { return savedTimestamp; }
+    public void setSavedTimestamp(String savedTimestamp) { this.savedTimestamp = savedTimestamp; }
+
+    // Getters and Setters
+    public int getTVShowId() { return id; }
+    public void setTVShowId(int id) { this.id = id; }
+
+    @Override
+    public String getTitle() { return name; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public double getVoteAverage() { return voteAverage; }
+    public void setVoteAverage(double voteAverage) { this.voteAverage = voteAverage; }
+
+    @Override
+    public String getPosterPath() { return posterPath; }
+    public void setPosterPath(String posterPath) { this.posterPath = posterPath; }
+
+    @Override
+    public String getBackdropPath() { return backdropPath; }
+    public void setBackdropPath(String backdropPath) { this.backdropPath = backdropPath; }
+
+    public String getOverview() { return overview; }
+    public void setOverview(String overview) { this.overview = overview; }
+
+    public String getOriginalLanguage() { return originalLanguage; }
+    public void setOriginalLanguage(String originalLanguage) { this.originalLanguage = originalLanguage; }
+
+    public String getFirstAirDate() { return firstAirDate; }
+    public void setFirstAirDate(String firstAirDate) { this.firstAirDate = firstAirDate; }
+
+    public List<String> getGenres() { return genres; }
+    public void setGenres(List<String> genres) { this.genres = genres; }
+
+    public List<String> getCrew() { return crew; }
+    public void setCrew(List<String> crew) { this.crew = crew; }
+
+    public List<SeasonsModel> getSeasonsInfo() { return seasonsInfo; }
+    public void setSeasonsInfo(List<SeasonsModel> seasonsInfo) { this.seasonsInfo = seasonsInfo; }
+
+    public List<String> getProductionCountries() { return productionCountries; }
+    public void setProductionCountries(List<String> productionCountries) { this.productionCountries = productionCountries; }
+
+    public int getNumberOfEpisodes() { return numberOfEpisodes; }
+    public void setNumberOfEpisodes(int numberOfEpisodes) { this.numberOfEpisodes = numberOfEpisodes; }
+
+    public int getNumberOfSeasons() { return numberOfSeasons; }
+    public void setNumberOfSeasons(int numberOfSeasons) { this.numberOfSeasons = numberOfSeasons; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+}

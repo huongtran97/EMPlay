@@ -15,12 +15,12 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import emplay.entertainment.emplay.R;
-import emplay.entertainment.emplay.fragment.WatchlistFragment;
-import emplay.entertainment.emplay.models.SharedViewModel;
-import emplay.entertainment.emplay.fragment.HomeFragment;
-import emplay.entertainment.emplay.fragment.ProfileFragment;
-import emplay.entertainment.emplay.fragment.SearchMoviesFragment;
-import emplay.entertainment.emplay.fragment.SearchTVShowsFragment;
+import emplay.entertainment.emplay.fragment.layout.WatchlistFragment;
+import emplay.entertainment.emplay.models.common.SharedViewModel;
+import emplay.entertainment.emplay.fragment.layout.HomeFragment;
+import emplay.entertainment.emplay.fragment.layout.ProfileFragment;
+import emplay.entertainment.emplay.fragment.layout.SearchMoviesFragment;
+import emplay.entertainment.emplay.fragment.layout.SearchTVShowsFragment;
 
 public class MainActivity extends AppCompatActivity {
 

@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import emplay.entertainment.emplay.models.MovieModel;
-import emplay.entertainment.emplay.models.TVShowModel;
+import emplay.entertainment.emplay.models.movie.MovieModel;
+import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "emplay.db";
-    private static final int DATABASE_VERSION = 10;
+    private static final int DATABASE_VERSION = 13;
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_SHOWS = "tvshows";
     public static final String TABLE_USER_PROFILE = "profile";
@@ -41,6 +41,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_NAME = "username";
     public static final String COLUMN_EMAIL = "email";
     public static final String COLUMN_GENRES = "genres";
+    public static final String COLUMN_VOTE_AVERAGE = "vote_average";
     public static final String COLUMN_SEARCH_QUERY = "search_query";
     public static final String COLUMN_TIMESTAMP = "timestamp";
 
@@ -85,6 +86,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_TITLE + " TEXT, " +
                     COLUMN_POSTER_PATH + " TEXT, " +
                     COLUMN_GENRES + " TEXT, " +
+                    COLUMN_VOTE_AVERAGE + " REAL DEFAULT 0, " +
                     COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
                     "FOREIGN KEY (" + COLUMN_MOVIE_ID + ") REFERENCES " + TABLE_MOVIES + "(" + COLUMN_ID + ") ON DELETE CASCADE)";
 
@@ -96,6 +98,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_TITLE + " TEXT, " +
                     COLUMN_POSTER_PATH + " TEXT, " +
                     COLUMN_GENRES + " TEXT, " +
+                    COLUMN_VOTE_AVERAGE + " REAL DEFAULT 0, " +
                     COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
                     "FOREIGN KEY (" + COLUMN_SHOW_ID + ") REFERENCES " + TABLE_SHOWS + "(" + COLUMN_ID + ") ON DELETE CASCADE)";
 

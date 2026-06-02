@@ -1,0 +1,505 @@
+package emplay.entertainment.emplay.fragment.details;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ImageSpan;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
+import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.activity.TrailerActivity;
+import emplay.entertainment.emplay.adapter.common.CastAdapter;
+import emplay.entertainment.emplay.adapter.tvshow.SeasonsTVAdapter;
+import emplay.entertainment.emplay.adapter.tvshow.SuggestionTVAdapter;
+import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.api.common.ImageUrl;
+import emplay.entertainment.emplay.api.common.MovieApiService;
+import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.api.tvshow.TVShowCreditsResponses;
+import emplay.entertainment.emplay.api.tvshow.TVShowDetailsResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowSimilarResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowsTrailerResponses;
+import emplay.entertainment.emplay.database.DatabaseHelper;
+import emplay.entertainment.emplay.databinding.SearchResultTvViewBinding;
+import emplay.entertainment.emplay.fragment.common.BaseFragment;
+import emplay.entertainment.emplay.models.common.CastModel;
+import emplay.entertainment.emplay.models.common.RegionProvidersModel;
+import emplay.entertainment.emplay.models.tvshow.SeasonsModel;
+import emplay.entertainment.emplay.models.tvshow.TVShowModel;
+import emplay.entertainment.emplay.tool.LanguageMapper;
+import emplay.entertainment.emplay.tool.PaginationHelper;
+import emplay.entertainment.emplay.tool.ReadHelper;
+import emplay.entertainment.emplay.tool.UiUtils;
+import emplay.entertainment.emplay.tool.WatchProviderHelper;
+import emplay.entertainment.emplay.database.WatchlistHelper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class TVShowResultDetailsFragment extends BaseFragment {
+
+    private static final String ARG_TV_ID = "TV_ID";
+    private static final int PAGE_SIZE = 9;
+    private int tvId;
+    private List<SeasonsModel> seasonsList;
+    private List<CastModel> castList;
+    private Map<String, RegionProvidersModel> watchProviderResults;
+    private final List<TVShowModel> allSuggestions = new ArrayList<>();
+    private List<TVShowsTrailerResponses.TrailerModel> trailers = new ArrayList<>();
+    private SearchResultTvViewBinding binding;
+    private SeasonsTVAdapter seasonAdapter;
+    private CastAdapter castAdapter;
+    private SuggestionTVAdapter suggestionTVAdapter;
+    private MovieApiService apiService;
+    private FirebaseAuth mAuth;
+    private DatabaseHelper databaseHelper;
+    private PaginationHelper<TVShowModel> paginationHelper;
+
+    public static TVShowResultDetailsFragment newInstance(int tvId) {
+        TVShowResultDetailsFragment fragment = new TVShowResultDetailsFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARG_TV_ID, tvId);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = SearchResultTvViewBinding.inflate(inflater, container, false);
+
+        databaseHelper = DatabaseHelper.getInstance(requireContext());
+        mAuth = FirebaseAuth.getInstance();
+        apiService = ApiClient.getClient().create(MovieApiService.class);
+
+        binding.searchResultSeasonsRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.searchResultCastRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.searchResultSuggestionRecyclerview.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        binding.searchResultSuggestionRecyclerview.setNestedScrollingEnabled(false);
+
+        seasonsList = new ArrayList<>();
+        castList = new ArrayList<>();
+
+        seasonAdapter = new SeasonsTVAdapter(seasonsList, requireActivity(), season -> navigateTo(SeasonDetailFragment.newInstance(tvId, season.getSeasonNumber())));
+        castAdapter = new CastAdapter(castList, requireActivity(), cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
+        suggestionTVAdapter = new SuggestionTVAdapter(new ArrayList<>(), getContext(), tv -> {
+            if(tv != null) navigateTo(TVShowResultDetailsFragment.newInstance(tv.getTVShowId()));
+        });
+
+        binding.searchResultSeasonsRecyclerview.setAdapter(seasonAdapter);
+        binding.searchResultCastRecyclerview.setAdapter(castAdapter);
+        binding.searchResultSuggestionRecyclerview.setAdapter(suggestionTVAdapter);
+
+        paginationHelper = new PaginationHelper<>(PAGE_SIZE, allSuggestions, new PaginationHelper.PaginationCallback<TVShowModel>() {
+            @Override
+            public void onPageUpdated(List<TVShowModel> pageItems) {
+                suggestionTVAdapter.updateData(pageItems);
+            }
+
+            @Override
+            public void onUiUpdate(int currentPage, int totalPages, boolean hasPrev, boolean hasNext) {
+                PaginationHelper.updatePaginationBar(binding.suggestionPaginationBar, 
+                        binding.suggestionPageIndicator, 
+                        binding.suggestionBtnPrev, 
+                        binding.suggestionBtnNext, 
+                        currentPage, totalPages, hasPrev, hasNext);
+            }
+        });
+
+        binding.suggestionBtnPrev.setOnClickListener(v -> {
+            paginationHelper.prevPage();
+            binding.searchResultSuggestionRecyclerview.scrollToPosition(0);
+        });
+        binding.suggestionBtnNext.setOnClickListener(v -> {
+            paginationHelper.nextPage();
+            binding.searchResultSuggestionRecyclerview.scrollToPosition(0);
+        });
+        binding.tvInfoCard.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+
+        if (getArguments() != null) {
+            tvId = getArguments().getInt(ARG_TV_ID, -1);
+            if (tvId != -1) {
+                fetchTVDetails();
+                fetchWatchProviders();
+                fetchTVCastList();
+                fetchTVSuggestionList();
+                fetchTrailers();
+            } else {
+                Toast.makeText(getContext(), "Invalid TV show ID", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        requireActivity().getWindow().setStatusBarColor(Color.parseColor("#0D0D12"));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        requireActivity().getWindow().setStatusBarColor(Color.BLACK);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        cancelCountdown();
+        binding = null;
+    }
+
+    @SuppressLint({"NotifyDataSetChanged", "SetTextI18n", "DefaultLocale"})
+    private void bindTVDetails(TVShowDetailsResponse tvDetails) {
+        if (binding == null) return;
+
+        // Title & share
+        binding.tvInfoCard.tvshowTitle.setText(tvDetails.getName());
+        binding.tvInfoCard.btnShare.setOnClickListener(v -> {
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("text/plain");
+            share.putExtra(Intent.EXTRA_TEXT, tvDetails.getName());
+            startActivity(Intent.createChooser(share, "Share via"));
+        });
+
+        // Rating
+        binding.tvInfoCard.tvPosterRating.setText(String.format("★ %.1f", tvDetails.getVote_average()));
+
+        // Language
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            binding.tvInfoCard.tvshowLanguage.setText("Language: " + LanguageMapper.getLanguageName(tvDetails.getOriginal_language()));
+        }
+
+        // Seasons & episodes
+        binding.tvInfoCard.tvshowInfoSeasons.setText("Seasons: " + tvDetails.getNumber_of_seasons());
+        binding.tvInfoCard.tvshowEpisodes.setText("Episodes: " + tvDetails.getNumber_of_episodes());
+
+        // First air date with calendar icon
+        String airDate = tvDetails.getFirst_air_date();
+        String airYear = (airDate != null && airDate.length() >= 4) ? airDate.substring(0, 4) : "";
+        SpannableString spannable = new SpannableString("  " + airYear);
+        Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_calendar);
+        assert icon != null;
+        icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
+        spannable.setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        binding.tvInfoCard.tvshowInformationFirstAirDate.setText(spannable);
+
+        // Overview and read more/less
+        binding.tvInfoCard.tvshowResultOverview.setText(tvDetails.getOverview());
+        ReadHelper.setup(binding.tvInfoCard.tvshowResultOverview, binding.tvInfoCard.readMoreText, false, null);
+
+        // Production country
+        List<TVShowDetailsResponse.ProductionCountry> countries = tvDetails.getProduction_countries();
+        if (countries != null && !countries.isEmpty()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                String countryNames = countries.stream()
+                        .map(TVShowDetailsResponse.ProductionCountry::getName)
+                        .collect(Collectors.joining(", "));
+                binding.tvInfoCard.tvshowProductCountry.setText(countryNames);
+            }
+        } else {
+            binding.tvInfoCard.tvshowProductCountry.setVisibility(View.GONE);
+        }
+
+        // Genre chips
+        List<String> genres = new ArrayList<>();
+        for (TVShowDetailsResponse.Genre g : tvDetails.getGenres()) genres.add(g.getName());
+        buildGenreChips(binding.tvInfoCard.tvshowInfoGenres, genres);
+
+        // Seasons list
+        List<TVShowDetailsResponse.Season> apiSeasons = tvDetails.getSeasons();
+        if (apiSeasons != null && !apiSeasons.isEmpty()) {
+            List<SeasonsModel> seasonsModels = new ArrayList<>();
+            for (TVShowDetailsResponse.Season season : apiSeasons) {
+                seasonsModels.add(new SeasonsModel(
+                        season.getId(),
+                        season.getName(),
+                        season.getPoster_path(),
+                        season.getEpisode_count(),
+                        season.getSeason_number()
+                ));
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                seasonsModels.sort((a, b) -> Integer.compare(a.getSeasonNumber(), b.getSeasonNumber()));
+            }
+            seasonsList.clear();
+            seasonsList.addAll(seasonsModels);
+            seasonAdapter.notifyDataSetChanged();
+        }
+
+        // Images
+        Glide.with(requireContext())
+                .load(ImageUrl.POSTER + tvDetails.getPoster_path())
+                .error(R.drawable.placeholder_image)
+                .into(binding.tvInfoCard.imageView);
+
+        String backdropPath = tvDetails.getBackdrop_path();
+        Glide.with(requireContext())
+                .load(backdropPath != null && !backdropPath.isEmpty()
+                        ? ImageUrl.BACKDROP + backdropPath
+                        : ImageUrl.POSTER + tvDetails.getPoster_path())
+                .error(R.drawable.placeholder_image)
+                .into(binding.tvInfoCard.backdropView);
+
+        // Watchlist button
+        updateWatchlistButton(tvDetails);
+
+        // Coming soon / released
+        applyReleaseVisibility(
+                tvDetails.getFirst_air_date(),
+                binding.tvInfoCard.wtwReleased.getRoot(),
+                binding.tvInfoCard.wtwUnreleased.getRoot(),
+                binding.tvInfoCard.comingSoonBadge,
+                () -> startCountdown(LocalDate.parse(tvDetails.getFirst_air_date()),
+                        binding.tvInfoCard.wtwUnreleased, () -> {
+                            binding.tvInfoCard.wtwUnreleased.getRoot().setVisibility(View.GONE);
+                            binding.tvInfoCard.wtwReleased.getRoot().setVisibility(View.VISIBLE);
+                            fetchWatchProviders();
+                        })
+        );
+
+        // Blurred background
+        UiUtils.setupBlurredBackground(this, tvDetails.getBackdrop_path(), tvDetails.getPoster_path(), binding.searchResultFragment);
+    }
+
+    private void updateWatchlistButton(TVShowDetailsResponse tvDetails) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            binding.tvInfoCard.addToLibraryBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_watchlist, 0, 0, 0);
+            binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v ->
+                    Toast.makeText(requireContext(), "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
+        } else {
+            String userId = currentUser.getUid();
+            updateSaveBtnState(userId, tvDetails.getId());
+
+            binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> {
+                if (WatchlistHelper.isTVShowSaved(databaseHelper, userId, tvDetails.getId())) {
+                    WatchlistHelper.removeTVShow(databaseHelper, userId, tvDetails.getId());
+                    updateSaveBtnState(userId, tvDetails.getId());
+                    Toast.makeText(requireContext(), "TV Show removed from library", Toast.LENGTH_SHORT).show();
+                } else {
+                    StringBuilder genresBuilder = new StringBuilder();
+                    if (tvDetails.getGenres() != null) {
+                        for (TVShowDetailsResponse.Genre genre : tvDetails.getGenres()) {
+                            if (genresBuilder.length() > 0) genresBuilder.append(",");
+                            genresBuilder.append(genre.getName());
+                        }
+                    }
+                    String genresString = genresBuilder.toString();
+                    long result = WatchlistHelper.saveTVShow(databaseHelper, userId, tvDetails.getId(),
+                            tvDetails.getName(), tvDetails.getPoster_path(), genresString, tvDetails.getVote_average());
+                    if (result != -1) {
+                        updateSaveBtnState(userId, tvDetails.getId());
+                        Toast.makeText(requireContext(), "TV Show added to library", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to add TV Show", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateSaveBtnState(String userId, int id) {
+        int iconRes = WatchlistHelper.isTVShowSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
+        binding.tvInfoCard.addToLibraryBtn.setIcon(ContextCompat.getDrawable(requireContext(), iconRes));
+    }
+
+    private void updateTrailerButton(List<TVShowsTrailerResponses.TrailerModel> trailers) {
+        this.trailers = trailers != null ? trailers : new ArrayList<>();
+        binding.tvInfoCard.trailerBtn.setOnClickListener(v -> {
+            if (!this.trailers.isEmpty()) {
+                String videoKey = this.trailers.get(0).getKey();
+                Intent intent = new Intent(getContext(), TrailerActivity.class);
+                intent.putExtra("TRAILER_ID", videoKey);
+                startActivity(intent);
+            } else {
+                Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void applyWatchProviders(String region) {
+        if (binding == null) return;
+        binding.tvInfoCard.wtwReleased.tvRegion.setText(region);
+        binding.tvInfoCard.wtwReleased.layoutWtwEmpty.setVisibility(View.GONE);
+        binding.tvInfoCard.wtwReleased.rvProviders.setVisibility(View.VISIBLE);
+        binding.tvInfoCard.wtwReleased.tabLayoutWtw.setVisibility(View.VISIBLE);
+        RegionProvidersModel providers = watchProviderResults.get(region);
+        if (providers != null) {
+            WatchProviderHelper.setupProviderTabs(requireContext(),
+                    binding.tvInfoCard.wtwReleased.tabLayoutWtw,
+                    binding.tvInfoCard.wtwReleased.rvProviders, providers);
+        } else {
+            handleNoWatchProviders();
+        }
+    }
+
+    private void handleNoWatchProviders() {
+        handleNoWatchProviders(
+                binding.tvInfoCard.wtwReleased.layoutWtwEmpty,
+                binding.tvInfoCard.wtwReleased.rvProviders,
+                binding.tvInfoCard.wtwReleased.tabLayoutWtw
+        );
+    }
+
+    private void fetchTrailers() {
+        safeEnqueue(apiService.getTVShowsTrailer(TMDBpath.tvShowTrailer(tvId)), new Callback<TVShowsTrailerResponses>() {
+            @Override
+            public void onResponse(@NonNull Call<TVShowsTrailerResponses> call, @NonNull Response<TVShowsTrailerResponses> response) {
+                if (response.isSuccessful()) {
+                    TVShowsTrailerResponses trailerResponses = response.body();
+                    List<TVShowsTrailerResponses.TrailerModel> allTrailers = trailerResponses != null ? trailerResponses.getResults() : null;
+
+                    if (allTrailers == null || allTrailers.isEmpty()) {
+                        updateTrailerButton(new ArrayList<>());
+                        return;
+                    }
+
+                    List<TVShowsTrailerResponses.TrailerModel> filtered = new ArrayList<>();
+                    for (TVShowsTrailerResponses.TrailerModel trailer : allTrailers) {
+                        if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
+                            filtered.add(trailer);
+                        }
+                    }
+                    if (filtered.isEmpty()) {
+                        for (TVShowsTrailerResponses.TrailerModel trailer : allTrailers) {
+                            if ("YouTube".equalsIgnoreCase(trailer.getSite())) filtered.add(trailer);
+                        }
+                    }
+                    updateTrailerButton(filtered);
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowsTrailerResponses> call, @NonNull Throwable t) {
+                Log.e("TVShowResultDetails", "Trailer fetch failed", t);
+            }
+        });
+    }
+
+    private void fetchWatchProviders() {
+        String defaultRegion = Locale.getDefault().getCountry();
+        safeEnqueue(apiService.getTVShowProviders(TMDBpath.tvProvider(tvId)), new Callback<TVShowProviderResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TVShowProviderResponse> call, @NonNull Response<TVShowProviderResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    watchProviderResults = response.body().getResults();
+                    String region = watchProviderResults.containsKey(defaultRegion)
+                            ? defaultRegion
+                            : watchProviderResults.isEmpty() ? null : watchProviderResults.keySet().iterator().next();
+                    if (region != null) {
+                        applyWatchProviders(region);
+                        binding.tvInfoCard.wtwReleased.btnRegion.setOnClickListener(v -> 
+                                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults, TVShowResultDetailsFragment.this::applyWatchProviders));
+                    } else {
+                        handleNoWatchProviders();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowProviderResponse> call, @NonNull Throwable t) {
+                Log.e("TVShowResultDetails", "Provider fetch failed", t);
+                handleNoWatchProviders();
+            }
+        });
+    }
+
+    @SuppressLint({"NotifyDataSetChanged", "SetTextI18n", "DefaultLocale"})
+    private void fetchTVDetails() {
+        safeEnqueue(apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvId)), new Callback<TVShowDetailsResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TVShowDetailsResponse> call, @NonNull Response<TVShowDetailsResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    bindTVDetails(response.body());
+                } else if (getContext() != null) {
+                    Toast.makeText(getContext(), "Failed to retrieve TV show details", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowDetailsResponse> call, @NonNull Throwable t) {
+                if (binding == null) return;
+                if (getContext() != null) Toast.makeText(getContext(), "Error fetching TV show details: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private void fetchTVCastList() {
+        safeEnqueue(apiService.getTVShowCredits(TMDBpath.tvShowCredits(tvId)), new Callback<TVShowCreditsResponses>() {
+            @Override
+            public void onResponse(@NonNull Call<TVShowCreditsResponses> call, @NonNull Response<TVShowCreditsResponses> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TVShowCreditsResponses tvCreditsResponse = response.body();
+                    List<TVShowCreditsResponses.Cast> raw = tvCreditsResponse.getCast();
+                    if (raw != null && !raw.isEmpty()) {
+                        castList.clear();
+                        for (TVShowCreditsResponses.Cast cast : raw) {
+                            castList.add(new CastModel(cast.getId(), cast.getName(), cast.getProfilePath(), cast.getCharacter()));
+                        }
+                        castAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowCreditsResponses> call, @NonNull Throwable t) {
+                if (getContext() != null) Toast.makeText(getContext(), "Error fetching cast list: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void fetchTVSuggestionList() {
+        safeEnqueue(apiService.getTVShowSimilar(TMDBpath.tvShowSimilar(tvId)), new Callback<TVShowSimilarResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TVShowSimilarResponse> call, @NonNull Response<TVShowSimilarResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<TVShowModel> results = response.body().getResults();
+                    List<TVShowModel> suggestions = new ArrayList<>();
+                    if (results != null) {
+                        for (TVShowModel tv : results) {
+                            if (tv.getPosterPath() != null) suggestions.add(tv);
+                        }
+                    }
+                    paginationHelper.updateData(suggestions);
+                } else if (getContext() != null) {
+                    Toast.makeText(getContext(), "Failed to load TV show recommendations", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowSimilarResponse> call, @NonNull Throwable t) {
+                if (getContext() != null) Toast.makeText(getContext(), "Failed to load TV show recommendations: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+}

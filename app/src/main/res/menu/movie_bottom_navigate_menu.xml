@@ -11,7 +11,7 @@
         android:id="@+id/menu_movie_search"
         />
     <item android:title="Watchlist"
-        android:icon="@drawable/movie_watchlist"
+        android:icon="@drawable/ic_watchlist"
         android:id="@+id/menu_movie_watchlist"
         />
     <item android:title="Profile"

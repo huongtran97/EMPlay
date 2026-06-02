@@ -41,4 +41,21 @@
     <color name="red_primary">#E50914</color>
     <color name="toggle_bg">#1E1E1E</color>
     <color name="pill_bg">#2E2E2E</color>
+
+    <!-- UI Components Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9E9E9E</color>
+    <color name="text_tertiary">#888888</color>
+    <color name="text_hint">#666666</color>
+    <color name="text_disabled">#444444</color>
+    <color name="text_overview">#CCCCCC</color>
+
+    <color name="accent_red">#E53935</color>
+    <color name="accent_amber">#C98A1A</color>
+    <color name="accent_yellow">#F5C518</color>
+
+    <color name="bg_dark_chip">#1E1E1E</color>
+    <color name="bg_countdown_block">#2A2A2A</color>
+    <color name="divider_dark">#1E1E1E</color>
+    <color name="space_separator">#444444</color>
 </resources>

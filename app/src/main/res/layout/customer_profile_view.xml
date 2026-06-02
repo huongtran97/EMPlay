@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#111111"
@@ -31,9 +32,9 @@
                 android:id="@+id/tvProfileName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Display Name"
+                android:text="@string/user_name"
                 android:textColor="#FFFFFF"
-                android:textSize="17sp"
+                android:textSize="20sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -41,18 +42,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="email@gmail.com"
+                android:text="@string/user_email"
                 android:textColor="#666666"
-                android:textSize="12sp" />
+                android:textSize="12sp"
+                android:visibility="invisible"/>
 
             <TextView
                 android:id="@+id/tvMemberSince"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:text="Member since...."
+                android:text="@string/member_since"
                 android:textColor="#666666"
-                android:textSize="11sp" />
+                android:textSize="13sp" />
 
         </LinearLayout>
 
@@ -64,6 +66,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:baselineAligned="false"
             android:orientation="horizontal"
             android:padding="14dp">
 
@@ -80,7 +83,7 @@
                     android:id="@+id/tvMoviesCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0"
+                    android:text="@string/zero"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -89,9 +92,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="Movies saved"
+                    android:text="@string/movies_saved"
                     android:textColor="#666666"
-                    android:textSize="9sp" />
+                    android:textSize="13sp" />
 
             </LinearLayout>
 
@@ -109,7 +112,7 @@
                     android:id="@+id/tvTvShowsCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0"
+                    android:text="@string/zero"
                     android:textColor="#FFFFFF"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -118,9 +121,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="TV Shows saved"
+                    android:text="@string/tv_shows_saved"
                     android:textColor="#666666"
-                    android:textSize="9sp" />
+                    android:textSize="13sp" />
 
             </LinearLayout>
 
@@ -138,18 +141,18 @@
                     android:id="@+id/tvTopGenre"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Genre"
+                    android:text="@string/genre"
                     android:textColor="#E50914"
-                    android:textSize="12dp"
+                    android:textSize="14sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="3dp"
-                    android:text="Top genre"
+                    android:text="@string/top_genre"
                     android:textColor="#666666"
-                    android:textSize="9sp" />
+                    android:textSize="13sp" />
 
             </LinearLayout>
 
@@ -161,21 +164,23 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="14dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="10dp"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginEnd="6dp"
+                android:contentDescription="@string/show_icon"
                 android:src="@drawable/ic_bar_chart"
                 app:tint="#5BA3D9" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Taste Profile"
+                android:text="@string/taste_profile"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -200,23 +205,24 @@
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginEnd="6dp"
-                android:src="@drawable/movie_watchlist"
+                android:contentDescription="@string/show_icon"
+                android:src="@drawable/ic_watchlist"
                 app:tint="#C98A1A" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Recently Saved"
+                android:text="@string/recently_saved"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tvRecentlySavedSeeAll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="See all"
+                android:text="@string/see_all"
                 android:textColor="#666666"
                 android:textSize="11sp" />
 
@@ -236,21 +242,23 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingHorizontal="14dp"
-            android:paddingBottom="10dp">
+            android:paddingBottom="10dp"
+            tools:ignore="UseCompoundDrawables">
 
             <ImageView
                 android:layout_width="15dp"
                 android:layout_height="15dp"
                 android:layout_marginEnd="6dp"
+                android:contentDescription="@string/show_icon"
                 android:src="@drawable/ic_settings"
                 app:tint="#666666" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Settings"
+                android:text="@string/settings"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -275,6 +283,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginEnd="12dp"
+                    android:contentDescription="@string/show_icon"
                     android:src="@drawable/ic_info"
                     app:tint="#666666" />
 
@@ -282,13 +291,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="About"
+                    android:text="@string/about"
                     android:textColor="#CCCCCC"
-                    android:textSize="13sp" />
+                    android:textSize="16sp" />
 
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
+                    android:contentDescription="@string/show_icon"
                     android:src="@drawable/ic_chevron_right"
                     app:tint="#333333" />
 
@@ -305,12 +315,14 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="13dp">
+                android:padding="13dp"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginEnd="12dp"
+                    android:contentDescription="@string/show_icon"
                     android:src="@drawable/logout"
                     app:tint="#E05555" />
 
@@ -320,11 +332,12 @@
                     android:layout_height="wrap_content"
                     android:text="@string/log_out"
                     android:textColor="#E05555"
-                    android:textSize="13sp" />
+                    android:textSize="16sp" />
 
             </LinearLayout>
 
             <View
+                android:id="@+id/dividerDeleteAccount"
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#1E1E1E" />
@@ -335,21 +348,23 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="13dp">
+                android:padding="13dp"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:layout_marginEnd="12dp"
+                    android:contentDescription="@string/show_icon"
                     android:src="@drawable/ic_delete"
                     app:tint="#444444" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Delete account"
+                    android:text="@string/delete_account"
                     android:textColor="#555555"
-                    android:textSize="13sp" />
+                    android:textSize="16sp" />
 
             </LinearLayout>
 

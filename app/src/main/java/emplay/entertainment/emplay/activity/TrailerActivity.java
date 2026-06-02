@@ -9,12 +9,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class TrailerActivity extends AppCompatActivity {
 
-    private static final String ARG_MOVIE_ID = "MOVIE_ID";
+    private static final String TRAILER_ID = "TRAILER_ID";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String videoId = getIntent().getStringExtra(ARG_MOVIE_ID);
+        String videoId = getIntent().getStringExtra(TRAILER_ID);
 
         if (videoId == null || videoId.isEmpty()) {
             Toast.makeText(this, "No trailer available", Toast.LENGTH_SHORT).show();

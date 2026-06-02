@@ -26,12 +26,12 @@
                 android:orientation="vertical"
                 android:paddingBottom="24dp">
 
-                <!-- Movie info RecyclerView -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/search_result_recyclerview"
+                <!-- Movie info card (bound directly via ViewBinding) -->
+                <include
+                    android:id="@+id/movie_info"
+                    layout="@layout/movie_information"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp" />
+                    android:layout_height="wrap_content" />
 
                 <!-- Divider -->
                 <View
