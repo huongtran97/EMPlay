@@ -57,16 +57,18 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- POSTER (left side, overlaps backdrop bottom)-->
-    <FrameLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/poster_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="-56dp"
-        android:elevation="8dp"
-        android:background="@drawable/bg_poster"
-        android:clipToOutline="true"
-        tools:targetApi="s"
+        android:translationZ="4dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:strokeColor="#555566"
+        app:strokeWidth="1dp"
+        app:cardBackgroundColor="#1E1E28"
         app:layout_constraintWidth_percent="0.32"
         app:layout_constraintDimensionRatio="2:3"
         app:layout_constraintStart_toStartOf="parent"
@@ -98,7 +100,7 @@
             android:background="@drawable/bg_badge_amber"
             android:visibility="gone" />
 
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 
     <!-- TITLE (right of poster) -->
 
@@ -158,98 +160,120 @@
         app:layout_constraintStart_toEndOf="@+id/poster_container"
         app:layout_constraintTop_toBottomOf="@+id/rating_row" />
 
-    <!-- META CHIPS (wraps automatically, no scrolling)-->
+    <!-- META CHIPS -->
     <com.google.android.flexbox.FlexboxLayout
-        android:id="@+id/meta_scroll"
+        android:id="@+id/meta_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="10dp"
         app:flexWrap="wrap"
         app:alignItems="flex_start"
+        app:justifyContent="flex_start"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/action_buttons">
 
         <TextView
-            android:id="@+id/tvshow_info_seasons"
+            android:id="@+id/chip_seasons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/season"
-            android:textColor="#777777"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif"
-            android:background="@drawable/bg_meta_chip"
-            android:paddingStart="9dp"
-            android:paddingEnd="9dp"
+            android:background="@drawable/bg_chip_season"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:layout_marginEnd="6dp"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="7dp"
+            android:textColor="#5B9FD4"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            app:drawableStartCompat="@drawable/ic_seasons"
+            app:drawableTint="#5B9FD4"
+            tools:text="Seasons: 1" />
 
         <TextView
-            android:id="@+id/tvshow_episodes"
+            android:id="@+id/chip_episodes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/episode"
-            android:textColor="#777777"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif"
-            android:background="@drawable/bg_meta_chip"
-            android:paddingStart="9dp"
-            android:paddingEnd="9dp"
+            android:background="@drawable/bg_chip_episode"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:layout_marginEnd="6dp"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="7dp"
+            android:textColor="#9B6FD4"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            app:drawableStartCompat="@drawable/ic_episodes"
+            app:drawableTint="#9B6FD4"
+            tools:text="Episodes: 8" />
 
         <TextView
-            android:id="@+id/tvshow_information_first_air_date"
+            android:id="@+id/movie_release_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/release_date"
-            android:textColor="#777777"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif"
-            android:background="@drawable/bg_meta_chip"
-            android:paddingStart="9dp"
-            android:paddingEnd="9dp"
+            android:background="@drawable/bg_chip_year"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:layout_marginEnd="6dp"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="7dp"
+            android:textColor="#52A872"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            app:drawableStartCompat="@drawable/ic_calendar_small"
+            app:drawableTint="#52A872"
+            tools:text="2026" />
 
         <TextView
-            android:id="@+id/tvshow_language"
+            android:id="@+id/movie_language"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/language"
-            android:textColor="#777777"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif"
-            android:background="@drawable/bg_meta_chip"
-            android:paddingStart="9dp"
-            android:paddingEnd="9dp"
+            android:background="@drawable/bg_chip_language"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:layout_marginEnd="6dp"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="7dp"
+            android:textColor="#C9943A"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            app:drawableStartCompat="@drawable/ic_language"
+            app:drawableTint="#C9943A"
+            tools:text="Language: English" />
 
         <TextView
-            android:id="@+id/tvshow_product_country"
+            android:id="@+id/movie_product_country"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/country"
-            android:textColor="#777777"
-            android:textSize="16sp"
-            android:fontFamily="sans-serif"
-            android:background="@drawable/bg_meta_chip"
-            android:paddingStart="9dp"
-            android:paddingEnd="9dp"
+            android:background="@drawable/bg_chip_country"
+            android:drawablePadding="5dp"
+            android:gravity="center_vertical"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
-            android:layout_marginBottom="6dp" />
+            android:layout_marginEnd="7dp"
+            android:layout_marginBottom="7dp"
+            android:textColor="#D46060"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            app:drawableStartCompat="@drawable/ic_map_pin"
+            app:drawableTint="#D46060"
+            tools:text="United States of America" />
 
     </com.google.android.flexbox.FlexboxLayout>
 
@@ -264,7 +288,7 @@
         android:background="#1E1E28"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/meta_scroll" />
+        app:layout_constraintTop_toBottomOf="@+id/meta_row" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/poster_genre_barrier"
@@ -277,51 +301,68 @@
 
     <LinearLayout
         android:id="@+id/action_buttons"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="270dp"
-        android:gravity="start"
+        android:baselineAligned="false"
         android:orientation="horizontal"
+        android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/poster_container"
-        android:background="@drawable/bg_button_outline"
-        android:padding="4dp">
+        app:layout_constraintTop_toBottomOf="@+id/poster_container">
 
-        <androidx.appcompat.widget.AppCompatButton
+        <LinearLayout
             android:id="@+id/trailer_btn"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:paddingStart="14dp"
-            android:paddingEnd="14dp"
-            android:background="@drawable/bg_button_red"
-            android:fontFamily="sans-serif-medium"
-            android:stateListAnimator="@null"
-            android:text="@string/trailer"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp" />
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_button_trailer"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true">
 
-        <View
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:background="#2E2E3E"
-            android:layout_marginVertical="6dp"/>
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:src="@drawable/ic_play"
+                android:contentDescription="@null"
+                app:tint="#D46060" />
 
-        <com.google.android.material.button.MaterialButton
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="7dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="@string/trailer"
+                android:textColor="#D46060"
+                android:textSize="14sp"
+                android:letterSpacing="0.05" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/add_to_library_btn"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:padding="10dp"
-            app:backgroundTint="@android:color/transparent"
-            app:strokeWidth="0dp"
-            app:cornerRadius="12dp"
-            app:icon="@drawable/ic_watchlist"
-            app:iconGravity="textStart"
-            app:iconTint="@color/text_primary"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_add_to_library_btn"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/ic_library"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_watchlist"
+                android:contentDescription="@null"
+                app:tint="#AAAAAA" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -331,7 +372,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="rating_row,meta_scroll" />
+        app:constraint_referenced_ids="rating_row,meta_row" />
 
     <!-- WHERE TO WATCH -->
     <include

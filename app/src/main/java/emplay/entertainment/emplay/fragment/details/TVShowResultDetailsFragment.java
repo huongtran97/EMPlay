@@ -7,9 +7,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ImageSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -194,28 +191,18 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         // Rating
         binding.tvInfoCard.tvPosterRating.setText(String.format("★ %.1f", tvDetails.getVote_average()));
 
-        // Language
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            binding.tvInfoCard.tvshowLanguage.setText("Language: " + LanguageMapper.getLanguageName(tvDetails.getOriginal_language()));
-        }
+        // First air date — year only
+        String airDate = tvDetails.getFirst_air_date();
+        binding.tvInfoCard.movieReleaseDate.setText((airDate != null && airDate.length() >= 4) ? airDate.substring(0, 4) : "");
 
         // Seasons & episodes
-        binding.tvInfoCard.tvshowInfoSeasons.setText("Seasons: " + tvDetails.getNumber_of_seasons());
-        binding.tvInfoCard.tvshowEpisodes.setText("Episodes: " + tvDetails.getNumber_of_episodes());
+        binding.tvInfoCard.chipSeasons.setText("Seasons: " + tvDetails.getNumber_of_seasons());
+        binding.tvInfoCard.chipEpisodes.setText("Episodes: " + tvDetails.getNumber_of_episodes());
 
-        // First air date with calendar icon
-        String airDate = tvDetails.getFirst_air_date();
-        String airYear = (airDate != null && airDate.length() >= 4) ? airDate.substring(0, 4) : "";
-        SpannableString spannable = new SpannableString("  " + airYear);
-        Drawable icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_calendar);
-        assert icon != null;
-        icon.setBounds(0, 0, icon.getIntrinsicWidth(), icon.getIntrinsicHeight());
-        spannable.setSpan(new ImageSpan(icon, ImageSpan.ALIGN_BASELINE), 0, 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        binding.tvInfoCard.tvshowInformationFirstAirDate.setText(spannable);
-
-        // Overview and read more/less
-        binding.tvInfoCard.tvshowResultOverview.setText(tvDetails.getOverview());
-        ReadHelper.setup(binding.tvInfoCard.tvshowResultOverview, binding.tvInfoCard.readMoreText, false, null);
+        // Language
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            binding.tvInfoCard.movieLanguage.setText("Language: " + LanguageMapper.getLanguageName(tvDetails.getOriginal_language()));
+        }
 
         // Production country
         List<TVShowDetailsResponse.ProductionCountry> countries = tvDetails.getProduction_countries();
@@ -224,11 +211,22 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 String countryNames = countries.stream()
                         .map(TVShowDetailsResponse.ProductionCountry::getName)
                         .collect(Collectors.joining(", "));
-                binding.tvInfoCard.tvshowProductCountry.setText(countryNames);
+                binding.tvInfoCard.movieProductCountry.setText(countryNames);
             }
         } else {
-            binding.tvInfoCard.tvshowProductCountry.setVisibility(View.GONE);
+            binding.tvInfoCard.movieProductCountry.setVisibility(View.GONE);
         }
+
+        // Overview and read more/less
+        binding.tvInfoCard.tvshowResultOverview.setText(tvDetails.getOverview());
+        ReadHelper.setup(binding.tvInfoCard.tvshowResultOverview, binding.tvInfoCard.readMoreText, false, null);
+
+        // Size chip icons to match text
+        sizeChipIcon(binding.tvInfoCard.movieReleaseDate);
+        sizeChipIcon(binding.tvInfoCard.chipSeasons);
+        sizeChipIcon(binding.tvInfoCard.chipEpisodes);
+        sizeChipIcon(binding.tvInfoCard.movieLanguage);
+        sizeChipIcon(binding.tvInfoCard.movieProductCountry);
 
         // Genre chips
         List<String> genres = new ArrayList<>();
@@ -302,7 +300,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private void updateWatchlistButton(TVShowDetailsResponse tvDetails) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            binding.tvInfoCard.addToLibraryBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_watchlist, 0, 0, 0);
             binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v ->
                     Toast.makeText(requireContext(), "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
         } else {
@@ -338,7 +335,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
     private void updateSaveBtnState(String userId, int id) {
         int iconRes = WatchlistHelper.isTVShowSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
-        binding.tvInfoCard.addToLibraryBtn.setIcon(ContextCompat.getDrawable(requireContext(), iconRes));
+        binding.tvInfoCard.icLibrary.setImageResource(iconRes);
     }
 
     private void updateTrailerButton(List<TVShowsTrailerResponses.TrailerModel> trailers) {

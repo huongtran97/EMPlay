@@ -189,31 +189,36 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 .error(R.drawable.placeholder_image)
                 .into(binding.movieInfo.backdropView);
 
-        // Released date only display "year"
+        // Release date — year only
         String rd = mDetails.getReleaseDate();
         binding.movieInfo.movieReleaseDate.setText((rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "");
+
+        // Runtime
+        binding.movieInfo.movieRuntime.setText(mDetails.getRuntime() + " min");
 
         // Language
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             binding.movieInfo.movieLanguage.setText("Language: " + LanguageMapper.getLanguageName(mDetails.getOriginalLanguage()));
         }
 
-        // Runtime
-        binding.movieInfo.movieRuntime.setText(mDetails.getRuntime() + " min");
-
         // Production country
         List<MovieDetailsResponse.ProductionCountry> countries = mDetails.getProduction_countries();
         if (countries != null && !countries.isEmpty()) {
-            String countryNames = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                countryNames = countries.stream()
+                String countryNames = countries.stream()
                         .map(MovieDetailsResponse.ProductionCountry::getName)
                         .collect(Collectors.joining(", "));
+                binding.movieInfo.movieProductCountry.setText(countryNames);
             }
-            binding.movieInfo.movieProductCountry.setText(countryNames);
         } else {
             binding.movieInfo.movieProductCountry.setVisibility(View.GONE);
         }
+
+        // Size chip icons to match text
+        sizeChipIcon(binding.movieInfo.movieReleaseDate);
+        sizeChipIcon(binding.movieInfo.movieRuntime);
+        sizeChipIcon(binding.movieInfo.movieLanguage);
+        sizeChipIcon(binding.movieInfo.movieProductCountry);
 
         // Genre chips
         List<String> genres = new ArrayList<>();
@@ -263,7 +268,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private void updateWatchlistButton(MovieDetailsResponse movieDetails) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser == null) {
-            binding.movieInfo.addToLibraryBtn.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_watchlist, 0, 0, 0);
             binding.movieInfo.addToLibraryBtn.setOnClickListener(v ->
                     Toast.makeText(requireContext(), "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
         } else {
@@ -299,7 +303,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
     private void updateSaveBtnState(String userId, int id) {
         int iconRes = WatchlistHelper.isMovieSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
-        binding.movieInfo.addToLibraryBtn.setIcon(ContextCompat.getDrawable(requireContext(), iconRes));
+        binding.movieInfo.icLibrary.setImageResource(iconRes);
     }
 
     private void updateTrailerButton(List<MoviesTrailerResponses.TrailerModel> trailers) {

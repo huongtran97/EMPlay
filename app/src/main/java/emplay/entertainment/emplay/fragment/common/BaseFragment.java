@@ -1,10 +1,13 @@
 package emplay.entertainment.emplay.fragment.common;
 
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import androidx.core.widget.TextViewCompat;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -129,6 +132,16 @@ public abstract class BaseFragment extends Fragment {
                 if (onFinish != null) safeRunOnUiThread(onFinish);
             }
         }.start();
+    }
+
+    // Meta chip icon sizing — scales drawableStart to match text height
+    protected static void sizeChipIcon(TextView tv) {
+        Drawable[] drawables = TextViewCompat.getCompoundDrawablesRelative(tv);
+        Drawable icon = drawables[0];
+        if (icon == null) return;
+        int size = Math.round(tv.getTextSize());
+        icon.setBounds(0, 0, size, size);
+        TextViewCompat.setCompoundDrawablesRelative(tv, icon, null, null, null);
     }
 
     // Watch Providers
