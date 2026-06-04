@@ -15,6 +15,8 @@ import com.google.android.flexbox.FlexboxLayout;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
@@ -99,6 +101,9 @@ public abstract class BaseFragment extends Fragment {
     // Countdown Timer
     protected void startCountdown(LocalDate releaseDate, WtwUnreleasedViewBinding unreleasedBinding, Runnable onFinish) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+
+        String formatted = releaseDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.getDefault()));
+        unreleasedBinding.tvExpectedLabel.setText(formatted);
 
         long releaseMillis = releaseDate.atStartOfDay(ZoneId.systemDefault())
                 .toInstant().toEpochMilli();

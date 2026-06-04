@@ -10,12 +10,13 @@
         </shape>
     </item>
 
-    <!-- amber top-edge accent line -->
+    <!-- Amber top-edge accent line: 1dp tall, inset from left/right, pinned to top -->
     <item
         android:top="0dp"
+        android:bottom="0dp"
         android:left="12dp"
         android:right="12dp"
-        android:bottom="0dp">
+        android:gravity="top">
         <shape android:shape="rectangle">
             <solid android:color="#C9943A" />
             <size android:height="1dp" />
@@ -24,4 +25,3 @@
     </item>
 
 </layer-list>
-

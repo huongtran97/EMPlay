@@ -297,11 +297,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                         0x00C9943A   // transparent edge
                 }
         );
-        amberGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
-        amberGlow.setGradientRadius(180f); // matches the 120dp View size at ~1.5x density
-        amberGlow.setShape(GradientDrawable.OVAL);
-        binding.tvInfoCard.wtwUnreleased.amberGlow.setBackground(amberGlow);
-
     }
 
     private void updateWatchlistButton(TVShowDetailsResponse tvDetails) {
