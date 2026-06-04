@@ -16,14 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
+import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
 import emplay.entertainment.emplay.models.movie.MovieModel;
@@ -34,19 +33,16 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     private final List<MovieModel> movies;
     private final OnItemClickListener listener;
     private final DatabaseHelper dbHelper;
-    private final FirebaseAuth mAuth;
 
     public interface OnItemClickListener {
         void onItemClick(MovieModel movie);
     }
 
     public TrendingBannerAdapter(Context context, List<MovieModel> movies,
-                                 DatabaseHelper dbHelper, FirebaseAuth mAuth,
-                                 OnItemClickListener listener) {
+                                 DatabaseHelper dbHelper, OnItemClickListener listener) {
         this.context = context;
         this.movies = movies;
         this.dbHelper = dbHelper;
-        this.mAuth = mAuth;
         this.listener = listener;
     }
 
@@ -83,34 +79,45 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     }
 
     private void setupWatchlistButton(ViewHolder holder, MovieModel movie) {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_watchlist));
-            holder.btnHeroWatchlist.setOnClickListener(v ->
-                    Toast.makeText(context, "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
-        } else {
-            String userId = currentUser.getUid();
-            updateWatchlistIcon(holder, userId, movie.getMovieId());
-            holder.btnHeroWatchlist.setOnClickListener(v -> {
-                if (WatchlistHelper.isMovieSaved(dbHelper, userId, movie.getMovieId())) {
-                    WatchlistHelper.removeMovie(dbHelper, userId, movie.getMovieId());
-                    updateWatchlistIcon(holder, userId, movie.getMovieId());
-                    Toast.makeText(context, "Movie removed from library", Toast.LENGTH_SHORT).show();
-                } else {
-                    String genres = "";
-                    if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
-                        genres = String.join(",", movie.getGenres());
-                    }
-                    long result = WatchlistHelper.saveMovie(dbHelper, userId, movie.getMovieId(),
-                            movie.getTitle(), movie.getPosterPath(), genres, movie.getVoteAverage());
-                    if (result != -1) {
+        AuthManager auth = AuthManager.getInstance(context);
+        switch (auth.getAuthType()) {
+            case GOOGLE:
+                String userId = auth.getUserId();
+                updateWatchlistIcon(holder, userId, movie.getMovieId());
+                holder.btnHeroWatchlist.setOnClickListener(v -> {
+                    if (WatchlistHelper.isMovieSaved(dbHelper, userId, movie.getMovieId())) {
+                        WatchlistHelper.removeMovie(dbHelper, userId, movie.getMovieId());
                         updateWatchlistIcon(holder, userId, movie.getMovieId());
-                        Toast.makeText(context, "Movie added to library", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Movie removed from library", Toast.LENGTH_SHORT).show();
                     } else {
-                        Toast.makeText(context, "Failed to add Movie", Toast.LENGTH_SHORT).show();
+                        String genres = (movie.getGenres() != null && !movie.getGenres().isEmpty())
+                                ? String.join(",", movie.getGenres()) : "";
+                        long result = WatchlistHelper.saveMovie(dbHelper, userId, movie.getMovieId(),
+                                movie.getTitle(), movie.getPosterPath(), genres, movie.getVoteAverage());
+                        if (result != -1) {
+                            updateWatchlistIcon(holder, userId, movie.getMovieId());
+                            Toast.makeText(context, "Movie added to library", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(context, "Failed to add Movie", Toast.LENGTH_SHORT).show();
+                        }
                     }
-                }
-            });
+                });
+                break;
+
+            case TMDB:
+                // Banner doesn't support per-item account_states fetch; direct to detail page.
+                holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_watchlist));
+                holder.btnHeroWatchlist.setOnClickListener(v -> {
+                    Toast.makeText(context, "Open movie details to save to your TMDB watchlist", Toast.LENGTH_SHORT).show();
+                    listener.onItemClick(movie);
+                });
+                break;
+
+            default:
+                holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_watchlist));
+                holder.btnHeroWatchlist.setOnClickListener(v ->
+                        Toast.makeText(context, "Sign in to save movies", Toast.LENGTH_SHORT).show());
+                break;
         }
     }
 

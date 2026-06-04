@@ -36,6 +36,12 @@ public class TMDBpath {
     public static String tvProvider(int tvId) { return "3/tv/" + tvId + "/watch/providers"; }
     public static String movieProvider(int movieId) { return "3/movie/" + movieId + "/watch/providers"; }
 
+    // TMDB account / watchlist paths
+    public static String accountWatchlistMovies(String accountId) { return "3/account/" + accountId + "/watchlist/movies"; }
+    public static String accountWatchlistTVShows(String accountId) { return "3/account/" + accountId + "/watchlist/tv"; }
+    public static String accountAddToWatchlist(String accountId) { return "3/account/" + accountId + "/watchlist"; }
+    public static String movieAccountStates(int movieId) { return "3/movie/" + movieId + "/account_states"; }
+    public static String tvAccountStates(int tvId) { return "3/tv/" + tvId + "/account_states"; }
 
     //Dynamic date for upcoming movies/TV
 

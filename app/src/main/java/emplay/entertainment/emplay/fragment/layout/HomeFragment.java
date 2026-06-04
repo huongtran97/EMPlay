@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,9 +74,8 @@ public class HomeFragment extends BaseFragment {
 
         // ViewPager2 for trending banner
         DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireActivity());
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         trendingAdapter = new TrendingBannerAdapter(requireContext(), new ArrayList<>(),
-                dbHelper, mAuth, this::onItemClicked);
+                dbHelper, this::onItemClicked);
         vpTrendingBanner.setAdapter(trendingAdapter);
 
         // Auto scroll setup

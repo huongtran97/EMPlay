@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.fragment.common;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -7,12 +8,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.TextViewCompat;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+
+import emplay.entertainment.emplay.activity.LoginActivity;
 
 import com.google.android.flexbox.FlexboxLayout;
 
@@ -158,5 +162,18 @@ public abstract class BaseFragment extends Fragment {
             countDownTimer.cancel();
             countDownTimer = null;
         }
+    }
+
+     // Shows a dialog prompting the guest user to sign in before saving to their watchlist.
+    protected void showLoginPromptDialog() {
+        if (!isAdded() || getContext() == null) return;
+        new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.login_prompt_title)
+                .setMessage(R.string.login_prompt_message)
+                .setPositiveButton(R.string.login_prompt_sign_in, (d, w) -> {
+                    startActivity(new Intent(requireContext(), LoginActivity.class));
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
     }
 }

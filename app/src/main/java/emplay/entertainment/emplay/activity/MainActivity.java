@@ -8,8 +8,7 @@ import android.util.Log;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import emplay.entertainment.emplay.auth.AuthManager;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -72,10 +71,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Show the welcome dialog if user isn't log in yet
-        FirebaseUser currentUser =
-                FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
+        // Show the welcome dialog if user isn't logged in yet
+        AuthManager authManager = AuthManager.getInstance(this);
+        if (!authManager.isLoggedIn()) {
             @SuppressLint("InflateParams") View dialogView = getLayoutInflater().inflate(R.layout.dialog_welcome, null);
 
             welcomeDialog = new android.app.Dialog(this);
@@ -96,7 +94,10 @@ public class MainActivity extends AppCompatActivity {
                 finishAfterTransition();
             });
 
-            dialogView.findViewById(R.id.btn_guest).setOnClickListener(v -> welcomeDialog.dismiss());
+            dialogView.findViewById(R.id.btn_guest).setOnClickListener(v -> {
+                AuthManager.getInstance(this).setGuest();
+                welcomeDialog.dismiss();
+            });
 
             welcomeDialog.show();
         }

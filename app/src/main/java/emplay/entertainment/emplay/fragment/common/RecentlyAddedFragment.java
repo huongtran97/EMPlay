@@ -12,15 +12,13 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.RecentlyAddedAdapter;
+import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
@@ -61,9 +59,9 @@ public class RecentlyAddedFragment extends BaseFragment {
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadData() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) return;
-        String userId = user.getUid();
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        if (auth.getAuthType() != AuthManager.AuthType.GOOGLE) return;
+        String userId = auth.getUserId();
 
         new Thread(() -> {
             List<MovieModel> movies = dbHelper.getAllMoviesFromDatabase(userId);
@@ -73,7 +71,7 @@ public class RecentlyAddedFragment extends BaseFragment {
             allItems.addAll(movies);
             allItems.addAll(shows);
             
-            // Default sort: Newest first (by timestamp)
+            // Default sort: Newest first
             Collections.sort(allItems, (a, b) -> {
                 if (a.getSavedTimestamp() == null || b.getSavedTimestamp() == null) return 0;
                 return b.getSavedTimestamp().compareTo(a.getSavedTimestamp());

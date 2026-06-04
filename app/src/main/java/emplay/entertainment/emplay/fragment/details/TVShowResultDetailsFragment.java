@@ -3,7 +3,6 @@ package emplay.entertainment.emplay.fragment.details;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,13 +14,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,6 +31,10 @@ import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.adapter.common.CastAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.SeasonsTVAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.SuggestionTVAdapter;
+import emplay.entertainment.emplay.api.auth.TMDBWatchlistApiService;
+import emplay.entertainment.emplay.api.auth.model.TMDBAccountStatesResponse;
+import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistRequest;
+import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistStatusResponse;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
@@ -44,6 +44,7 @@ import emplay.entertainment.emplay.api.tvshow.TVShowDetailsResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowSimilarResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowsTrailerResponses;
+import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.databinding.SearchResultTvViewBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
@@ -76,9 +77,10 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private CastAdapter castAdapter;
     private SuggestionTVAdapter suggestionTVAdapter;
     private MovieApiService apiService;
-    private FirebaseAuth mAuth;
+    private TMDBWatchlistApiService watchlistApiService;
     private DatabaseHelper databaseHelper;
     private PaginationHelper<TVShowModel> paginationHelper;
+    private boolean tmdbTVInWatchlist = false;
 
     public static TVShowResultDetailsFragment newInstance(int tvId) {
         TVShowResultDetailsFragment fragment = new TVShowResultDetailsFragment();
@@ -94,8 +96,8 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         binding = SearchResultTvViewBinding.inflate(inflater, container, false);
 
         databaseHelper = DatabaseHelper.getInstance(requireContext());
-        mAuth = FirebaseAuth.getInstance();
         apiService = ApiClient.getClient().create(MovieApiService.class);
+        watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
 
         seasonsList = new ArrayList<>();
         castList = new ArrayList<>();
@@ -298,44 +300,120 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     }
 
     private void updateWatchlistButton(TVShowDetailsResponse tvDetails) {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
-        } else {
-            String userId = currentUser.getUid();
-            updateSaveBtnState(userId, tvDetails.getId());
-
-            binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> {
-                if (WatchlistHelper.isTVShowSaved(databaseHelper, userId, tvDetails.getId())) {
-                    WatchlistHelper.removeTVShow(databaseHelper, userId, tvDetails.getId());
-                    updateSaveBtnState(userId, tvDetails.getId());
-                    Toast.makeText(requireContext(), "TV Show removed from library", Toast.LENGTH_SHORT).show();
-                } else {
-                    StringBuilder genresBuilder = new StringBuilder();
-                    if (tvDetails.getGenres() != null) {
-                        for (TVShowDetailsResponse.Genre genre : tvDetails.getGenres()) {
-                            if (genresBuilder.length() > 0) genresBuilder.append(",");
-                            genresBuilder.append(genre.getName());
-                        }
-                    }
-                    String genresString = genresBuilder.toString();
-                    long result = WatchlistHelper.saveTVShow(databaseHelper, userId, tvDetails.getId(),
-                            tvDetails.getName(), tvDetails.getPoster_path(), genresString, tvDetails.getVote_average());
-                    if (result != -1) {
-                        updateSaveBtnState(userId, tvDetails.getId());
-                        Toast.makeText(requireContext(), "TV Show added to library", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to add TV Show", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        switch (auth.getAuthType()) {
+            case NONE:
+            case GUEST:
+                binding.tvInfoCard.icLibrary.setImageResource(R.drawable.ic_watchlist);
+                binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> showLoginPromptDialog());
+                break;
+            case GOOGLE:
+                setupGoogleTVWatchlistButton(auth.getUserId(), tvDetails);
+                break;
+            case TMDB:
+                setupTmdbTVWatchlistButton(auth, tvDetails);
+                break;
         }
     }
 
-    private void updateSaveBtnState(String userId, int id) {
+    private void setupGoogleTVWatchlistButton(String userId, TVShowDetailsResponse tvDetails) {
+        updateSaveBtnIcon(userId, tvDetails.getId());
+        binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> {
+            if (WatchlistHelper.isTVShowSaved(databaseHelper, userId, tvDetails.getId())) {
+                WatchlistHelper.removeTVShow(databaseHelper, userId, tvDetails.getId());
+                updateSaveBtnIcon(userId, tvDetails.getId());
+                Toast.makeText(requireContext(), "TV Show removed from library", Toast.LENGTH_SHORT).show();
+            } else {
+                String genresString = buildGenresString(tvDetails.getGenres());
+                long result = WatchlistHelper.saveTVShow(databaseHelper, userId, tvDetails.getId(),
+                        tvDetails.getName(), tvDetails.getPoster_path(), genresString, tvDetails.getVote_average());
+                if (result != -1) {
+                    updateSaveBtnIcon(userId, tvDetails.getId());
+                    Toast.makeText(requireContext(), "TV Show added to library", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "Failed to add TV Show", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void setupTmdbTVWatchlistButton(AuthManager auth, TVShowDetailsResponse tvDetails) {
+        binding.tvInfoCard.icLibrary.setImageResource(R.drawable.ic_watchlist);
+        binding.tvInfoCard.addToLibraryBtn.setEnabled(false);
+
+        safeEnqueue(watchlistApiService.getAccountStates(
+                TMDBpath.tvAccountStates(tvDetails.getId()), auth.getTMDBSessionId()),
+                new Callback<TMDBAccountStatesResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBAccountStatesResponse> call,
+                                           @NonNull Response<TMDBAccountStatesResponse> response) {
+                        if (binding == null) return;
+                        tmdbTVInWatchlist = response.isSuccessful()
+                                && response.body() != null && response.body().watchlist;
+                        applyTmdbTVWatchlistState(auth, tvDetails.getId());
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBAccountStatesResponse> call, @NonNull Throwable t) {
+                        if (binding != null) binding.tvInfoCard.addToLibraryBtn.setEnabled(true);
+                    }
+                });
+    }
+
+    private void applyTmdbTVWatchlistState(AuthManager auth, int mediaId) {
+        if (binding == null) return;
+        binding.tvInfoCard.icLibrary.setImageResource(tmdbTVInWatchlist ? R.drawable.ic_check : R.drawable.ic_watchlist);
+        binding.tvInfoCard.addToLibraryBtn.setEnabled(true);
+        binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> toggleTmdbTVWatchlist(auth, mediaId));
+    }
+
+    private void toggleTmdbTVWatchlist(AuthManager auth, int mediaId) {
+        binding.tvInfoCard.addToLibraryBtn.setEnabled(false);
+        boolean addToWatchlist = !tmdbTVInWatchlist;
+
+        safeEnqueue(watchlistApiService.updateWatchlist(
+                TMDBpath.accountAddToWatchlist(auth.getTMDBAccountId()),
+                auth.getTMDBSessionId(),
+                new TMDBWatchlistRequest("tv", mediaId, addToWatchlist)),
+                new Callback<TMDBWatchlistStatusResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBWatchlistStatusResponse> call,
+                                           @NonNull Response<TMDBWatchlistStatusResponse> response) {
+                        if (binding == null) return;
+                        if (response.isSuccessful() && response.body() != null) {
+                            tmdbTVInWatchlist = addToWatchlist;
+                            Toast.makeText(requireContext(),
+                                    addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                        }
+                        applyTmdbTVWatchlistState(auth, mediaId);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call, @NonNull Throwable t) {
+                        if (binding != null) {
+                            Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                            applyTmdbTVWatchlistState(auth, mediaId);
+                        }
+                    }
+                });
+    }
+
+    private void updateSaveBtnIcon(String userId, int id) {
         int iconRes = WatchlistHelper.isTVShowSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
         binding.tvInfoCard.icLibrary.setImageResource(iconRes);
+    }
+
+    private String buildGenresString(List<TVShowDetailsResponse.Genre> genres) {
+        if (genres == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (TVShowDetailsResponse.Genre g : genres) {
+            if (sb.length() > 0) sb.append(",");
+            sb.append(g.getName());
+        }
+        return sb.toString();
     }
 
     private void updateTrailerButton(List<TVShowsTrailerResponses.TrailerModel> trailers) {

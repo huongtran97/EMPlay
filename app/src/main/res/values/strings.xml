@@ -101,6 +101,18 @@
     <string name="message_welcomer">Login to save your favourite movies and TV shows, or continue as a guest.</string>
     <string name="login_register">Login / Register</string>
     <string name="guest">Continue as Guest</string>
+    <string name="or">or</string>
+    <string name="continue_with_tmdb">Continue with TMDB</string>
+    <string name="continue_with_google">Continue with Google</string>
+    <string name="tmdb_auth_failed">TMDB sign-in failed. Please try again.</string>
+    <string name="tmdb_auth_cancelled">TMDB sign-in was cancelled.</string>
+    <string name="welcome_tmdb">Welcome, %s!</string>
+    <string name="signing_in_tmdb">Completing sign-in…</string>
+    <string name="login_prompt_title">Sign in to save</string>
+    <string name="login_prompt_message">Create an account or sign in to add titles to your watchlist.</string>
+    <string name="login_prompt_sign_in">Sign in</string>
+    <string name="disconnect_tmdb">Disconnect TMDB</string>
+    <string name="tmdb_account_badge">TMDB Account</string>
 
 
 </resources>

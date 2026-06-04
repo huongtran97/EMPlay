@@ -40,5 +40,22 @@
         </activity>
         <activity android:name=".activity.AboutActivity"
             android:theme="@style/HiddenTitleTheme"/>
+
+        <!-- Receives the deep-link redirect after TMDB OAuth approval -->
+        <activity
+            android:name=".activity.TMDBAuthActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:theme="@style/HiddenTitleTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="emplay"
+                    android:host="auth"
+                    android:path="/tmdb" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

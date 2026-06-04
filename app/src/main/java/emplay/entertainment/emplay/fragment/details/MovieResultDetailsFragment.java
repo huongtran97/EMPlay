@@ -14,13 +14,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.bumptech.glide.Glide;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -33,8 +30,11 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.adapter.common.CastAdapter;
 import emplay.entertainment.emplay.adapter.movie.SuggestionMovieAdapter;
+import emplay.entertainment.emplay.api.auth.TMDBWatchlistApiService;
+import emplay.entertainment.emplay.api.auth.model.TMDBAccountStatesResponse;
+import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistRequest;
+import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistStatusResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
-import emplay.entertainment.emplay.api.tvshow.TVShowsTrailerResponses;
 import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -44,6 +44,7 @@ import emplay.entertainment.emplay.api.movie.MovieDetailsResponse;
 import emplay.entertainment.emplay.api.movie.MovieSimilarResponse;
 import emplay.entertainment.emplay.api.movie.MoviesTrailerResponses;
 import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.databinding.SearchResultMovieViewBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
@@ -70,10 +71,11 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private CastAdapter castAdapter;
     private SuggestionMovieAdapter suggestionMovieAdapter;
     private MovieApiService apiService;
+    private TMDBWatchlistApiService watchlistApiService;
     private DatabaseHelper databaseHelper;
-    private FirebaseAuth mAuth;
     private Map<String, RegionProvidersModel> watchProviderResults;
     private PaginationHelper<MovieModel> paginationHelper;
+    private boolean tmdbMovieInWatchlist = false;
 
     public static MovieResultDetailsFragment newInstance(int movieId) {
         MovieResultDetailsFragment fragment = new MovieResultDetailsFragment();
@@ -89,8 +91,8 @@ public class MovieResultDetailsFragment extends BaseFragment {
         binding = SearchResultMovieViewBinding.inflate(inflater, container, false);
 
         databaseHelper = DatabaseHelper.getInstance(requireActivity());
-        mAuth = FirebaseAuth.getInstance();
         apiService = ApiClient.getClient().create(MovieApiService.class);
+        watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
 
         castAdapter = new CastAdapter(castList, requireActivity(), cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
         suggestionMovieAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(), movie -> {
@@ -266,44 +268,120 @@ public class MovieResultDetailsFragment extends BaseFragment {
     }
 
     private void updateWatchlistButton(MovieDetailsResponse movieDetails) {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) {
-            binding.movieInfo.addToLibraryBtn.setOnClickListener(v ->
-                    Toast.makeText(requireContext(), "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
-        } else {
-            String userId = currentUser.getUid();
-            updateSaveBtnState(userId, movieDetails.getId());
-
-            binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> {
-                if (WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId())) {
-                    WatchlistHelper.removeMovie(databaseHelper, userId, movieDetails.getId());
-                    updateSaveBtnState(userId, movieDetails.getId());
-                    Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
-                } else {
-                    StringBuilder genresBuilder = new StringBuilder();
-                    if (movieDetails.getGenres() != null) {
-                        for (MovieDetailsResponse.Genre genre : movieDetails.getGenres()) {
-                            if (genresBuilder.length() > 0) genresBuilder.append(",");
-                            genresBuilder.append(genre.getName());
-                        }
-                    }
-                    String genresString = genresBuilder.toString();
-                    long result = WatchlistHelper.saveMovie(databaseHelper, userId, movieDetails.getId(), 
-                            movieDetails.getTitle(), movieDetails.getPosterPath(), genresString, movieDetails.getVoteAverage());
-                    if (result != -1) {
-                        updateSaveBtnState(userId, movieDetails.getId());
-                        Toast.makeText(requireContext(), "Movie added to library", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(requireContext(), "Failed to add Movie", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        switch (auth.getAuthType()) {
+            case NONE:
+            case GUEST:
+                binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
+                binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> showLoginPromptDialog());
+                break;
+            case GOOGLE:
+                setupGoogleMovieWatchlistButton(auth.getUserId(), movieDetails);
+                break;
+            case TMDB:
+                setupTmdbMovieWatchlistButton(auth, movieDetails);
+                break;
         }
     }
 
-    private void updateSaveBtnState(String userId, int id) {
+    private void setupGoogleMovieWatchlistButton(String userId, MovieDetailsResponse movieDetails) {
+        updateSaveBtnIcon(userId, movieDetails.getId());
+        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> {
+            if (WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId())) {
+                WatchlistHelper.removeMovie(databaseHelper, userId, movieDetails.getId());
+                updateSaveBtnIcon(userId, movieDetails.getId());
+                Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
+            } else {
+                String genresString = buildGenresString(movieDetails.getGenres());
+                long result = WatchlistHelper.saveMovie(databaseHelper, userId, movieDetails.getId(),
+                        movieDetails.getTitle(), movieDetails.getPosterPath(), genresString, movieDetails.getVoteAverage());
+                if (result != -1) {
+                    updateSaveBtnIcon(userId, movieDetails.getId());
+                    Toast.makeText(requireContext(), "Movie added to library", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(requireContext(), "Failed to add Movie", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    private void setupTmdbMovieWatchlistButton(AuthManager auth, MovieDetailsResponse movieDetails) {
+        binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
+        binding.movieInfo.addToLibraryBtn.setEnabled(false);
+
+        safeEnqueue(watchlistApiService.getAccountStates(
+                TMDBpath.movieAccountStates(movieDetails.getId()), auth.getTMDBSessionId()),
+                new Callback<TMDBAccountStatesResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBAccountStatesResponse> call,
+                                           @NonNull Response<TMDBAccountStatesResponse> response) {
+                        if (binding == null) return;
+                        tmdbMovieInWatchlist = response.isSuccessful()
+                                && response.body() != null && response.body().watchlist;
+                        applyTmdbMovieWatchlistState(auth, movieDetails.getId());
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBAccountStatesResponse> call, @NonNull Throwable t) {
+                        if (binding != null) binding.movieInfo.addToLibraryBtn.setEnabled(true);
+                    }
+                });
+    }
+
+    private void applyTmdbMovieWatchlistState(AuthManager auth, int mediaId) {
+        if (binding == null) return;
+        binding.movieInfo.icLibrary.setImageResource(tmdbMovieInWatchlist ? R.drawable.ic_check : R.drawable.ic_watchlist);
+        binding.movieInfo.addToLibraryBtn.setEnabled(true);
+        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> toggleTmdbMovieWatchlist(auth, mediaId));
+    }
+
+    private void toggleTmdbMovieWatchlist(AuthManager auth, int mediaId) {
+        binding.movieInfo.addToLibraryBtn.setEnabled(false);
+        boolean addToWatchlist = !tmdbMovieInWatchlist;
+
+        safeEnqueue(watchlistApiService.updateWatchlist(
+                TMDBpath.accountAddToWatchlist(auth.getTMDBAccountId()),
+                auth.getTMDBSessionId(),
+                new TMDBWatchlistRequest("movie", mediaId, addToWatchlist)),
+                new Callback<TMDBWatchlistStatusResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBWatchlistStatusResponse> call,
+                                           @NonNull Response<TMDBWatchlistStatusResponse> response) {
+                        if (binding == null) return;
+                        if (response.isSuccessful() && response.body() != null) {
+                            tmdbMovieInWatchlist = addToWatchlist;
+                            Toast.makeText(requireContext(),
+                                    addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                        }
+                        applyTmdbMovieWatchlistState(auth, mediaId);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call, @NonNull Throwable t) {
+                        if (binding != null) {
+                            Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                            applyTmdbMovieWatchlistState(auth, mediaId);
+                        }
+                    }
+                });
+    }
+
+    private void updateSaveBtnIcon(String userId, int id) {
         int iconRes = WatchlistHelper.isMovieSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
         binding.movieInfo.icLibrary.setImageResource(iconRes);
+    }
+
+    private String buildGenresString(List<MovieDetailsResponse.Genre> genres) {
+        if (genres == null) return "";
+        StringBuilder sb = new StringBuilder();
+        for (MovieDetailsResponse.Genre g : genres) {
+            if (sb.length() > 0) sb.append(",");
+            sb.append(g.getName());
+        }
+        return sb.toString();
     }
 
     private void updateTrailerButton(List<MoviesTrailerResponses.TrailerModel> trailers) {

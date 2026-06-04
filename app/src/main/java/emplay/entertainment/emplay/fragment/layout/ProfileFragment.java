@@ -3,11 +3,10 @@ package emplay.entertainment.emplay.fragment.layout;
 import static android.content.Context.MODE_PRIVATE;
 
 import android.annotation.SuppressLint;
-import android.content.res.ColorStateList;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -35,36 +34,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.activity.AboutActivity;
-import emplay.entertainment.emplay.fragment.common.RecentlyAddedFragment;
-import emplay.entertainment.emplay.fragment.common.BaseFragment;
-import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
-import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
-import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.activity.LoginActivity;
 import emplay.entertainment.emplay.activity.MainActivity;
+import emplay.entertainment.emplay.adapter.common.RecentlySavedAdapter;
+import emplay.entertainment.emplay.api.auth.TMDBWatchlistApiService;
+import emplay.entertainment.emplay.api.auth.model.TMDBMovieWatchlistResponse;
+import emplay.entertainment.emplay.api.auth.model.TMDBTVWatchlistResponse;
+import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
+import emplay.entertainment.emplay.fragment.common.BaseFragment;
+import emplay.entertainment.emplay.fragment.common.RecentlyAddedFragment;
+import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
+import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.common.MediaItem;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
-import emplay.entertainment.emplay.adapter.common.RecentlySavedAdapter;
+import emplay.entertainment.emplay.tool.BadgeHelper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-/**
- *  Profile screen — shows the current user's name, avatar, and their liked movies/TV shows.
- *  Liked items are read from SQLite on a background thread so the UI doesn't freeze.
- *  Guest users see a "Login / Register" prompt instead of real data.
- */
 public class ProfileFragment extends BaseFragment {
     private static final String ARG_ID = "arg_id";
     private FirebaseAuth mAuth;
     private DatabaseHelper databaseHelper;
+    private TMDBWatchlistApiService watchlistApiService;
     private CircleImageView civAvatar;
     private TextView tvProfileName, tvProfileEmail, tvMemberSince;
     private TextView tvMoviesCount, tvTvShowsCount, tvTopGenre;
     private LinearLayout llTasteProfile;
+    private View llTasteProfileHeader;
     private final List<MediaItem> recentlySavedList = new ArrayList<>();
     private RecentlySavedAdapter recentlySavedAdapter;
     private AlertDialog deleteAccountDialog;
@@ -82,11 +88,13 @@ public class ProfileFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         databaseHelper = DatabaseHelper.getInstance(requireContext());
         mAuth = FirebaseAuth.getInstance();
+        watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.customer_profile_view, container, false);
 
         civAvatar = view.findViewById(R.id.civAvatar);
@@ -96,16 +104,10 @@ public class ProfileFragment extends BaseFragment {
         tvMoviesCount = view.findViewById(R.id.tvMoviesCount);
         tvTvShowsCount = view.findViewById(R.id.tvTvShowsCount);
         tvTopGenre = view.findViewById(R.id.tvTopGenre);
-        
         llTasteProfile = view.findViewById(R.id.llTasteProfile);
+        llTasteProfileHeader = view.findViewById(R.id.llTasteProfileHeader);
+
         RecyclerView rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
-
-        TextView tvRecentlySavedSeeAll = view.findViewById(R.id.tvRecentlySavedSeeAll);
-        if (tvRecentlySavedSeeAll != null) {
-            tvRecentlySavedSeeAll.setPaintFlags(tvRecentlySavedSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            tvRecentlySavedSeeAll.setOnClickListener(v -> navigateTo(new RecentlyAddedFragment()));
-        }
-
         recentlySavedAdapter = new RecentlySavedAdapter(requireContext(), recentlySavedList, this::onItemClicked);
         rvRecentlySaved.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         rvRecentlySaved.setAdapter(recentlySavedAdapter);
@@ -113,56 +115,7 @@ public class ProfileFragment extends BaseFragment {
         view.findViewById(R.id.llAbout).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), AboutActivity.class)));
 
-        view.findViewById(R.id.llLogout).setOnClickListener(v -> {
-            if (mAuth.getCurrentUser() != null) {
-                mAuth.signOut();
-                Intent intent = new Intent(requireContext(), MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            } else {
-                startActivity(new Intent(requireContext(), LoginActivity.class));
-            }
-        });
-
-        view.findViewById(R.id.llDeleteAccount).setOnClickListener(v -> {
-            FirebaseUser currentUser = mAuth.getCurrentUser();
-            if (currentUser == null) return;
-            
-            deleteAccountDialog = new AlertDialog.Builder(requireContext())
-                    .setTitle("Delete Account")
-                    .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        String email = currentUser.getEmail();
-                        currentUser.delete().addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                if (email != null) {
-                                    databaseHelper.deleteUserProfile(email);
-                                }
-                                if (isAdded()) {
-                                    Toast.makeText(requireContext(), "Account deleted successfully", Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(requireContext(), LoginActivity.class));
-                                    requireActivity().finish();
-                                }
-                            } else {
-                                if (isAdded()) {
-                                    Toast.makeText(requireContext(), "Failed to delete account", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
-        });
-
         return view;
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (deleteAccountDialog != null && deleteAccountDialog.isShowing()) {
-            deleteAccountDialog.dismiss();
-        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -170,45 +123,71 @@ public class ProfileFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        FirebaseUser user = mAuth.getCurrentUser();
-
+        AuthManager auth = AuthManager.getInstance(requireContext());
         TextView tvLogoutLabel = view.findViewById(R.id.tvLogoutLabel);
-        tvLogoutLabel.setText(user != null ? R.string.log_out : R.string.log_in);
+        TextView tvRecentlySavedSeeAll = view.findViewById(R.id.tvRecentlySavedSeeAll);
 
-        if (user != null) {
-            String username = user.getDisplayName();
-            String email = user.getEmail();
-            Uri photoUrl = user.getPhotoUrl();
+        switch (auth.getAuthType()) {
+            case GOOGLE:
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user == null) break;
+                tvLogoutLabel.setText(R.string.log_out);
+                bindGoogleProfile(user);
+                setupGoogleLogout();
+                setupDeleteAccount(view, user);
+                if (tvRecentlySavedSeeAll != null) {
+                    tvRecentlySavedSeeAll.setPaintFlags(
+                            tvRecentlySavedSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                    tvRecentlySavedSeeAll.setOnClickListener(v -> navigateTo(new RecentlyAddedFragment()));
+                }
+                loadGoogleUserData(user.getUid());
+                break;
 
-            tvProfileName.setText(username != null ? username : "No username set");
-            tvProfileEmail.setText(email != null ? email : "No email set");
+            case TMDB:
+                tvLogoutLabel.setText(R.string.disconnect_tmdb);
+                bindTmdbProfile(auth);
+                setupTmdbLogout(auth);
+                view.findViewById(R.id.dividerDeleteAccount).setVisibility(View.GONE);
+                view.findViewById(R.id.llDeleteAccount).setVisibility(View.GONE);
+                // Taste profile needs genre names not available in watchlist responses
+                llTasteProfileHeader.setVisibility(View.GONE);
+                llTasteProfile.setVisibility(View.GONE);
+                if (tvRecentlySavedSeeAll != null) tvRecentlySavedSeeAll.setVisibility(View.GONE);
+                loadTmdbUserData(auth);
+                break;
 
-            if (photoUrl != null) {
-                Glide.with(this)
-                        .load(photoUrl)
-                        .circleCrop()
-                        .placeholder(R.drawable.avatar)
-                        .into(civAvatar);
-            } else {
-                civAvatar.setImageResource(R.drawable.avatar);
-            }
-
-            // Show join date immediately if available
-            displayJoinDate();
+            default: // NONE / GUEST
+                tvLogoutLabel.setText(R.string.log_in);
+                bindGuestProfile();
+                view.findViewById(R.id.llLogout).setOnClickListener(v ->
+                        startActivity(new Intent(requireContext(), LoginActivity.class)));
+                view.findViewById(R.id.dividerDeleteAccount).setVisibility(View.GONE);
+                view.findViewById(R.id.llDeleteAccount).setVisibility(View.GONE);
+                if (tvRecentlySavedSeeAll != null) tvRecentlySavedSeeAll.setVisibility(View.GONE);
+                break;
         }
-        else {
-            tvProfileName.setText("Hi there!");
-            tvProfileEmail.setText("Do you want to login?");
-            tvMemberSince.setText("");
-            view.findViewById(R.id.dividerDeleteAccount).setVisibility(View.GONE);
-            view.findViewById(R.id.llDeleteAccount).setVisibility(View.GONE);
-        }
+    }
 
-        loadUserData();
+    // Google user
+
+    private void bindGoogleProfile(FirebaseUser user) {
+        tvProfileName.setText(user.getDisplayName() != null ? user.getDisplayName() : "User");
+        tvProfileEmail.setText(user.getEmail() != null ? user.getEmail() : "");
+
+        if (user.getPhotoUrl() != null) {
+            Glide.with(this)
+                    .load(user.getPhotoUrl())
+                    .circleCrop()
+                    .placeholder(R.drawable.avatar)
+                    .into(civAvatar);
+        } else {
+            civAvatar.setImageResource(R.drawable.avatar);
+        }
+        displayGoogleJoinDate();
     }
 
     @SuppressLint("SetTextI18n")
-    private void displayJoinDate() {
+    private void displayGoogleJoinDate() {
         if (getContext() == null) return;
         SharedPreferences prefs = getContext().getSharedPreferences("app_prefs", MODE_PRIVATE);
         long joinDate = prefs.getLong("join_date", -1);
@@ -221,38 +200,179 @@ public class ProfileFragment extends BaseFragment {
         }
     }
 
-    private void loadUserData() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) return;
-        String userId = user.getUid();
-
+    private void loadGoogleUserData(String userId) {
         new Thread(() -> {
-            List<MovieModel> likedMovies = databaseHelper.getAllMoviesFromDatabase(userId);
-            List<TVShowModel> likedTVShows = databaseHelper.getSavedTVShows(userId);
-            
+            List<MovieModel> movies = databaseHelper.getAllMoviesFromDatabase(userId);
+            List<TVShowModel> tvShows = databaseHelper.getSavedTVShows(userId);
+
             List<MediaItem> combined = new ArrayList<>();
-            combined.addAll(likedMovies);
-            combined.addAll(likedTVShows);
-            
-            // Sort by recent
+            combined.addAll(movies);
+            combined.addAll(tvShows);
             Collections.reverse(combined);
 
             safeRunOnUiThread(() -> {
-                updateStats(likedMovies, likedTVShows);
+                tvMoviesCount.setText(String.valueOf(movies.size()));
+                tvTvShowsCount.setText(String.valueOf(tvShows.size()));
                 recentlySavedAdapter.updateData(combined);
-                buildTasteProfile(likedMovies, likedTVShows);
+                buildTasteProfile(movies, tvShows);
+                displayGoogleJoinDate();
             });
         }).start();
     }
 
-    private void updateStats(List<MovieModel> movies, List<TVShowModel> tvShows) {
-        tvMoviesCount.setText(String.valueOf(movies.size()));
-        tvTvShowsCount.setText(String.valueOf(tvShows.size()));
-        displayJoinDate();
+    private void setupGoogleLogout() {
+        requireView().findViewById(R.id.llLogout).setOnClickListener(v -> {
+            AuthManager.getInstance(requireContext()).signOut();
+            Intent intent = new Intent(requireContext(), MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        });
     }
 
+    private void setupDeleteAccount(View view, FirebaseUser user) {
+        view.findViewById(R.id.llDeleteAccount).setOnClickListener(v -> {
+            deleteAccountDialog = new AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Account")
+                    .setMessage("Are you sure you want to delete your account? This action cannot be undone.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        String email = user.getEmail();
+                        user.delete().addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                AuthManager.getInstance(requireContext()).signOut();
+                                if (email != null) databaseHelper.deleteUserProfile(email);
+                                if (isAdded()) {
+                                    Toast.makeText(requireContext(),
+                                            "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                    startActivity(new Intent(requireContext(), LoginActivity.class));
+                                    requireActivity().finish();
+                                }
+                            } else if (isAdded()) {
+                                Toast.makeText(requireContext(),
+                                        "Failed to delete account", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        });
+    }
+
+    //  TMDB user
+
+    private void bindTmdbProfile(AuthManager auth) {
+        String username = auth.getTMDBUsername();
+        tvProfileName.setText(!username.isEmpty() ? username : "TMDB User");
+        tvProfileEmail.setText( username);
+        tvProfileEmail.setTextColor(0xFF01B4E4);
+        tvProfileEmail.setVisibility(View.VISIBLE);
+        tvMemberSince.setText(R.string.tmdb_account_badge);
+        civAvatar.setImageResource(R.drawable.avatar);
+    }
+
+    private void loadTmdbUserData(AuthManager auth) {
+        String accountId = auth.getTMDBAccountId();
+        String sessionId = auth.getTMDBSessionId();
+        if (accountId == null || sessionId == null) return;
+
+        AtomicInteger pending = new AtomicInteger(2);
+        List<MediaItem> recentMovies = new ArrayList<>();
+        List<MediaItem> recentTV = new ArrayList<>();
+        int[] counts = {0, 0}; // [movies, tv]
+
+        watchlistApiService.getWatchlistMovies(
+                TMDBpath.accountWatchlistMovies(accountId), sessionId, 1)
+                .enqueue(new Callback<TMDBMovieWatchlistResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBMovieWatchlistResponse> call,
+                                           @NonNull Response<TMDBMovieWatchlistResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            counts[0] = response.body().totalResults;
+                            if (response.body().results != null) recentMovies.addAll(response.body().results);
+                        }
+                        if (pending.decrementAndGet() == 0) onTmdbDataReady(counts, recentMovies, recentTV);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBMovieWatchlistResponse> call, @NonNull Throwable t) {
+                        if (pending.decrementAndGet() == 0) onTmdbDataReady(counts, recentMovies, recentTV);
+                    }
+                });
+
+        watchlistApiService.getWatchlistTV(
+                TMDBpath.accountWatchlistTVShows(accountId), sessionId, 1)
+                .enqueue(new Callback<TMDBTVWatchlistResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBTVWatchlistResponse> call,
+                                           @NonNull Response<TMDBTVWatchlistResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            counts[1] = response.body().totalResults;
+                            if (response.body().results != null) recentTV.addAll(response.body().results);
+                        }
+                        if (pending.decrementAndGet() == 0) onTmdbDataReady(counts, recentMovies, recentTV);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBTVWatchlistResponse> call, @NonNull Throwable t) {
+                        if (pending.decrementAndGet() == 0) onTmdbDataReady(counts, recentMovies, recentTV);
+                    }
+                });
+    }
+
+    private void onTmdbDataReady(int[] counts, List<MediaItem> movies, List<MediaItem> tv) {
+        List<MediaItem> combined = new ArrayList<>();
+        combined.addAll(movies);
+        combined.addAll(tv);
+        safeRunOnUiThread(() -> {
+            tvMoviesCount.setText(String.valueOf(counts[0]));
+            tvTvShowsCount.setText(String.valueOf(counts[1]));
+            tvTopGenre.setText("—");
+            recentlySavedAdapter.updateData(combined);
+        });
+    }
+
+    private void setupTmdbLogout(AuthManager auth) {
+        requireView().findViewById(R.id.llLogout).setOnClickListener(v ->
+                new AlertDialog.Builder(requireContext())
+                        .setTitle(R.string.disconnect_tmdb)
+                        .setMessage("You will be signed out of your TMDB account.")
+                        .setPositiveButton(R.string.disconnect_tmdb, (d, w) -> {
+                            auth.signOut();
+                            Intent intent = new Intent(requireContext(), MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        })
+                        .setNegativeButton(android.R.string.cancel, null)
+                        .show());
+    }
+
+    // Guest session
+
+    private void bindGuestProfile() {
+        tvProfileName.setText("Hi there!");
+        tvProfileEmail.setText("Do you want to login?");
+        tvMemberSince.setText("");
+    }
+
+    //  Taste profile (Google only)
+
     private void buildTasteProfile(List<MovieModel> movies, List<TVShowModel> tvShows) {
-        Map<String, Integer> genreCounts = getStringIntegerMap(movies, tvShows);
+        Map<String, Integer> genreCounts = new HashMap<>();
+        for (MovieModel m : movies) {
+            if (m.getGenres() != null) {
+                for (String g : m.getGenres()) {
+                    Integer c = genreCounts.get(g);
+                    genreCounts.put(g, (c == null ? 0 : c) + 1);
+                }
+            }
+        }
+        for (TVShowModel t : tvShows) {
+            if (t.getGenres() != null) {
+                for (String g : t.getGenres()) {
+                    Integer c = genreCounts.get(g);
+                    genreCounts.put(g, (c == null ? 0 : c) + 1);
+                }
+            }
+        }
 
         if (genreCounts.isEmpty()) {
             tvTopGenre.setText("—");
@@ -260,19 +380,18 @@ public class ProfileFragment extends BaseFragment {
             return;
         }
 
-        List<Map.Entry<String, Integer>> sortedGenres = new ArrayList<>(genreCounts.entrySet());
+        List<Map.Entry<String, Integer>> sorted = new ArrayList<>(genreCounts.entrySet());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            sortedGenres.sort((a, b) -> b.getValue().compareTo(a.getValue()));
+            sorted.sort((a, b) -> b.getValue().compareTo(a.getValue()));
         }
-
-        tvTopGenre.setText(sortedGenres.get(0).getKey());
+        tvTopGenre.setText(sorted.get(0).getKey());
 
         llTasteProfile.removeAllViews();
-        int max = sortedGenres.get(0).getValue();
-        int displayCount = Math.min(sortedGenres.size(), 4);
+        int max = sorted.get(0).getValue();
+        int displayCount = Math.min(sorted.size(), 4);
 
         for (int i = 0; i < displayCount; i++) {
-            Map.Entry<String, Integer> entry = sortedGenres.get(i);
+            Map.Entry<String, Integer> entry = sorted.get(i);
             View row = getLayoutInflater().inflate(R.layout.taste_row, llTasteProfile, false);
             TextView name = row.findViewById(R.id.tvGenreName);
             TextView count = row.findViewById(R.id.tvGenreCount);
@@ -281,51 +400,37 @@ public class ProfileFragment extends BaseFragment {
             name.setText(entry.getKey());
             count.setText(String.valueOf(entry.getValue()));
 
-            int genreColor = BadgeHelper.getGenreColorByName(requireContext(), entry.getKey());
-            bar.setBackgroundTintList(ColorStateList.valueOf(genreColor));
+            int color = BadgeHelper.getGenreColorByName(requireContext(), entry.getKey());
+            bar.setBackgroundTintList(ColorStateList.valueOf(color));
 
-            // Set bar width based on ratio
             float ratio = (float) entry.getValue() / max;
             row.post(() -> {
-                int fullWidth = bar.getParent() instanceof View ? ((View)bar.getParent()).getWidth() : 0;
+                int fullWidth = bar.getParent() instanceof View ? ((View) bar.getParent()).getWidth() : 0;
                 if (fullWidth > 0) {
                     ViewGroup.LayoutParams lp = bar.getLayoutParams();
                     lp.width = (int) (fullWidth * ratio);
                     bar.setLayoutParams(lp);
                 }
             });
-
             llTasteProfile.addView(row);
         }
     }
 
-    @NonNull
-    private static Map<String, Integer> getStringIntegerMap(List<MovieModel> movies, List<TVShowModel> tvShows) {
-        Map<String, Integer> genreCounts = new HashMap<>();
-        for (MovieModel m : movies) {
-            if (m.getGenres() != null) {
-                for (String g : m.getGenres()) {
-                    Integer current = genreCounts.get(g);
-                    genreCounts.put(g, (current == null ? 0 : current) + 1);
-                }
-            }
-        }
-        for (TVShowModel t : tvShows) {
-            if (t.getGenres() != null) {
-                for (String g : t.getGenres()) {
-                    Integer current = genreCounts.get(g);
-                    genreCounts.put(g, (current == null ? 0 : current) + 1);
-                }
-            }
-        }
-        return genreCounts;
-    }
+    // Shared
 
     private void onItemClicked(Object item) {
         if (item instanceof MovieModel) {
             navigateTo(MovieResultDetailsFragment.newInstance(((MovieModel) item).getMovieId()));
         } else if (item instanceof TVShowModel) {
             navigateTo(TVShowResultDetailsFragment.newInstance(((TVShowModel) item).getTVShowId()));
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (deleteAccountDialog != null && deleteAccountDialog.isShowing()) {
+            deleteAccountDialog.dismiss();
         }
     }
 }

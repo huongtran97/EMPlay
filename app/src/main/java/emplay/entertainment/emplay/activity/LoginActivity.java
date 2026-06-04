@@ -2,6 +2,7 @@ package emplay.entertainment.emplay.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
 import androidx.credentials.Credential;
 import androidx.credentials.CredentialManager;
@@ -26,7 +28,14 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.auth.TMDBAuthApiService;
+import emplay.entertainment.emplay.api.auth.model.TMDBRequestTokenResponse;
+import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -45,15 +54,17 @@ public class LoginActivity extends AppCompatActivity {
         credentialManager = CredentialManager.create(this);
 
         findViewById(R.id.btn_google_sign_in).setOnClickListener(v -> startGoogleSignIn());
-        findViewById(R.id.btn_guest_continue).setOnClickListener(v -> navigateToMainActivity());
+        findViewById(R.id.btn_tmdb_sign_in).setOnClickListener(v -> startTmdbSignIn());
+        findViewById(R.id.btn_guest_continue).setOnClickListener(v -> {
+            AuthManager.getInstance(this).setGuest();
+            navigateToMainActivity();
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        // Skip the login screen if the user is already signed in.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
+        if (AuthManager.getInstance(this).isLoggedIn()) {
             navigateToMainActivity();
         }
     }
@@ -129,6 +140,45 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(this, "Authentication failed. Please try again.", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    private void startTmdbSignIn() {
+        progressBar.setVisibility(View.VISIBLE);
+        TMDBAuthApiService authService = ApiClient.getClient().create(TMDBAuthApiService.class);
+        authService.getRequestToken()
+                .enqueue(new Callback<TMDBRequestTokenResponse>() {
+                    @Override
+                    public void onResponse(Call<TMDBRequestTokenResponse> call,
+                                           Response<TMDBRequestTokenResponse> response) {
+                        progressBar.setVisibility(View.GONE);
+                        if (response.isSuccessful() && response.body() != null
+                                && response.body().success) {
+                            openTmdbAuthPage(response.body().requestToken);
+                        } else {
+                            Log.e("LoginActivity", "Request token failed: " + response.code());
+                            Toast.makeText(LoginActivity.this,
+                                    getString(R.string.tmdb_auth_failed), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<TMDBRequestTokenResponse> call, Throwable t) {
+                        progressBar.setVisibility(View.GONE);
+                        Log.e("LoginActivity", "Request token network error", t);
+                        Toast.makeText(LoginActivity.this,
+                                getString(R.string.tmdb_auth_failed), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void openTmdbAuthPage(String requestToken) {
+        String redirectUri = "emplay://auth/tmdb";
+        String authUrl = "https://www.themoviedb.org/authenticate/" + requestToken
+                + "?redirect_to=" + Uri.encode(redirectUri);
+        new CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+                .launchUrl(this, Uri.parse(authUrl));
     }
 
     private void navigateToMainActivity() {
