@@ -79,8 +79,8 @@ public class SeasonDetailFragment extends BaseFragment {
         episodesRecyclerView = view.findViewById(R.id.season_detail_episodes_recyclerview);
 
         episodeList = new ArrayList<>();
-        episodeAdapter = new EpisodeAdapter(episodeList, getContext());
-        episodesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        episodeAdapter = new EpisodeAdapter(episodeList, requireContext());
+        episodesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         episodesRecyclerView.setAdapter(episodeAdapter);
         episodesRecyclerView.setNestedScrollingEnabled(false);
 

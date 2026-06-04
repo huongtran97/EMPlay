@@ -51,11 +51,16 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
         holder.tvTitle.setText(movie.getTitle());
         
         String releaseDateStr = movie.getReleaseDate();
-        String year = (releaseDateStr != null && releaseDateStr.length() >= 4) 
+        String year = (releaseDateStr != null && releaseDateStr.length() >= 4)
                 ? releaseDateStr.substring(0, 4) : "";
-        holder.tvMeta.setText(year + " • " + movie.getOriginalLanguage().toUpperCase(Locale.ROOT));
+        String lang = movie.getOriginalLanguage() != null
+                ? movie.getOriginalLanguage().toUpperCase(Locale.ROOT) : "";
+        String rel = BadgeHelper.formatRelativeDate(releaseDateStr);
+        String meta = year + " · " + lang;
+        if (!rel.isEmpty()) meta += " · " + rel;
+        holder.tvMeta.setText(meta);
 
-        BadgeHelper.applyWhatsNewBadge(holder.tvBadge, releaseDateStr);
+        BadgeHelper.applyWhatsNewBadge(holder.tvBadge, releaseDateStr, 14);
 
         Glide.with(context)
                 .load(ImageUrl.THUMBNAIL + movie.getPosterPath())

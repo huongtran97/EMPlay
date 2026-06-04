@@ -54,7 +54,6 @@ public class WatchlistFragment extends Fragment {
         tvItemCount = view.findViewById(R.id.tvItemCount);
         tvSortLabel = view.findViewById(R.id.tvSortLabel);
         llSortBtn = view.findViewById(R.id.llSortBtn);
-
         setupViewPager();
         viewPager.setCurrentItem(initialTab, false);
 

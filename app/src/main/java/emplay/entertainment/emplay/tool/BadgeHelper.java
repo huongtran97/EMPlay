@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.view.View;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
@@ -19,21 +20,80 @@ import java.util.Locale;
 public class BadgeHelper {
 
     /**
-     * Applies "NEW" (released within last 30 days) or "SOON" (not yet released / older)
-     * styling to a badge TextView. dateStr must be in "yyyy-MM-dd" format.
+     * @param newThresholdDays past days that still count as "NEW" (14 for movies, 7 for TV).
+     * Rules:
+     *  - Released within newThresholdDays → "NEW" (blue)
+     *  - Future, ≤ 30 days away           → "in X day(s)" (amber)
+     *  - Future, > 30 days away           → "in X month(s)" (amber)
+     *  - Older than newThresholdDays      → badge hidden
      */
     @SuppressLint("SetTextI18n")
-    public static void applyWhatsNewBadge(TextView badge, String dateStr) {
-        boolean isNew = isIsNew(dateStr);
+    public static void applyWhatsNewBadge(TextView badge, String dateStr, int newThresholdDays) {
+        if (dateStr == null || dateStr.isEmpty()) {
+            badge.setVisibility(View.GONE);
+            return;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(dateStr);
+            if (date == null) { badge.setVisibility(View.GONE); return; }
 
-        if (isNew) {
-            badge.setText("NEW");
-            badge.setTextColor(Color.parseColor("#5BA3D9"));
-            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A4A")));
-        } else {
-            badge.setText("SOON");
-            badge.setTextColor(Color.parseColor("#C98A1A"));
-            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+            long diffMs = new Date().getTime() - date.getTime();
+
+            if (diffMs < 0) {
+                // Future release — show countdown
+                long daysUntil = (long) Math.ceil((double) (-diffMs) / (1000L * 60 * 60 * 24));
+                badge.setVisibility(View.VISIBLE);
+                if (daysUntil <= 30) {
+                    badge.setText("In " + daysUntil + (daysUntil == 1 ? " day" : " days"));
+                } else {
+                    long months = Math.max(1, daysUntil / 30);
+                    badge.setText("In " + months + (months == 1 ? " month" : " months"));
+                }
+                badge.setTextColor(Color.parseColor("#C98A1A"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+            } else if (diffMs <= (long) newThresholdDays * 24 * 60 * 60 * 1000) {
+                // Released within threshold — "NEW"
+                badge.setVisibility(View.VISIBLE);
+                badge.setText("NEW");
+                badge.setTextColor(Color.parseColor("#5BA3D9"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A4A")));
+            } else {
+                // Past newThresholdDays but still within filter window — "Released"
+                badge.setVisibility(View.VISIBLE);
+                badge.setText("RELEASED");
+                badge.setTextColor(Color.parseColor("#AAAAAA"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#1E1E1E")));
+            }
+        } catch (ParseException ignored) {
+            badge.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * TV show badge — always visible.
+     *  < 30 days   → "New"         (blue)
+     *  30–365 days → "New season"  (green)
+     *  > 365 days  → "New episode" (amber)
+     */
+    @SuppressLint("SetTextI18n")
+    public static void applyTVShowBadge(TextView badge, String firstAirDate) {
+        badge.setVisibility(View.VISIBLE);
+        String type = getTVShowType(firstAirDate);
+        badge.setText(type.equals("New TV show") ? "New" : type);
+        switch (type) {
+            case "New TV show":
+                badge.setTextColor(Color.parseColor("#5BA3D9"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A4A")));
+                break;
+            case "SEASON":
+                badge.setTextColor(Color.parseColor("#4DB87A"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A1A")));
+                break;
+            default:
+                badge.setTextColor(Color.parseColor("#C98A1A"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+                break;
         }
     }
 
@@ -45,6 +105,63 @@ public class BadgeHelper {
         badge.setBackgroundTintList(ContextCompat.getColorStateList(context,
                 isMovie ? R.color.red_primary : android.R.color.holo_blue_dark));
         badge.setTextColor(Color.WHITE);
+    }
+
+    public static String formatRelativeDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return "";
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(dateStr);
+            if (date == null) return "";
+            long diffMs = new Date().getTime() - date.getTime();
+            if (diffMs < 0) return "";
+            long days = diffMs / (1000L * 60 * 60 * 24);
+            if (days == 0) return "Today";
+            if (days == 1) return "Yesterday";
+            return days + " days ago";
+        } catch (ParseException ignored) {
+            return "";
+        }
+    }
+
+    /**
+     * Returns "New TV show" (< 30 days), "New season" (30–365 days), or "New episode" (> 365 days).
+     */
+    public static String getTVShowType(String firstAirDate) {
+        if (isIsNew(firstAirDate)) return "New TV show";
+        if (isWithinDays(firstAirDate, 365)) return "SEASON";
+        return "EP";
+    }
+
+    /** True if dateStr is not older than {@code days} days — includes future dates. */
+    public static boolean isNotOlderThan(String dateStr, int days) {
+        if (dateStr == null || dateStr.isEmpty()) return false;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(dateStr);
+            if (date == null) return false;
+            Calendar cutoff = Calendar.getInstance();
+            cutoff.add(Calendar.DAY_OF_YEAR, -days);
+            return date.after(cutoff.getTime());
+        } catch (ParseException ignored) {
+            return false;
+        }
+    }
+
+    /** True if dateStr falls within the last {@code days} days (past only, not future). */
+    public static boolean isWithinDays(String dateStr, int days) {
+        if (dateStr == null || dateStr.isEmpty()) return false;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(dateStr);
+            if (date == null) return false;
+            Calendar cutoff = Calendar.getInstance();
+            cutoff.add(Calendar.DAY_OF_YEAR, -days);
+            Date now = new Date();
+            return date.after(cutoff.getTime()) && date.before(now);
+        } catch (ParseException ignored) {
+            return false;
+        }
     }
 
     private static boolean isIsNew(String dateStr) {

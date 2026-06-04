@@ -13,7 +13,7 @@
     <string name="saved_recently">Saved recently</string>
     <string name="just_now">Just now</string>
     <string name="saved_ago">Saved %s ago</string>
-    <string name="rating_format">★ %.1f</string>
+    <string name="rating_format">★ %1$.1f</string>
     <string name="log_in">Login</string>
     <string name="log_out">Log out</string>
     <string name="movie">Movies</string>
@@ -34,7 +34,6 @@
     <string name="title">Title</string>
     <string name="genre">Genre</string>
     <string name="release_date">Release date</string>
-    <string name="space">  •  </string>
     <string name="run_time">Runtime</string>
     <string name="language">Language</string>
     <string name="overview">Overview</string>

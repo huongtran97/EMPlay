@@ -20,7 +20,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -81,7 +80,7 @@ public class ProfileFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseHelper = DatabaseHelper.getInstance(getContext());
+        databaseHelper = DatabaseHelper.getInstance(requireContext());
         mAuth = FirebaseAuth.getInstance();
     }
 
@@ -104,17 +103,11 @@ public class ProfileFragment extends BaseFragment {
         TextView tvRecentlySavedSeeAll = view.findViewById(R.id.tvRecentlySavedSeeAll);
         if (tvRecentlySavedSeeAll != null) {
             tvRecentlySavedSeeAll.setPaintFlags(tvRecentlySavedSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            tvRecentlySavedSeeAll.setOnClickListener(v -> {
-                Fragment fragment = new RecentlyAddedFragment();
-                getParentFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, fragment)
-                        .addToBackStack(null)
-                        .commit();
-            });
+            tvRecentlySavedSeeAll.setOnClickListener(v -> navigateTo(new RecentlyAddedFragment()));
         }
 
-        recentlySavedAdapter = new RecentlySavedAdapter(getContext(), recentlySavedList, this::onItemClicked);
-        rvRecentlySaved.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        recentlySavedAdapter = new RecentlySavedAdapter(requireContext(), recentlySavedList, this::onItemClicked);
+        rvRecentlySaved.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         rvRecentlySaved.setAdapter(recentlySavedAdapter);
 
         view.findViewById(R.id.llAbout).setOnClickListener(v ->
@@ -330,17 +323,9 @@ public class ProfileFragment extends BaseFragment {
 
     private void onItemClicked(Object item) {
         if (item instanceof MovieModel) {
-            MovieModel movie = (MovieModel) item;
-            MovieResultDetailsFragment fragment = MovieResultDetailsFragment.newInstance(movie.getMovieId());
-            replaceFragment(fragment);
+            navigateTo(MovieResultDetailsFragment.newInstance(((MovieModel) item).getMovieId()));
         } else if (item instanceof TVShowModel) {
-            TVShowModel tvShow = (TVShowModel) item;
-            TVShowResultDetailsFragment fragment = TVShowResultDetailsFragment.newInstance(tvShow.getTVShowId());
-            replaceFragment(fragment);
+            navigateTo(TVShowResultDetailsFragment.newInstance(((TVShowModel) item).getTVShowId()));
         }
-    }
-
-    private void replaceFragment(Fragment fragment) {
-        navigateTo(fragment);
     }
 }

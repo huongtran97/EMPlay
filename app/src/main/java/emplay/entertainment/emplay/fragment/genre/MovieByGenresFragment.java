@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,6 +22,7 @@ import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.api.movie.MovieResponse;
+import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import retrofit2.Call;
@@ -34,7 +33,7 @@ import retrofit2.Response;
  * Shows movies filtered by a single genre in a paginated 3-column grid.
  * Display 18 per page so items land on clean 3-column boundaries.
  */
-public class MovieByGenresFragment extends Fragment {
+public class MovieByGenresFragment extends BaseFragment {
 
     private static final String ARG_GENRE_ID = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
@@ -70,9 +69,9 @@ public class MovieByGenresFragment extends Fragment {
         btnPrev = view.findViewById(R.id.btn_prev);
         btnNext = view.findViewById(R.id.btn_next);
 
-        movieByGenreAdapter = new MovieByGenreAdapter(new ArrayList<>(), getContext(), this::onItemClick);
+        movieByGenreAdapter = new MovieByGenreAdapter(new ArrayList<>(), requireContext(), this::onItemClick);
 
-        movieByGenreRecyclerview.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        movieByGenreRecyclerview.setLayoutManager(new GridLayoutManager(requireContext(), 3));
         movieByGenreRecyclerview.setAdapter(movieByGenreAdapter);
 
         btnPrev.setOnClickListener(v -> {
@@ -103,10 +102,7 @@ public class MovieByGenresFragment extends Fragment {
     }
 
     private void onItemClick(MovieModel movieModel) {
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, MovieResultDetailsFragment.newInstance(movieModel.getMovieId()));
-        transaction.addToBackStack(null);
-        transaction.commit();
+        navigateTo(MovieResultDetailsFragment.newInstance(movieModel.getMovieId()));
     }
 
     private void fetchMoviesByGenre(int genreId) {
@@ -114,7 +110,7 @@ public class MovieByGenresFragment extends Fragment {
         isLoading = true;
 
         // Work out which TMDB pages overlap with the 18 items.
-        // If the slice spans two TMDB pages, fetch both and trim to our 18 items window.
+        // If the slice spans two TMDB pages, fetch both and trim to 18 items window.
         int startItemIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         int firstTmdbPage = (startItemIndex / 20) + 1;
         int secondTmdbPage = ((startItemIndex + ITEMS_PER_PAGE - 1) / 20) + 1;
@@ -134,7 +130,7 @@ public class MovieByGenresFragment extends Fragment {
 
     private void fetchTmdbPage(int genreId, int page, List<MovieModel> accumulator, Runnable onDone) {
         Call<MovieResponse> call = apiService.getMoviesByGenre(TMDBpath.discoverMovies(), genreId, page);
-        call.enqueue(new Callback<MovieResponse>() {
+        safeEnqueue(call, new Callback<MovieResponse>() {
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {

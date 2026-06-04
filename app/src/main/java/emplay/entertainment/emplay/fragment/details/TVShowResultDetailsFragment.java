@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -99,23 +100,22 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         mAuth = FirebaseAuth.getInstance();
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        binding.searchResultSeasonsRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.searchResultCastRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.searchResultSuggestionRecyclerview.setLayoutManager(new GridLayoutManager(getContext(), 3));
-        binding.searchResultSuggestionRecyclerview.setNestedScrollingEnabled(false);
-
         seasonsList = new ArrayList<>();
         castList = new ArrayList<>();
 
         seasonAdapter = new SeasonsTVAdapter(seasonsList, requireActivity(), season -> navigateTo(SeasonDetailFragment.newInstance(tvId, season.getSeasonNumber())));
         castAdapter = new CastAdapter(castList, requireActivity(), cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
-        suggestionTVAdapter = new SuggestionTVAdapter(new ArrayList<>(), getContext(), tv -> {
+        suggestionTVAdapter = new SuggestionTVAdapter(new ArrayList<>(), requireContext(), tv -> {
             if(tv != null) navigateTo(TVShowResultDetailsFragment.newInstance(tv.getTVShowId()));
         });
 
         binding.searchResultSeasonsRecyclerview.setAdapter(seasonAdapter);
+        binding.searchResultSeasonsRecyclerview.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.searchResultCastRecyclerview.setAdapter(castAdapter);
+        binding.searchResultCastRecyclerview.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.searchResultSuggestionRecyclerview.setAdapter(suggestionTVAdapter);
+        binding.searchResultSuggestionRecyclerview.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        binding.searchResultSuggestionRecyclerview.setNestedScrollingEnabled(false);
 
         paginationHelper = new PaginationHelper<>(PAGE_SIZE, allSuggestions, new PaginationHelper.PaginationCallback<TVShowModel>() {
             @Override
@@ -152,7 +152,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 fetchTVSuggestionList();
                 fetchTrailers();
             } else {
-                Toast.makeText(getContext(), "Invalid TV show ID", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Invalid TV show ID", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -289,6 +289,19 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
         // Blurred background
         UiUtils.setupBlurredBackground(this, tvDetails.getBackdrop_path(), tvDetails.getPoster_path(), binding.searchResultFragment);
+
+        GradientDrawable amberGlow = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR, // ignored for radial, but required
+                new int[]{
+                        0x66C9943A,  // amber center — 40% opacity
+                        0x00C9943A   // transparent edge
+                }
+        );
+        amberGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        amberGlow.setGradientRadius(180f); // matches the 120dp View size at ~1.5x density
+        amberGlow.setShape(GradientDrawable.OVAL);
+        binding.tvInfoCard.wtwUnreleased.amberGlow.setBackground(amberGlow);
+
     }
 
     private void updateWatchlistButton(TVShowDetailsResponse tvDetails) {

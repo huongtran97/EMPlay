@@ -49,6 +49,7 @@ public class WatchlistGridAdapter extends RecyclerView.Adapter<WatchlistGridAdap
         return new GridViewHolder(view);
     }
 
+    @SuppressLint("StringFormatInvalid")
     @Override
     public void onBindViewHolder(@NonNull GridViewHolder holder, int position) {
         MediaItem item = items.get(position);
@@ -85,7 +86,7 @@ public class WatchlistGridAdapter extends RecyclerView.Adapter<WatchlistGridAdap
             rating = itemView.findViewById(R.id.tvPosterRating);
             upcomingDate = itemView.findViewById(R.id.tvUpcomingDate);
 
-            // Set fixed aspect ratio for poster if needed or let XML handle it
+            // Set fixed aspect ratio for poster if needed
             itemView.post(() -> {
                 int width = itemView.getWidth();
                 if (width > 0) {

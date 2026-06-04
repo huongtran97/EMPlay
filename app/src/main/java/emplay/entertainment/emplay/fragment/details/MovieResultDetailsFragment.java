@@ -3,6 +3,7 @@ package emplay.entertainment.emplay.fragment.details;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -92,15 +93,15 @@ public class MovieResultDetailsFragment extends BaseFragment {
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
         castAdapter = new CastAdapter(castList, requireActivity(), cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
-        suggestionMovieAdapter = new SuggestionMovieAdapter(new ArrayList<>(), getContext(), movie -> {
+        suggestionMovieAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(), movie -> {
             if (movie != null) navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()));
         });
 
-        binding.searchResultCastRecyclerview.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
         binding.searchResultCastRecyclerview.setAdapter(castAdapter);
+        binding.searchResultCastRecyclerview.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        binding.searchResultSuggestionRecyclerview.setLayoutManager(new GridLayoutManager(getContext(), 3));
         binding.searchResultSuggestionRecyclerview.setAdapter(suggestionMovieAdapter);
+        binding.searchResultSuggestionRecyclerview.setLayoutManager(new GridLayoutManager(requireContext(), 3));
         binding.searchResultSuggestionRecyclerview.setNestedScrollingEnabled(false);
 
         paginationHelper = new PaginationHelper<>(PAGE_SIZE, allSuggestions, new PaginationHelper.PaginationCallback<MovieModel>() {
@@ -248,6 +249,19 @@ public class MovieResultDetailsFragment extends BaseFragment {
         );
         // Blurred background
         UiUtils.setupBlurredBackground(this, mDetails.getBackdropPath(), mDetails.getPosterPath(), binding.searchResultFragment);
+
+        GradientDrawable amberGlow = new GradientDrawable(
+                GradientDrawable.Orientation.TL_BR, // ignored for radial, but required
+                new int[]{
+                        0x66C9943A,  // amber center — 40% opacity
+                        0x00C9943A   // transparent edge
+                }
+        );
+        amberGlow.setGradientType(GradientDrawable.RADIAL_GRADIENT);
+        amberGlow.setGradientRadius(180f); // matches the 120dp View size at ~1.5x density
+        amberGlow.setShape(GradientDrawable.OVAL);
+        binding.movieInfo.wtwUnreleased.amberGlow.setBackground(amberGlow);
+
     }
 
     private void updateWatchlistButton(MovieDetailsResponse movieDetails) {

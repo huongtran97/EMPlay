@@ -2,60 +2,97 @@ package emplay.entertainment.emplay.api.common;
 
 import androidx.annotation.NonNull;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+
 import java.util.concurrent.TimeUnit;
 
 import emplay.entertainment.emplay.BuildConfig;
+import okhttp3.Cache;
+import okhttp3.ConnectionSpec;
 import okhttp3.HttpUrl;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
+import okhttp3.Protocol;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.TlsVersion;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
 
-    // Switch to false to bypass the proxy and hit TMDB directly (debug only).
+    // Switch to "false" to bypass the proxy and hit TMDB directly (debug only).
     // When true, the API key never leaves the server — safer for release builds.
     public static boolean USE_PROXY = true;
 
-    // Only used when USE_PROXY = false (direct TMDB calls).
     private static final String TMDB_API_KEY = BuildConfig.API_KEY;
 
     private static final String BASE_URL = "https://emplay-proxy-production.up.railway.app/";
+    private static File cacheDir;
+
+    public static void init(File appCacheDir) {
+        cacheDir = appCacheDir;
+    }
 
     // Lazily created — one instance shared across the whole app.
     static Retrofit retrofit;
 
-    public static Retrofit getClient() {
+    public static synchronized Retrofit getClient() {
         if (retrofit == null) {
+            ConnectionSpec tlsSpec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                    .tlsVersions(TlsVersion.TLS_1_2, TlsVersion.TLS_1_3)
+                    .build();
+
             OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
-                    .connectTimeout(30, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
-                    .writeTimeout(30, TimeUnit.SECONDS)
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(35, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .callTimeout(50, TimeUnit.SECONDS)
                     .retryOnConnectionFailure(true)
+                    .protocols(Arrays.asList(Protocol.HTTP_1_1))
+                    .connectionSpecs(Arrays.asList(tlsSpec, ConnectionSpec.CLEARTEXT))
                     .addInterceptor(chain -> {
-                        // "Accept-Encoding: identity" disables gzip on every request.
-                        // Without this, some proxy responses came back with malformed
-                        // compressed data and OkHttp threw "gzip finished without exhausting source".
+                        // Retry once on timeout or PROTOCOL_ERROR
+                        for (int attempt = 0; attempt < 2; attempt++) {
+                            try {
+                                return chain.proceed(chain.request());
+                            } catch (IOException e) {
+                                if (attempt == 0) {
+                                    String msg = e.getMessage();
+                                    if (e instanceof SocketTimeoutException
+                                            || (msg != null && msg.contains("PROTOCOL_ERROR"))) {
+                                        continue;
+                                    }
+                                }
+                                throw e;
+                            }
+                        }
+                        throw new IOException("unreachable");
+                    })
+                    .addInterceptor(chain -> {
                         Request request = chain.request().newBuilder()
-                                .header("Accept-Encoding", "identity")
-                                .header("X-App-Token", BuildConfig.APP_TOKEN) // authenticates with our proxy
+                                .header("X-App-Token", BuildConfig.APP_TOKEN)
                                 .build();
                         return chain.proceed(request);
                     })
                     .addInterceptor(new TMDBInterceptor());
 
-            // Only log in debug so we don't accidentally print tokens in production.
+            if (cacheDir != null) {
+                clientBuilder.cache(new Cache(new File(cacheDir, "tmdb_http_cache"), 10 * 1024 * 1024));
+            }
+
             if (BuildConfig.DEBUG) {
-                HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
-                loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
-                clientBuilder.addInterceptor(loggingInterceptor);
+                HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
+                logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
+                clientBuilder.addInterceptor(logging);
             }
 
             OkHttpClient okHttpClient = clientBuilder.build();
+            glideClient = okHttpClient;
 
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
@@ -64,6 +101,21 @@ public class ApiClient {
                     .build();
         }
         return retrofit;
+    }
+
+    private static OkHttpClient glideClient;
+
+    public static synchronized OkHttpClient getSharedClient() {
+        if (glideClient == null) {
+            glideClient = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(10, TimeUnit.SECONDS)
+                    .retryOnConnectionFailure(true)
+                    .protocols(Arrays.asList(Protocol.HTTP_1_1))
+                    .build();
+        }
+        return glideClient;
     }
 
     /**

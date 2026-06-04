@@ -36,6 +36,10 @@ public class TVShowModel implements Serializable, MediaItem {
     private List<SeasonsModel> seasonsInfo;
     private String username;
     private String savedTimestamp;
+    private String displayImagePath;
+    private String displayDate;
+    private String displaySeasonInfo;
+    private boolean detailsFetched;
 
     public TVShowModel() {}
 
@@ -122,4 +126,16 @@ public class TVShowModel implements Serializable, MediaItem {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
+    public String getDisplayImagePath() { return displayImagePath; }
+    public void setDisplayImagePath(String displayImagePath) { this.displayImagePath = displayImagePath; }
+
+    public String getDisplayDate() { return displayDate; }
+    public void setDisplayDate(String displayDate) { this.displayDate = displayDate; }
+
+    public String getDisplaySeasonInfo() { return displaySeasonInfo; }
+    public void setDisplaySeasonInfo(String displaySeasonInfo) { this.displaySeasonInfo = displaySeasonInfo; }
+
+    public boolean isDetailsFetched() { return detailsFetched; }
+    public void setDetailsFetched(boolean detailsFetched) { this.detailsFetched = detailsFetched; }
 }

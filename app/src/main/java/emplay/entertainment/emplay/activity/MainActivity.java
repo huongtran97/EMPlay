@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
 import emplay.entertainment.emplay.R;
@@ -63,9 +64,9 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (selectedFragment != null) {
+                getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_container, selectedFragment)
-                        .addToBackStack(null)
                         .commit();
             }
             return true;
@@ -87,10 +88,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             dialogView.findViewById(R.id.btn_login).setOnClickListener(v -> {
-                welcomeDialog.dismiss();
+                if (welcomeDialog != null && welcomeDialog.isShowing()) {
+                    welcomeDialog.dismiss();
+                }
                 Intent intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
-                finish();
+                finishAfterTransition();
             });
 
             dialogView.findViewById(R.id.btn_guest).setOnClickListener(v -> welcomeDialog.dismiss());
@@ -101,9 +104,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         if (welcomeDialog != null && welcomeDialog.isShowing()) {
             welcomeDialog.dismiss();
         }
+        super.onDestroy();
     }
 }

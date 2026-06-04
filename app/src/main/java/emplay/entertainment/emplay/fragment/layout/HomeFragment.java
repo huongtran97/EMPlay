@@ -18,11 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.adapter.movie.TrendingBannerAdapter;
+import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
 import emplay.entertainment.emplay.api.movie.UpComingMovieResponse;
 import emplay.entertainment.emplay.api.tvshow.UpComingTVShowsResponse;
@@ -37,6 +39,7 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.api.movie.MovieResponse;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.adapter.tvshow.UpComingTVAdapter;
@@ -64,15 +67,17 @@ public class HomeFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.activity_main, container, false);
+        View view = inflater.inflate(R.layout.home_view, container, false);
 
         vpTrendingBanner = view.findViewById(R.id.vpTrendingBanner);
         btnWhatsNewTvShow = view.findViewById(R.id.btnWhatsNewTvShow);
         btnWhatsNewMovie = view.findViewById(R.id.btnWhatsNewMovie);
 
         // ViewPager2 for trending banner
-        trendingAdapter = new TrendingBannerAdapter(getContext(), new ArrayList<>(), 
-                this::onItemClicked, this::navigateToWatchlist);
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireActivity());
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        trendingAdapter = new TrendingBannerAdapter(requireContext(), new ArrayList<>(),
+                dbHelper, mAuth, this::onItemClicked);
         vpTrendingBanner.setAdapter(trendingAdapter);
 
         // Auto scroll setup
@@ -84,34 +89,34 @@ public class HomeFragment extends BaseFragment {
             tvWhatsNewSeeAll.setOnClickListener(v -> navigateTo(WhatsNewFragment.newInstance(isWhatsNewShowingTV)));
         }
 
+        apiService = ApiClient.getClient().create(MovieApiService.class);
+
         // What's New toggle
         rvWhatsNew = view.findViewById(R.id.rvWhatsNew);
-        whatsNewTVAdapter = new WhatsNewTVAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
-        whatsNewMovieAdapter = new WhatsNewMovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
-        rvWhatsNew.setLayoutManager(new LinearLayoutManager(getContext()));
+        whatsNewTVAdapter = new WhatsNewTVAdapter(requireContext(), new ArrayList<>(), apiService, this::onItemClicked);
+        whatsNewMovieAdapter = new WhatsNewMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
+        rvWhatsNew.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvWhatsNew.setNestedScrollingEnabled(false);
-        rvWhatsNew.setAdapter(whatsNewTVAdapter);
+        rvWhatsNew.setAdapter(isWhatsNewShowingTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
 
         btnWhatsNewTvShow.setOnClickListener(v -> switchWhatsNew(true));
         btnWhatsNewMovie.setOnClickListener(v -> switchWhatsNew(false));
+        applyWhatsNewButtonState(isWhatsNewShowingTV);
 
         // Upcoming Movies
         rvUpcomingMovies = view.findViewById(R.id.rvUpcomingMovies);
-        upcomingMovieAdapter = new UpcomingMovieAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
+        upcomingMovieAdapter = new UpcomingMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvUpcomingMovies.setAdapter(upcomingMovieAdapter);
-        rvUpcomingMovies.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvUpcomingMovies.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
         // Upcoming TV Shows
         RecyclerView rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
-        upComingTVAdapter = new UpComingTVAdapter(getContext(), new ArrayList<>(), this::onItemClicked);
+        upComingTVAdapter = new UpComingTVAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvUpcomingTvShows.setAdapter(upComingTVAdapter);
-        rvUpcomingTvShows.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvUpcomingTvShows.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        apiService = ApiClient.getClient().create(MovieApiService.class);
-
-        fetchHeroMovie();
+        fetchTrendingMovies();
         fetchWhatsNewTVShows();
-        fetchWhatsNewMovies();
         fetchUpComingMovie();
         fetchUpcomingTVShows();
 
@@ -119,31 +124,43 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void setupAutoScroll() {
-        bannerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (trendingAdapter != null && trendingAdapter.getItemCount() > 0) {
-                    int current = vpTrendingBanner.getCurrentItem();
-                    int total = trendingAdapter.getItemCount();
-                    vpTrendingBanner.setCurrentItem(current < total - 1 ? current + 1 : 0);
-                }
-                bannerHandler.postDelayed(this, 4000);
+        bannerRunnable = () -> {
+            if (trendingAdapter != null && trendingAdapter.getItemCount() > 0) {
+                int current = vpTrendingBanner.getCurrentItem();
+                int total = trendingAdapter.getItemCount();
+                vpTrendingBanner.setCurrentItem(current < total - 1 ? current + 1 : 0);
             }
+            bannerHandler.postDelayed(bannerRunnable, 4000);
         };
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         bannerHandler.postDelayed(bannerRunnable, 4000);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        bannerHandler.removeCallbacks(bannerRunnable); // stop when not visible
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        bannerHandler.removeCallbacks(bannerRunnable);
+        bannerHandler.removeCallbacks(bannerRunnable); // safety cleanup
     }
 
     private void switchWhatsNew(boolean showTV) {
-        if (isWhatsNewShowingTV == showTV) return;
-        isWhatsNewShowingTV = showTV;
-        rvWhatsNew.setAdapter(showTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
+        if (isWhatsNewShowingTV != showTV) {
+            isWhatsNewShowingTV = showTV;
+            rvWhatsNew.setAdapter(showTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
+        }
+        applyWhatsNewButtonState(showTV);
+    }
 
+    private void applyWhatsNewButtonState(boolean showTV) {
         btnWhatsNewTvShow.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFFE50914 : 0xFF1E1E1E));
         btnWhatsNewTvShow.setTextColor(showTV ? 0xFFFFFFFF : 0xFF888888);
         btnWhatsNewTvShow.setIconTint(ColorStateList.valueOf(showTV ? 0xFFFFFFFF : 0xFF888888));
@@ -153,24 +170,28 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
     }
 
-    /**
-     * Data fetching
-     */
-    private void fetchHeroMovie() {
+    private void fetchTrendingMovies() {
         safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().getResults().isEmpty()) {
+                if (response.isSuccessful() && response.body() != null) {
                     List<MovieModel> results = response.body().getResults();
-                    // Show top 5 movies in banner
-                    List<MovieModel> bannerMovies = results.subList(0, Math.min(results.size(), 5));
-                    trendingAdapter.updateData(bannerMovies);
+                    if (results == null || results.isEmpty()) return;
+                    trendingAdapter.updateData(new ArrayList<>(results.subList(0, Math.min(results.size(), 5))));
+                    cachedMovies.clear();
+                    for (MovieModel movie : results) {
+                        if (movie.getPosterPath() != null && BadgeHelper.isNotOlderThan(movie.getReleaseDate(), 30)) {
+                            cachedMovies.add(movie);
+                        }
+                    }
+                    List<MovieModel> limited = cachedMovies.subList(0, Math.min(cachedMovies.size(), 4));
+                    whatsNewMovieAdapter.updateData(new ArrayList<>(limited));
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                Log.e("HomeFragment", "Failed to fetch hero movie", t);
+                Log.e("HomeFragment", "Failed to fetch trending movies", t);
             }
         });
     }
@@ -180,8 +201,10 @@ public class HomeFragment extends BaseFragment {
             @Override
             public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<TVShowModel> results = response.body().getResults();
+                    if (results == null) return;
                     cachedTVShows.clear();
-                    for (TVShowModel tv : response.body().getResults()) {
+                    for (TVShowModel tv : results) {
                         if (tv.getPosterPath() != null) cachedTVShows.add(tv);
                     }
                     // Limit to 4 items for the Home screen
@@ -193,28 +216,6 @@ public class HomeFragment extends BaseFragment {
             @Override
             public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
                 Log.e("HomeFragment", "Failed to fetch trending TV shows", t);
-            }
-        });
-    }
-
-    private void fetchWhatsNewMovies() {
-        safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    cachedMovies.clear();
-                    for (MovieModel movie : response.body().getResults()) {
-                        if (movie.getPosterPath() != null) cachedMovies.add(movie);
-                    }
-                    // Limit to 4 items for the Home screen
-                    List<MovieModel> limited = cachedMovies.subList(0, Math.min(cachedMovies.size(), 4));
-                    whatsNewMovieAdapter.updateData(new ArrayList<>(limited));
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                Log.e("HomeFragment", "Failed to fetch trending movies", t);
             }
         });
     }
@@ -277,7 +278,4 @@ public class HomeFragment extends BaseFragment {
         navigateTo(fragment);
     }
 
-    private void navigateToWatchlist() {
-        navigateTo(WatchlistFragment.newInstance(0));
-    }
 }

@@ -209,6 +209,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
                 int genreIndex = cursor.getColumnIndex(COLUMN_GENRES);
                 int timestampIndex = cursor.getColumnIndex(COLUMN_TIMESTAMP);
+                int voteIndex = cursor.getColumnIndex(COLUMN_VOTE_AVERAGE);
 
                 if (idIndex != -1 && titleIndex != -1 && posterPathIndex != -1) {
                     int id = cursor.getInt(idIndex);
@@ -216,6 +217,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String posterPath = cursor.getString(posterPathIndex);
                     String genresStr = genreIndex != -1 ? cursor.getString(genreIndex) : null;
                     String timestamp = timestampIndex != -1 ? cursor.getString(timestampIndex) : null;
+                    double voteAverage = voteIndex != -1 ? cursor.getDouble(voteIndex) : 0.0;
 
                     List<String> genres = new ArrayList<>();
                     if (genresStr != null && !genresStr.isEmpty()) {
@@ -225,6 +227,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     MovieModel movie = new MovieModel(id, title, posterPath);
                     movie.setGenres(genres);
                     movie.setSavedTimestamp(timestamp);
+                    movie.setVoteAverage(voteAverage);
                     movies.add(movie);
                 }
             } while (cursor.moveToNext());
@@ -249,6 +252,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 int posterPathIndex = cursor.getColumnIndex(COLUMN_POSTER_PATH);
                 int genreIndex = cursor.getColumnIndex(COLUMN_GENRES);
                 int timestampIndex = cursor.getColumnIndex(COLUMN_TIMESTAMP);
+                int voteIndex = cursor.getColumnIndex(COLUMN_VOTE_AVERAGE);
 
                 if (idIndex != -1 && titleIndex != -1 && posterPathIndex != -1) {
                     int id = cursor.getInt(idIndex);
@@ -256,6 +260,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     String posterPath = cursor.getString(posterPathIndex);
                     String genresStr = genreIndex != -1 ? cursor.getString(genreIndex) : null;
                     String timestamp = timestampIndex != -1 ? cursor.getString(timestampIndex) : null;
+                    double voteAverage = voteIndex != -1 ? cursor.getDouble(voteIndex) : 0.0;
 
                     List<String> genres = new ArrayList<>();
                     if (genresStr != null && !genresStr.isEmpty()) {
@@ -265,6 +270,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     TVShowModel tv = new TVShowModel(id, title, posterPath);
                     tv.setGenres(genres);
                     tv.setSavedTimestamp(timestamp);
+                    tv.setVoteAverage(voteAverage);
                     tvShows.add(tv);
                 }
             } while (cursor.moveToNext());

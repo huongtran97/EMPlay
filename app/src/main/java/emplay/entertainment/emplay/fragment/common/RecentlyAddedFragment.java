@@ -9,8 +9,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,7 +28,7 @@ import emplay.entertainment.emplay.models.common.MediaItem;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 
-public class RecentlyAddedFragment extends Fragment {
+public class RecentlyAddedFragment extends BaseFragment {
 
     private RecentlyAddedAdapter adapter;
     private final List<MediaItem> allItems = new ArrayList<>();
@@ -109,15 +107,10 @@ public class RecentlyAddedFragment extends Fragment {
     }
 
     private void onItemClick(MediaItem item) {
-        Fragment fragment;
         if (item instanceof MovieModel) {
-            fragment = MovieResultDetailsFragment.newInstance(item.getMediaId());
+            navigateTo(MovieResultDetailsFragment.newInstance(item.getMediaId()));
         } else {
-            fragment = TVShowResultDetailsFragment.newInstance(item.getMediaId());
+            navigateTo(TVShowResultDetailsFragment.newInstance(item.getMediaId()));
         }
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 }

@@ -76,8 +76,8 @@ public class TrendingSeeAllFragment extends BaseFragment {
         
         tvTitle.setText(isTV ? "Trending TV Shows" : "Trending Movies");
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new TrendingSearchAdapter(getContext(), trendingList, this::onItemClick);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        adapter = new TrendingSearchAdapter(requireContext(), trendingList, this::onItemClick);
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);

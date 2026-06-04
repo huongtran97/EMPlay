@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.movie.WhatsNewMovieAdapter;
@@ -26,6 +27,7 @@ import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
+import emplay.entertainment.emplay.tool.BadgeHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -60,7 +62,7 @@ public class WhatsNewFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.whats_new_view, container, false);
 
         recyclerView = view.findViewById(R.id.rvWhatsNewFull);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         TextView tvTitle = view.findViewById(R.id.trendNow);
         tvTitle.setText(isTV ? "What's New in TV Shows" : "What's New in Movies");
@@ -77,14 +79,18 @@ public class WhatsNewFragment extends BaseFragment {
     }
 
     private void fetchTVShows() {
-        WhatsNewTVAdapter adapter = new WhatsNewTVAdapter(getContext(), new ArrayList<>(), this::onTVShowClicked);
+        WhatsNewTVAdapter adapter = new WhatsNewTVAdapter(requireContext(), new ArrayList<>(), apiService, this::onTVShowClicked);
         recyclerView.setAdapter(adapter);
 
         safeEnqueue(apiService.getTrendingTVShows(TMDBpath.trendingTVShows()), new Callback<TVShowResponse>() {
             @Override
             public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.updateData(response.body().getResults());
+                    List<TVShowModel> all = new ArrayList<>();
+                    for (TVShowModel tv : response.body().getResults()) {
+                        if (tv.getPosterPath() != null) all.add(tv);
+                    }
+                    adapter.updateData(all);
                 }
             }
 
@@ -96,14 +102,20 @@ public class WhatsNewFragment extends BaseFragment {
     }
 
     private void fetchMovies() {
-        WhatsNewMovieAdapter adapter = new WhatsNewMovieAdapter(getContext(), new ArrayList<>(), this::onMovieClicked);
+        WhatsNewMovieAdapter adapter = new WhatsNewMovieAdapter(requireContext(), new ArrayList<>(), this::onMovieClicked);
         recyclerView.setAdapter(adapter);
 
         safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    adapter.updateData(response.body().getResults());
+                    List<MovieModel> filtered = new ArrayList<>();
+                    for (MovieModel m : response.body().getResults()) {
+                        if (m.getPosterPath() != null && BadgeHelper.isNotOlderThan(m.getReleaseDate(), 30)) {
+                            filtered.add(m);
+                        }
+                    }
+                    adapter.updateData(filtered);
                 }
             }
 

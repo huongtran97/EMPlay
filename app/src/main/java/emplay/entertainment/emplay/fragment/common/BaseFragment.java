@@ -32,12 +32,12 @@ public abstract class BaseFragment extends Fragment {
         call.enqueue(new Callback<T>() {
             @Override
             public void onResponse(@NonNull Call<T> call, @NonNull Response<T> response) {
-                if (isAdded()) callback.onResponse(call, response);
+                if (isAdded() && getContext() != null) callback.onResponse(call, response);
             }
 
             @Override
             public void onFailure(@NonNull Call<T> call, @NonNull Throwable t) {
-                if (isAdded()) callback.onFailure(call, t);
+                if (isAdded() && getContext() != null) callback.onFailure(call, t);
             }
         });
     }

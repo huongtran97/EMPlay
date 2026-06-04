@@ -87,8 +87,8 @@ public class CastDetailFragment extends BaseFragment {
         // Read More / Less
         ReadHelper.setup(biographyText, readMoreText, isExpanded, expanded -> isExpanded = expanded);
 
-        creditAdapter = new CreditAdapter(new ArrayList<>(), getContext(), this::onCreditClicked);
-        creditsRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        creditAdapter = new CreditAdapter(new ArrayList<>(), requireContext(), this::onCreditClicked);
+        creditsRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
         creditsRecyclerView.setAdapter(creditAdapter);
         creditsRecyclerView.setNestedScrollingEnabled(false);
 

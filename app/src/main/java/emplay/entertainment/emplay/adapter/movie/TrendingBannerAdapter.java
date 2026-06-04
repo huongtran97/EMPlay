@@ -8,17 +8,24 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.List;
 import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
+import emplay.entertainment.emplay.database.DatabaseHelper;
+import emplay.entertainment.emplay.database.WatchlistHelper;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 
 public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAdapter.ViewHolder> {
@@ -26,23 +33,21 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     private final Context context;
     private final List<MovieModel> movies;
     private final OnItemClickListener listener;
-    private final OnWatchlistClickListener watchlistListener;
+    private final DatabaseHelper dbHelper;
+    private final FirebaseAuth mAuth;
 
     public interface OnItemClickListener {
         void onItemClick(MovieModel movie);
     }
 
-    public interface OnWatchlistClickListener {
-        void onWatchlistClick();
-    }
-
-    public TrendingBannerAdapter(Context context, List<MovieModel> movies, 
-                                 OnItemClickListener listener, 
-                                 OnWatchlistClickListener watchlistListener) {
+    public TrendingBannerAdapter(Context context, List<MovieModel> movies,
+                                 DatabaseHelper dbHelper, FirebaseAuth mAuth,
+                                 OnItemClickListener listener) {
         this.context = context;
         this.movies = movies;
+        this.dbHelper = dbHelper;
+        this.mAuth = mAuth;
         this.listener = listener;
-        this.watchlistListener = watchlistListener;
     }
 
     @NonNull
@@ -53,6 +58,7 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         return new ViewHolder(view);
     }
 
+    @SuppressLint("StringFormatInvalid")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MovieModel movie = movies.get(position);
@@ -73,7 +79,45 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
                 .into(holder.ivHeroPoster);
 
         holder.btnHeroMoreInfo.setOnClickListener(v -> listener.onItemClick(movie));
-        holder.btnHeroWatchlist.setOnClickListener(v -> watchlistListener.onWatchlistClick());
+        setupWatchlistButton(holder, movie);
+    }
+
+    private void setupWatchlistButton(ViewHolder holder, MovieModel movie) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_watchlist));
+            holder.btnHeroWatchlist.setOnClickListener(v ->
+                    Toast.makeText(context, "You must be logged in to save it!", Toast.LENGTH_SHORT).show());
+        } else {
+            String userId = currentUser.getUid();
+            updateWatchlistIcon(holder, userId, movie.getMovieId());
+            holder.btnHeroWatchlist.setOnClickListener(v -> {
+                if (WatchlistHelper.isMovieSaved(dbHelper, userId, movie.getMovieId())) {
+                    WatchlistHelper.removeMovie(dbHelper, userId, movie.getMovieId());
+                    updateWatchlistIcon(holder, userId, movie.getMovieId());
+                    Toast.makeText(context, "Movie removed from library", Toast.LENGTH_SHORT).show();
+                } else {
+                    String genres = "";
+                    if (movie.getGenres() != null && !movie.getGenres().isEmpty()) {
+                        genres = String.join(",", movie.getGenres());
+                    }
+                    long result = WatchlistHelper.saveMovie(dbHelper, userId, movie.getMovieId(),
+                            movie.getTitle(), movie.getPosterPath(), genres, movie.getVoteAverage());
+                    if (result != -1) {
+                        updateWatchlistIcon(holder, userId, movie.getMovieId());
+                        Toast.makeText(context, "Movie added to library", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(context, "Failed to add Movie", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateWatchlistIcon(ViewHolder holder, String userId, int movieId) {
+        int iconRes = WatchlistHelper.isMovieSaved(dbHelper, userId, movieId)
+                ? R.drawable.ic_check : R.drawable.ic_watchlist;
+        holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, iconRes));
     }
 
     @Override
@@ -91,7 +135,8 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivHeroPoster;
         TextView tvHeroTitle, tvHeroYear, tvHeroGenre, tvHeroRating, tvHeroBadge;
-        Button btnHeroWatchlist, btnHeroMoreInfo;
+        MaterialButton btnHeroWatchlist;
+        Button btnHeroMoreInfo;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

@@ -11,8 +11,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,8 +23,9 @@ import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
-import emplay.entertainment.emplay.models.tvshow.TVShowModel;
+import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
+import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,7 +33,7 @@ import retrofit2.Response;
 /**
  *  TV show genre browser — same 18-item pagination trick as MovieByGenresFragment.
  */
-public class TVShowsByGenresFragment extends Fragment {
+public class TVShowsByGenresFragment extends BaseFragment {
     private static final String ARG_GENRE_ID = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
     private static final int ITEMS_PER_PAGE = 18; // 6 rows of 3 items
@@ -69,9 +68,9 @@ public class TVShowsByGenresFragment extends Fragment {
         btnPrev = view.findViewById(R.id.btn_prev);
         btnNext = view.findViewById(R.id.btn_next);
 
-        tvByGenreAdapter = new TVShowByGenreAdapter(new ArrayList<>(), getContext(), this::onItemClick);
+        tvByGenreAdapter = new TVShowByGenreAdapter(new ArrayList<>(), requireContext(), this::onItemClick);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 3);
+        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
         tvByGenreRecyclerview.setLayoutManager(layoutManager);
         tvByGenreRecyclerview.setAdapter(tvByGenreAdapter);
 
@@ -101,7 +100,7 @@ public class TVShowsByGenresFragment extends Fragment {
             if (genreId != -1) {
                 fetchTVShowsByGenre(genreId);
             } else {
-                Toast.makeText(getContext(), "Invalid genre ID", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Invalid genre ID", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -109,11 +108,7 @@ public class TVShowsByGenresFragment extends Fragment {
     }
 
     private void onItemClick(TVShowModel tvShowModel) {
-        TVShowResultDetailsFragment fragment = TVShowResultDetailsFragment.newInstance(tvShowModel.getTVShowId());
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        navigateTo(TVShowResultDetailsFragment.newInstance(tvShowModel.getTVShowId()));
     }
 
     private void fetchTVShowsByGenre(int genreId) {
@@ -121,7 +116,7 @@ public class TVShowsByGenresFragment extends Fragment {
         isLoading = true;
 
         // Work out which TMDB pages overlap with the 18 items.
-        // If the slice spans two TMDB pages, fetch both and trim to our 18 items window.
+        // If the slice spans two TMDB pages, fetch both and trim to 18 items window.
         int startItemIndex = (currentPage - 1) * ITEMS_PER_PAGE;
         int firstTmdbPage = (startItemIndex / 20) + 1;
         int secondTmdbPage = ((startItemIndex + ITEMS_PER_PAGE - 1) / 20) + 1;
@@ -141,7 +136,7 @@ public class TVShowsByGenresFragment extends Fragment {
 
     private void fetchTmdbPage(int genreId, int page, List<TVShowModel> accumulator, Runnable onDone) {
         Call<TVShowResponse> call = apiService.getTVShowsByGenre(TMDBpath.discoverTVShows(), genreId, page);
-        call.enqueue(new Callback<TVShowResponse>() {
+        safeEnqueue(call, new Callback<TVShowResponse>() {
             @Override
             public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {

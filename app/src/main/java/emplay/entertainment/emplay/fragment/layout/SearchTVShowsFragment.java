@@ -15,12 +15,11 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import androidx.core.widget.NestedScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.Objects;
 
 import emplay.entertainment.emplay.database.DatabaseHelper;
+import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.common.TrendingSeeAllFragment;
 import emplay.entertainment.emplay.fragment.genre.TVShowsByGenresFragment;
 import emplay.entertainment.emplay.tool.BadgeHelper;
@@ -61,12 +61,11 @@ import retrofit2.Response;
 /**
  *  TV show search tab — mirrors SearchMoviesFragment but for TV.
  */
-public class SearchTVShowsFragment extends Fragment {
+public class SearchTVShowsFragment extends BaseFragment {
 
     private SearchTVAdapter searchAdapter;
     private GenresAdapter genresAdapter;
     private TrendingSearchAdapter trendingAdapter;
-
     private final List<TVShowModel> searchTVList = new ArrayList<>();
     private final List<GenresModel> genresList = new ArrayList<>();
     private final List<TVShowModel> trendingList = new ArrayList<>();
@@ -99,8 +98,8 @@ public class SearchTVShowsFragment extends Fragment {
         tvClearAll = view.findViewById(R.id.btnClearAll);
         if (tvClearAll != null) {
             tvClearAll.setPaintFlags(tvClearAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            tvClearAll.setOnClickListener(v -> clearHistory());
         }
-
 
         btnMovie = view.findViewById(R.id.btnMovie);
         btnTvShow = view.findViewById(R.id.btnTvShow);
@@ -109,7 +108,6 @@ public class SearchTVShowsFragment extends Fragment {
         btnMovie.setOnClickListener(v -> onMovieClick());
         btnTvShow.setOnClickListener(v -> onTVShowClick());
         btnSeeAll.setOnClickListener(v -> navigateTo(TrendingSeeAllFragment.newInstance(true)));
-        tvClearAll.setOnClickListener(v -> clearHistory());
 
         setupRecyclerViews();
         setupSearchInput();
@@ -126,25 +124,18 @@ public class SearchTVShowsFragment extends Fragment {
         return view;
     }
 
-    private void navigateTo(Fragment fragment) {
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }
-
     private void setupRecyclerViews() {
         searchAdapter = new SearchTVAdapter(searchTVList, this::showTVDetails);
-        rvSearchResults.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvSearchResults.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvSearchResults.setAdapter(searchAdapter);
 
         genresAdapter = new GenresAdapter(genresList, this::onGenreClick);
-        rvGenres.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        rvGenres.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         rvGenres.setNestedScrollingEnabled(false);
         rvGenres.setAdapter(genresAdapter);
 
-        trendingAdapter = new TrendingSearchAdapter(getContext(), trendingList, this::onTrendingClick);
-        rvTrendingSearches.setLayoutManager(new LinearLayoutManager(getContext()));
+        trendingAdapter = new TrendingSearchAdapter(requireContext(), trendingList, this::onTrendingClick);
+        rvTrendingSearches.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvTrendingSearches.setAdapter(trendingAdapter);
     }
 
@@ -201,59 +192,70 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     private void fetchTrendingTVShows() {
-        apiService.getTrendingTVShows(TMDBpath.trendingTVShows()).enqueue(new Callback<TVShowResponse>() {
-            @SuppressLint("NotifyDataSetChanged")
+        safeEnqueue(apiService.getTrendingTVShows(TMDBpath.trendingTVShows()), new Callback<TVShowResponse>() {
             @Override
             public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    trendingList.clear();
                     List<TVShowModel> results = response.body().getResults();
                     if (results != null) {
-                        // Sort by rating highest to lowest
-                        Collections.sort(results, (t1, t2) -> Double.compare(t2.getVoteAverage(), t1.getVoteAverage()));
-                        trendingList.addAll(results.subList(0, Math.min(results.size(), 5)));
+                        Collections.sort(results, (t1, t2) ->
+                                Double.compare(t2.getVoteAverage(), t1.getVoteAverage()));
+
+                        int newSize = Math.min(results.size(), 5);
+                        trendingList.clear();
+                        trendingList.addAll(results.subList(0, newSize));
+                        trendingAdapter.notifyItemRangeChanged(0, newSize);
                     }
-                    trendingAdapter.notifyDataSetChanged();
                 }
             }
-            @Override public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {}
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                Toast.makeText(getContext(), "Failed to load trending TV shows", Toast.LENGTH_SHORT).show();
+            }
         });
     }
-
 
     private void onGenreClick(GenresModel genre) {
         if (genre == null) return;
         TVShowsByGenresFragment fragment = TVShowsByGenresFragment.newInstance(genre.getId(), genre.getName());
-        replaceFragment(fragment, "TVShowsByGenresFragment");
+        navigateTo(fragment);
     }
 
     private void fetchGenresForTVShows() {
-        apiService.getGenresTVShows(TMDBpath.genresTVShows()).enqueue(new Callback<GenresResponse>() {
-            @SuppressLint("NotifyDataSetChanged")
+        safeEnqueue(apiService.getGenresTVShows(TMDBpath.genresTVShows()), new Callback<GenresResponse>() {
             @Override
             public void onResponse(@NonNull Call<GenresResponse> call, @NonNull Response<GenresResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    genresList.clear();
-                    for (GenresModel g : response.body().getGenres()) {
-                        genresList.add(new GenresModel(
-                                g.getId(), g.getName(),
-                                BadgeHelper.getGenreColor(requireContext(), g.getId())));
+                    Context ctx = getContext();
+                    List<GenresModel> genres = response.body().getGenres();
+
+                    if (genres != null && !genres.isEmpty() && genresList.isEmpty()) {
+                        for (GenresModel g : genres) {
+                            genresList.add(new GenresModel(
+                                    g.getId(),
+                                    g.getName(),
+                                    BadgeHelper.getGenreColor(ctx, g.getId())));
+                        }
+                        genresAdapter.notifyItemRangeInserted(0, genresList.size());
                     }
-                    genresAdapter.notifyDataSetChanged();
                 }
             }
-            @Override public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {}
+
+            @Override
+            public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {
+                Toast.makeText(getContext(), "Failed to load genres", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
-
     private void onTVShowClick() {
-
+        // already on TV show tab — no-op
     }
 
     private void onMovieClick() {
         viewModel.setIsTVShowSearch(false);
-        replaceFragment(new SearchMoviesFragment(), "SearchMoviesFragment");
+        navigateTo(new SearchMoviesFragment());
     }
 
     @Override
@@ -279,7 +281,7 @@ public class SearchTVShowsFragment extends Fragment {
     }
 
     void searchTVShows(String query) {
-        apiService.searchTVShows(TMDBpath.searchTVShows(), query).enqueue(new Callback<TVShowResponse>() {
+        safeEnqueue(apiService.searchTVShows(TMDBpath.searchTVShows(), query), new Callback<TVShowResponse>() {
             @Override
             public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -298,7 +300,11 @@ public class SearchTVShowsFragment extends Fragment {
                     viewModel.setSearchTVResults(filtered);
                 }
             }
-            @Override public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {}
+
+            @Override
+            public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                Toast.makeText(getContext(), "Search failed. Check your connection.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 
@@ -312,14 +318,12 @@ public class SearchTVShowsFragment extends Fragment {
 
     private void showTVDetails(TVShowModel tv) {
         if (tv == null) return;
-        TVShowResultDetailsFragment fragment = TVShowResultDetailsFragment.newInstance(tv.getTVShowId());
-        replaceFragment(fragment, "TVShowResultDetailsFragment");
+        navigateTo(TVShowResultDetailsFragment.newInstance(tv.getTVShowId()));
     }
 
     private void onTrendingClick(MediaItem item) {
         if (item == null) return;
-        TVShowResultDetailsFragment fragment = TVShowResultDetailsFragment.newInstance(item.getMediaId());
-        replaceFragment(fragment, "TVShowResultDetailsFragment");
+        navigateTo(TVShowResultDetailsFragment.newInstance(item.getMediaId()));
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -329,13 +333,6 @@ public class SearchTVShowsFragment extends Fragment {
             searchTVList.addAll(tvShows);
             searchAdapter.notifyDataSetChanged();
         });
-    }
-
-    private void replaceFragment(Fragment fragment, String tag) {
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment, tag);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 
     private void updateToggleUI() {
