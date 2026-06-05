@@ -1,18 +1,27 @@
 package emplay.entertainment.emplay.fragment.common;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.CountDownTimer;
+import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.widget.TextViewCompat;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -36,6 +45,53 @@ public abstract class BaseFragment extends Fragment {
 
     protected CountDownTimer countDownTimer;
 
+    // Current background color — tracked so argb animation starts from the right value.
+    // Defaults to near-black. Subclasses that use animateBackground() share this state.
+    @ColorInt
+    private int currentBgColor = 0xFF0D0D0D;
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Default: respect system bars padding (status bar + nav bar).
+        // Fragments that want edge-to-edge (e.g. HomeFragment) should override
+        // onViewCreated, call super, then clear the top padding for their hero area.
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), bars.top, v.getPaddingRight(), v.getPaddingBottom());
+            return insets;
+        });
+    }
+
+    // Dynamic background color — used by fragments with a Palette banner
+    protected void animateBackground(@ColorInt int toColor) {
+        View root = getView();
+        if (root == null || !isAdded()) return;
+
+        int fromColor = currentBgColor;
+        if (fromColor == toColor) return;
+
+        ValueAnimator animator = ValueAnimator.ofObject(new ArgbEvaluator(), fromColor, toColor);
+        animator.setDuration(500);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.addUpdateListener(anim -> {
+            int color = (int) anim.getAnimatedValue();
+            root.setBackgroundColor(color);
+            currentBgColor = color;
+        });
+        animator.start();
+    }
+
+//    Resets the background to the default near-black without animation.
+//    Call in onDestroyView or when leaving the banner screen.
+    protected void resetBackground() {
+        currentBgColor = 0xFF0D0D0D;
+        View root = getView();
+        if (root != null) root.setBackgroundColor(currentBgColor);
+    }
+
+
     // Retrofit
     protected <T> void safeEnqueue(Call<T> call, Callback<T> callback) {
         call.enqueue(new Callback<T>() {
@@ -51,7 +107,7 @@ public abstract class BaseFragment extends Fragment {
         });
     }
 
-    // UI Thread
+    // UI thread
     protected void safeRunOnUiThread(Runnable runnable) {
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
@@ -69,7 +125,7 @@ public abstract class BaseFragment extends Fragment {
         transaction.commit();
     }
 
-    // Genre Chips
+    // Genre chips
     protected void buildGenreChips(FlexboxLayout container, List<String> genres) {
         if (container == null || genres == null) return;
         float density = getResources().getDisplayMetrics().density;
@@ -84,7 +140,8 @@ public abstract class BaseFragment extends Fragment {
             chip.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 13);
             chip.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_meta_chip));
             chip.setPadding(px9, px5, px9, px5);
-            FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             lp.setMarginEnd(px6);
             lp.bottomMargin = px6;
             chip.setLayoutParams(lp);
@@ -92,24 +149,30 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-    // Coming Soon / Released Visibility
-    protected void applyReleaseVisibility(String releaseDateStr, View releasedRoot, View unreleasedRoot, View comingSoonBadge, Runnable onUnreleased) {
+
+    // Release visibility
+    protected void applyReleaseVisibility(String releaseDateStr, View releasedRoot,
+                                          View unreleasedRoot, View comingSoonBadge,
+                                          Runnable onUnreleased) {
         if (releaseDateStr == null || releaseDateStr.isEmpty()) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            LocalDate release = LocalDate.parse(releaseDateStr);
+            LocalDate release    = LocalDate.parse(releaseDateStr);
             boolean isUnreleased = release.isAfter(LocalDate.now());
-            releasedRoot.setVisibility(isUnreleased ? View.GONE : View.VISIBLE);
+            releasedRoot.setVisibility(isUnreleased ? View.GONE  : View.VISIBLE);
             unreleasedRoot.setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
             comingSoonBadge.setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
             if (isUnreleased && onUnreleased != null) onUnreleased.run();
         }
     }
 
-    // Countdown Timer
-    protected void startCountdown(LocalDate releaseDate, WtwUnreleasedViewBinding unreleasedBinding, Runnable onFinish) {
+    // Countdown timer
+    protected void startCountdown(LocalDate releaseDate,
+                                  WtwUnreleasedViewBinding unreleasedBinding,
+                                  Runnable onFinish) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 
-        String formatted = releaseDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.getDefault()));
+        String formatted = releaseDate.format(
+                DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.getDefault()));
         unreleasedBinding.tvExpectedLabel.setText(formatted);
 
         long releaseMillis = releaseDate.atStartOfDay(ZoneId.systemDefault())
@@ -138,7 +201,7 @@ public abstract class BaseFragment extends Fragment {
         }.start();
     }
 
-    // Meta chip icon sizing — scales drawableStart to match text height
+    // Scales the drawableStart of a chip TextView to match its text height.
     protected static void sizeChipIcon(TextView tv) {
         Drawable[] drawables = TextViewCompat.getCompoundDrawablesRelative(tv);
         Drawable icon = drawables[0];
@@ -148,7 +211,6 @@ public abstract class BaseFragment extends Fragment {
         TextViewCompat.setCompoundDrawablesRelative(tv, icon, null, null, null);
     }
 
-    // Watch Providers
     protected void handleNoWatchProviders(View layoutEmpty, View rvProviders, View tabLayout) {
         if (!isAdded()) return;
         layoutEmpty.setVisibility(View.VISIBLE);
@@ -156,7 +218,6 @@ public abstract class BaseFragment extends Fragment {
         tabLayout.setVisibility(View.GONE);
     }
 
-    // Countdown Cleanup
     protected void cancelCountdown() {
         if (countDownTimer != null) {
             countDownTimer.cancel();
@@ -164,15 +225,13 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-     // Shows a dialog prompting the guest user to sign in before saving to their watchlist.
     protected void showLoginPromptDialog() {
         if (!isAdded() || getContext() == null) return;
         new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.login_prompt_title)
                 .setMessage(R.string.login_prompt_message)
-                .setPositiveButton(R.string.login_prompt_sign_in, (d, w) -> {
-                    startActivity(new Intent(requireContext(), LoginActivity.class));
-                })
+                .setPositiveButton(R.string.login_prompt_sign_in, (d, w) ->
+                        startActivity(new Intent(requireContext(), LoginActivity.class)))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
     }

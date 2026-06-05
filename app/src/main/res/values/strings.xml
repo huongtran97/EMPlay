@@ -28,6 +28,7 @@
     <string name="browse_by_genre">Browse by genre</string>
     <string name="show_icon">Icon</string>
     <string name="show_poster">Poster</string>
+    <string name="add_to_watchlist">Add to watchlist</string>
     <string name="whats_new">What\'s new</string>
     <string name="upcoming">Upcoming</string>
     <string name="trailer">Trailer</string>
@@ -113,6 +114,8 @@
     <string name="login_prompt_sign_in">Sign in</string>
     <string name="disconnect_tmdb">Disconnect TMDB</string>
     <string name="tmdb_account_badge">TMDB Account</string>
+    <string name="now_in_theaters">Now Showing</string>
+    <string name="show_backdrop">show backdrop\n</string>
 
 
 </resources>

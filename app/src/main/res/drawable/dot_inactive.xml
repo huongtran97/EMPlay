@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    dot_inactive.xml
+    Small semi-transparent circle for inactive pagination dots.
+    Width and height are both fixed at 8dp in code (buildDots method).
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+
+    <!-- White at ~32% opacity -->
+    <solid android:color="#52FFFFFF" />
+
+</shape>

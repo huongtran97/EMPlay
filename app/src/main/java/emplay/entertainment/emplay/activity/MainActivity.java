@@ -7,6 +7,10 @@ import android.util.Log;
 
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import emplay.entertainment.emplay.auth.AuthManager;
 
@@ -29,11 +33,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.movie_fragment);
 
         SharedViewModel viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.movie_bottom_navigation_view);
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNavigationView, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bars.bottom);
+            return insets;
+        });
         if (bottomNavigationView == null) {
             Log.e("MovieOption", "BottomNavigationView is null");
         }
@@ -71,9 +81,10 @@ public class MainActivity extends AppCompatActivity {
             return true;
         });
 
-        // Show the welcome dialog if user isn't logged in yet
+        // Show the welcome dialog only when the user hasn't made any choice this session.
+        // GUEST means they already dismissed it; GOOGLE/TMDB means they're logged in.
         AuthManager authManager = AuthManager.getInstance(this);
-        if (!authManager.isLoggedIn()) {
+        if (authManager.getAuthType() == AuthManager.AuthType.NONE) {
             @SuppressLint("InflateParams") View dialogView = getLayoutInflater().inflate(R.layout.dialog_welcome, null);
 
             welcomeDialog = new android.app.Dialog(this);

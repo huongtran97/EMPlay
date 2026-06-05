@@ -109,4 +109,6 @@ dependencies {
     implementation 'androidx.security:security-crypto:1.1.0-alpha06'
     // Chrome Custom Tabs for TMDB OAuth flow
     implementation 'androidx.browser:browser:1.8.0'
+    implementation 'me.relex:circleindicator:2.1.6'
+    implementation 'androidx.palette:palette:1.0.0'
 }

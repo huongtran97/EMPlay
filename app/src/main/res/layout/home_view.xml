@@ -13,11 +13,107 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/vpTrendingBanner"
+        <!-- HERO BANNER  -->
+        <FrameLayout
+            android:id="@+id/heroBannerContainer"
             android:layout_width="match_parent"
-            android:layout_height="260dp" />
+            android:layout_height="400dp"
+            android:background="#111111"
+            android:clipChildren="false">
 
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpTrendingBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:overScrollMode="never" />
+
+        </FrameLayout>
+
+        <View
+            android:id="@+id/viewBannerFade"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:layout_marginTop="-32dp"
+            android:background="@drawable/gradient_banner_bottom" />
+
+        <!-- PAGINATION DOTS -->
+        <LinearLayout
+            android:id="@+id/llHeroDots"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+
+        <!-- NOW IN THEATERS badge -->
+        <TextView
+            android:id="@+id/tvHeroBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_badge_theaters"
+            android:paddingHorizontal="9dp"
+            android:paddingVertical="3dp"
+            android:text="@string/now_in_theaters"
+            android:textColor="#E57373"
+            android:textSize="11sp"
+            android:letterSpacing="0.09"
+            android:textAllCaps="true"
+            android:textStyle="bold" />
+
+        <!-- MOVIE TITLE -->
+        <TextSwitcher
+            android:id="@+id/tvHeroTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginHorizontal="20dp"
+            android:gravity="center" />
+
+        <!-- Meta row -->
+        <LinearLayout
+            android:id="@+id/llHeroMeta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <!-- Language-->
+            <TextView
+                android:id="@+id/tvHeroYear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#80FFFFFF"
+                android:textSize="13sp" />
+
+            <!-- Dot separator -->
+            <View
+                android:layout_width="3dp"
+                android:layout_height="3dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="#40FFFFFF"
+                android:layerType="software" />
+
+            <!-- Star rating -->
+            <TextView
+                android:id="@+id/tvHeroRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawablePadding="4dp"
+                android:textColor="#FFD600"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- WHAT'S NEW -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,6 +142,7 @@
 
         </LinearLayout>
 
+        <!-- Filter buttons row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -102,6 +199,7 @@
             android:paddingHorizontal="14dp"
             android:nestedScrollingEnabled="false" />
 
+        <!-- UPCOMING -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -140,10 +238,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="@string/movie"
                 android:textColor="#666666"
-                android:textSize="14sp"
-                android:gravity="center"/>
+                android:textSize="14sp" />
 
         </LinearLayout>
 
@@ -152,8 +250,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
-            android:paddingHorizontal="14dp"
-            android:clipToPadding="false"/>
+            android:clipToPadding="false"
+            android:paddingHorizontal="14dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -166,10 +264,10 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:gravity="center"
                 android:text="@string/tv_show"
                 android:textColor="#666666"
-                android:textSize="14sp"
-                android:gravity="center"/>
+                android:textSize="14sp" />
 
         </LinearLayout>
 
@@ -178,8 +276,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:paddingHorizontal="14dp"
-            android:clipToPadding="false" />
+            android:clipToPadding="false"
+            android:paddingHorizontal="14dp" />
 
     </LinearLayout>
 

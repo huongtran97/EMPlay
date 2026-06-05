@@ -2,30 +2,42 @@ package emplay.entertainment.emplay.adapter.movie;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.Nullable;
+import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.button.MaterialButton;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import java.util.List;
-import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.api.auth.TMDBWatchlistApiService;
+import emplay.entertainment.emplay.api.auth.model.TMDBAccountStatesResponse;
+import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistRequest;
+import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistStatusResponse;
 import emplay.entertainment.emplay.api.common.ImageUrl;
+import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
 import emplay.entertainment.emplay.models.movie.MovieModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAdapter.ViewHolder> {
 
@@ -33,9 +45,21 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     private final List<MovieModel> movies;
     private final OnItemClickListener listener;
     private final DatabaseHelper dbHelper;
+    private final TMDBWatchlistApiService watchlistApiService;
+
+    @Nullable
+    private OnPaletteColorListener paletteColorListener;
 
     public interface OnItemClickListener {
         void onItemClick(MovieModel movie);
+    }
+
+    public interface OnPaletteColorListener {
+        void onColorReady(int position, int color);
+    }
+
+    public void setPaletteColorListener(@Nullable OnPaletteColorListener listener) {
+        this.paletteColorListener = listener;
     }
 
     public TrendingBannerAdapter(Context context, List<MovieModel> movies,
@@ -44,6 +68,7 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         this.movies = movies;
         this.dbHelper = dbHelper;
         this.listener = listener;
+        this.watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
     }
 
     @NonNull
@@ -54,31 +79,60 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         return new ViewHolder(view);
     }
 
-    @SuppressLint("StringFormatInvalid")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MovieModel movie = movies.get(position);
 
-        holder.tvHeroTitle.setText(movie.getTitle());
-        holder.tvHeroRating.setText(
-                holder.itemView.getContext().getString(R.string.rating_format, movie.getVoteAverage())
-        );
+        String posterUrl = ImageUrl.POSTER + movie.getPosterPath();
+        if (paletteColorListener != null) {
+            Glide.with(context)
+                    .asBitmap()
+                    .load(posterUrl)
+                    .placeholder(R.drawable.bg_poster_placeholder)
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap bitmap,
+                                                    @Nullable Transition<? super Bitmap> transition) {
+                            holder.ivHeroPoster.setImageBitmap(bitmap);
+                            Palette.from(bitmap).generate(palette -> {
+                                if (palette == null || paletteColorListener == null) return;
+                                int fallback = 0xFF0D0D0D;
+                                int dominant = palette.getDarkMutedColor(
+                                        palette.getDarkVibrantColor(fallback));
+                                float[] hsv = new float[3];
+                                Color.colorToHSV(dominant, hsv);
+                                hsv[2] *= 0.55f;
+                                paletteColorListener.onColorReady(position, Color.HSVToColor(hsv));
+                            });
+                        }
 
-        if (movie.getReleaseDate() != null && movie.getReleaseDate().length() >= 4) {
-            holder.tvHeroYear.setText(movie.getReleaseDate().substring(0, 4));
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                            holder.ivHeroPoster.setImageDrawable(placeholder);
+                        }
+                    });
+        } else {
+            Glide.with(context)
+                    .load(posterUrl)
+                    .placeholder(R.drawable.bg_poster_placeholder)
+                    .into(holder.ivHeroPoster);
         }
-        holder.tvHeroGenre.setText(movie.getOriginalLanguage().toUpperCase(Locale.ROOT));
 
-        Glide.with(context)
-                .load(ImageUrl.BACKDROP + movie.getBackdropPath())
-                .placeholder(R.drawable.bg_poster_placeholder)
-                .into(holder.ivHeroPoster);
-
-        holder.btnHeroMoreInfo.setOnClickListener(v -> listener.onItemClick(movie));
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(movie));
         setupWatchlistButton(holder, movie);
     }
 
+    @Nullable
+    public MovieModel getMovie(int position) {
+        if (position < 0 || position >= movies.size()) return null;
+        return movies.get(position);
+    }
+
     private void setupWatchlistButton(ViewHolder holder, MovieModel movie) {
+        holder.btnHeroWatchlist.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
         AuthManager auth = AuthManager.getInstance(context);
         switch (auth.getAuthType()) {
             case GOOGLE:
@@ -105,26 +159,80 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
                 break;
 
             case TMDB:
-                // Banner doesn't support per-item account_states fetch; direct to detail page.
-                holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_watchlist));
-                holder.btnHeroWatchlist.setOnClickListener(v -> {
-                    Toast.makeText(context, "Open movie details to save to your TMDB watchlist", Toast.LENGTH_SHORT).show();
-                    listener.onItemClick(movie);
-                });
+                setupTmdbWatchlistButton(holder, auth, movie);
                 break;
 
             default:
-                holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, R.drawable.ic_watchlist));
+                holder.icHeroWatchlist.setImageResource(R.drawable.ic_watchlist);
                 holder.btnHeroWatchlist.setOnClickListener(v ->
                         Toast.makeText(context, "Sign in to save movies", Toast.LENGTH_SHORT).show());
                 break;
         }
     }
 
+    private void setupTmdbWatchlistButton(ViewHolder holder, AuthManager auth, MovieModel movie) {
+        holder.icHeroWatchlist.setImageResource(R.drawable.ic_watchlist);
+        holder.btnHeroWatchlist.setEnabled(false);
+
+        watchlistApiService.getAccountStates(
+                TMDBpath.movieAccountStates(movie.getMovieId()), auth.getTMDBSessionId())
+                .enqueue(new Callback<TMDBAccountStatesResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBAccountStatesResponse> call,
+                                           @NonNull Response<TMDBAccountStatesResponse> response) {
+                        boolean inWatchlist = response.isSuccessful()
+                                && response.body() != null && response.body().watchlist;
+                        applyTmdbState(holder, auth, movie, inWatchlist);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBAccountStatesResponse> call, @NonNull Throwable t) {
+                        applyTmdbState(holder, auth, movie, false);
+                    }
+                });
+    }
+
+    private void applyTmdbState(ViewHolder holder, AuthManager auth, MovieModel movie, boolean inWatchlist) {
+        holder.icHeroWatchlist.setImageResource(inWatchlist ? R.drawable.ic_check : R.drawable.ic_watchlist);
+        holder.btnHeroWatchlist.setEnabled(true);
+        holder.btnHeroWatchlist.setOnClickListener(v -> toggleTmdbWatchlist(holder, auth, movie, inWatchlist));
+    }
+
+    private void toggleTmdbWatchlist(ViewHolder holder, AuthManager auth, MovieModel movie, boolean currentlyInWatchlist) {
+        holder.btnHeroWatchlist.setEnabled(false);
+        boolean addToWatchlist = !currentlyInWatchlist;
+
+        watchlistApiService.updateWatchlist(
+                TMDBpath.accountAddToWatchlist(auth.getTMDBAccountId()),
+                auth.getTMDBSessionId(),
+                new TMDBWatchlistRequest("movie", movie.getMovieId(), addToWatchlist))
+                .enqueue(new Callback<TMDBWatchlistStatusResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TMDBWatchlistStatusResponse> call,
+                                           @NonNull Response<TMDBWatchlistStatusResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            Toast.makeText(context,
+                                    addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist",
+                                    Toast.LENGTH_SHORT).show();
+                            applyTmdbState(holder, auth, movie, addToWatchlist);
+                        } else {
+                            Toast.makeText(context, "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                            applyTmdbState(holder, auth, movie, currentlyInWatchlist);
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(context, "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                        applyTmdbState(holder, auth, movie, currentlyInWatchlist);
+                    }
+                });
+    }
+
     private void updateWatchlistIcon(ViewHolder holder, String userId, int movieId) {
         int iconRes = WatchlistHelper.isMovieSaved(dbHelper, userId, movieId)
                 ? R.drawable.ic_check : R.drawable.ic_watchlist;
-        holder.btnHeroWatchlist.setIcon(ContextCompat.getDrawable(context, iconRes));
+        holder.icHeroWatchlist.setImageResource(iconRes);
     }
 
     @Override
@@ -141,20 +249,14 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivHeroPoster;
-        TextView tvHeroTitle, tvHeroYear, tvHeroGenre, tvHeroRating, tvHeroBadge;
-        MaterialButton btnHeroWatchlist;
-        Button btnHeroMoreInfo;
+        LinearLayout btnHeroWatchlist;
+        ImageView icHeroWatchlist;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivHeroPoster = itemView.findViewById(R.id.ivHeroPoster);
-            tvHeroTitle = itemView.findViewById(R.id.tvHeroTitle);
-            tvHeroYear = itemView.findViewById(R.id.tvHeroYear);
-            tvHeroGenre = itemView.findViewById(R.id.tvHeroGenre);
-            tvHeroRating = itemView.findViewById(R.id.tvHeroRating);
-            tvHeroBadge = itemView.findViewById(R.id.tvHeroBadge);
             btnHeroWatchlist = itemView.findViewById(R.id.btnHeroWatchlist);
-            btnHeroMoreInfo = itemView.findViewById(R.id.btnHeroMoreInfo);
+            icHeroWatchlist = itemView.findViewById(R.id.icHeroWatchlist);
         }
     }
 }
