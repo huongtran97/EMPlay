@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ═══════════════════════════════════════
+         TEXT SIZES
+         Usage in XML : android:textSize="@dimen/text_badge"
+         Usage in Java: tv.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+                            getResources().getDimension(R.dimen.text_badge));
+    ════════════════════════════════════════ -->
+    <dimen name="text_badge">11sp</dimen>           <!-- "Now in theaters", "Coming Soon", countdown unit labels (D/H/M/S) -->
+    <dimen name="text_divider_label">12sp</dimen>   <!-- "or" divider in login screen -->
+    <dimen name="text_meta">13sp</dimen>            <!-- hero language, hero rating, login subtitle, notify button -->
+    <dimen name="text_chip">14sp</dimen>            <!-- all meta chips, filter buttons, button labels, see_all, upcoming sub-label -->
+    <dimen name="text_poster_rating">15sp</dimen>   <!-- rating on detail screen poster row -->
+    <dimen name="text_body">16sp</dimen>            <!-- overview, read_more, expected release date label -->
+    <dimen name="text_section_header">18sp</dimen>  <!-- "What's New", "Upcoming" section headers -->
+    <dimen name="text_title">22sp</dimen>           <!-- hero banner title, detail screen title -->
+    <dimen name="text_countdown">24sp</dimen>       <!-- countdown timer digits -->
+    <dimen name="text_app_name">30sp</dimen>        <!-- "Emplay" on login screen -->
+
+    <!-- ═══════════════════════════════════════
+         SPACING — margins and padding
+         Usage in XML : android:layout_margin="@dimen/margin_screen"
+    ════════════════════════════════════════ -->
+    <dimen name="margin_dot_separator">3dp</dimen>      <!-- dot separator between language / rating -->
+    <dimen name="margin_chip_gap">6dp</dimen>           <!-- gap between chips and dots -->
+    <dimen name="margin_element_gap">8dp</dimen>        <!-- gap between sibling buttons / filter row items -->
+    <dimen name="margin_banner_gap">12dp</dimen>        <!-- gap between banner cards in ViewPager2 -->
+    <dimen name="margin_screen_tight">14dp</dimen>      <!-- horizontal padding for section headers -->
+    <dimen name="margin_screen">16dp</dimen>            <!-- standard horizontal screen margin -->
+    <dimen name="margin_banner_horizontal">20dp</dimen> <!-- ViewPager2 paddingHorizontal for peek effect -->
+    <dimen name="margin_login_horizontal">32dp</dimen>  <!-- login screen content horizontal padding -->
+
+    <!-- ═══════════════════════════════════════
+         PADDING — internal component padding
+    ════════════════════════════════════════ -->
+    <dimen name="padding_badge_vertical">3dp</dimen>    <!-- badge top/bottom padding -->
+    <dimen name="padding_badge_horizontal">9dp</dimen>  <!-- badge left/right padding -->
+    <dimen name="padding_chip_vertical">5dp</dimen>     <!-- chip top/bottom padding -->
+    <dimen name="padding_chip_horizontal">10dp</dimen>  <!-- chip left/right padding -->
+    <dimen name="padding_countdown_top">12dp</dimen>    <!-- countdown block top padding -->
+    <dimen name="padding_countdown_bottom">10dp</dimen> <!-- countdown block bottom padding -->
+
+    <!-- ═══════════════════════════════════════
+         COMPONENT SIZES
+    ════════════════════════════════════════ -->
+    <dimen name="size_section_icon">15dp</dimen>        <!-- section header icon (What's New, Upcoming) -->
+    <dimen name="size_notify_icon">16dp</dimen>         <!-- bell icon inside notify button -->
+    <dimen name="size_watchlist_icon">20dp</dimen>      <!-- watchlist icon in action button -->
+    <dimen name="size_action_button">44dp</dimen>       <!-- square action buttons (trailer, watchlist, guest btn) -->
+    <dimen name="size_login_button">50dp</dimen>        <!-- Google / TMDB / notify buttons height -->
+    <dimen name="size_back_button">48dp</dimen>         <!-- back and share circular buttons -->
+    <dimen name="size_logo_width">71dp</dimen>          <!-- app logo width on login screen -->
+    <dimen name="size_logo_height">77dp</dimen>         <!-- app logo height on login screen -->
+    <dimen name="size_banner_height">400dp</dimen>      <!-- hero ViewPager2 height -->
+    <dimen name="size_banner_fade">32dp</dimen>         <!-- gradient fade view below banner -->
+    <dimen name="size_dot_inactive">8dp</dimen>         <!-- pagination dot — inactive (circle) -->
+    <dimen name="size_dot_active">22dp</dimen>          <!-- pagination dot — active (pill) -->
+
+    <!-- ═══════════════════════════════════════
+         CORNER RADIUS
+    ════════════════════════════════════════ -->
+    <dimen name="radius_badge">4dp</dimen>          <!-- "Now in theaters", "Coming Soon" badges -->
+    <dimen name="radius_dot">8dp</dimen>            <!-- dot active pill fully rounded -->
+    <dimen name="radius_poster_card">10dp</dimen>   <!-- poster MaterialCardView -->
+    <dimen name="radius_button">12dp</dimen>        <!-- login buttons, filter buttons -->
+    <dimen name="radius_banner_card">16dp</dimen>   <!-- banner card in ViewPager2 -->
+    <dimen name="radius_circular">50dp</dimen>      <!-- back / share fully circular buttons -->
+
+</resources>

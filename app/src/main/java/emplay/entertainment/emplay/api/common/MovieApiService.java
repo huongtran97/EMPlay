@@ -35,6 +35,10 @@ public interface MovieApiService {
             @Query("path") String path);
 
     @GET("api/tmdb")
+    Call<MovieResponse> getNowPlayingMovies(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
     Call<MovieDetailsResponse> getMovieDetails(
             @Query("path") String path);
 

@@ -14,6 +14,7 @@ import java.util.Locale;
 public class TMDBpath {
 
     public static String trendingMovies() { return "3/trending/movie/week"; }
+    public static String nowPlayingMovies() { return "3/movie/now_playing"; }
     public static String trendingTVShows() { return "3/trending/tv/week"; }
     public static String movieDetails(int movieId) { return "3/movie/" + movieId; }
     public static String movieCredits(int movieId) { return "3/movie/" + movieId + "/credits"; }

@@ -31,7 +31,9 @@ import java.util.Locale;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import emplay.entertainment.emplay.adapter.movie.TrendingBannerAdapter;
 import emplay.entertainment.emplay.database.DatabaseHelper;
@@ -72,18 +74,28 @@ public class HomeFragment extends BaseFragment {
     private TrendingBannerAdapter trendingAdapter;
     private MaterialButton btnWhatsNewTvShow, btnWhatsNewMovie;
     private View heroBannerContainer;
+    private View heroSection;
+    private android.graphics.drawable.LayerDrawable heroSectionLayerBg;
+    private android.graphics.drawable.GradientDrawable heroSectionFill;
     private int heroBgColor = 0xFF111111;
     private final android.util.SparseIntArray bannerColors = new android.util.SparseIntArray();
     private boolean isWhatsNewShowingTV = true;
     private final List<TVShowModel> cachedTVShows = new ArrayList<>();
     private final List<MovieModel> cachedMovies = new ArrayList<>();
+    private final List<MovieModel> nowPlayingPool = new ArrayList<>();
+    private final Random random = new Random();
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.home_view, container, false);
-
         heroBannerContainer = view.findViewById(R.id.heroBannerContainer);
+        heroSection = view.findViewById(R.id.heroSection);
+        heroSectionLayerBg = (android.graphics.drawable.LayerDrawable)
+                ContextCompat.getDrawable(requireContext(), R.drawable.bg_hero_section).mutate();
+        heroSectionFill = (android.graphics.drawable.GradientDrawable) heroSectionLayerBg.getDrawable(1);
+        heroSection.setBackground(heroSectionLayerBg);
+        heroSection.setClipToOutline(true);
         vpTrendingBanner = view.findViewById(R.id.vpTrendingBanner);
         btnWhatsNewTvShow = view.findViewById(R.id.btnWhatsNewTvShow);
         btnWhatsNewMovie = view.findViewById(R.id.btnWhatsNewMovie);
@@ -202,6 +214,7 @@ public class HomeFragment extends BaseFragment {
         rvUpcomingTvShows.setAdapter(upComingTVAdapter);
         rvUpcomingTvShows.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
+        fetchNowPlayingMovies();
         fetchTrendingMovies();
         fetchWhatsNewTVShows();
         fetchUpComingMovie();
@@ -212,13 +225,14 @@ public class HomeFragment extends BaseFragment {
 
     @Override
     protected void animateBackground(int toColor) {
-        if (heroBannerContainer == null || !isAdded()) return;
+        if (heroSectionFill == null || !isAdded()) return;
         ValueAnimator animator = ValueAnimator.ofArgb(heroBgColor, toColor);
         animator.setDuration(500);
         animator.setInterpolator(new DecelerateInterpolator());
         animator.addUpdateListener(a -> {
             int color = (int) a.getAnimatedValue();
-            if (heroBannerContainer != null) heroBannerContainer.setBackgroundColor(color);
+            if (heroSectionFill != null) heroSectionFill.setColor(color);
+            if (isAdded()) requireActivity().getWindow().setStatusBarColor(color);
             heroBgColor = color;
         });
         animator.start();
@@ -226,8 +240,22 @@ public class HomeFragment extends BaseFragment {
 
     @Override
     protected void resetBackground() {
-        heroBgColor = 0xFF111111;
-        if (heroBannerContainer != null) heroBannerContainer.setBackgroundColor(heroBgColor);
+        heroBgColor = 0xFF0A0A0A;
+        if (heroSectionFill != null) heroSectionFill.setColor(heroBgColor);
+        if (isAdded()) requireActivity().getWindow().setStatusBarColor(heroBgColor);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (isAdded()) requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (isAdded()) requireActivity().getWindow().setStatusBarColor(heroBgColor);
+        if (!nowPlayingPool.isEmpty()) showNowPlayingBanner();
     }
 
     @Override
@@ -235,6 +263,9 @@ public class HomeFragment extends BaseFragment {
         super.onDestroyView();
         resetBackground();
         heroBannerContainer = null;
+        heroSection = null;
+        heroSectionLayerBg = null;
+        heroSectionFill = null;
     }
 
     private void switchWhatsNew(boolean showTV) {
@@ -255,6 +286,43 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
     }
 
+    private void fetchNowPlayingMovies() {
+        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies()), new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<MovieModel> results = response.body().getResults();
+                    if (results == null || results.isEmpty()) return;
+                    nowPlayingPool.clear();
+                    for (MovieModel m : results) {
+                        if (m.getBackdropPath() != null) nowPlayingPool.add(m);
+                        if (nowPlayingPool.size() == 6) break;
+                    }
+                    showNowPlayingBanner();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                Log.e("HomeFragment", "Failed to fetch now playing movies", t);
+            }
+        });
+    }
+
+    private void showNowPlayingBanner() {
+        if (nowPlayingPool.isEmpty() || !isAdded()) return;
+        bannerColors.clear();
+        List<MovieModel> ordered = new ArrayList<>(nowPlayingPool);
+        Collections.swap(ordered, 0, random.nextInt(ordered.size()));
+        trendingAdapter.updateData(ordered);
+        buildDots(ordered.size());
+        vpTrendingBanner.setCurrentItem(0, false);
+        MovieModel first = ordered.get(0);
+        tvHeroTitle.setCurrentText(first.getTitle());
+        tvHeroYear.setText(first.getOriginalLanguage().toUpperCase(Locale.ROOT));
+        tvHeroRating.setText(getString(R.string.rating_format, first.getVoteAverage()));
+    }
+
     private void fetchTrendingMovies() {
         safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
             @Override
@@ -262,14 +330,6 @@ public class HomeFragment extends BaseFragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<MovieModel> results = response.body().getResults();
                     if (results == null || results.isEmpty()) return;
-                    trendingAdapter.updateData(new ArrayList<>(results.subList(0, Math.min(results.size(), 5))));
-                    buildDots(trendingAdapter.getItemCount());
-                    MovieModel first = trendingAdapter.getMovie(0);
-                    if (first != null) {
-                        tvHeroTitle.setCurrentText(first.getTitle());
-                        tvHeroYear.setText(first.getOriginalLanguage().toUpperCase(Locale.ROOT));
-                        tvHeroRating.setText(getString(R.string.rating_format, first.getVoteAverage()));
-                    }
                     cachedMovies.clear();
                     for (MovieModel movie : results) {
                         if (movie.getPosterPath() != null && BadgeHelper.isNotOlderThan(movie.getReleaseDate(), 30)) {
