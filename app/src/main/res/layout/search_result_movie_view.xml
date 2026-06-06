@@ -53,7 +53,7 @@
                     android:layout_marginBottom="8dp"
                     android:text="CAST"
                     android:textColor="#777777"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/text_badge"
                     android:letterSpacing="0.15"
                     android:fontFamily="sans-serif-medium" />
 
@@ -87,7 +87,7 @@
                     android:layout_marginBottom="8dp"
                     android:text="YOU MIGHT ALSO LIKE"
                     android:textColor="#777777"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/text_badge"
                     android:letterSpacing="0.15"
                     android:fontFamily="sans-serif-medium" />
 
@@ -125,7 +125,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textColor="#888888"
-                        android:textSize="13sp" />
+                        android:textSize="@dimen/text_meta" />
 
                     <ImageButton
                         android:id="@+id/suggestion_btn_next"

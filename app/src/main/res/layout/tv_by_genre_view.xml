@@ -12,13 +12,13 @@
         android:id="@+id/tv_genres"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/black_han_sans"
+        android:fontFamily="@font/bebas_neue"
         android:paddingStart="20dp"
         android:paddingTop="20dp"
         android:paddingBottom="10dp"
         android:text="Genre name goes here"
         android:textColor="#FFFFFF"
-        android:textSize="22sp"
+        android:textSize="@dimen/text_title"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"/>
 
@@ -63,7 +63,7 @@
             android:gravity="center"
             android:text="Page 1"
             android:textColor="#888888"
-            android:textSize="13sp" />
+            android:textSize="@dimen/text_meta" />
 
         <ImageButton
             android:id="@+id/btn_next"

@@ -13,10 +13,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:fontFamily="@font/black_han_sans"
+        android:fontFamily="@font/bebas_neue"
         android:text="@string/policy"
         android:textColor="#FFFFFF"
-        android:textSize="22sp" />
+        android:textSize="@dimen/text_title" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#BBBBBB"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_chip"
             android:lineSpacingExtra="4sp"
             android:paddingStart="4dp"
             android:paddingEnd="12dp"
@@ -48,7 +48,7 @@
         android:backgroundTint="#C82923"
         android:text="@string/close"
         android:textColor="#FFFFFF"
-        android:textSize="14sp"
+        android:textSize="@dimen/text_chip"
         android:fontFamily="sans-serif-medium"
         app:cornerRadius="12dp" />
 

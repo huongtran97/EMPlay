@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
             android:textColor="#FFFFFF"
-            android:textSize="15sp"
+            android:textSize="@dimen/text_poster_rating"
             android:textStyle="bold"
             android:maxLines="1"
             android:ellipsize="end" />
@@ -46,7 +46,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#777777"
-            android:textSize="16sp" />
+            android:textSize="@dimen/text_body" />
 
     </LinearLayout>
 
@@ -57,7 +57,7 @@
         android:background="@drawable/bg_type_badge"
         android:paddingHorizontal="7dp"
         android:paddingVertical="2dp"
-        android:textSize="12sp"
+        android:textSize="@dimen/text_divider_label"
         android:textStyle="bold" />
 
 </LinearLayout>

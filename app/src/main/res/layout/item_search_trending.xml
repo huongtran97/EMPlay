@@ -23,7 +23,7 @@
             android:minWidth="48dp"
             android:gravity="center"
             android:textColor="#E05C30"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_section_header"
             android:textStyle="bold"/>
 
         <ImageView
@@ -46,8 +46,9 @@
                 android:id="@+id/trendNow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:text="@string/rating_format"
+                android:textColor="#FFC107"
+                android:textSize="@dimen/text_section_header"
                 android:ellipsize="end"
                 android:maxLines="1"/>
 
@@ -57,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="3dp"
                 android:textColor="#777777"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_chip" />
         </LinearLayout>
     </LinearLayout>
 

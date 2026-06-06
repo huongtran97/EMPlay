@@ -42,9 +42,9 @@
                         android:id="@+id/cast_detail_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/black_han_sans"
+                        android:fontFamily="@font/bebas_neue"
                         android:textColor="#FFFFFF"
-                        android:textSize="20sp"/>
+                        android:textSize="@dimen/text_subtitle"/>
 
                     <TextView
                         android:id="@+id/cast_detail_department"
@@ -53,7 +53,7 @@
                         android:layout_marginTop="4dp"
                         android:fontFamily="sans-serif"
                         android:textColor="#E53935"
-                        android:textSize="13sp"/>
+                        android:textSize="@dimen/text_meta"/>
 
                     <TextView
                         android:id="@+id/cast_detail_birthday"
@@ -62,7 +62,7 @@
                         android:layout_marginTop="6dp"
                         android:fontFamily="sans-serif"
                         android:textColor="#888888"
-                        android:textSize="13sp"/>
+                        android:textSize="@dimen/text_meta"/>
 
                     <TextView
                         android:id="@+id/cast_detail_place"
@@ -71,7 +71,7 @@
                         android:layout_marginTop="2dp"
                         android:fontFamily="sans-serif"
                         android:textColor="#888888"
-                        android:textSize="13sp"/>
+                        android:textSize="@dimen/text_meta"/>
 
                 </LinearLayout>
 
@@ -99,7 +99,7 @@
                     android:layout_marginTop="16dp"
                     android:text="@string/bio"
                     android:textColor="#777777"
-                    android:textSize="11sp"
+                    android:textSize="@dimen/text_badge"
                     android:letterSpacing="0.15"
                     android:fontFamily="sans-serif-medium"
                     app:layout_constraintStart_toStartOf="parent"
@@ -115,7 +115,7 @@
                     android:fontFamily="sans-serif"
                     android:lineSpacingExtra="4dp"
                     android:textColor="#BBBBBB"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_meta"
                     android:maxLines="4"
                     android:ellipsize="end"
                     android:breakStrategy="high_quality"
@@ -135,7 +135,7 @@
                     android:paddingBottom="12dp"
                     android:text="@string/read_more"
                     android:textColor="#E53935"
-                    android:textSize="12sp"
+                    android:textSize="@dimen/text_divider_label"
                     android:textStyle="bold"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="@id/cast_detail_biography"
@@ -160,7 +160,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="@string/credit"
                 android:textColor="#777777"
-                android:textSize="11sp"
+                android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium"/>
 
@@ -197,7 +197,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textColor="#888888"
-                    android:textSize="13sp" />
+                    android:textSize="@dimen/text_meta" />
 
                 <ImageButton
                     android:id="@+id/credits_btn_next"

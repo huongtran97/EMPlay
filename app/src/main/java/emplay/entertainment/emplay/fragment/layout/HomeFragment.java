@@ -124,7 +124,7 @@ public class HomeFragment extends BaseFragment {
             public View makeView() {
                 TextView tv = new TextView(requireContext());
                 tv.setTextSize(22f);
-                tv.setTypeface(Typeface.DEFAULT_BOLD);
+                tv.setTypeface(androidx.core.content.res.ResourcesCompat.getFont(requireContext(), R.font.bebas_neue));
                 tv.setTextColor(Color.WHITE);
                 tv.setGravity(Gravity.CENTER);
                 tv.setLayoutParams(new FrameLayout.LayoutParams(

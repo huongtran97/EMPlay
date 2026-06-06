@@ -27,7 +27,7 @@
         android:layout_gravity="bottom"
         android:padding="5dp"
         android:textColor="#FFFFFF"
-        android:textSize="11sp"
+        android:textSize="@dimen/text_badge"
         android:textStyle="bold"
         android:maxLines="2"
         android:ellipsize="end" />

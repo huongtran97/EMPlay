@@ -28,7 +28,7 @@
         android:layout_marginStart="6dp"
         android:text="@string/wtw"
         android:textColor="@color/text_tertiary"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_body"
         android:textStyle="bold"
         android:letterSpacing="0.08"
         android:fontFamily="sans-serif-medium"
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:text="@string/region"
             android:textColor="@color/text_disabled"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_body"
             android:fontFamily="sans-serif" />
 
     </LinearLayout>
@@ -136,7 +136,7 @@
             android:layout_height="wrap_content"
             android:text="@string/unavailable_country"
             android:textColor="@color/text_disabled"
-            android:textSize="16sp"
+            android:textSize="@dimen/text_body"
             android:fontFamily="sans-serif" />
 
     </LinearLayout>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_rounded_bg"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/bebas_neue"
+        android:text="@string/libraries"
+        android:textColor="#FFFFFF"
+        android:textSize="@dimen/text_title" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="16dp"
+        android:fadeScrollbars="false"
+        android:scrollbarStyle="insideInset"
+        android:scrollbars="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingEnd="12dp"
+            android:paddingBottom="8dp">
+
+            <!-- Retrofit -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Retrofit" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Square" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- OkHttp -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="OkHttp" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Square" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- Glide -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Glide" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Bump Technologies" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- Glide Transformations -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Glide Transformations" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Wasabeef" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- CircleImageView -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="CircleImageView" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="hdodenhof" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- FlexboxLayout -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="FlexboxLayout" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Google" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- Palette -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Palette" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AndroidX" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- Android Image Slider -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Android Image Slider" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="smarteist" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- CircleIndicator -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="CircleIndicator" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="reaxt" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+            <!-- Security Crypto -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Security Crypto" android:textColor="#CCCCCC" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif-medium" />
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="AndroidX" android:textColor="#555555" android:textSize="@dimen/text_chip" android:fontFamily="sans-serif" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_close"
+        android:layout_width="match_parent"
+        android:layout_height="54dp"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#C82923"
+        android:text="@string/close"
+        android:textColor="#FFFFFF"
+        android:textSize="@dimen/text_chip"
+        android:fontFamily="sans-serif-medium"
+        app:cornerRadius="12dp" />
+
+</LinearLayout>

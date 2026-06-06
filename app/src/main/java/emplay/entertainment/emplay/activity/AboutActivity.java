@@ -2,6 +2,9 @@ package emplay.entertainment.emplay.activity;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
+import android.net.Uri;
+import android.widget.ImageView;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -28,6 +31,7 @@ import emplay.entertainment.emplay.R;
 public class AboutActivity extends AppCompatActivity {
 
     private Dialog privacyPolicyDialog;
+    private Dialog librariesDialog;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -44,6 +48,13 @@ public class AboutActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             findViewById(R.id.privacy_policy_row).setOnClickListener(v -> showPrivacyPolicy());
         }
+
+        findViewById(R.id.libraries_row).setOnClickListener(v -> showLibraries());
+
+        ImageView tmdbLogo = findViewById(R.id.tmdb_logo);
+        tmdbLogo.setOnClickListener(v -> startActivity(
+                new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.themoviedb.org"))));
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -89,11 +100,29 @@ public class AboutActivity extends AppCompatActivity {
         privacyPolicyDialog.show();
     }
 
+    private void showLibraries() {
+        librariesDialog = new Dialog(this);
+        librariesDialog.setContentView(R.layout.dialog_libraries);
+
+        Window window = librariesDialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setLayout((int) (getResources().getDisplayMetrics().widthPixels * 0.90),
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        librariesDialog.findViewById(R.id.btn_close).setOnClickListener(v -> librariesDialog.dismiss());
+        librariesDialog.show();
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         if (privacyPolicyDialog != null && privacyPolicyDialog.isShowing()) {
             privacyPolicyDialog.dismiss();
+        }
+        if (librariesDialog != null && librariesDialog.isShowing()) {
+            librariesDialog.dismiss();
         }
     }
 }

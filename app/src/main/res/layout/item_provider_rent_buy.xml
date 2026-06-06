@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/text_overview"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_chip"
             android:maxLines="1" />
 
         <TextView
@@ -42,17 +42,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="@color/text_hint"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_chip"
             android:maxLines="1" />
 
     </LinearLayout>
-
-    <!-- Price -->
-    <TextView
-        android:id="@+id/tv_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/accent_yellow"
-        android:textSize="14sp"/>
 
 </LinearLayout>

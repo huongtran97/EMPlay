@@ -13,7 +13,7 @@
         android:paddingBottom="10dp"
         android:text="@string/watch_list"
         android:textColor="#FFFFFF"
-        android:textSize="20sp"
+        android:textSize="@dimen/text_subtitle"
         android:textStyle="bold" />
 
     <com.google.android.material.tabs.TabLayout
@@ -47,7 +47,7 @@
             android:layout_weight="1"
             android:text="@string/count_item"
             android:textColor="#666666"
-            android:textSize="16sp" />
+            android:textSize="@dimen/text_body" />
 
         <LinearLayout
             android:id="@+id/llSortBtn"
@@ -73,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/a_z"
                 android:textColor="#AAAAAA"
-                android:textSize="16sp" />
+                android:textSize="@dimen/text_body" />
 
         </LinearLayout>
 

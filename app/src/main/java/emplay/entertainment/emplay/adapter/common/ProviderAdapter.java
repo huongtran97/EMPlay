@@ -101,14 +101,13 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      */
     static class RentBuyViewHolder extends RecyclerView.ViewHolder {
         ImageView ivLogo;
-        TextView tvName, tvQuality, tvPrice;
+        TextView tvName, tvQuality;
 
         RentBuyViewHolder(View itemView) {
             super(itemView);
             ivLogo    = itemView.findViewById(R.id.iv_provider_logo);
             tvName    = itemView.findViewById(R.id.tv_provider_name);
             tvQuality = itemView.findViewById(R.id.tv_quality);
-            tvPrice   = itemView.findViewById(R.id.tv_price);
         }
 
         void bind(ProviderModel provider) {
@@ -119,9 +118,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);
 
-            // Hide price and quality since TMDB does not return this data
             tvQuality.setVisibility(View.GONE);
-            tvPrice.setVisibility(View.GONE);
         }
     }
 }

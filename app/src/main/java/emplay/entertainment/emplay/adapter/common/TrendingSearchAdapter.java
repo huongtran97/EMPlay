@@ -72,7 +72,7 @@ public class TrendingSearchAdapter extends RecyclerView.Adapter<TrendingSearchAd
         }
 
         // Show rating as meta info since MediaItem doesn't have release date
-        @SuppressLint("DefaultLocale") String meta = String.format("Rating: %.1f", item.getVoteAverage());
+        @SuppressLint("DefaultLocale") String meta = String.format("%.1f", item.getVoteAverage());
         holder.tvMeta.setText(meta);
 
         // hide divider on last item

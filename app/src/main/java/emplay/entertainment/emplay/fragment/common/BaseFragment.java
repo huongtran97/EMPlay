@@ -78,17 +78,17 @@ public abstract class BaseFragment extends Fragment {
         animator.addUpdateListener(anim -> {
             int color = (int) anim.getAnimatedValue();
             root.setBackgroundColor(color);
+            if (isAdded()) requireActivity().getWindow().setStatusBarColor(color);
             currentBgColor = color;
         });
         animator.start();
     }
 
-//    Resets the background to the default near-black without animation.
-//    Call in onDestroyView or when leaving the banner screen.
     protected void resetBackground() {
-        currentBgColor = 0xFF0D0D0D;
+        currentBgColor = 0xFF0A0A0A;
         View root = getView();
         if (root != null) root.setBackgroundColor(currentBgColor);
+        if (isAdded()) requireActivity().getWindow().setStatusBarColor(currentBgColor);
     }
 
 

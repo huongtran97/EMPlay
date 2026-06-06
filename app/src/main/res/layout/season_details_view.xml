@@ -54,7 +54,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="#C0392B"
-                        android:textSize="18sp"
+                        android:textSize="@dimen/text_section_header"
                         android:letterSpacing="0.28"
                         android:textAllCaps="true"
                         android:fontFamily="sans-serif-medium" />
@@ -65,7 +65,7 @@
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/bebas_neue"
                         android:textColor="#F0EDE6"
-                        android:textSize="38sp"
+                        android:textSize="@dimen/text_countdown_large"
                         android:letterSpacing="0.03"
                         android:includeFontPadding="false" />
 
@@ -83,7 +83,7 @@
                             android:layout_height="wrap_content"
                             android:background="@drawable/pill_red"
                             android:textColor="#C0392B"
-                            android:textSize="15sp"
+                            android:textSize="@dimen/text_poster_rating"
                             android:paddingStart="9dp"
                             android:paddingEnd="9dp"
                             android:paddingTop="3dp"
@@ -97,7 +97,7 @@
                             android:layout_marginStart="6dp"
                             android:background="@drawable/pill_dark"
                             android:textColor="#8A8580"
-                            android:textSize="15sp"
+                            android:textSize="@dimen/text_poster_rating"
                             android:paddingStart="9dp"
                             android:paddingEnd="9dp"
                             android:paddingTop="3dp"
@@ -131,7 +131,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/overview"
                     android:textColor="#8A8580"
-                    android:textSize="16sp"
+                    android:textSize="@dimen/text_body"
                     android:letterSpacing="0.28"
                     android:textAllCaps="true"
                     android:fontFamily="sans-serif-medium"
@@ -146,7 +146,7 @@
                     android:justificationMode="inter_word"
                     tools:targetApi="o"
                     android:textColor="#B8B4AD"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_chip"
                     android:maxLines="4"
                     android:ellipsize="end" />
 
@@ -159,7 +159,7 @@
                     android:paddingBottom="4dp"
                     android:text="@string/read_more"
                     android:textColor="#C0392B"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_chip"
                     android:letterSpacing="0.08"
                     android:textAllCaps="true"
                     android:fontFamily="sans-serif-medium"
@@ -184,7 +184,7 @@
                 android:layout_marginBottom="4dp"
                 android:text="@string/episode"
                 android:textColor="#8A8580"
-                android:textSize="15sp"
+                android:textSize="@dimen/text_poster_rating"
                 android:letterSpacing="0.28"
                 android:textAllCaps="true"
                 android:fontFamily="sans-serif-medium" />

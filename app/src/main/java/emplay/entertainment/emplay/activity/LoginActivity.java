@@ -133,6 +133,7 @@ public class LoginActivity extends AppCompatActivity {
                                 }
                             }
 
+                            AuthManager.getInstance(this).setGoogle();
                             Toast.makeText(this, "Welcome, " + name + "!", Toast.LENGTH_SHORT).show();
                             navigateToMainActivity();
                         }

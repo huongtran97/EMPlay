@@ -71,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/bebas_neue"
                     android:textColor="#F0EDE6"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/text_section_header"
                     android:letterSpacing="0.04"
                     android:includeFontPadding="false" />
 
@@ -80,7 +80,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#8A8580"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_meta"
                     android:letterSpacing="0.06" />
 
             </LinearLayout>

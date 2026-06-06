@@ -150,13 +150,13 @@ public class MovieResultDetailsFragment extends BaseFragment {
     @Override
     public void onResume() {
         super.onResume();
-        requireActivity().getWindow().setStatusBarColor(Color.parseColor("#0D0D12"));
+        requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        requireActivity().getWindow().setStatusBarColor(Color.BLACK);
+        requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
         // Language
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            binding.movieInfo.movieLanguage.setText("Language: " + LanguageMapper.getLanguageName(mDetails.getOriginalLanguage()));
+            binding.movieInfo.movieLanguage.setText(" " + LanguageMapper.getLanguageName(mDetails.getOriginalLanguage()));
         }
 
         // Production country

@@ -31,7 +31,7 @@
             android:layout_weight="1"
             android:text="@string/recently_add"
             android:textColor="#FFFFFF"
-            android:textSize="20sp"
+            android:textSize="@dimen/text_subtitle"
             android:textStyle="bold" />
 
     </LinearLayout>
@@ -51,7 +51,7 @@
             android:layout_weight="1"
             android:text="@string/count_item"
             android:textColor="#666666"
-            android:textSize="12sp" />
+            android:textSize="@dimen/text_divider_label" />
 
         <LinearLayout
             android:id="@+id/llSortBtn"
@@ -77,7 +77,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/new_add"
                 android:textColor="#AAAAAA"
-                android:textSize="11sp" />
+                android:textSize="@dimen/text_badge" />
 
         </LinearLayout>
 

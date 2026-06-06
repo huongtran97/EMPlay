@@ -41,8 +41,8 @@
             android:layout_height="wrap_content"
             android:text="@string/emplay"
             android:textColor="#FFFFFF"
-            android:textSize="30sp"
-            android:fontFamily="@font/black_han_sans"
+            android:textSize="@dimen/text_app_name"
+            android:fontFamily="@font/bebas_neue"
             android:layout_marginBottom="4dp"/>
 
         <TextView
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:text="@string/your_movies_and_tv_shows_companion"
             android:textColor="#777777"
-            android:textSize="13sp"
+            android:textSize="@dimen/text_meta"
             android:fontFamily="sans-serif"
             android:layout_marginBottom="40dp"/>
 
@@ -59,9 +59,11 @@
             android:id="@+id/btn_google_sign_in"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="10dp"
+            android:layout_marginBottom="5dp"
             android:backgroundTint="#3A3737"
             android:fontFamily="sans-serif-medium"
+            android:textSize="@dimen/text_chip"
+            android:textColor="#FFFFFF"
             android:stateListAnimator="@null"
             app:cornerRadius="12dp"
             android:text="@string/continue_with_google"
@@ -75,17 +77,27 @@
             android:id="@+id/btn_tmdb_sign_in"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#01B4E4"
+            android:layout_marginBottom="5dp"
+            android:backgroundTint="#3A3737"
             android:text="@string/continue_with_tmdb"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            app:icon="@drawable/tmdb_logo"
+            android:textSize="@dimen/text_chip"
             android:fontFamily="sans-serif-medium"
             android:stateListAnimator="@null"
             app:cornerRadius="12dp"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
             app:iconTint="@null" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="8dp"
+            android:text="@string/tmdb"
+            android:textColor="#555555"
+            android:textSize="@dimen/text_badge" />
 
         <!-- Divider -->
         <LinearLayout
@@ -106,7 +118,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/or"
                 android:textColor="#555555"
-                android:textSize="12sp"
+                android:textSize="@dimen/text_divider_label"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"/>
 
@@ -134,9 +146,10 @@
             android:stateListAnimator="@null"
             android:text="@string/guest"
             android:textColor="#777777"
-            android:textSize="14sp"
+            android:textSize="@dimen/text_chip"
             app:cornerRadius="12dp" />
 
     </LinearLayout>
+
 
 </FrameLayout>

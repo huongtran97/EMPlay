@@ -30,7 +30,7 @@
             android:layout_marginStart="8dp"
             android:text="@string/trending_now"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_section_header"
             android:textStyle="bold" />
 
     </LinearLayout>

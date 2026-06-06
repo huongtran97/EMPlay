@@ -37,7 +37,7 @@
         android:maxLines="2"
         android:padding="5dp"
         android:textColor="#FFFFFF"
-        android:textSize="13sp"
+        android:textSize="@dimen/text_meta"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@id/ivPoster"
         app:layout_constraintEnd_toEndOf="@id/ivPoster"
@@ -53,7 +53,7 @@
         android:paddingHorizontal="4dp"
         android:paddingVertical="1dp"
         android:textColor="#F5C518"
-        android:textSize="11sp"
+        android:textSize="@dimen/text_badge"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,7 +67,7 @@
         android:paddingHorizontal="4dp"
         android:paddingVertical="1dp"
         android:textColor="#FFFFFF"
-        android:textSize="11sp"
+        android:textSize="@dimen/text_badge"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

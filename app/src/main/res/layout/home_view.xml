@@ -69,7 +69,7 @@
                 android:paddingVertical="3dp"
                 android:text="@string/now_in_theaters"
                 android:textColor="#E57373"
-                android:textSize="11sp"
+                android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.09"
                 android:textAllCaps="true"
                 android:textStyle="bold" />
@@ -100,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="#80FFFFFF"
-                    android:textSize="13sp" />
+                    android:textSize="@dimen/text_meta" />
 
                 <!-- Dot separator -->
                 <View
@@ -117,7 +117,7 @@
                     android:layout_height="wrap_content"
                     android:drawablePadding="4dp"
                     android:textColor="#FFD600"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_meta"
                     android:textStyle="bold" />
 
             </LinearLayout>
@@ -149,7 +149,7 @@
                 android:layout_weight="1"
                 android:text="@string/whats_new"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_section_header"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -170,7 +170,7 @@
                 android:text="@string/tv_show"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_chip"
                 android:textStyle="bold"
                 app:backgroundTint="#E50914"
                 app:cornerRadius="20dp" />
@@ -182,7 +182,7 @@
                 android:text="@string/movie"
                 android:textAllCaps="false"
                 android:textColor="#888888"
-                android:textSize="14sp"
+                android:textSize="@dimen/text_chip"
                 app:backgroundTint="#1E1E1E"
                 app:cornerRadius="20dp"
                 app:strokeColor="#2A2A2A"
@@ -199,7 +199,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/see_all"
                 android:textColor="#666666"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_chip" />
 
         </LinearLayout>
 
@@ -234,7 +234,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/upcoming"
                 android:textColor="#FFFFFF"
-                android:textSize="18sp"
+                android:textSize="@dimen/text_section_header"
                 android:textStyle="bold" />
 
         </LinearLayout>
@@ -253,7 +253,7 @@
                 android:gravity="center"
                 android:text="@string/movie"
                 android:textColor="#666666"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_chip" />
 
         </LinearLayout>
 
@@ -279,7 +279,7 @@
                 android:gravity="center"
                 android:text="@string/tv_show"
                 android:textColor="#666666"
-                android:textSize="14sp" />
+                android:textSize="@dimen/text_chip" />
 
         </LinearLayout>
 

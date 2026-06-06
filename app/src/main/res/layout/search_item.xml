@@ -37,7 +37,7 @@
             android:fontFamily="sans-serif-medium"
             android:text="@string/title"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textSize="@dimen/text_section_header"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toTopOf="parent" />
@@ -50,7 +50,7 @@
             android:layout_marginStart="14dp"
             android:text="@string/_0_0"
             android:textColor="#FFC107"
-            android:textSize="15sp"
+            android:textSize="@dimen/text_poster_rating"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toBottomOf="@+id/search_title" />
 
@@ -64,7 +64,7 @@
             android:fontFamily="sans-serif"
             android:text="@string/release_date"
             android:textColor="#555555"
-            android:textSize="15sp"
+            android:textSize="@dimen/text_poster_rating"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toBottomOf="@+id/tvPosterRating" />
@@ -80,7 +80,7 @@
             android:fontFamily="sans-serif"
             android:text="@string/language"
             android:textColor="#555555"
-            android:textSize="15sp"
+            android:textSize="@dimen/text_poster_rating"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/search_poster"
             app:layout_constraintTop_toBottomOf="@+id/search_release_date" />
