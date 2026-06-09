@@ -73,20 +73,20 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         View view = inflater.inflate(R.layout.search_view, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        dbHelper  = DatabaseHelper.getInstance(requireContext());
+        dbHelper = DatabaseHelper.getInstance(requireContext());
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        etSearch          = view.findViewById(R.id.etSearch);
-        rvSearchResults   = view.findViewById(R.id.rvSearchResults);
-        rvGenres          = view.findViewById(R.id.rvGenres);
+        etSearch = view.findViewById(R.id.etSearch);
+        rvSearchResults = view.findViewById(R.id.rvSearchResults);
+        rvGenres = view.findViewById(R.id.rvGenres);
         rvTrendingSearches = view.findViewById(R.id.rvTrendingSearches);
-        svSearchDefault   = view.findViewById(R.id.svSearchDefault);
-        pillsContainer    = view.findViewById(R.id.pillsContainer);
-        recentSearch      = view.findViewById(R.id.recentSearch);
-        clearAll          = view.findViewById(R.id.btnClearAll);
-        btnMovie          = view.findViewById(R.id.btnMovie);
-        btnTvShow         = view.findViewById(R.id.btnTvShow);
-        btnSeeAll         = view.findViewById(R.id.btnSeeAll);
+        svSearchDefault = view.findViewById(R.id.svSearchDefault);
+        pillsContainer = view.findViewById(R.id.pillsContainer);
+        recentSearch = view.findViewById(R.id.recentSearch);
+        clearAll = view.findViewById(R.id.btnClearAll);
+        btnMovie = view.findViewById(R.id.btnMovie);
+        btnTvShow = view.findViewById(R.id.btnTvShow);
+        btnSeeAll = view.findViewById(R.id.btnSeeAll);
 
         if (clearAll != null) {
             clearAll.setPaintFlags(clearAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);

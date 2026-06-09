@@ -258,10 +258,6 @@ public class HomeFragment extends BaseFragment {
             }
         });
 
-        // Overlay views (title, dots, meta row, badge) sit below the ViewPager2 in the layout.
-        // They need to: (1) pass taps to navigate/watchlist, (2) forward horizontal drags to ViewPager2.
-        View llHeroMeta = view.findViewById(R.id.llHeroMeta);
-        View tvHeroBadge = view.findViewById(R.id.tvHeroBadge);
         int touchSlop = ViewConfiguration.get(requireContext()).getScaledTouchSlop();
 
         GestureDetector overlayDetector = new GestureDetector(requireContext(),
@@ -285,59 +281,69 @@ public class HomeFragment extends BaseFragment {
                     }
                 });
 
-        // Apply the same touch listener to all overlay views.
-        // ACTION_DOWN returns true to keep the touch stream alive for MOVE + UP.
-        // Horizontal drag beyond touchSlop is forwarded to ViewPager2 as a fake drag.
-        for (View v : new View[]{tvHeroTitle, llHeroDots, llHeroMeta, tvHeroBadge}) {
-            v.setOnTouchListener(new View.OnTouchListener() {
-                private float startX, startY, lastX;
-                private boolean dragging;
+        // Single touch listener on heroSection covers the entire hero area —
+// VP region lets ViewPager2 handle natively, overlay region uses fakeDrag
+        heroSection.setOnTouchListener(new View.OnTouchListener() {
+            private float startX, startY, lastX;
+            private boolean dragging;
+            private boolean forwardToVP;
 
-                @SuppressLint("ClickableViewAccessibility")
-                @Override
-                public boolean onTouch(View view, MotionEvent event) {
-                    // Feed every event to the gesture detector first
-                    overlayDetector.onTouchEvent(event);
-
-                    switch (event.getActionMasked()) {
-                        case MotionEvent.ACTION_DOWN:
-                            startX = lastX = event.getX();
-                            startY = event.getY();
-                            dragging = false;
-                            // Must return true — consuming DOWN tells Android to keep
-                            // delivering MOVE and UP to this view
-                            return true;
-
-                        case MotionEvent.ACTION_MOVE:
-                            float dx = event.getX() - startX;
-                            float dy = event.getY() - startY;
-                            // Start fake drag only when horizontal motion exceeds touchSlop
-                            // and is more horizontal than vertical
-                            if (!dragging && Math.abs(dx) > Math.abs(dy)
-                                    && Math.abs(dx) > touchSlop) {
-                                dragging = true;
-                                if (!vpTrendingBanner.isFakeDragging())
-                                    vpTrendingBanner.beginFakeDrag();
-                            }
-                            if (dragging && vpTrendingBanner.isFakeDragging()) {
-                                // Forward delta (not absolute) to ViewPager2
-                                vpTrendingBanner.fakeDragBy(event.getX() - lastX);
-                                lastX = event.getX();
-                            }
-                            return true;
-
-                        case MotionEvent.ACTION_UP:
-                        case MotionEvent.ACTION_CANCEL:
-                            // End fake drag so ViewPager2 snaps to nearest page
-                            if (dragging && vpTrendingBanner.isFakeDragging())
-                                vpTrendingBanner.endFakeDrag();
-                            dragging = false;
-                            return true;
-                    }
-                    return false;
+            @SuppressLint("ClickableViewAccessibility")
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // On DOWN, check if touch landed inside vpTrendingBanner bounds
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    int[] vpLoc = new int[2];
+                    vpTrendingBanner.getLocationOnScreen(vpLoc);
+                    float absX = event.getRawX();
+                    float absY = event.getRawY();
+                    forwardToVP = absX >= vpLoc[0]
+                            && absX <= vpLoc[0] + vpTrendingBanner.getWidth()
+                            && absY >= vpLoc[1]
+                            && absY <= vpLoc[1] + vpTrendingBanner.getHeight();
                 }
-            });
-        }
+
+                // Touch is inside VP area — don't intercept, let ViewPager2 + card handle it
+                if (forwardToVP) return false;
+
+                // Touch is in overlay area (dots, title, meta, badge, fade view)
+                // Feed to gesture detector for tap/double-tap detection
+                overlayDetector.onTouchEvent(event);
+
+                switch (event.getActionMasked()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = lastX = event.getX();
+                        startY = event.getY();
+                        dragging = false;
+                        // Consume DOWN to keep receiving MOVE + UP
+                        return true;
+
+                    case MotionEvent.ACTION_MOVE:
+                        float dx = event.getX() - startX;
+                        float dy = event.getY() - startY;
+                        // Start fake drag when horizontal motion exceeds touchSlop
+                        if (!dragging && Math.abs(dx) > Math.abs(dy)
+                                && Math.abs(dx) > touchSlop) {
+                            dragging = true;
+                            if (!vpTrendingBanner.isFakeDragging())
+                                vpTrendingBanner.beginFakeDrag();
+                        }
+                        if (dragging && vpTrendingBanner.isFakeDragging()) {
+                            vpTrendingBanner.fakeDragBy(event.getX() - lastX);
+                            lastX = event.getX();
+                        }
+                        return true;
+
+                    case MotionEvent.ACTION_UP:
+                    case MotionEvent.ACTION_CANCEL:
+                        if (dragging && vpTrendingBanner.isFakeDragging())
+                            vpTrendingBanner.endFakeDrag();
+                        dragging = false;
+                        return true;
+                }
+                return false;
+            }
+        });
 
         TextView tvWhatsNewSeeAll = view.findViewById(R.id.tvWhatsNewSeeAll);
         if (tvWhatsNewSeeAll != null) {
@@ -425,7 +431,6 @@ public class HomeFragment extends BaseFragment {
             fetchNowPlayingMovies();
             lastFetchTime = now;
         } else {
-            bannerColors.clear();
             showNowPlayingBanner();
         }
     }

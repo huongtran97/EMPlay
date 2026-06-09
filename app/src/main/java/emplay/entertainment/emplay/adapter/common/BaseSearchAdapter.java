@@ -81,11 +81,11 @@ public abstract class BaseSearchAdapter<T extends MediaItem>
 
         public SearchViewHolder(@NonNull View itemView) {
             super(itemView);
-            title    = itemView.findViewById(R.id.search_title);
-            date     = itemView.findViewById(R.id.search_release_date);
+            title = itemView.findViewById(R.id.search_title);
+            date = itemView.findViewById(R.id.search_release_date);
             language = itemView.findViewById(R.id.search_language);
-            poster   = itemView.findViewById(R.id.search_poster);
-            rating   = itemView.findViewById(R.id.tvPosterRating);
+            poster = itemView.findViewById(R.id.search_poster);
+            rating = itemView.findViewById(R.id.tvPosterRating);
         }
     }
 }
