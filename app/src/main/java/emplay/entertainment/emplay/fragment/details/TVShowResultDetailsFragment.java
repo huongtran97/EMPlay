@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -159,9 +162,21 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Edge-to-edge hero: clear root top padding, push buttons below status bar instead
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), v.getPaddingBottom());
+            binding.tvInfoCard.topButtonsRow.setPadding(0, bars.top, 0, 0);
+            return insets;
+        });
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
+        setDarkStatusBar();
     }
 
     @Override
@@ -184,10 +199,12 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         // Title & share
         binding.tvInfoCard.tvshowTitle.setText(tvDetails.getName());
         binding.tvInfoCard.btnShare.setOnClickListener(v -> {
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT, tvDetails.getName());
-            startActivity(Intent.createChooser(share, "Share via"));
+            String slug = tvDetails.getName().toLowerCase(Locale.ROOT).replace(" ", "-");
+            String url = "https://www.themoviedb.org/tv/" + tvDetails.getId() + "-" + slug;
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, tvDetails.getName() + "\n" + url);
+            startActivity(Intent.createChooser(shareIntent, "Share via"));
         });
 
         // Rating

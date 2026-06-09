@@ -5,7 +5,7 @@
     android:id="@+id/movie_by_genres_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0A"
+    android:background="#0D0D12"
     tools:context=".fragment.genre.MovieByGenresFragment">
 
     <TextView
@@ -16,11 +16,12 @@
         android:paddingStart="20dp"
         android:paddingTop="20dp"
         android:paddingBottom="10dp"
-        android:text="Genre name goes here"
+        android:text="@string/genre"
         android:textColor="#FFFFFF"
         android:textSize="@dimen/text_title"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"
+        tools:ignore="RtlSymmetry" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tv_by_genre_recyclerview"
@@ -52,7 +53,7 @@
             android:layout_height="36dp"
             android:src="@drawable/ic_arrow_back"
             android:background="@drawable/rounded_btn_bg"
-            android:contentDescription="Previous page"
+            android:contentDescription="@string/pre_page"
             android:enabled="false" />
 
         <TextView
@@ -61,7 +62,7 @@
             android:layout_weight="1"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Page 1"
+            android:text="@string/page_1"
             android:textColor="#888888"
             android:textSize="@dimen/text_meta" />
 
@@ -71,7 +72,7 @@
             android:layout_height="36dp"
             android:src="@drawable/ic_arrow_forward"
             android:background="@drawable/rounded_btn_bg"
-            android:contentDescription="Next page" />
+            android:contentDescription="@string/next_page" />
 
     </LinearLayout>
 

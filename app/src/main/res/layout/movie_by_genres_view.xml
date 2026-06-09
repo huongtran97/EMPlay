@@ -5,7 +5,7 @@
     android:id="@+id/movie_by_genres_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0A"
+    android:background="#0D0D12"
     tools:context=".fragment.genre.MovieByGenresFragment">
 
     <TextView

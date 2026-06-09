@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId "emplay.entertainment.emplay"
         minSdk 23
-        targetSdk 34
+        targetSdk 35
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -51,6 +51,7 @@ android {
     }
 
     compileOptions {
+        coreLibraryDesugaringEnabled true
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
@@ -105,8 +106,10 @@ dependencies {
     
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+
     // Encrypted storage for TMDB session credentials
-    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+    implementation 'androidx.security:security-crypto:1.1.0'
     // Chrome Custom Tabs for TMDB OAuth flow
     implementation 'androidx.browser:browser:1.8.0'
     implementation 'me.relex:circleindicator:2.1.6'

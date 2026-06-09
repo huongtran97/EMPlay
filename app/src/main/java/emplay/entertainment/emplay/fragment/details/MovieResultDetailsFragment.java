@@ -14,6 +14,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -65,6 +68,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private static final int PAGE_SIZE = 9;
     private SearchResultMovieViewBinding binding;
     private int movieId;
+    private boolean isNowPlaying = false;
     private final List<CastModel> castList = new ArrayList<>();
     private final List<MovieModel> allSuggestions = new ArrayList<>();
     private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
@@ -140,7 +144,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 fetchCastList();
                 fetchSuggestionList();
                 fetchTrailers();
-                fetchWatchProviders();
             }
         }
 
@@ -148,9 +151,21 @@ public class MovieResultDetailsFragment extends BaseFragment {
     }
 
     @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        // Edge-to-edge hero: clear root top padding, push buttons below status bar instead
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), v.getPaddingBottom());
+            binding.movieInfo.topButtonsRow.setPadding(0, bars.top, 0, 0);
+            return insets;
+        });
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
+        setDarkStatusBar();
     }
 
     @Override
@@ -173,10 +188,12 @@ public class MovieResultDetailsFragment extends BaseFragment {
         // Title & share
         binding.movieInfo.movieTitle.setText(mDetails.getTitle());
         binding.movieInfo.btnShare.setOnClickListener(v -> {
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT, mDetails.getTitle());
-            startActivity(Intent.createChooser(share, "Share via"));
+            String slug = mDetails.getTitle().toLowerCase(Locale.ROOT).replace(" ", "-");
+            String url = "https://www.themoviedb.org/movie/" + mDetails.getId() + "-" + slug;
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, mDetails.getTitle() + "\n" + url);
+            startActivity(Intent.createChooser(shareIntent, "Share via"));
         });
 
         // Rating
@@ -194,6 +211,19 @@ public class MovieResultDetailsFragment extends BaseFragment {
         // Release date — year only
         String rd = mDetails.getReleaseDate();
         binding.movieInfo.movieReleaseDate.setText((rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "");
+
+        // Determine if the movie is currently in theaters (released within past 45 days)
+        if (rd != null && !rd.isEmpty()) {
+            try {
+                LocalDate releaseDate = LocalDate.parse(rd);
+                long days = java.time.temporal.ChronoUnit.DAYS.between(releaseDate, LocalDate.now());
+                isNowPlaying = days >= 0 && days <= 45;
+            } catch (Exception ignored) {
+                isNowPlaying = false;
+            }
+        }
+        // Fetch after isNowPlaying is set so handleNoWatchProviders reads the correct value
+        fetchWatchProviders();
 
         // Runtime
         binding.movieInfo.movieRuntime.setText(mDetails.getRuntime() + " min");
@@ -415,12 +445,24 @@ public class MovieResultDetailsFragment extends BaseFragment {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private void handleNoWatchProviders() {
         handleNoWatchProviders(
                 binding.movieInfo.wtwReleased.layoutWtwEmpty,
                 binding.movieInfo.wtwReleased.rvProviders,
                 binding.movieInfo.wtwReleased.tabLayoutWtw
         );
+        if (isNowPlaying) {
+            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setText("NOW PLAYING IN THEATERS");
+            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.accent_amber));
+            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTypeface(null, android.graphics.Typeface.BOLD);
+        } else {
+            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setText(getString(R.string.unavailable_country));
+            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTextColor(
+                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_disabled));
+            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTypeface(null, android.graphics.Typeface.NORMAL);
+        }
     }
 
     private void fetchMovieDetails() {

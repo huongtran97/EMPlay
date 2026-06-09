@@ -69,7 +69,7 @@ public class CastDetailFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.cast_details_fragment, container, false);
+        View view = inflater.inflate(R.layout.cast_details_view, container, false);
 
         profileImage = view.findViewById(R.id.cast_detail_image);
         nameText = view.findViewById(R.id.cast_detail_name);

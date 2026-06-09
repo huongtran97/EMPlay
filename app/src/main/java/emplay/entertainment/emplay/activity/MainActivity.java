@@ -2,6 +2,7 @@ package emplay.entertainment.emplay.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -34,19 +35,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            );
+        }
+
         setContentView(R.layout.movie_fragment);
 
-        SharedViewModel viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.movie_bottom_navigation_view);
         ViewCompat.setOnApplyWindowInsetsListener(bottomNavigationView, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(), v.getPaddingRight(), bars.bottom);
+            v.setPadding(v.getPaddingLeft(), v.getPaddingTop(),
+                    v.getPaddingRight(), bars.bottom);
             return insets;
         });
-        if (bottomNavigationView == null) {
-            Log.e("MovieOption", "BottomNavigationView is null");
-        }
+
+        SharedViewModel viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
         // Only load the home fragment on first launch — skip on config changes
         // to avoid rebuilding the fragment stack unnecessarily.
@@ -54,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new HomeFragment()).commit();
         }
 
-        assert bottomNavigationView != null;
         bottomNavigationView.setOnItemSelectedListener(item -> {
             Fragment selectedFragment = null;
             int itemId = item.getItemId();

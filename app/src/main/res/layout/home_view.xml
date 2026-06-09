@@ -4,9 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0A"
-    android:fillViewport="true"
-    android:scrollbars="none">
+    android:background="#0D0D12"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -22,9 +21,10 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:background="@drawable/bg_hero_section"
-            android:elevation="16dp">
+            android:elevation="0dp"
+            android:foreground="@drawable/bg_hero_section_border">
 
-            <!-- HERO BANNER  -->
+        <!-- HERO BANNER  -->
             <FrameLayout
                 android:id="@+id/heroBannerContainer"
                 android:layout_width="match_parent"

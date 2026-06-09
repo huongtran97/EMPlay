@@ -2,9 +2,11 @@ package emplay.entertainment.emplay.fragment.layout;
 
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -25,7 +27,11 @@ import android.widget.ViewSwitcher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -59,6 +65,14 @@ import emplay.entertainment.emplay.api.movie.MovieResponse;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.adapter.tvshow.UpComingTVAdapter;
 import emplay.entertainment.emplay.adapter.movie.UpcomingMovieAdapter;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
+import emplay.entertainment.emplay.models.common.RegionProvidersModel;
+
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Call;
@@ -77,7 +91,6 @@ public class HomeFragment extends BaseFragment {
     private TrendingBannerAdapter trendingAdapter;
     private MaterialButton btnWhatsNewTvShow, btnWhatsNewMovie;
     private View heroSection;
-    private android.graphics.drawable.LayerDrawable heroSectionLayerBg;
     private android.graphics.drawable.GradientDrawable heroSectionFill; // The inner fill layer of the hero background — animated to match poster palette color
     private int heroBgColor = 0xFF111111; // Tracks current animated background color for status bar sync and animator start value
     private final android.util.SparseIntArray bannerColors = new android.util.SparseIntArray(); // Cache of palette-extracted colors keyed by banner position — avoids re-extracting on swipe back
@@ -86,6 +99,8 @@ public class HomeFragment extends BaseFragment {
     private final List<MovieModel> cachedMovies = new ArrayList<>();
     private final List<MovieModel> nowPlayingPool = new ArrayList<>(); // Source pool for the hero banner — populated once from API, never reshuffled after initial load
     private final Random random = new Random();
+    private long lastFetchTime = 0;
+    private static final long CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 
     @Nullable
     @Override
@@ -95,12 +110,18 @@ public class HomeFragment extends BaseFragment {
 
         heroSection = view.findViewById(R.id.heroSection);
 
-        // Mutate so we can modify this drawable instance without affecting others
-        heroSectionLayerBg = (android.graphics.drawable.LayerDrawable)
-                ContextCompat.getDrawable(requireContext(), R.drawable.bg_hero_section).mutate();
+
         // Layer 1 is the solid fill — layer 0 is typically a border or shadow
-        heroSectionFill = (android.graphics.drawable.GradientDrawable) heroSectionLayerBg.getDrawable(1);
-        heroSection.setBackground(heroSectionLayerBg);
+        heroSectionFill = (GradientDrawable) ContextCompat.getDrawable(
+                requireContext(), R.drawable.bg_hero_section).mutate();
+        heroSection.setBackground(heroSectionFill);
+
+        heroSection.setOutlineProvider(new android.view.ViewOutlineProvider() {
+            @Override
+            public void getOutline(View view, android.graphics.Outline outline) {
+                outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), dpToPx(24));
+            }
+        });
         heroSection.setClipToOutline(true);
 
         vpTrendingBanner = view.findViewById(R.id.vpTrendingBanner);
@@ -351,8 +372,18 @@ public class HomeFragment extends BaseFragment {
         rvUpcomingTvShows.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        // Kick off all network requests — each populates its respective adapter on response
-        fetchNowPlayingMovies();
+        // heroSection extends behind the transparent status bar (edge-to-edge).
+        // Push the banner content below the status bar; the animated background shows through.
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            heroSection.setPadding(0, bars.top, 0, 0);
+            return new WindowInsetsCompat.Builder(insets)
+                    .setInsets(
+                            WindowInsetsCompat.Type.systemBars(),
+                            Insets.of(bars.left, 0, bars.right, bars.bottom)
+                    )
+                    .build();
+        });
         fetchTrendingMovies();
         fetchWhatsNewTVShows();
         fetchUpComingMovie();
@@ -371,8 +402,6 @@ public class HomeFragment extends BaseFragment {
         animator.addUpdateListener(a -> {
             int color = (int) a.getAnimatedValue();
             if (heroSectionFill != null) heroSectionFill.setColor(color);
-            if (isAdded()) requireActivity().getWindow().setStatusBarColor(color);
-            // Keep heroBgColor in sync so the next animation starts from the right value
             heroBgColor = color;
         });
         animator.start();
@@ -383,25 +412,20 @@ public class HomeFragment extends BaseFragment {
     protected void resetBackground() {
         heroBgColor = 0xFF0A0A0A;
         if (heroSectionFill != null) heroSectionFill.setColor(heroBgColor);
-        if (isAdded()) requireActivity().getWindow().setStatusBarColor(heroBgColor);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // Reset status bar when navigating away so other screens get the default color
-        if (isAdded()) requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        // Restore the hero palette color on the status bar when returning to this screen
-        if (isAdded()) requireActivity().getWindow().setStatusBarColor(heroBgColor);
-        // Only seed the banner on first load — do NOT call showNowPlayingBanner() unconditionally
-        // here, as it would re-shuffle cards and jump back to page 0 every time the user
-        // returns from a detail screen
-        if (!nowPlayingPool.isEmpty() && trendingAdapter.getItemCount() == 0) {
+        long now = System.currentTimeMillis();
+        if (nowPlayingPool.isEmpty() || (now - lastFetchTime) > CACHE_DURATION_MS) {
+            nowPlayingPool.clear();
+            bannerColors.clear();
+            trendingAdapter.updateData(new ArrayList<>());
+            fetchNowPlayingMovies();
+            lastFetchTime = now;
+        } else {
+            bannerColors.clear();
             showNowPlayingBanner();
         }
     }
@@ -412,7 +436,6 @@ public class HomeFragment extends BaseFragment {
         resetBackground();
         // Null out view references to avoid memory leaks after the view hierarchy is destroyed
         heroSection         = null;
-        heroSectionLayerBg  = null;
         heroSectionFill     = null;
     }
 
@@ -435,7 +458,8 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
     }
 
-    // Fetches up to 6 now-playing movies that have a backdrop, then seeds the hero banner
+    // Fetches now-playing movies, date-filters them, then checks each for streaming providers.
+    // Only movies with NO flatrate streaming in the user's region reach the hero banner.
     private void fetchNowPlayingMovies() {
         safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies()),
                 new Callback<MovieResponse>() {
@@ -445,12 +469,21 @@ public class HomeFragment extends BaseFragment {
                         if (response.isSuccessful() && response.body() != null) {
                             List<MovieModel> results = response.body().getResults();
                             if (results == null || results.isEmpty()) return;
-                            nowPlayingPool.clear();
+                            List<MovieModel> candidates = new ArrayList<>();
+                            LocalDate today = LocalDate.now();
                             for (MovieModel m : results) {
-                                if (m.getPosterPath() != null) nowPlayingPool.add(m);
-                                if (nowPlayingPool.size() == 6) break;
+                                if (m.getPosterPath() == null) continue;
+                                String rd = m.getReleaseDate();
+                                if (rd == null || rd.isEmpty()) continue;
+                                try {
+                                    long days = ChronoUnit.DAYS.between(LocalDate.parse(rd), today);
+                                    if (days < 0 || days > 45) continue;
+                                } catch (Exception ignored) {
+                                    continue;
+                                }
+                                candidates.add(m);
                             }
-                            showNowPlayingBanner();
+                            if (!candidates.isEmpty()) filterByTheatersOnly(candidates);
                         }
                     }
                     @Override
@@ -458,6 +491,64 @@ public class HomeFragment extends BaseFragment {
                         Log.e("HomeFragment", "Failed to fetch now playing movies", t);
                     }
                 });
+    }
+
+    // For each candidate, check if it has flatrate streaming providers in the user's region.
+    // Movies without flatrate providers are still exclusively in theaters.
+    private void filterByTheatersOnly(List<MovieModel> candidates) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String region = prefs.getString("pref_region", "US");
+        AtomicInteger remaining = new AtomicInteger(candidates.size());
+        List<MovieModel> theaterOnly = Collections.synchronizedList(new ArrayList<>());
+
+        for (MovieModel movie : candidates) {
+            safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movie.getMovieId())),
+                    new Callback<TVShowProviderResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<TVShowProviderResponse> call,
+                                               @NonNull Response<TVShowProviderResponse> response) {
+                            boolean hasDigital = false;
+                            if (response.isSuccessful() && response.body() != null) {
+                                Map<String, RegionProvidersModel> providerMap = response.body().getResults();
+                                if (providerMap != null && providerMap.containsKey(region)) {
+                                    RegionProvidersModel regionData = providerMap.get(region);
+                                    if (regionData != null) {
+                                        // Filter: subscription + rent + buy
+                                        boolean hasFlatrate = regionData.getFlatrate() != null
+                                                && !regionData.getFlatrate().isEmpty();
+                                        boolean hasRent = regionData.getRent() != null
+                                                && !regionData.getRent().isEmpty();
+                                        boolean hasBuy = regionData.getBuy() != null
+                                                && !regionData.getBuy().isEmpty();
+                                        hasDigital = hasFlatrate || hasRent || hasBuy;
+                                    }
+                                }
+                            }
+                            if (!hasDigital) theaterOnly.add(movie);
+                            onProviderCheckDone(remaining, candidates, theaterOnly);
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<TVShowProviderResponse> call,
+                                              @NonNull Throwable t) {
+                            theaterOnly.add(movie);
+                            onProviderCheckDone(remaining, candidates, theaterOnly);
+                        }
+                    });
+        }
+    }
+
+    private void onProviderCheckDone(AtomicInteger remaining, List<MovieModel> candidates,
+                                     List<MovieModel> theaterOnly) {
+        if (remaining.decrementAndGet() != 0) return;
+        nowPlayingPool.clear();
+        for (MovieModel m : candidates) { // preserve original now_playing order
+            if (theaterOnly.contains(m)) {
+                nowPlayingPool.add(m);
+                if (nowPlayingPool.size() == 6) break;
+            }
+        }
+        if (!nowPlayingPool.isEmpty()) showNowPlayingBanner();
     }
 
     // Randomizes order and loads banner — called once from fetchNowPlayingMovies,
@@ -634,9 +725,6 @@ public class HomeFragment extends BaseFragment {
         }
     }
 
-    private int dpToPx(int dp) {
-        return Math.round(dp * getResources().getDisplayMetrics().density);
-    }
 
     // Routes item clicks to the correct detail fragment based on model type
     public void onItemClicked(Object item) {

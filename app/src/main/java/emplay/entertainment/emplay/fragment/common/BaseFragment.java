@@ -2,7 +2,9 @@ package emplay.entertainment.emplay.fragment.common;
 
 import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -10,9 +12,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.core.widget.TextViewCompat;
 
 import androidx.annotation.ColorInt;
@@ -222,6 +226,28 @@ public abstract class BaseFragment extends Fragment {
         if (countDownTimer != null) {
             countDownTimer.cancel();
             countDownTimer = null;
+        }
+    }
+
+    // Transparent status bar with dark icons — used by detail screens with a full-bleed hero image
+    protected void setDarkStatusBar() {
+        if (!isAdded()) return;
+        android.view.Window window = requireActivity().getWindow();
+        window.setStatusBarColor(Color.TRANSPARENT);
+        new WindowInsetsControllerCompat(window, window.getDecorView())
+                .setAppearanceLightStatusBars(false);
+    }
+
+    protected int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
+    protected void hideKeyboard() {
+        View focused = requireActivity().getCurrentFocus();
+        if (focused != null) {
+            InputMethodManager imm = (InputMethodManager) requireActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(focused.getWindowToken(), 0);
         }
     }
 

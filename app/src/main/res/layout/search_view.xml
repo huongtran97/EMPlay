@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#111111"
+    android:background="#0D0D12"
     android:orientation="vertical">
 
     <LinearLayout
@@ -92,44 +92,41 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- ===== RECENTLY SEARCHED ===== -->
+            <!-- RECENTLY SEARCHED -->
             <LinearLayout
+                android:id="@+id/recentSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="14dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="14dp"
+                android:visibility="gone">
 
-                <TextView
-                    android:layout_width="0dp"
+                <!-- Pills row -->
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/pillsContainer"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/recently_search"
-                    android:textColor="#FFFFFF"
-                    android:textSize="@dimen/text_section_header"
-                    android:textStyle="bold"/>
+                    android:layout_marginBottom="8dp"
+                    app:flexWrap="wrap"
+                    app:flexDirection="row"
+                    app:justifyContent="flex_start"
+                    app:alignItems="center"/>
 
                 <TextView
                     android:id="@+id/btnClearAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginBottom="28dp"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/clear_all"
                     android:textColor="#888888"
                     android:textSize="@dimen/text_body"
-                    android:clickable="true"
-                    android:focusable="true"/>
-            </LinearLayout>
+                    android:textStyle="italic" />
 
-            <!-- Pills row -->
-            <com.google.android.flexbox.FlexboxLayout
-                android:id="@+id/pillsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="28dp"
-                app:flexWrap="wrap"
-                app:flexDirection="row"
-                app:justifyContent="flex_start"
-                app:alignItems="center"/>
+            </LinearLayout>
 
             <!-- Trending search  -->
             <LinearLayout
@@ -163,11 +160,11 @@
                     android:id="@+id/btnSeeAll"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:focusable="true"
                     android:text="@string/see_all"
                     android:textColor="#888888"
-                    android:textSize="@dimen/text_body"
-                    android:clickable="true"
-                    android:focusable="true"/>
+                    android:textSize="@dimen/text_body" />
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
