@@ -106,6 +106,8 @@ public class HomeFragment extends BaseFragment {
     private long lastFetchTime = 0;
     private static final long CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
     private android.os.Handler providerCheckHandler;
+    private View heroSkeleton;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerLayout;
 
     @Nullable
     @Override
@@ -114,7 +116,9 @@ public class HomeFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.home_view, container, false);
 
         heroSection = view.findViewById(R.id.heroSection);
-
+        heroSkeleton = view.findViewById(R.id.heroSkeleton);
+        shimmerLayout = view.findViewById(R.id.shimmerLayout);
+        shimmerLayout.startShimmer();
 
         // Layer 1 is the solid fill — layer 0 is typically a border or shadow
         heroSectionFill = (GradientDrawable) ContextCompat.getDrawable(
@@ -287,7 +291,7 @@ public class HomeFragment extends BaseFragment {
                 });
 
         // Single touch listener on heroSection covers the entire hero area —
-// VP region lets ViewPager2 handle natively, overlay region uses fakeDrag
+        // VP region lets ViewPager2 handle natively, overlay region uses fakeDrag
         heroSection.setOnTouchListener(new View.OnTouchListener() {
             private float startX, startY, lastX;
             private boolean dragging;
@@ -455,6 +459,11 @@ public class HomeFragment extends BaseFragment {
         heroBatch.clear();
         heroSection         = null;
         heroSectionFill     = null;
+        heroSkeleton        = null;
+        if (shimmerLayout != null) {
+            shimmerLayout.stopShimmer();
+            shimmerLayout = null;
+        }
     }
 
     private void switchWhatsNew(boolean showTV) {
@@ -620,6 +629,7 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void showNowPlayingBanner() {
+
         if (nowPlayingPool.isEmpty() || !isAdded()) return;
         bannerColors.clear();
 
@@ -627,6 +637,18 @@ public class HomeFragment extends BaseFragment {
             heroBatch.addAll(pickHeroBatch());
         }
         if (heroBatch.isEmpty()) return;
+
+        if (shimmerLayout != null) shimmerLayout.stopShimmer();
+        if (heroSkeleton != null) heroSkeleton.setVisibility(View.GONE);
+
+        View bannerContainer = heroSection == null ? null : heroSection.findViewById(R.id.heroBannerContainer);
+        if (bannerContainer != null) bannerContainer.setVisibility(View.VISIBLE);
+        if (llHeroDots != null) llHeroDots.setVisibility(View.VISIBLE);
+        View badge = heroSection == null ? null : heroSection.findViewById(R.id.tvHeroBadge);
+        if (badge != null) badge.setVisibility(View.VISIBLE);
+        if (tvHeroTitle != null) tvHeroTitle.setVisibility(View.VISIBLE);
+        View metaRow = heroSection == null ? null : heroSection.findViewById(R.id.llHeroMeta);
+        if (metaRow != null) metaRow.setVisibility(View.VISIBLE);
 
         trendingAdapter.updateData(new ArrayList<>(heroBatch));
         buildDots(heroBatch.size());

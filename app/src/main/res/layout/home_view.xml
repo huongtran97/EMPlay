@@ -24,11 +24,77 @@
             android:elevation="0dp"
             android:foreground="@drawable/bg_hero_section_border">
 
-        <!-- HERO BANNER  -->
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:shimmer_duration="1200"
+                app:shimmer_tilt="20">
+
+                <!-- Skeleton shown while theater-only pool is being built -->
+                <FrameLayout
+                    android:id="@+id/heroSkeleton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible">
+
+                    <!-- Cover banner + dots + badge + title + meta area -->
+                    <View
+                        android:id="@+id/skeletonShimmer"
+                        android:layout_width="match_parent"
+                        android:layout_height="500dp"
+                        android:background="@drawable/shimmer_gradient" />
+
+                    <!-- Dots placeholder -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="106dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <View android:layout_width="20dp" android:layout_height="7dp" android:layout_marginEnd="5dp" android:background="#33FFFFFF" />
+                        <View android:layout_width="7dp" android:layout_height="7dp" android:layout_marginEnd="5dp" android:background="#1AFFFFFF" />
+                        <View android:layout_width="7dp" android:layout_height="7dp" android:layout_marginEnd="5dp" android:background="#1AFFFFFF" />
+                        <View android:layout_width="7dp" android:layout_height="7dp" android:background="#1AFFFFFF" />
+                    </LinearLayout>
+
+                    <!-- Badge placeholder -->
+                    <View
+                        android:layout_width="110dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="82dp"
+                        android:background="#1AFFFFFF" />
+
+                    <!-- Title placeholder -->
+                    <View
+                        android:layout_width="160dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="50dp"
+                        android:background="#1AFFFFFF" />
+
+                    <!-- Meta row placeholder -->
+                    <View
+                        android:layout_width="100dp"
+                        android:layout_height="12dp"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:layout_marginBottom="26dp"
+                        android:background="#1AFFFFFF" />
+
+                </FrameLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+
+
+            <!-- HERO BANNER -->
             <FrameLayout
                 android:id="@+id/heroBannerContainer"
                 android:layout_width="match_parent"
                 android:layout_height="400dp"
+                android:visibility="gone"
                 android:clipChildren="false">
 
                 <androidx.viewpager2.widget.ViewPager2
@@ -47,7 +113,7 @@
                 android:layout_height="32dp"
                 android:layout_marginTop="-32dp"/>
 
-            <!-- PAGINATION DOTS -->
+            <!-- PAGINATION DOTS — gone until banner is ready -->
             <LinearLayout
                 android:id="@+id/llHeroDots"
                 android:layout_width="wrap_content"
@@ -55,9 +121,10 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal" />
+                android:orientation="horizontal"
+                android:visibility="gone"/>
 
-            <!-- NOW IN THEATERS badge -->
+            <!-- NOW IN THEATERS badge — gone until banner is ready -->
             <TextView
                 android:id="@+id/tvHeroBadge"
                 android:layout_width="wrap_content"
@@ -72,18 +139,20 @@
                 android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.09"
                 android:textAllCaps="true"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:visibility="gone"/>
 
-            <!-- MOVIE TITLE -->
+            <!-- MOVIE TITLE — gone until banner is ready -->
             <TextSwitcher
                 android:id="@+id/tvHeroTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:layout_marginHorizontal="20dp"
-                android:gravity="center" />
+                android:gravity="center"
+                android:visibility="gone"/>
 
-            <!-- Meta row -->
+            <!-- Meta row — gone until banner is ready -->
             <LinearLayout
                 android:id="@+id/llHeroMeta"
                 android:layout_width="wrap_content"
@@ -92,9 +161,10 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginBottom="16dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
-                <!-- Language-->
+                <!-- Language -->
                 <TextView
                     android:id="@+id/tvHeroYear"
                     android:layout_width="wrap_content"
