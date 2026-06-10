@@ -5,6 +5,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,13 +19,16 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ApiClient;
@@ -47,6 +52,7 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     private final DatabaseHelper dbHelper;
     private final TMDBWatchlistApiService watchlistApiService;
     private final CardGestureListener gestureListener;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
     @Nullable private OnPaletteColorListener paletteColorListener;
     @Nullable private RecyclerView attachedRecyclerView;
 
@@ -158,10 +164,21 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     private void loadWatchlistState(ViewHolder holder, MovieModel movie) {
         AuthManager auth = AuthManager.getInstance(context);
         switch (auth.getAuthType()) {
-            case GOOGLE:
-                // Synchronous DB read — safe to call directly on main thread
-                updateWatchlistIcon(holder, auth.getUserId(), movie.getMovieId());
+            case GOOGLE: {
+                String userId = auth.getUserId();
+                int movieId = movie.getMovieId();
+                new Thread(() -> {
+                    boolean saved = WatchlistHelper.isMovieSaved(dbHelper, userId, movieId);
+                    mainHandler.post(() -> {
+                        if (holder.getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                            holder.icHeroWatchlist.setImageResource(
+                                    saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+                            holder.icHeroWatchlist.setTag(saved);
+                        }
+                    });
+                }).start();
                 break;
+            }
 
             case TMDB:
                 // Snapshot the ImageView reference before the async call.
@@ -202,21 +219,31 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         switch (auth.getAuthType()) {
 
             case GOOGLE: {
-                // Synchronous SQLite — no async needed, no stale holder risk
                 String userId = auth.getUserId();
-                if (WatchlistHelper.isMovieSaved(dbHelper, userId, movie.getMovieId())) {
-                    WatchlistHelper.removeMovie(dbHelper, userId, movie.getMovieId());
-                    Toast.makeText(context, "Removed from library", Toast.LENGTH_SHORT).show();
-                } else {
-                    String genres = (movie.getGenres() != null && !movie.getGenres().isEmpty())
-                            ? String.join(",", movie.getGenres()) : "";
-                    long result = WatchlistHelper.saveMovie(dbHelper, userId, movie.getMovieId(),
-                            movie.getTitle(), movie.getPosterPath(), genres, movie.getVoteAverage());
-                    Toast.makeText(context, result != -1 ? "Added to library" : "Failed to add",
-                            Toast.LENGTH_SHORT).show();
-                }
-                // Re-read DB to get authoritative state and refresh icon
-                updateWatchlistIcon(holder, userId, movie.getMovieId());
+                String genres = (movie.getGenres() != null && !movie.getGenres().isEmpty())
+                        ? String.join(",", movie.getGenres()) : "";
+                new Thread(() -> {
+                    boolean wasSaved = WatchlistHelper.isMovieSaved(dbHelper, userId, movie.getMovieId());
+                    String msg;
+                    if (wasSaved) {
+                        WatchlistHelper.removeMovie(dbHelper, userId, movie.getMovieId());
+                        msg = "Removed from library";
+                    } else {
+                        long result = WatchlistHelper.saveMovie(dbHelper, userId, movie.getMovieId(),
+                                movie.getTitle(), movie.getPosterPath(), genres, movie.getVoteAverage());
+                        msg = result != -1 ? "Added to library" : "Failed to add";
+                    }
+                    boolean nowSaved = WatchlistHelper.isMovieSaved(dbHelper, userId, movie.getMovieId());
+                    String finalMsg = msg;
+                    mainHandler.post(() -> {
+                        if (holder.getBindingAdapterPosition() != RecyclerView.NO_POSITION) {
+                            holder.icHeroWatchlist.setImageResource(
+                                    nowSaved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+                            holder.icHeroWatchlist.setTag(nowSaved);
+                        }
+                        Toast.makeText(context, finalMsg, Toast.LENGTH_SHORT).show();
+                    });
+                }).start();
                 break;
             }
 
@@ -273,24 +300,28 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         }
     }
 
-    // Reads from local DB and sets the icon + tag to reflect current saved state
-    private void updateWatchlistIcon(ViewHolder holder, String userId, int movieId) {
-        boolean saved = WatchlistHelper.isMovieSaved(dbHelper, userId, movieId);
-        holder.icHeroWatchlist.setImageResource(saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
-        holder.icHeroWatchlist.setTag(saved);
-    }
-
     @Override
     public int getItemCount() {
         return movies.size();
     }
 
-    // Full refresh — clears old data and reloads all items
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<MovieModel> newMovies) {
+        List<MovieModel> oldMovies = new ArrayList<>(movies);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldMovies.size(); }
+            @Override public int getNewListSize() { return newMovies != null ? newMovies.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldMovies.get(o).getMovieId() == newMovies.get(n).getMovieId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                MovieModel a = oldMovies.get(o), b = newMovies.get(n);
+                return Objects.equals(a.getPosterPath(), b.getPosterPath())
+                        && Objects.equals(a.getTitle(), b.getTitle());
+            }
+        });
         movies.clear();
-        movies.addAll(newMovies);
-        notifyDataSetChanged();
+        if (newMovies != null) movies.addAll(newMovies);
+        diff.dispatchUpdatesTo(this);
     }
 
     @Override

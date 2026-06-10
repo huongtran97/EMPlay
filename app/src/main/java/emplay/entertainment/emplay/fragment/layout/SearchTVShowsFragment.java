@@ -61,9 +61,7 @@ public class SearchTVShowsFragment extends BaseSearchFragment<TVShowModel> {
                                 Collections.sort(results, (a, b) ->
                                         Double.compare(b.getVoteAverage(), a.getVoteAverage()));
                                 int size = Math.min(results.size(), 5);
-                                trendingList.clear();
-                                trendingList.addAll(results.subList(0, size));
-                                trendingAdapter.notifyItemRangeChanged(0, size);
+                                trendingAdapter.updateData(results.subList(0, size));
                             }
                         }
                     }

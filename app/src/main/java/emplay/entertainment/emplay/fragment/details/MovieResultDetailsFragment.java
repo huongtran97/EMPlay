@@ -3,7 +3,6 @@ package emplay.entertainment.emplay.fragment.details;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -287,14 +286,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
         // Blurred background
         UiUtils.setupBlurredBackground(this, mDetails.getBackdropPath(), mDetails.getPosterPath(), binding.searchResultFragment);
 
-        GradientDrawable amberGlow = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR, // ignored for radial, but required
-                new int[]{
-                        0x66C9943A,  // amber center — 40% opacity
-                        0x00C9943A   // transparent edge
-                }
-        );
-
     }
 
     private void updateWatchlistButton(MovieDetailsResponse movieDetails) {
@@ -316,23 +307,27 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
     private void setupGoogleMovieWatchlistButton(String userId, MovieDetailsResponse movieDetails) {
         updateSaveBtnIcon(userId, movieDetails.getId());
-        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> {
+        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> new Thread(() -> {
             if (WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId())) {
                 WatchlistHelper.removeMovie(databaseHelper, userId, movieDetails.getId());
-                updateSaveBtnIcon(userId, movieDetails.getId());
-                Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
+                safeRunOnUiThread(() -> {
+                    binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
+                    Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
+                });
             } else {
                 String genresString = buildGenresString(movieDetails.getGenres());
-                long result = WatchlistHelper.saveMovie(databaseHelper, userId, movieDetails.getId(),
-                        movieDetails.getTitle(), movieDetails.getPosterPath(), genresString, movieDetails.getVoteAverage());
-                if (result != -1) {
-                    updateSaveBtnIcon(userId, movieDetails.getId());
-                    Toast.makeText(requireContext(), "Movie added to library", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requireContext(), "Failed to add Movie", Toast.LENGTH_SHORT).show();
-                }
+                boolean saved = WatchlistHelper.saveMovie(databaseHelper, userId, movieDetails.getId(),
+                        movieDetails.getTitle(), movieDetails.getPosterPath(), genresString,
+                        movieDetails.getVoteAverage()) != -1;
+                safeRunOnUiThread(() -> {
+                    binding.movieInfo.icLibrary.setImageResource(
+                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+                    Toast.makeText(requireContext(),
+                            saved ? "Movie added to library" : "Failed to add Movie",
+                            Toast.LENGTH_SHORT).show();
+                });
             }
-        });
+        }).start());
     }
 
     private void setupTmdbMovieWatchlistButton(AuthManager auth, MovieDetailsResponse movieDetails) {
@@ -400,8 +395,12 @@ public class MovieResultDetailsFragment extends BaseFragment {
     }
 
     private void updateSaveBtnIcon(String userId, int id) {
-        int iconRes = WatchlistHelper.isMovieSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
-        binding.movieInfo.icLibrary.setImageResource(iconRes);
+        new Thread(() -> {
+            boolean saved = WatchlistHelper.isMovieSaved(databaseHelper, userId, id);
+            safeRunOnUiThread(() ->
+                    binding.movieInfo.icLibrary.setImageResource(
+                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist));
+        }).start();
     }
 
     private String buildGenresString(List<MovieDetailsResponse.Genre> genres) {
@@ -517,7 +516,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
         });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void fetchCastList() {
         safeEnqueue(apiService.getMovieCredits(TMDBpath.movieCredits(movieId)), new Callback<MovieCreditsResponse>() {
             @Override
@@ -525,11 +523,11 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 if (response.isSuccessful() && response.body() != null) {
                     List<MovieCreditsResponse.Cast> raw = response.body().getCast();
                     if (raw != null) {
-                        castList.clear();
+                        List<CastModel> newCast = new ArrayList<>();
                         for (MovieCreditsResponse.Cast c : raw) {
-                            castList.add(new CastModel(c.getId(), c.getCastName(), c.getProfilePath(), c.getCharacter()));
+                            newCast.add(new CastModel(c.getId(), c.getCastName(), c.getProfilePath(), c.getCharacter()));
                         }
-                        castAdapter.notifyDataSetChanged();
+                        castAdapter.updateData(newCast);
                     }
                 }
             }

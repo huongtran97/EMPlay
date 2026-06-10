@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
+import emplay.entertainment.emplay.adapter.common.RecentlyAddedAdapter;
 import emplay.entertainment.emplay.adapter.movie.MovieLikedAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.TVLikedAdapter;
 
@@ -55,6 +56,8 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
                 ((MovieLikedAdapter) adapter).removeItem(position);
             } else if (adapter instanceof TVLikedAdapter) {
                 ((TVLikedAdapter) adapter).removeItem(position);
+            } else if (adapter instanceof RecentlyAddedAdapter) {
+                ((RecentlyAddedAdapter) adapter).removeItem(position);
             }
         }
     }
@@ -67,6 +70,6 @@ public class SwipeToDeleteCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        return makeMovementFlags(0, ItemTouchHelper.UP);
+        return makeMovementFlags(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
     }
 }

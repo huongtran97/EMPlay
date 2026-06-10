@@ -4,8 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -65,6 +66,8 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     protected DatabaseHelper dbHelper;
     protected String lastQuery = "";
     protected TextView clearAll, btnSeeAll;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable pendingSearch;
 
     @Nullable
     @Override
@@ -141,13 +144,12 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                boolean hasText = false;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
-                    hasText = !s.isEmpty();
-                }
+                boolean hasText = s.length() > 0;
                 svSearchDefault.setVisibility(hasText ? View.GONE : View.VISIBLE);
                 rvSearchResults.setVisibility(hasText ? View.VISIBLE : View.GONE);
-                performSearch();
+                searchHandler.removeCallbacks(pendingSearch);
+                pendingSearch = BaseSearchFragment.this::performSearch;
+                searchHandler.postDelayed(pendingSearch, 300);
             }
             @Override public void afterTextChanged(Editable s) {}
         });
@@ -242,6 +244,12 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         btnTvShow.setTextColor(tv ? Color.WHITE : Color.parseColor("#888888"));
         btnTvShow.setIconTint(ContextCompat.getColorStateList(requireContext(),
                 tv ? android.R.color.white : android.R.color.darker_gray));
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        searchHandler.removeCallbacks(pendingSearch);
     }
 
     @Override

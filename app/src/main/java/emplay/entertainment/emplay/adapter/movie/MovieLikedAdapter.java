@@ -17,15 +17,17 @@ import emplay.entertainment.emplay.models.movie.MovieModel;
 public class MovieLikedAdapter extends BasePosterAdapter<MovieModel> {
 
     private final DatabaseHelper databaseHelper;
+    private final String userId;
 
     public interface OnItemClickListener {
         void onItemClick(MovieModel movie);
     }
 
     public MovieLikedAdapter(Context context, List<MovieModel> movies,
-                             OnItemClickListener listener, DatabaseHelper databaseHelper) {
+                             OnItemClickListener listener, DatabaseHelper databaseHelper, String userId) {
         super(context, movies, listener::onItemClick);
         this.databaseHelper = databaseHelper;
+        this.userId = userId;
     }
 
     @Override
@@ -42,6 +44,6 @@ public class MovieLikedAdapter extends BasePosterAdapter<MovieModel> {
         if (position < 0 || position >= mData.size()) return;
         MovieModel item = mData.get(position);
         super.removeItem(position);
-        databaseHelper.deleteMovie(item.getMovieId());
+        databaseHelper.deleteMovie(item.getMovieId(), userId);
     }
 }

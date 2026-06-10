@@ -72,6 +72,7 @@ public class MovieByGenresFragment extends BaseFragment {
         movieByGenreAdapter = new MovieByGenreAdapter(new ArrayList<>(), requireContext(), this::onItemClick);
 
         movieByGenreRecyclerview.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        movieByGenreRecyclerview.setHasFixedSize(true);
         movieByGenreRecyclerview.setAdapter(movieByGenreAdapter);
 
         btnPrev.setOnClickListener(v -> {
@@ -147,6 +148,7 @@ public class MovieByGenresFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                isLoading = false;
                 onDone.run();
             }
         });

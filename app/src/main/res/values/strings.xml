@@ -116,6 +116,8 @@
     <string name="tmdb_account_badge">TMDB Account</string>
     <string name="now_in_theaters">Now Showing</string>
     <string name="show_backdrop">show backdrop\n</string>
+    <string name="sort_newest_first">Newest first</string>
+    <string name="sort_a_z">A–Z</string>
 
 
 </resources>

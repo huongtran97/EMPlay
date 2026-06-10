@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.fragment.common;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +8,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,6 +19,7 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.RecentlyAddedAdapter;
 import emplay.entertainment.emplay.auth.AuthManager;
+import emplay.entertainment.emplay.tool.SwipeToDeleteCallback;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
@@ -48,16 +49,22 @@ public class RecentlyAddedFragment extends BaseFragment {
 
         view.findViewById(R.id.llSortBtn).setOnClickListener(v -> toggleSort());
 
-        adapter = new RecentlyAddedAdapter(requireContext(), allItems, this::onItemClick);
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        String userId = auth.getAuthType() == AuthManager.AuthType.GOOGLE ? auth.getUserId() : null;
+
+        adapter = new RecentlyAddedAdapter(requireContext(), allItems, this::onItemClick, dbHelper, userId);
+        adapter.setOnItemRemovedListener(count ->
+                tvItemCount.setText(getString(R.string.items_count, count)));
         rvRecentlyAdded.setLayoutManager(new LinearLayoutManager(requireContext()));
+        rvRecentlyAdded.setHasFixedSize(true);
         rvRecentlyAdded.setAdapter(adapter);
+        new ItemTouchHelper(new SwipeToDeleteCallback(rvRecentlyAdded)).attachToRecyclerView(rvRecentlyAdded);
 
         loadData();
 
         return view;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void loadData() {
         AuthManager auth = AuthManager.getInstance(requireContext());
         if (auth.getAuthType() != AuthManager.AuthType.GOOGLE) return;
@@ -66,42 +73,45 @@ public class RecentlyAddedFragment extends BaseFragment {
         new Thread(() -> {
             List<MovieModel> movies = dbHelper.getAllMoviesFromDatabase(userId);
             List<TVShowModel> shows = dbHelper.getSavedTVShows(userId);
-            
-            allItems.clear();
-            allItems.addAll(movies);
-            allItems.addAll(shows);
-            
-            // Default sort: Newest first
-            Collections.sort(allItems, (a, b) -> {
+
+            List<MediaItem> loaded = new ArrayList<>();
+            loaded.addAll(movies);
+            loaded.addAll(shows);
+            Collections.sort(loaded, (a, b) -> {
                 if (a.getSavedTimestamp() == null || b.getSavedTimestamp() == null) return 0;
                 return b.getSavedTimestamp().compareTo(a.getSavedTimestamp());
             });
 
             if (isAdded()) {
                 requireActivity().runOnUiThread(() -> {
-                    adapter.notifyDataSetChanged();
+                    isSortedAZ = false;
+                    tvSortLabel.setText(R.string.sort_newest_first);
+                    adapter.updateData(loaded);
                     tvItemCount.setText(getString(R.string.items_count, allItems.size()));
                 });
             }
         }).start();
     }
 
-    @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
+
     private void toggleSort() {
+        List<MediaItem> sorted = new ArrayList<>(allItems);
         if (isSortedAZ) {
-            // Sort by Newest
-            Collections.sort(allItems, (a, b) -> {
+            Collections.sort(sorted, (a, b) -> {
                 if (a.getSavedTimestamp() == null || b.getSavedTimestamp() == null) return 0;
                 return b.getSavedTimestamp().compareTo(a.getSavedTimestamp());
             });
-            tvSortLabel.setText("Newest first");
+            tvSortLabel.setText(R.string.sort_newest_first);
         } else {
-            // Sort A-Z
-            Collections.sort(allItems, (a, b) -> a.getTitle().compareToIgnoreCase(b.getTitle()));
-            tvSortLabel.setText("A-Z");
+            Collections.sort(sorted, (a, b) -> {
+                String ta = a.getTitle() != null ? a.getTitle() : "";
+                String tb = b.getTitle() != null ? b.getTitle() : "";
+                return ta.compareToIgnoreCase(tb);
+            });
+            tvSortLabel.setText(R.string.sort_a_z);
         }
         isSortedAZ = !isSortedAZ;
-        adapter.notifyDataSetChanged();
+        adapter.updateData(sorted);
     }
 
     private void onItemClick(MediaItem item) {

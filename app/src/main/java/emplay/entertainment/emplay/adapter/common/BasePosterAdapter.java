@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.palette.graphics.Palette;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,6 +22,7 @@ import com.bumptech.glide.request.transition.Transition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -72,11 +74,23 @@ public abstract class BasePosterAdapter<T extends MediaItem>
         return null;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<T> newData) {
+        List<T> oldData = new ArrayList<>(mData);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldData.size(); }
+            @Override public int getNewListSize() { return newData != null ? newData.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldData.get(o).getMediaId() == newData.get(n).getMediaId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                MediaItem a = oldData.get(o), b = newData.get(n);
+                return Objects.equals(a.getPosterPath(), b.getPosterPath())
+                        && Objects.equals(a.getTitle(), b.getTitle());
+            }
+        });
         mData.clear();
         if (newData != null) mData.addAll(newData);
-        notifyDataSetChanged();
+        diff.dispatchUpdatesTo(this);
     }
 
     public void removeItem(int position) {

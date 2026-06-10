@@ -72,6 +72,7 @@ public class TVShowsByGenresFragment extends BaseFragment {
 
         GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
         tvByGenreRecyclerview.setLayoutManager(layoutManager);
+        tvByGenreRecyclerview.setHasFixedSize(true);
         tvByGenreRecyclerview.setAdapter(tvByGenreAdapter);
 
         btnPrev.setOnClickListener(v -> {
@@ -154,6 +155,7 @@ public class TVShowsByGenresFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                isLoading = false;
                 onDone.run();
             }
         });

@@ -9,11 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -65,11 +68,22 @@ public abstract class BaseSearchAdapter<T extends MediaItem>
         holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<T> newData) {
+        List<T> oldData = new ArrayList<>(list);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldData.size(); }
+            @Override public int getNewListSize() { return newData != null ? newData.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldData.get(o).getMediaId() == newData.get(n).getMediaId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                return Objects.equals(oldData.get(o).getTitle(), newData.get(n).getTitle())
+                        && Objects.equals(oldData.get(o).getPosterPath(), newData.get(n).getPosterPath());
+            }
+        });
         list.clear();
         if (newData != null) list.addAll(newData);
-        notifyDataSetChanged();
+        diff.dispatchUpdatesTo(this);
     }
 
     @Override

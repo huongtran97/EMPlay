@@ -75,7 +75,7 @@
                 android:id="@+id/tvSortLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/new_add"
+                android:text="@string/sort_newest_first"
                 android:textColor="#AAAAAA"
                 android:textSize="@dimen/text_badge" />
 

@@ -9,12 +9,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import emplay.entertainment.emplay.R;
@@ -27,13 +30,32 @@ import emplay.entertainment.emplay.tool.ReadHelper;
  * episode number, title, air date, and a collapsible overview (Read More/Less).
  */
 public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeViewHolder> {
-    private final List<SeasonDetailResponse.Episode> episodeList;
+    private final List<SeasonDetailResponse.Episode> episodeList = new ArrayList<>();
     private final Context context;
     private final Set<Integer> expandedItems = new HashSet<>();
 
-    public EpisodeAdapter(List<SeasonDetailResponse.Episode> episodeList, Context context) {
-        this.episodeList = episodeList;
+    public EpisodeAdapter(Context context) {
         this.context = context;
+    }
+
+    public void updateData(List<SeasonDetailResponse.Episode> newEpisodes) {
+        List<SeasonDetailResponse.Episode> oldList = new ArrayList<>(episodeList);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldList.size(); }
+            @Override public int getNewListSize() { return newEpisodes != null ? newEpisodes.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldList.get(o).getId() == newEpisodes.get(n).getId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                SeasonDetailResponse.Episode a = oldList.get(o), b = newEpisodes.get(n);
+                return a.getEpisodeNumber() == b.getEpisodeNumber()
+                        && Objects.equals(a.getName(), b.getName())
+                        && Objects.equals(a.getStillPath(), b.getStillPath());
+            }
+        });
+        episodeList.clear();
+        if (newEpisodes != null) episodeList.addAll(newEpisodes);
+        diff.dispatchUpdatesTo(this);
     }
 
     @NonNull

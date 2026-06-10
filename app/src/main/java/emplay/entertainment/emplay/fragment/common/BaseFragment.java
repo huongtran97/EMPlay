@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
@@ -36,8 +37,9 @@ import com.google.android.flexbox.FlexboxLayout;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.databinding.WtwUnreleasedViewBinding;
@@ -48,6 +50,8 @@ import retrofit2.Response;
 public abstract class BaseFragment extends Fragment {
 
     protected CountDownTimer countDownTimer;
+    private long lastNavTime = 0;
+    private final List<Call<?>> pendingCalls = new ArrayList<>();
 
     // Current background color — tracked so argb animation starts from the right value.
     // Defaults to near-black. Subclasses that use animateBackground() share this state.
@@ -98,17 +102,27 @@ public abstract class BaseFragment extends Fragment {
 
     // Retrofit
     protected <T> void safeEnqueue(Call<T> call, Callback<T> callback) {
+        pendingCalls.add(call);
         call.enqueue(new Callback<T>() {
             @Override
             public void onResponse(@NonNull Call<T> call, @NonNull Response<T> response) {
+                pendingCalls.remove(call);
                 if (isAdded() && getContext() != null) callback.onResponse(call, response);
             }
 
             @Override
             public void onFailure(@NonNull Call<T> call, @NonNull Throwable t) {
+                pendingCalls.remove(call);
                 if (isAdded() && getContext() != null) callback.onFailure(call, t);
             }
         });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        for (Call<?> c : pendingCalls) c.cancel();
+        pendingCalls.clear();
     }
 
     // UI thread
@@ -123,6 +137,9 @@ public abstract class BaseFragment extends Fragment {
     // Navigation
     protected void navigateTo(Fragment fragment) {
         if (!isAdded()) return;
+        long now = SystemClock.elapsedRealtime();
+        if (now - lastNavTime < 500) return;
+        lastNavTime = now;
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);

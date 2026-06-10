@@ -8,11 +8,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -26,10 +29,21 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
 
     private List<PersonCreditsResponse.CreditItem> creditList;
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<PersonCreditsResponse.CreditItem> newList) {
-        creditList = newList;
-        notifyDataSetChanged();
+        List<PersonCreditsResponse.CreditItem> oldList =
+                creditList != null ? new ArrayList<>(creditList) : new ArrayList<>();
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldList.size(); }
+            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldList.get(o).getId() == newList.get(n).getId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                return Objects.equals(oldList.get(o).getPosterPath(), newList.get(n).getPosterPath());
+            }
+        });
+        creditList = newList != null ? new ArrayList<>(newList) : new ArrayList<>();
+        diff.dispatchUpdatesTo(this);
     }
     private final Context context;
     private final OnCreditClickListener listener;
@@ -40,7 +54,7 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
 
     public CreditAdapter(List<PersonCreditsResponse.CreditItem> creditList,
                          Context context, OnCreditClickListener listener) {
-        this.creditList = creditList;
+        this.creditList = creditList != null ? new ArrayList<>(creditList) : new ArrayList<>();
         this.context = context;
         this.listener = listener;
     }

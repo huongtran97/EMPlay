@@ -9,12 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -46,11 +48,24 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
         this.onSeasonClickListener = listener;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<SeasonsModel> newSeasonsList) {
+        List<SeasonsModel> oldList = new ArrayList<>(seasonsList);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldList.size(); }
+            @Override public int getNewListSize() { return newSeasonsList != null ? newSeasonsList.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldList.get(o).getId() == newSeasonsList.get(n).getId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                SeasonsModel a = oldList.get(o), b = newSeasonsList.get(n);
+                return a.getSeasonNumber() == b.getSeasonNumber()
+                        && a.getNumberOfEpisodes() == b.getNumberOfEpisodes()
+                        && Objects.equals(a.getPosterPath(), b.getPosterPath());
+            }
+        });
         seasonsList.clear();
-        seasonsList.addAll(newSeasonsList);
-        notifyDataSetChanged();
+        if (newSeasonsList != null) seasonsList.addAll(newSeasonsList);
+        diff.dispatchUpdatesTo(this);
     }
 
     @NonNull

@@ -3,7 +3,6 @@ package emplay.entertainment.emplay.fragment.details;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -268,9 +267,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 seasonsModels.sort((a, b) -> Integer.compare(a.getSeasonNumber(), b.getSeasonNumber()));
             }
-            seasonsList.clear();
-            seasonsList.addAll(seasonsModels);
-            seasonAdapter.notifyDataSetChanged();
+            seasonAdapter.updateData(seasonsModels);
         }
 
         // Images
@@ -307,13 +304,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         // Blurred background
         UiUtils.setupBlurredBackground(this, tvDetails.getBackdrop_path(), tvDetails.getPoster_path(), binding.searchResultFragment);
 
-        GradientDrawable amberGlow = new GradientDrawable(
-                GradientDrawable.Orientation.TL_BR, // ignored for radial, but required
-                new int[]{
-                        0x66C9943A,  // amber center — 40% opacity
-                        0x00C9943A   // transparent edge
-                }
-        );
     }
 
     private void updateWatchlistButton(TVShowDetailsResponse tvDetails) {
@@ -335,23 +325,27 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
     private void setupGoogleTVWatchlistButton(String userId, TVShowDetailsResponse tvDetails) {
         updateSaveBtnIcon(userId, tvDetails.getId());
-        binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> {
+        binding.tvInfoCard.addToLibraryBtn.setOnClickListener(v -> new Thread(() -> {
             if (WatchlistHelper.isTVShowSaved(databaseHelper, userId, tvDetails.getId())) {
                 WatchlistHelper.removeTVShow(databaseHelper, userId, tvDetails.getId());
-                updateSaveBtnIcon(userId, tvDetails.getId());
-                Toast.makeText(requireContext(), "TV Show removed from library", Toast.LENGTH_SHORT).show();
+                safeRunOnUiThread(() -> {
+                    binding.tvInfoCard.icLibrary.setImageResource(R.drawable.ic_watchlist);
+                    Toast.makeText(requireContext(), "TV Show removed from library", Toast.LENGTH_SHORT).show();
+                });
             } else {
                 String genresString = buildGenresString(tvDetails.getGenres());
-                long result = WatchlistHelper.saveTVShow(databaseHelper, userId, tvDetails.getId(),
-                        tvDetails.getName(), tvDetails.getPoster_path(), genresString, tvDetails.getVote_average());
-                if (result != -1) {
-                    updateSaveBtnIcon(userId, tvDetails.getId());
-                    Toast.makeText(requireContext(), "TV Show added to library", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(requireContext(), "Failed to add TV Show", Toast.LENGTH_SHORT).show();
-                }
+                boolean saved = WatchlistHelper.saveTVShow(databaseHelper, userId, tvDetails.getId(),
+                        tvDetails.getName(), tvDetails.getPoster_path(), genresString,
+                        tvDetails.getVote_average()) != -1;
+                safeRunOnUiThread(() -> {
+                    binding.tvInfoCard.icLibrary.setImageResource(
+                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+                    Toast.makeText(requireContext(),
+                            saved ? "TV Show added to library" : "Failed to add TV Show",
+                            Toast.LENGTH_SHORT).show();
+                });
             }
-        });
+        }).start());
     }
 
     private void setupTmdbTVWatchlistButton(AuthManager auth, TVShowDetailsResponse tvDetails) {
@@ -419,8 +413,12 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     }
 
     private void updateSaveBtnIcon(String userId, int id) {
-        int iconRes = WatchlistHelper.isTVShowSaved(databaseHelper, userId, id) ? R.drawable.ic_check : R.drawable.ic_watchlist;
-        binding.tvInfoCard.icLibrary.setImageResource(iconRes);
+        new Thread(() -> {
+            boolean saved = WatchlistHelper.isTVShowSaved(databaseHelper, userId, id);
+            safeRunOnUiThread(() ->
+                    binding.tvInfoCard.icLibrary.setImageResource(
+                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist));
+        }).start();
     }
 
     private String buildGenresString(List<TVShowDetailsResponse.Genre> genres) {
@@ -562,11 +560,11 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                     TVShowCreditsResponses tvCreditsResponse = response.body();
                     List<TVShowCreditsResponses.Cast> raw = tvCreditsResponse.getCast();
                     if (raw != null && !raw.isEmpty()) {
-                        castList.clear();
+                        List<CastModel> newCast = new ArrayList<>();
                         for (TVShowCreditsResponses.Cast cast : raw) {
-                            castList.add(new CastModel(cast.getId(), cast.getName(), cast.getProfilePath(), cast.getCharacter()));
+                            newCast.add(new CastModel(cast.getId(), cast.getName(), cast.getProfilePath(), cast.getCharacter()));
                         }
-                        castAdapter.notifyDataSetChanged();
+                        castAdapter.updateData(newCast);
                     }
                 }
             }

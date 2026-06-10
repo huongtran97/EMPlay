@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -16,6 +17,7 @@ import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -46,11 +48,23 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
         this.onCastClickListener = listener;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<CastModel> newCastList) {
+        List<CastModel> oldList = new ArrayList<>(castList);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldList.size(); }
+            @Override public int getNewListSize() { return newCastList != null ? newCastList.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldList.get(o).getId() == newCastList.get(n).getId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                CastModel a = oldList.get(o), b = newCastList.get(n);
+                return Objects.equals(a.getName(), b.getName())
+                        && Objects.equals(a.getProfilePath(), b.getProfilePath());
+            }
+        });
         castList.clear();
-        castList.addAll(newCastList);
-        notifyDataSetChanged();
+        if (newCastList != null) castList.addAll(newCastList);
+        diff.dispatchUpdatesTo(this);
     }
 
     @NonNull

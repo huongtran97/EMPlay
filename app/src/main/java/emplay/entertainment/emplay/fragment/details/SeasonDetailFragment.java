@@ -16,12 +16,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.tvshow.EpisodeAdapter;
 import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.tvshow.SeasonDetailResponse;
 import emplay.entertainment.emplay.api.common.TMDBpath;
@@ -52,7 +52,6 @@ public class SeasonDetailFragment extends BaseFragment {
     private TextView episodeCount;
     private RecyclerView episodesRecyclerView;
     private EpisodeAdapter episodeAdapter;
-    private List<SeasonDetailResponse.Episode> episodeList;
     private boolean isExpanded = false;
 
     public static SeasonDetailFragment newInstance(int tvId, int seasonNumber) {
@@ -78,8 +77,7 @@ public class SeasonDetailFragment extends BaseFragment {
         episodeCount = view.findViewById(R.id.season_detail_episode_count);
         episodesRecyclerView = view.findViewById(R.id.season_detail_episodes_recyclerview);
 
-        episodeList = new ArrayList<>();
-        episodeAdapter = new EpisodeAdapter(episodeList, requireContext());
+        episodeAdapter = new EpisodeAdapter(requireContext());
         episodesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         episodesRecyclerView.setAdapter(episodeAdapter);
         episodesRecyclerView.setNestedScrollingEnabled(false);
@@ -103,7 +101,7 @@ public class SeasonDetailFragment extends BaseFragment {
     private void fetchSeasonDetails() {
         safeEnqueue(apiService.getTVSeasonDetails(
                 TMDBpath.tvSeasonDetails(tvId, seasonNumber)), new Callback<SeasonDetailResponse>() {
-            @SuppressLint({"SetTextI18n", "NotifyDataSetChanged"})
+            @SuppressLint("SetTextI18n")
             @Override
             public void onResponse(@NonNull Call<SeasonDetailResponse> call,
                                    @NonNull Response<SeasonDetailResponse> response) {
@@ -120,14 +118,12 @@ public class SeasonDetailFragment extends BaseFragment {
 
                     if (season.getEpisodes() != null) {
                         episodeCount.setText(season.getEpisodes().size() + " Episodes");
-                        episodeList.clear();
-                        episodeList.addAll(season.getEpisodes());
-                        episodeAdapter.notifyDataSetChanged();
+                        episodeAdapter.updateData(season.getEpisodes());
                     }
 
                     if (season.getPosterPath() != null) {
                         Glide.with(SeasonDetailFragment.this)
-                                .load("https://image.tmdb.org/t/p/w500" + season.getPosterPath())
+                                .load(ImageUrl.POSTER + season.getPosterPath())
                                 .placeholder(R.drawable.placeholder_image)
                                 .into(posterImage);
                     }

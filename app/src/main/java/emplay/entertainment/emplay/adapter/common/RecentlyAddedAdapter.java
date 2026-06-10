@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.adapter.common;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.Objects;
 
 import com.bumptech.glide.Glide;
 
@@ -20,6 +22,7 @@ import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
+import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.models.common.MediaItem;
 import emplay.entertainment.emplay.models.movie.MovieModel;
@@ -27,19 +30,83 @@ import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 
 public class RecentlyAddedAdapter extends RecyclerView.Adapter<RecentlyAddedAdapter.ViewHolder> {
 
+    private static final SimpleDateFormat DATE_FORMAT =
+            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+
     private final Context context;
     private final List<MediaItem> items;
     private final OnItemClickListener listener;
+    private final DatabaseHelper dbHelper;
+    private final String userId;
+    private OnItemRemovedListener onItemRemovedListener;
 
     public interface OnItemClickListener {
         void onItemClick(MediaItem item);
     }
 
-    public RecentlyAddedAdapter(Context context, List<MediaItem> items, OnItemClickListener listener) {
+    public interface OnItemRemovedListener {
+        void onItemRemoved(int newCount);
+    }
+
+    public RecentlyAddedAdapter(Context context, List<MediaItem> items, OnItemClickListener listener,
+                                DatabaseHelper dbHelper, String userId) {
         this.context = context;
         this.items = items;
         this.listener = listener;
+        this.dbHelper = dbHelper;
+        this.userId = userId;
     }
+
+    public void setOnItemRemovedListener(OnItemRemovedListener listener) {
+        this.onItemRemovedListener = listener;
+    }
+
+    public void removeItem(int position) {
+        if (position < 0 || position >= items.size()) return;
+        MediaItem item = items.remove(position);
+        notifyItemRemoved(position);
+        if (dbHelper != null && userId != null) {
+            new Thread(() -> {
+                if (item instanceof MovieModel) {
+                    dbHelper.deleteMovie(item.getMediaId(), userId);
+                } else if (item instanceof TVShowModel) {
+                    dbHelper.deleteTV(item.getMediaId(), userId);
+                }
+            }).start();
+        }
+        if (onItemRemovedListener != null) onItemRemovedListener.onItemRemoved(items.size());
+    }
+
+    public void updateData(List<MediaItem> newItems) {
+        DiffUtil.DiffResult result = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override
+            public int getOldListSize() { return items.size(); }
+
+            @Override
+            public int getNewListSize() { return newItems.size(); }
+
+            @Override
+            public boolean areItemsTheSame(int oldPos, int newPos) {
+                MediaItem o = items.get(oldPos);
+                MediaItem n = newItems.get(newPos);
+                return o.getMediaId() == n.getMediaId()
+                        && o.getClass().equals(n.getClass());
+            }
+
+            @Override
+            public boolean areContentsTheSame(int oldPos, int newPos) {
+                MediaItem o = items.get(oldPos);
+                MediaItem n = newItems.get(newPos);
+                return Objects.equals(o.getTitle(), n.getTitle())
+                        && Objects.equals(o.getPosterPath(), n.getPosterPath())
+                        && Objects.equals(o.getSavedTimestamp(), n.getSavedTimestamp());
+            }
+        });
+        items.clear();
+        items.addAll(newItems);
+        result.dispatchUpdatesTo(this);
+    }
+
 
     @NonNull
     @Override
@@ -48,10 +115,11 @@ public class RecentlyAddedAdapter extends RecyclerView.Adapter<RecentlyAddedAdap
         return new ViewHolder(view);
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MediaItem item = items.get(position);
+
+        holder.tvTitle.setText(item.getTitle());
 
         // Genre handling
         List<String> genres = null;
@@ -86,9 +154,7 @@ public class RecentlyAddedAdapter extends RecyclerView.Adapter<RecentlyAddedAdap
     private String formatDate(String rawTimestamp) {
         if (rawTimestamp == null) return context.getString(R.string.saved_recently);
         try {
-            // SQLite CURRENT_TIMESTAMP is YYYY-MM-DD HH:MM:SS
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
-            Date date = sdf.parse(rawTimestamp);
+            Date date = DATE_FORMAT.parse(rawTimestamp);
             if (date == null) return context.getString(R.string.saved_recently);
             
             long diff = System.currentTimeMillis() - date.getTime();
@@ -112,11 +178,12 @@ public class RecentlyAddedAdapter extends RecyclerView.Adapter<RecentlyAddedAdap
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView ivThumbnail;
-        TextView tvGenre, tvSavedTime, tvType;
+        TextView tvTitle, tvGenre, tvSavedTime, tvType;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivThumbnail = itemView.findViewById(R.id.ivThumbnail);
+            tvTitle = itemView.findViewById(R.id.tvTitle);
             tvGenre = itemView.findViewById(R.id.tvGenre);
             tvSavedTime = itemView.findViewById(R.id.tvSavedTime);
             tvType = itemView.findViewById(R.id.tvType);

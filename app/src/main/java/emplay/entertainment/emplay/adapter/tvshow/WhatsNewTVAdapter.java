@@ -9,11 +9,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -172,11 +175,23 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
         return tvShowList.size();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<TVShowModel> newList) {
+        List<TVShowModel> oldList = new ArrayList<>(tvShowList);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldList.size(); }
+            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldList.get(o).getTVShowId() == newList.get(n).getTVShowId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                TVShowModel a = oldList.get(o), b = newList.get(n);
+                return Objects.equals(a.getName(), b.getName())
+                        && Objects.equals(a.getPosterPath(), b.getPosterPath());
+            }
+        });
         tvShowList.clear();
-        tvShowList.addAll(newList);
-        notifyDataSetChanged();
+        if (newList != null) tvShowList.addAll(newList);
+        diff.dispatchUpdatesTo(this);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

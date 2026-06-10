@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.adapter.common;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.TypedValue;
@@ -10,26 +9,46 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.common.MediaItem;
 
 public class TrendingSearchAdapter extends RecyclerView.Adapter<TrendingSearchAdapter.ViewHolder> {
     private final Context context;
-    private final List<? extends MediaItem> items;
+    private final List<MediaItem> items;
     private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
         void onItemClick(MediaItem item);
     }
 
-    public TrendingSearchAdapter(Context context, List<? extends MediaItem> items, OnItemClickListener listener) {
+    public TrendingSearchAdapter(Context context, List<? extends MediaItem> initialItems, OnItemClickListener listener) {
         this.context = context;
-        this.items = items;
+        this.items = new ArrayList<>(initialItems);
         this.listener = listener;
+    }
+
+    public void updateData(List<? extends MediaItem> newItems) {
+        List<MediaItem> oldItems = new ArrayList<>(items);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldItems.size(); }
+            @Override public int getNewListSize() { return newItems != null ? newItems.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldItems.get(o).getMediaId() == newItems.get(n).getMediaId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                return Objects.equals(oldItems.get(o).getTitle(), newItems.get(n).getTitle());
+            }
+        });
+        items.clear();
+        if (newItems != null) items.addAll(newItems);
+        diff.dispatchUpdatesTo(this);
     }
 
     @NonNull

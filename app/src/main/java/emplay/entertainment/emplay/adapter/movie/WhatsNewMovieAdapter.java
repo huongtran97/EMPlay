@@ -9,12 +9,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -75,11 +78,23 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
         return movieList.size();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     public void updateData(List<MovieModel> newList) {
+        List<MovieModel> oldList = new ArrayList<>(movieList);
+        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
+            @Override public int getOldListSize() { return oldList.size(); }
+            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
+            @Override public boolean areItemsTheSame(int o, int n) {
+                return oldList.get(o).getMovieId() == newList.get(n).getMovieId();
+            }
+            @Override public boolean areContentsTheSame(int o, int n) {
+                MovieModel a = oldList.get(o), b = newList.get(n);
+                return Objects.equals(a.getTitle(), b.getTitle())
+                        && Objects.equals(a.getPosterPath(), b.getPosterPath());
+            }
+        });
         movieList.clear();
-        movieList.addAll(newList);
-        notifyDataSetChanged();
+        if (newList != null) movieList.addAll(newList);
+        diff.dispatchUpdatesTo(this);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

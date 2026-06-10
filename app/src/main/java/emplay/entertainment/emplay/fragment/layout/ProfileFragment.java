@@ -110,6 +110,7 @@ public class ProfileFragment extends BaseFragment {
         RecyclerView rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
         recentlySavedAdapter = new RecentlySavedAdapter(requireContext(), recentlySavedList, this::onItemClicked);
         rvRecentlySaved.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        rvRecentlySaved.setHasFixedSize(true);
         rvRecentlySaved.setAdapter(recentlySavedAdapter);
 
         view.findViewById(R.id.llAbout).setOnClickListener(v ->
@@ -279,9 +280,9 @@ public class ProfileFragment extends BaseFragment {
         List<MediaItem> recentTV = new ArrayList<>();
         int[] counts = {0, 0}; // [movies, tv]
 
-        watchlistApiService.getWatchlistMovies(
-                TMDBpath.accountWatchlistMovies(accountId), sessionId, 1)
-                .enqueue(new Callback<TMDBMovieWatchlistResponse>() {
+        safeEnqueue(watchlistApiService.getWatchlistMovies(
+                        TMDBpath.accountWatchlistMovies(accountId), sessionId, 1),
+                new Callback<TMDBMovieWatchlistResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TMDBMovieWatchlistResponse> call,
                                            @NonNull Response<TMDBMovieWatchlistResponse> response) {
@@ -298,9 +299,9 @@ public class ProfileFragment extends BaseFragment {
                     }
                 });
 
-        watchlistApiService.getWatchlistTV(
-                TMDBpath.accountWatchlistTVShows(accountId), sessionId, 1)
-                .enqueue(new Callback<TMDBTVWatchlistResponse>() {
+        safeEnqueue(watchlistApiService.getWatchlistTV(
+                        TMDBpath.accountWatchlistTVShows(accountId), sessionId, 1),
+                new Callback<TMDBTVWatchlistResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TMDBTVWatchlistResponse> call,
                                            @NonNull Response<TMDBTVWatchlistResponse> response) {

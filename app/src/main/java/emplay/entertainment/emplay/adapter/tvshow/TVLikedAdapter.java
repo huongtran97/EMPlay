@@ -17,15 +17,17 @@ import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 public class TVLikedAdapter extends BasePosterAdapter<TVShowModel> {
 
     private final DatabaseHelper databaseHelper;
+    private final String userId;
 
     public interface OnItemClickListener {
         void onItemClick(TVShowModel tv);
     }
 
     public TVLikedAdapter(Context context, List<TVShowModel> data,
-                          OnItemClickListener listener, DatabaseHelper databaseHelper) {
+                          OnItemClickListener listener, DatabaseHelper databaseHelper, String userId) {
         super(context, data, listener::onItemClick);
         this.databaseHelper = databaseHelper;
+        this.userId = userId;
     }
 
     @Override
@@ -41,6 +43,6 @@ public class TVLikedAdapter extends BasePosterAdapter<TVShowModel> {
         if (position < 0 || position >= mData.size()) return;
         TVShowModel item = mData.get(position);
         super.removeItem(position);
-        databaseHelper.deleteTV(item.getTVShowId());
+        databaseHelper.deleteTV(item.getTVShowId(), userId);
     }
 }
