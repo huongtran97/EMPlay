@@ -376,14 +376,12 @@ public class HomeFragment extends BaseFragment {
         rvUpcomingMovies.setAdapter(upcomingMovieAdapter);
         rvUpcomingMovies.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvUpcomingMovies.setHasFixedSize(true);
 
         RecyclerView rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
         upComingTVAdapter = new UpComingTVAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvUpcomingTvShows.setAdapter(upComingTVAdapter);
         rvUpcomingTvShows.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvUpcomingTvShows.setHasFixedSize(true);
 
         RecyclerView.RecycledViewPool sharedPool = new RecyclerView.RecycledViewPool();
         rvUpcomingMovies.setRecycledViewPool(sharedPool);

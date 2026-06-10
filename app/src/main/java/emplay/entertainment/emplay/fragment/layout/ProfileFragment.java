@@ -110,7 +110,6 @@ public class ProfileFragment extends BaseFragment {
         RecyclerView rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
         recentlySavedAdapter = new RecentlySavedAdapter(requireContext(), recentlySavedList, this::onItemClicked);
         rvRecentlySaved.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvRecentlySaved.setHasFixedSize(true);
         rvRecentlySaved.setAdapter(recentlySavedAdapter);
 
         view.findViewById(R.id.llAbout).setOnClickListener(v ->

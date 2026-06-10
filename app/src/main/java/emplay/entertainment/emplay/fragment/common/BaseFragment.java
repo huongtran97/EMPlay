@@ -209,9 +209,9 @@ public abstract class BaseFragment extends Fragment {
                 long seconds = (millisUntilFinished % 60000)    / 1000;
                 safeRunOnUiThread(() -> {
                     unreleasedBinding.tvDays.setText(String.valueOf(days));
-                    unreleasedBinding.tvHours.setText(String.format("%02d", hours));
-                    unreleasedBinding.tvMinutes.setText(String.format("%02d", minutes));
-                    unreleasedBinding.tvSeconds.setText(String.format("%02d", seconds));
+                    unreleasedBinding.tvHours.setText(String.format(Locale.ROOT, "%02d", hours));
+                    unreleasedBinding.tvMinutes.setText(String.format(Locale.ROOT, "%02d", minutes));
+                    unreleasedBinding.tvSeconds.setText(String.format(Locale.ROOT, "%02d", seconds));
                 });
             }
 
