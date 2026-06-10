@@ -35,6 +35,7 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
     private final List<TVShowModel> tvShowList;
     private final MovieApiService apiService;
     private final OnItemClickListener listener;
+    private final int maxItems;
 
     public interface OnItemClickListener {
         void onItemClick(TVShowModel tvShow);
@@ -42,10 +43,16 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
 
     public WhatsNewTVAdapter(Context context, List<TVShowModel> tvShowList,
                              MovieApiService apiService, OnItemClickListener listener) {
+        this(context, tvShowList, apiService, listener, Integer.MAX_VALUE);
+    }
+
+    public WhatsNewTVAdapter(Context context, List<TVShowModel> tvShowList,
+                             MovieApiService apiService, OnItemClickListener listener, int maxItems) {
         this.context = context;
         this.tvShowList = tvShowList;
         this.apiService = apiService;
         this.listener = listener;
+        this.maxItems = maxItems;
     }
 
     @NonNull
@@ -79,12 +86,13 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
         holder.tvMeta.setText(meta);
 
         // Image: episode still for "New episode", season poster for "New season", backdrop for "New TV show"
+        // fetchDetails (which may remove stale items) only runs in the full "see all" view.
         String imageUrl;
         if (tvShow.getDisplayImagePath() != null) {
             imageUrl = tvShow.getDisplayImagePath();
         } else {
             imageUrl = ImageUrl.THUMBNAIL + tvShow.getBackdropPath();
-            if (!"New TV show".equals(type) && !tvShow.isDetailsFetched()) {
+            if (maxItems == Integer.MAX_VALUE && !"New TV show".equals(type) && !tvShow.isDetailsFetched()) {
                 fetchDetails(tvShow, type);
             }
         }
@@ -123,7 +131,7 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
                                         int pos = tvShowList.indexOf(tvShow);
                                         if (pos != -1) {
                                             tvShowList.remove(pos);
-                                            notifyItemRemoved(pos);
+                                            if (pos < maxItems) notifyItemRemoved(pos);
                                         }
                                         return;
                                     }
@@ -143,7 +151,7 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
                                     int pos = tvShowList.indexOf(tvShow);
                                     if (pos != -1) {
                                         tvShowList.remove(pos);
-                                        notifyItemRemoved(pos);
+                                        if (pos < maxItems) notifyItemRemoved(pos);
                                     }
                                     return;
                                 }
@@ -176,21 +184,24 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
     }
 
     public void updateData(List<TVShowModel> newList) {
+        List<TVShowModel> capped = newList != null
+                ? new ArrayList<>(newList.subList(0, Math.min(newList.size(), maxItems)))
+                : new ArrayList<>();
         List<TVShowModel> oldList = new ArrayList<>(tvShowList);
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override public int getOldListSize() { return oldList.size(); }
-            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
+            @Override public int getNewListSize() { return capped.size(); }
             @Override public boolean areItemsTheSame(int o, int n) {
-                return oldList.get(o).getTVShowId() == newList.get(n).getTVShowId();
+                return oldList.get(o).getTVShowId() == capped.get(n).getTVShowId();
             }
             @Override public boolean areContentsTheSame(int o, int n) {
-                TVShowModel a = oldList.get(o), b = newList.get(n);
+                TVShowModel a = oldList.get(o), b = capped.get(n);
                 return Objects.equals(a.getName(), b.getName())
                         && Objects.equals(a.getPosterPath(), b.getPosterPath());
             }
         });
         tvShowList.clear();
-        if (newList != null) tvShowList.addAll(newList);
+        tvShowList.addAll(capped);
         diff.dispatchUpdatesTo(this);
     }
 

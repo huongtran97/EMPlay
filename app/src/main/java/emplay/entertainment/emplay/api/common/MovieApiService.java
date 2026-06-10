@@ -35,10 +35,6 @@ public interface MovieApiService {
             @Query("path") String path);
 
     @GET("api/tmdb")
-    Call<MovieResponse> getNowPlayingMovies(
-            @Query("path") String path);
-
-    @GET("api/tmdb")
     Call<MovieDetailsResponse> getMovieDetails(
             @Query("path") String path);
 
@@ -142,5 +138,10 @@ public interface MovieApiService {
     Call<TVShowResponse> getTVShowsByGenre(
             @Query("path") String path,
             @Query("with_genres") int genreId,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
+    Call<MovieResponse> getNowPlayingMovies(
+            @Query("path") String path,
             @Query("page") int page);
 }

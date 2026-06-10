@@ -41,8 +41,11 @@ import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import emplay.entertainment.emplay.adapter.movie.TrendingBannerAdapter;
 import emplay.entertainment.emplay.database.DatabaseHelper;
@@ -97,10 +100,12 @@ public class HomeFragment extends BaseFragment {
     private boolean isWhatsNewShowingTV = true;
     private final List<TVShowModel> cachedTVShows = new ArrayList<>();
     private final List<MovieModel> cachedMovies = new ArrayList<>();
-    private final List<MovieModel> nowPlayingPool = new ArrayList<>(); // Source pool for the hero banner — populated once from API, never reshuffled after initial load
+    private final List<MovieModel> nowPlayingPool = new ArrayList<>(); // Full theater-only pool fetched from API
+    private final List<MovieModel> heroBatch = new ArrayList<>();      // The 5 movies picked for this session
     private final Random random = new Random();
     private long lastFetchTime = 0;
     private static final long CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+    private android.os.Handler providerCheckHandler;
 
     @Nullable
     @Override
@@ -356,8 +361,8 @@ public class HomeFragment extends BaseFragment {
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
         rvWhatsNew = view.findViewById(R.id.rvWhatsNew);
-        whatsNewTVAdapter    = new WhatsNewTVAdapter(requireContext(), new ArrayList<>(), apiService, this::onItemClicked);
-        whatsNewMovieAdapter = new WhatsNewMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
+        whatsNewTVAdapter    = new WhatsNewTVAdapter(requireContext(), new ArrayList<>(), apiService, this::onItemClicked, 4);
+        whatsNewMovieAdapter = new WhatsNewMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked, 4);
         rvWhatsNew.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvWhatsNew.setNestedScrollingEnabled(false);
         rvWhatsNew.setAdapter(isWhatsNewShowingTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
@@ -444,8 +449,12 @@ public class HomeFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (providerCheckHandler != null) {
+            providerCheckHandler.removeCallbacksAndMessages(null);
+            providerCheckHandler = null;
+        }
         resetBackground();
-        // Null out view references to avoid memory leaks after the view hierarchy is destroyed
+        heroBatch.clear();
         heroSection         = null;
         heroSectionFill     = null;
     }
@@ -469,40 +478,70 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
     }
 
-    // Fetches now-playing movies, date-filters them, then checks each for streaming providers.
-    // Only movies with NO flatrate streaming in the user's region reach the hero banner.
+    // Fetches two pages of now-playing movies concurrently, date/language-filters them,
+    // then checks each against the watch-providers API. Only movies with no streaming
+    // providers in the user's region (theater-only) reach the hero banner.
     private void fetchNowPlayingMovies() {
-        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies()),
-                new Callback<MovieResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<MovieResponse> call,
-                                           @NonNull Response<MovieResponse> response) {
-                        if (response.isSuccessful() && response.body() != null) {
-                            List<MovieModel> results = response.body().getResults();
-                            if (results == null || results.isEmpty()) return;
-                            List<MovieModel> candidates = new ArrayList<>();
-                            LocalDate today = LocalDate.now();
-                            for (MovieModel m : results) {
-                                if (m.getPosterPath() == null) continue;
-                                String rd = m.getReleaseDate();
-                                if (rd == null || rd.isEmpty()) continue;
-                                try {
-                                    long days = ChronoUnit.DAYS.between(LocalDate.parse(rd), today);
-                                    if (days < 0 || days > 45) continue;
-                                } catch (Exception ignored) {
-                                    continue;
-                                }
-                                candidates.add(m);
-                            }
-                            if (!candidates.isEmpty()) filterByTheatersOnly(candidates);
-                        }
-                    }
-                    @Override
-                    public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                        Log.e("HomeFragment", "Failed to fetch now playing movies", t);
-                    }
-                });
+        AtomicInteger pagesRemaining = new AtomicInteger(2);
+        List<MovieModel> allResults = new ArrayList<>();
+
+        Callback<MovieResponse> pageCallback = new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MovieResponse> call,
+                                   @NonNull Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<MovieModel> results = response.body().getResults();
+                    if (results != null) allResults.addAll(results);
+                }
+                // Wait for both pages before processing
+                if (pagesRemaining.decrementAndGet() == 0) processNowPlayingResults(allResults);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                Log.e("HomeFragment", "Failed to fetch now playing movies", t);
+                // Still process whatever was collected from the other page
+                if (pagesRemaining.decrementAndGet() == 0) processNowPlayingResults(allResults);
+            }
+        };
+
+        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies(), 1), pageCallback);
+        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies(), 2), pageCallback);
     }
+
+    // Applies date and language filters to raw now-playing results,
+    // then hands off to provider checks to finalize the theater-only pool.
+    private void processNowPlayingResults(List<MovieModel> allResults) {
+        if (allResults.isEmpty()) return;
+
+        // Date-filter: keep only movies released within the last 60 days
+        List<MovieModel> candidates = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (MovieModel m : allResults) {
+            if (m.getPosterPath() == null) continue;
+            String rd = m.getReleaseDate();
+            if (rd == null || rd.isEmpty()) continue;
+            try {
+                long days = ChronoUnit.DAYS.between(LocalDate.parse(rd), today);
+                if (days < 0 || days > 60) continue;
+            } catch (Exception ignored) { continue; }
+            candidates.add(m);
+        }
+        if (candidates.isEmpty()) return;
+
+        // Language filter: prefer English-only for a consistent experience.
+        // Falls back to all languages if fewer than 5 English movies are available.
+        List<MovieModel> englishOnly = new ArrayList<>();
+        for (MovieModel m : candidates) {
+            if ("en".equals(m.getOriginalLanguage())) englishOnly.add(m);
+        }
+        List<MovieModel> finalCandidates = englishOnly.size() >= 5 ? englishOnly : candidates;
+
+        // Provider checks will further filter to theater-only movies using the user's region
+        filterByTheatersOnly(finalCandidates);
+    }
+
+
 
     // For each candidate, check if it has flatrate streaming providers in the user's region.
     // Movies without flatrate providers are still exclusively in theaters.
@@ -510,74 +549,92 @@ public class HomeFragment extends BaseFragment {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
         String region = prefs.getString("pref_region", "US");
         AtomicInteger remaining = new AtomicInteger(candidates.size());
-        List<MovieModel> theaterOnly = Collections.synchronizedList(new ArrayList<>());
+        List<MovieModel> theaterOnly = new ArrayList<>();
 
-        for (MovieModel movie : candidates) {
-            safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movie.getMovieId())),
-                    new Callback<TVShowProviderResponse>() {
-                        @Override
-                        public void onResponse(@NonNull Call<TVShowProviderResponse> call,
-                                               @NonNull Response<TVShowProviderResponse> response) {
-                            boolean hasDigital = false;
-                            if (response.isSuccessful() && response.body() != null) {
-                                Map<String, RegionProvidersModel> providerMap = response.body().getResults();
-                                if (providerMap != null && providerMap.containsKey(region)) {
-                                    RegionProvidersModel regionData = providerMap.get(region);
-                                    if (regionData != null) {
-                                        // Filter: subscription + rent + buy
-                                        boolean hasFlatrate = regionData.getFlatrate() != null
-                                                && !regionData.getFlatrate().isEmpty();
-                                        boolean hasRent = regionData.getRent() != null
-                                                && !regionData.getRent().isEmpty();
-                                        boolean hasBuy = regionData.getBuy() != null
-                                                && !regionData.getBuy().isEmpty();
-                                        hasDigital = hasFlatrate || hasRent || hasBuy;
-                                    }
+        providerCheckHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        for (int i = 0; i < candidates.size(); i++) {
+            MovieModel movie = candidates.get(i);
+            providerCheckHandler.postDelayed(
+                    () -> enqueueWithRetry(movie, region, theaterOnly, remaining, candidates, 0),
+                    i * 200L // stagger requests 200ms apart to avoid 429
+            );
+        }
+    }
+    private void enqueueWithRetry(MovieModel movie, String region,
+                                  List<MovieModel> theaterOnly,
+                                  AtomicInteger remaining,
+                                  List<MovieModel> candidates,
+                                  int retryCount) {
+        safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movie.getMovieId())),
+                new Callback<TVShowProviderResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TVShowProviderResponse> call,
+                                           @NonNull Response<TVShowProviderResponse> response) {
+                        // Retry with exponential backoff on 429
+                        if (response.code() == 429 && retryCount < 3) {
+                            long backoff = (retryCount + 1) * 500L; // 500ms, 1000ms, 1500ms
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
+                                    () -> enqueueWithRetry(movie, region, theaterOnly, remaining, candidates, retryCount + 1),
+                                    backoff
+                            );
+                            return;
+                        }
+                        boolean hasDigital = false;
+                        if (response.isSuccessful() && response.body() != null) {
+                            Map<String, RegionProvidersModel> providerMap = response.body().getResults();
+                            if (providerMap != null && providerMap.containsKey(region)) {
+                                RegionProvidersModel regionData = providerMap.get(region);
+                                if (regionData != null) {
+                                    // Filter: subscription + rent + buy
+                                    boolean hasFlatrate = regionData.getFlatrate() != null
+                                            && !regionData.getFlatrate().isEmpty();
+                                    boolean hasRent = regionData.getRent() != null
+                                            && !regionData.getRent().isEmpty();
+                                    boolean hasBuy = regionData.getBuy() != null
+                                            && !regionData.getBuy().isEmpty();
+                                    hasDigital = hasFlatrate || hasRent || hasBuy;
                                 }
                             }
-                            if (!hasDigital) theaterOnly.add(movie);
-                            onProviderCheckDone(remaining, candidates, theaterOnly);
                         }
+                        if (!hasDigital) theaterOnly.add(movie);
+                        onProviderCheckDone(remaining, candidates, theaterOnly);
+                    }
 
-                        @Override
-                        public void onFailure(@NonNull Call<TVShowProviderResponse> call,
-                                              @NonNull Throwable t) {
-                            theaterOnly.add(movie);
-                            onProviderCheckDone(remaining, candidates, theaterOnly);
-                        }
-                    });
-        }
+                    @Override
+                    public void onFailure(@NonNull Call<TVShowProviderResponse> call, @NonNull Throwable t) {
+                        // Network failure — assume theater-only to avoid incorrectly excluding the movie
+                        theaterOnly.add(movie);
+                        onProviderCheckDone(remaining, candidates, theaterOnly);
+                    }
+                });
     }
 
     private void onProviderCheckDone(AtomicInteger remaining, List<MovieModel> candidates,
                                      List<MovieModel> theaterOnly) {
         if (remaining.decrementAndGet() != 0) return;
+        Set<Integer> theaterIds = new java.util.HashSet<>();
+        for (MovieModel m : theaterOnly) theaterIds.add(m.getMovieId());
         nowPlayingPool.clear();
-        for (MovieModel m : candidates) { // preserve original now_playing order
-            if (theaterOnly.contains(m)) {
-                nowPlayingPool.add(m);
-                if (nowPlayingPool.size() == 6) break;
-            }
+        for (MovieModel m : candidates) {
+            if (theaterIds.contains(m.getMovieId())) nowPlayingPool.add(m);
         }
         if (!nowPlayingPool.isEmpty()) showNowPlayingBanner();
     }
 
-    // Randomizes order and loads banner — called once from fetchNowPlayingMovies,
-    // and from onResume only if the adapter is still empty
     private void showNowPlayingBanner() {
         if (nowPlayingPool.isEmpty() || !isAdded()) return;
         bannerColors.clear();
 
-        // Randomly promote one movie to position 0 for variety on each app launch
-        List<MovieModel> ordered = new ArrayList<>(nowPlayingPool);
-        Collections.swap(ordered, 0, random.nextInt(ordered.size()));
+        if (heroBatch.isEmpty()) {
+            heroBatch.addAll(pickHeroBatch());
+        }
+        if (heroBatch.isEmpty()) return;
 
-        trendingAdapter.updateData(ordered);
-        buildDots(ordered.size());
+        trendingAdapter.updateData(new ArrayList<>(heroBatch));
+        buildDots(heroBatch.size());
         vpTrendingBanner.setCurrentItem(0, false);
 
-        // Set initial meta without animation (setCurrentText bypasses TextSwitcher transition)
-        MovieModel first = ordered.get(0);
+        MovieModel first = heroBatch.get(0);
         tvHeroTitle.setCurrentText(first.getTitle());
 
         // Convert TMDB date format "yyyy-MM-dd" → "dd/MM/yyyy"
@@ -595,6 +652,89 @@ public class HomeFragment extends BaseFragment {
         tvHeroRating.setText(getString(R.string.rating_format, first.getVoteAverage()));
     }
 
+    // Picks the next 5 movies from a persistent no-repeat shuffle of nowPlayingPool.
+    // State is kept in SharedPreferences across app restarts:
+    //   hero_pool_ids     — comma-separated IDs of the full pool (detects content changes)
+    //   hero_unseen_ids   — IDs not yet shown in the current cycle, in shuffled order
+    //   hero_last_batch_ids — the 5 IDs shown last session (prevents overlap at cycle boundaries)
+    private List<MovieModel> pickHeroBatch() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences("hero_prefs", 0);
+
+        Map<Integer, MovieModel> poolMap = new LinkedHashMap<>();
+        for (MovieModel m : nowPlayingPool) poolMap.put(m.getMovieId(), m);
+        List<Integer> poolIds = new ArrayList<>(poolMap.keySet());
+
+        String currentPoolStr = idsToString(poolIds);
+        List<Integer> unseenIds = parseIds(prefs.getString("hero_unseen_ids", ""));
+        List<Integer> lastBatchIds = parseIds(prefs.getString("hero_last_batch_ids", ""));
+
+        if (!currentPoolStr.equals(prefs.getString("hero_pool_ids", ""))) {
+            unseenIds = new ArrayList<>(poolIds);
+            Collections.shuffle(unseenIds, random);
+            lastBatchIds.clear();
+        } else {
+            unseenIds.retainAll(poolIds);
+        }
+
+        if (unseenIds.size() < 5) {
+            List<Integer> newCycle = new ArrayList<>(poolIds);
+            Collections.shuffle(newCycle, random);
+
+            // Rotate new cycle until its first 5 entries don't overlap with the previous batch.
+            // Only attempt rotation if the pool is large enough to find a non-overlapping arrangement.
+            if (!lastBatchIds.isEmpty() && newCycle.size() > lastBatchIds.size()) {
+                for (int i = 0; i < newCycle.size(); i++) {
+                    List<Integer> nextBatch = newCycle.subList(0, Math.min(5, newCycle.size()));
+                    boolean hasOverlap = false;
+                    for (int id : nextBatch) {
+                        if (lastBatchIds.contains(id)) { hasOverlap = true; break; }
+                    }
+                    if (!hasOverlap) break;
+                    Collections.rotate(newCycle, 1);
+                }
+            }
+
+            Set<Integer> deduped = new LinkedHashSet<>(unseenIds);
+            deduped.addAll(newCycle);
+            unseenIds = new ArrayList<>(deduped);
+        }
+
+        int take = Math.min(5, unseenIds.size());
+        List<Integer> batch = new ArrayList<>(unseenIds.subList(0, take));
+        List<Integer> remaining = new ArrayList<>(unseenIds.subList(take, unseenIds.size()));
+
+        prefs.edit()
+                .putString("hero_pool_ids", currentPoolStr)
+                .putString("hero_unseen_ids", idsToString(remaining))
+                .putString("hero_last_batch_ids", idsToString(batch))
+                .apply();
+
+        List<MovieModel> result = new ArrayList<>();
+        for (int id : batch) {
+            MovieModel m = poolMap.get(id);
+            if (m != null) result.add(m);
+        }
+        return result;
+    }
+
+    private static String idsToString(List<Integer> ids) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < ids.size(); i++) {
+            if (i > 0) sb.append(',');
+            sb.append(ids.get(i));
+        }
+        return sb.toString();
+    }
+
+    private static List<Integer> parseIds(String s) {
+        List<Integer> ids = new ArrayList<>();
+        if (s == null || s.isEmpty()) return ids;
+        for (String part : s.split(",")) {
+            try { ids.add(Integer.parseInt(part.trim())); } catch (NumberFormatException ignored) {}
+        }
+        return ids;
+    }
+
     private void fetchTrendingMovies() {
         safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()),
                 new Callback<MovieResponse>() {
@@ -605,16 +745,13 @@ public class HomeFragment extends BaseFragment {
                             List<MovieModel> results = response.body().getResults();
                             if (results == null || results.isEmpty()) return;
                             cachedMovies.clear();
-                            // Only include movies released within the last 30 days
                             for (MovieModel movie : results) {
                                 if (movie.getPosterPath() != null
                                         && BadgeHelper.isNotOlderThan(movie.getReleaseDate(), 30)) {
                                     cachedMovies.add(movie);
                                 }
                             }
-                            List<MovieModel> limited = cachedMovies.subList(
-                                    0, Math.min(cachedMovies.size(), 4));
-                            whatsNewMovieAdapter.updateData(new ArrayList<>(limited));
+                            whatsNewMovieAdapter.updateData(new ArrayList<>(cachedMovies));
                         }
                     }
                     @Override
@@ -637,10 +774,7 @@ public class HomeFragment extends BaseFragment {
                             for (TVShowModel tv : results) {
                                 if (tv.getPosterPath() != null) cachedTVShows.add(tv);
                             }
-                            // Limit to 4 items for the Home screen
-                            List<TVShowModel> limited = cachedTVShows.subList(
-                                    0, Math.min(cachedTVShows.size(), 4));
-                            whatsNewTVAdapter.updateData(new ArrayList<>(limited));
+                            whatsNewTVAdapter.updateData(new ArrayList<>(cachedTVShows));
                         }
                     }
                     @Override

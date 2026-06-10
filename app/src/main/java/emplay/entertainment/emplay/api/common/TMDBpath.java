@@ -12,7 +12,6 @@ import java.util.Locale;
  *   apiService.getMoviesTrailer(TmdbPaths.movieTrailer(123))
  */
 public class TMDBpath {
-
     public static String trendingMovies() { return "3/trending/movie/week"; }
     public static String nowPlayingMovies() { return "3/movie/now_playing"; }
     public static String trendingTVShows() { return "3/trending/tv/week"; }
@@ -43,6 +42,7 @@ public class TMDBpath {
     public static String accountAddToWatchlist(String accountId) { return "3/account/" + accountId + "/watchlist"; }
     public static String movieAccountStates(int movieId) { return "3/movie/" + movieId + "/account_states"; }
     public static String tvAccountStates(int tvId) { return "3/tv/" + tvId + "/account_states"; }
+
 
     //Dynamic date for upcoming movies/TV
 

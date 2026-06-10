@@ -2,7 +2,6 @@ package emplay.entertainment.emplay.fragment.details;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -79,6 +78,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private Map<String, RegionProvidersModel> watchProviderResults;
     private PaginationHelper<MovieModel> paginationHelper;
     private boolean tmdbMovieInWatchlist = false;
+    private android.os.Handler fetchHandler;
 
     public static MovieResultDetailsFragment newInstance(int movieId) {
         MovieResultDetailsFragment fragment = new MovieResultDetailsFragment();
@@ -140,9 +140,10 @@ public class MovieResultDetailsFragment extends BaseFragment {
             movieId = getArguments().getInt(ARG_MOVIE_ID, -1);
             if (movieId != -1) {
                 fetchMovieDetails();
-                fetchCastList();
-                fetchSuggestionList();
-                fetchTrailers();
+                fetchHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+                fetchHandler.postDelayed(this::fetchCastList,       150);
+                fetchHandler.postDelayed(this::fetchSuggestionList, 300);
+                fetchHandler.postDelayed(this::fetchTrailers,       450);
             }
         }
 
@@ -176,6 +177,10 @@ public class MovieResultDetailsFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if (fetchHandler != null) {
+            fetchHandler.removeCallbacksAndMessages(null);
+            fetchHandler = null;
+        }
         cancelCountdown();
         binding = null;
     }
@@ -221,9 +226,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 isNowPlaying = false;
             }
         }
-        // Fetch after isNowPlaying is set so handleNoWatchProviders reads the correct value
         fetchWatchProviders();
-
         // Runtime
         binding.movieInfo.movieRuntime.setText(mDetails.getRuntime() + " min");
 
@@ -280,7 +283,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         binding.movieInfo.wtwUnreleased, () -> {
                             binding.movieInfo.wtwUnreleased.getRoot().setVisibility(View.GONE);
                             binding.movieInfo.wtwReleased.getRoot().setVisibility(View.VISIBLE);
-                            fetchWatchProviders();
                         })
         );
         // Blurred background
@@ -300,7 +302,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 setupGoogleMovieWatchlistButton(auth.getUserId(), movieDetails);
                 break;
             case TMDB:
-                setupTmdbMovieWatchlistButton(auth, movieDetails);
+                setupTMDBMovieWatchlistButton(auth, movieDetails);
                 break;
         }
     }
@@ -330,7 +332,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
         }).start());
     }
 
-    private void setupTmdbMovieWatchlistButton(AuthManager auth, MovieDetailsResponse movieDetails) {
+    private void setupTMDBMovieWatchlistButton(AuthManager auth, MovieDetailsResponse movieDetails) {
         binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
         binding.movieInfo.addToLibraryBtn.setEnabled(false);
 
@@ -343,7 +345,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         if (binding == null) return;
                         tmdbMovieInWatchlist = response.isSuccessful()
                                 && response.body() != null && response.body().watchlist;
-                        applyTmdbMovieWatchlistState(auth, movieDetails.getId());
+                        applyTMDBMovieWatchlistState(auth, movieDetails.getId());
                     }
 
                     @Override
@@ -353,14 +355,14 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 });
     }
 
-    private void applyTmdbMovieWatchlistState(AuthManager auth, int mediaId) {
+    private void applyTMDBMovieWatchlistState(AuthManager auth, int mediaId) {
         if (binding == null) return;
         binding.movieInfo.icLibrary.setImageResource(tmdbMovieInWatchlist ? R.drawable.ic_check : R.drawable.ic_watchlist);
         binding.movieInfo.addToLibraryBtn.setEnabled(true);
-        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> toggleTmdbMovieWatchlist(auth, mediaId));
+        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> toggleTMDBMovieWatchlist(auth, mediaId));
     }
 
-    private void toggleTmdbMovieWatchlist(AuthManager auth, int mediaId) {
+    private void toggleTMDBMovieWatchlist(AuthManager auth, int mediaId) {
         binding.movieInfo.addToLibraryBtn.setEnabled(false);
         boolean addToWatchlist = !tmdbMovieInWatchlist;
 
@@ -381,14 +383,14 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         } else {
                             Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
                         }
-                        applyTmdbMovieWatchlistState(auth, mediaId);
+                        applyTMDBMovieWatchlistState(auth, mediaId);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call, @NonNull Throwable t) {
                         if (binding != null) {
                             Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
-                            applyTmdbMovieWatchlistState(auth, mediaId);
+                            applyTMDBMovieWatchlistState(auth, mediaId);
                         }
                     }
                 });
@@ -414,6 +416,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
     }
 
     private void updateTrailerButton(List<MoviesTrailerResponses.TrailerModel> trailers) {
+        if (binding == null) return;
         this.trailers = trailers != null ? trailers : new ArrayList<>();
         binding.movieInfo.trailerBtn.setOnClickListener(v -> {
             if (!this.trailers.isEmpty()) {

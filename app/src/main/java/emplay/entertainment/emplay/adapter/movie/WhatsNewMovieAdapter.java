@@ -29,15 +29,21 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
     private final Context context;
     private final List<MovieModel> movieList;
     private final OnItemClickListener listener;
+    private final int maxItems;
 
     public interface OnItemClickListener {
         void onItemClick(MovieModel movie);
     }
 
     public WhatsNewMovieAdapter(Context context, List<MovieModel> movieList, OnItemClickListener listener) {
+        this(context, movieList, listener, Integer.MAX_VALUE);
+    }
+
+    public WhatsNewMovieAdapter(Context context, List<MovieModel> movieList, OnItemClickListener listener, int maxItems) {
         this.context = context;
         this.movieList = movieList;
         this.listener = listener;
+        this.maxItems = maxItems;
     }
 
     @NonNull
@@ -66,7 +72,7 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
         BadgeHelper.applyWhatsNewBadge(holder.tvBadge, releaseDateStr, 14);
 
         Glide.with(context)
-                .load(ImageUrl.THUMBNAIL + movie.getPosterPath())
+                .load(ImageUrl.POSTER + movie.getPosterPath())
                 .placeholder(R.drawable.bg_poster_placeholder)
                 .into(holder.ivThumb);
 
@@ -79,21 +85,24 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
     }
 
     public void updateData(List<MovieModel> newList) {
+        List<MovieModel> capped = newList != null
+                ? new ArrayList<>(newList.subList(0, Math.min(newList.size(), maxItems)))
+                : new ArrayList<>();
         List<MovieModel> oldList = new ArrayList<>(movieList);
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override public int getOldListSize() { return oldList.size(); }
-            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
+            @Override public int getNewListSize() { return capped.size(); }
             @Override public boolean areItemsTheSame(int o, int n) {
-                return oldList.get(o).getMovieId() == newList.get(n).getMovieId();
+                return oldList.get(o).getMovieId() == capped.get(n).getMovieId();
             }
             @Override public boolean areContentsTheSame(int o, int n) {
-                MovieModel a = oldList.get(o), b = newList.get(n);
+                MovieModel a = oldList.get(o), b = capped.get(n);
                 return Objects.equals(a.getTitle(), b.getTitle())
                         && Objects.equals(a.getPosterPath(), b.getPosterPath());
             }
         });
         movieList.clear();
-        if (newList != null) movieList.addAll(newList);
+        movieList.addAll(capped);
         diff.dispatchUpdatesTo(this);
     }
 
