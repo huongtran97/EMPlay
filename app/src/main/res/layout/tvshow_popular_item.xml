@@ -7,6 +7,7 @@
     android:layout_height="160dp"
     android:layout_margin="5dp"
     android:backgroundTint="@android:color/transparent"
+    android:focusable="true"
     cardview:cardCornerRadius="8dp">
 
     <LinearLayout
@@ -17,7 +18,9 @@
         <ImageView
             android:id="@+id/header"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:contentDescription="@string/show_poster"
+            android:scaleType="centerCrop" />
 
     </LinearLayout>
 

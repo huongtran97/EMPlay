@@ -3,8 +3,8 @@
     xmlns:cardview="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/tools"
     android:id="@+id/movie_card_view"
-    android:layout_width="160dp"
-    android:layout_height="240dp"
+    android:layout_width="120dp"
+    android:layout_height="wrap_content"
     android:layout_margin="10dp"
     android:clickable="true"
     android:focusable="true"
@@ -15,21 +15,21 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <!-- Poster area -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_height="180dp">
 
             <ImageView
                 android:id="@+id/header"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:contentDescription="@string/show_poster"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_poster_placeholder" />
 
             <!-- Dark gradient overlay at bottom of poster -->
             <View
@@ -63,7 +63,8 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:gravity="start">
+                android:gravity="start"
+                app:ignore="UselessParent">
 
                 <TextView
                     android:id="@+id/name"
@@ -84,22 +85,6 @@
                     android:letterSpacing="0.06" />
 
             </LinearLayout>
-
-            <!-- Arrow button -->
-            <FrameLayout
-                android:layout_width="26dp"
-                android:layout_height="26dp"
-                android:background="@drawable/circle_red_outline">
-
-                <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/show_icon"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/accent_red" />
-
-            </FrameLayout>
 
         </LinearLayout>
 

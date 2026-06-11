@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -33,7 +34,9 @@
             android:layout_marginStart="10dp"
             android:background="@drawable/bg_poster_placeholder"
             android:contentDescription="@string/show_poster"
-            android:scaleType="centerCrop" />
+            android:scaleType="centerCrop"
+            android:clipToOutline="true"
+            tools:targetApi="lollipop" />
 
         <LinearLayout
             android:layout_width="0dp"
