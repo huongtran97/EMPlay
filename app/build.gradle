@@ -41,7 +41,7 @@ android {
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", "\"\""
-            buildConfigField "String", "APP_TOKEN", "\"${localProperties['APP_TOKEN']}\""
+            buildConfigField "String", "APP_TOKEN", "\"${localProperties['APP_TOKEN'] ?: ''}\""
         }
     }
 

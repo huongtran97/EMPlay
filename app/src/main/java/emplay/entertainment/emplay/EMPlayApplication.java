@@ -2,6 +2,7 @@ package emplay.entertainment.emplay;
 
 import android.app.Application;
 
+import emplay.entertainment.emplay.api.common.DeviceIdHelper;
 import okhttp3.Request;
 import emplay.entertainment.emplay.api.common.ApiClient;
 
@@ -9,7 +10,7 @@ public class EMPlayApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        ApiClient.init(getCacheDir());
+        ApiClient.init(getCacheDir(), DeviceIdHelper.getDeviceId(getApplicationContext()));
         warmUpProxy();
     }
 

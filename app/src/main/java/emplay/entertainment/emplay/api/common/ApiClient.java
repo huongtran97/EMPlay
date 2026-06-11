@@ -33,9 +33,11 @@ public class ApiClient {
 
     private static final String BASE_URL = "https://emplay-proxy-production.up.railway.app/";
     private static File cacheDir;
+    private static String deviceId = "";
 
-    public static void init(File appCacheDir) {
+    public static void init(File appCacheDir,  String appDeviceId) {
         cacheDir = appCacheDir;
+        deviceId = appDeviceId;
     }
 
     // Lazily created — one instance shared across the whole app.
@@ -74,10 +76,20 @@ public class ApiClient {
                         throw new IOException("unreachable");
                     })
                     .addInterceptor(chain -> {
-                        Request request = chain.request().newBuilder()
-                                .header("X-App-Token", BuildConfig.APP_TOKEN)
-                                .build();
-                        return chain.proceed(request);
+                        Request original = chain.request();
+
+                        // Only attach app headers to requests going to OUR proxy.
+                        // Never leak the app token to third-party hosts (e.g. image.tmdb.org).
+                        if (!"emplay-proxy-production.up.railway.app".equals(original.url().host())) {
+                            return chain.proceed(original);
+                        }
+
+                        Request.Builder builder = original.newBuilder()
+                                .header("X-App-Token", BuildConfig.APP_TOKEN);
+                        if (!deviceId.isEmpty()) {
+                            builder.header("X-Device-Id", deviceId);
+                        }
+                        return chain.proceed(builder.build());
                     })
                     .addInterceptor(new TMDBInterceptor());
 
