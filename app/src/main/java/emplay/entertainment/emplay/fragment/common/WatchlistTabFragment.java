@@ -7,8 +7,6 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,7 +33,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class WatchlistTabFragment extends Fragment {
+public class WatchlistTabFragment extends BaseFragment {
 
     private static final String ARG_TYPE = "media_type";
     private String type;
@@ -113,47 +111,45 @@ public class WatchlistTabFragment extends Fragment {
     }
 
     private void loadMoviesFromTmdb(String accountId, String sessionId) {
-        watchlistApiService.getWatchlistMovies(
-                TMDBpath.accountWatchlistMovies(accountId), sessionId, 1)
-                .enqueue(new Callback<TMDBMovieWatchlistResponse>() {
+        safeEnqueue(watchlistApiService.getWatchlistMovies(
+                TMDBpath.accountWatchlistMovies(accountId), sessionId, 1),
+                new Callback<TMDBMovieWatchlistResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TMDBMovieWatchlistResponse> call,
                                            @NonNull Response<TMDBMovieWatchlistResponse> response) {
-                        if (!isAdded()) return;
                         List<MediaItem> items = new ArrayList<>();
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().results != null) {
                             items.addAll(response.body().results);
                         }
-                        requireActivity().runOnUiThread(() -> updateUI(items));
+                        updateUI(items);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<TMDBMovieWatchlistResponse> call, @NonNull Throwable t) {
-                        if (isAdded()) requireActivity().runOnUiThread(() -> updateUI(new ArrayList<>()));
+                        updateUI(new ArrayList<>());
                     }
                 });
     }
 
     private void loadTVFromTmdb(String accountId, String sessionId) {
-        watchlistApiService.getWatchlistTV(
-                TMDBpath.accountWatchlistTVShows(accountId), sessionId, 1)
-                .enqueue(new Callback<TMDBTVWatchlistResponse>() {
+        safeEnqueue(watchlistApiService.getWatchlistTV(
+                TMDBpath.accountWatchlistTVShows(accountId), sessionId, 1),
+                new Callback<TMDBTVWatchlistResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TMDBTVWatchlistResponse> call,
                                            @NonNull Response<TMDBTVWatchlistResponse> response) {
-                        if (!isAdded()) return;
                         List<MediaItem> items = new ArrayList<>();
                         if (response.isSuccessful() && response.body() != null
                                 && response.body().results != null) {
                             items.addAll(response.body().results);
                         }
-                        requireActivity().runOnUiThread(() -> updateUI(items));
+                        updateUI(items);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<TMDBTVWatchlistResponse> call, @NonNull Throwable t) {
-                        if (isAdded()) requireActivity().runOnUiThread(() -> updateUI(new ArrayList<>()));
+                        updateUI(new ArrayList<>());
                     }
                 });
     }
@@ -166,16 +162,10 @@ public class WatchlistTabFragment extends Fragment {
     }
 
     private void onItemClick(MediaItem item) {
-        Fragment fragment;
         if (item instanceof MovieModel) {
-            fragment = MovieResultDetailsFragment.newInstance(item.getMediaId());
+            navigateTo(MovieResultDetailsFragment.newInstance(item.getMediaId()));
         } else {
-            fragment = TVShowResultDetailsFragment.newInstance(item.getMediaId());
+            navigateTo(TVShowResultDetailsFragment.newInstance(item.getMediaId()));
         }
-
-        FragmentTransaction transaction = requireActivity().getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
     }
 }

@@ -71,6 +71,101 @@ public class BadgeHelper {
     }
 
     /**
+     * Movie status badge.
+     *  release_date ≤ today → "NOW SHOWING" (green)
+     *  release_date > today → "COMING SOON"  (amber)
+     */
+    public static void applyMovieBadge(TextView badge, String releaseDateStr) {
+        if (releaseDateStr == null || releaseDateStr.isEmpty()) {
+            badge.setVisibility(View.GONE);
+            return;
+        }
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date releaseDate = sdf.parse(releaseDateStr);
+            if (releaseDate == null) { badge.setVisibility(View.GONE); return; }
+            badge.setVisibility(View.VISIBLE);
+            if (releaseDate.after(new Date())) {
+                badge.setText("COMING SOON");
+                badge.setTextColor(Color.parseColor("#C98A1A"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+            } else {
+                badge.setText("NOW SHOWING");
+                badge.setTextColor(Color.parseColor("#4DB87A"));
+                badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A1A")));
+            }
+        } catch (ParseException ignored) {
+            badge.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * TV show status badge.
+     *  first_air_date > today                          → "COMING SOON"  (amber)
+     *  first_air_date ≤ today AND nextEpisodeExists    → "NOW SHOWING"  (green)
+     *  first_air_date ≤ today AND !nextEpisodeExists   → "FULL SERIES"  (muted blue)
+     *  nextEpisodeExists == null (unknown)             → "NOW SHOWING"  as provisional
+     */
+    public static void applyTVStatusBadge(TextView badge, String firstAirDate, Boolean nextEpisodeExists) {
+        badge.setVisibility(View.VISIBLE);
+        boolean isFuture = false;
+        if (firstAirDate != null && !firstAirDate.isEmpty()) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                Date aired = sdf.parse(firstAirDate);
+                if (aired != null && aired.after(new Date())) isFuture = true;
+            } catch (ParseException ignored) {}
+        }
+        if (isFuture) {
+            badge.setText("COMING SOON");
+            badge.setTextColor(Color.parseColor("#C98A1A"));
+            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+        } else if (Boolean.FALSE.equals(nextEpisodeExists)) {
+            badge.setText("FULL SERIES");
+            badge.setTextColor(Color.parseColor("#9BB5CC"));
+            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D1A2A")));
+        } else {
+            badge.setText("NOW SHOWING");
+            badge.setTextColor(Color.parseColor("#4DB87A"));
+            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A1A")));
+        }
+    }
+
+    /** True if dateStr is a future date. */
+    public static boolean isFutureDate(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return false;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(dateStr);
+            return date != null && date.after(new Date());
+        } catch (ParseException ignored) {
+            return false;
+        }
+    }
+
+    /**
+     * TV badge for the "What's New – see all" list.
+     *  future              → badge hidden (filtered before reaching here)
+     *  nextEpisodeExists   → "NEW EP"     (green)
+     *  FULL SERIES         → "FULL SERIES" (muted blue)
+     */
+    public static void applyWhatsNewTVBadge(TextView badge, String firstAirDate, Boolean nextEpisodeExists) {
+        badge.setVisibility(View.VISIBLE);
+        boolean isFuture = isFutureDate(firstAirDate);
+        if (isFuture) {
+            badge.setVisibility(View.GONE);
+        } else if (Boolean.FALSE.equals(nextEpisodeExists)) {
+            badge.setText("FULL SERIES");
+            badge.setTextColor(Color.parseColor("#9BB5CC"));
+            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D1A2A")));
+        } else {
+            badge.setText("NEW EP");
+            badge.setTextColor(Color.parseColor("#4DB87A"));
+            badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A1A")));
+        }
+    }
+
+    /**
      * TV show badge — always visible.
      *  < 30 days   → "New"         (blue)
      *  30–365 days → "New season"  (green)

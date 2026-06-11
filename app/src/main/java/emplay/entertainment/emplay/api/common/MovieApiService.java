@@ -12,6 +12,8 @@ import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowSimilarResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowsTrailerResponses;
+import emplay.entertainment.emplay.api.movie.MovieReleaseDatesResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowContentRatingsResponse;
 import emplay.entertainment.emplay.api.movie.UpComingMovieResponse;
 import emplay.entertainment.emplay.api.tvshow.UpComingTVShowsResponse;
 import retrofit2.Call;
@@ -142,6 +144,20 @@ public interface MovieApiService {
 
     @GET("api/tmdb")
     Call<MovieResponse> getNowPlayingMovies(
+            @Query("path") String path,
+            @Query("page") int page,
+            @Query("region") String region);
+
+    @GET("api/tmdb")
+    Call<MovieReleaseDatesResponse> getMovieReleaseDates(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<TVShowContentRatingsResponse> getTVShowContentRatings(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<TVShowResponse> getOnAirTVShows(
             @Query("path") String path,
             @Query("page") int page);
 }

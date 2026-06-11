@@ -15,6 +15,7 @@ public class TMDBpath {
     public static String trendingMovies() { return "3/trending/movie/week"; }
     public static String nowPlayingMovies() { return "3/movie/now_playing"; }
     public static String trendingTVShows() { return "3/trending/tv/week"; }
+    public static String onAirTVShows() { return "3/tv/on_the_air"; }
     public static String movieDetails(int movieId) { return "3/movie/" + movieId; }
     public static String movieCredits(int movieId) { return "3/movie/" + movieId + "/credits"; }
     public static String movieSimilar(int movieId) { return "3/movie/" + movieId + "/similar"; }
@@ -35,6 +36,8 @@ public class TMDBpath {
     public static String tvSeasonDetails(int tvId, int seasonNumber) { return "3/tv/" + tvId + "/season/" + seasonNumber; }
     public static String tvProvider(int tvId) { return "3/tv/" + tvId + "/watch/providers"; }
     public static String movieProvider(int movieId) { return "3/movie/" + movieId + "/watch/providers"; }
+    public static String movieReleaseDates(int movieId) { return "3/movie/" + movieId + "/release_dates"; }
+    public static String tvShowContentRatings(int tvId) { return "3/tv/" + tvId + "/content_ratings"; }
 
     // TMDB account / watchlist paths
     public static String accountWatchlistMovies(String accountId) { return "3/account/" + accountId + "/watchlist/movies"; }

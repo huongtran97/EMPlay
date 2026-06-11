@@ -86,9 +86,13 @@ public class WhatsNewFragment extends BaseFragment {
             @Override
             public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<TVShowModel> results = response.body().getResults();
                     List<TVShowModel> all = new ArrayList<>();
-                    for (TVShowModel tv : response.body().getResults()) {
-                        if (tv.getPosterPath() != null) all.add(tv);
+                    if (results != null) {
+                        for (TVShowModel tv : results) {
+                            if (tv.getPosterPath() != null && !BadgeHelper.isFutureDate(tv.getFirstAirDate()))
+                                all.add(tv);
+                        }
                     }
                     adapter.updateData(all);
                 }
@@ -109,10 +113,13 @@ public class WhatsNewFragment extends BaseFragment {
             @Override
             public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    List<MovieModel> results = response.body().getResults();
                     List<MovieModel> filtered = new ArrayList<>();
-                    for (MovieModel m : response.body().getResults()) {
-                        if (m.getPosterPath() != null && BadgeHelper.isNotOlderThan(m.getReleaseDate(), 30)) {
-                            filtered.add(m);
+                    if (results != null) {
+                        for (MovieModel m : results) {
+                            if (m.getPosterPath() != null && BadgeHelper.isWithinDays(m.getReleaseDate(), 30)) {
+                                filtered.add(m);
+                            }
                         }
                     }
                     adapter.updateData(filtered);

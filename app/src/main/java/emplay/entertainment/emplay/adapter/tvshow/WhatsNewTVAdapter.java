@@ -69,7 +69,11 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
         holder.tvTitle.setText(tvShow.getName());
 
         String firstAirDate = tvShow.getFirstAirDate();
-        BadgeHelper.applyTVShowBadge(holder.tvBadge, firstAirDate);
+        if (maxItems == Integer.MAX_VALUE) {
+            BadgeHelper.applyWhatsNewTVBadge(holder.tvBadge, firstAirDate, tvShow.getNextEpisodeExists());
+        } else {
+            BadgeHelper.applyTVStatusBadge(holder.tvBadge, firstAirDate, tvShow.getNextEpisodeExists());
+        }
 
         String type = BadgeHelper.getTVShowType(firstAirDate);
 
@@ -79,22 +83,24 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
         String meta;
         if (seasonInfo != null) {
             meta = seasonInfo;
-        } else {
+        } else if (maxItems != Integer.MAX_VALUE) {
             meta = (firstAirDate != null && firstAirDate.length() >= 4) ? firstAirDate.substring(0, 4) : "";
+        } else {
+            meta = "";
         }
         if (!rel.isEmpty()) meta += " · " + rel;
         holder.tvMeta.setText(meta);
 
-        // Image: episode still for "New episode", season poster for "New season", backdrop for "New TV show"
-        // fetchDetails (which may remove stale items) only runs in the full "see all" view.
         String imageUrl;
         if (tvShow.getDisplayImagePath() != null) {
             imageUrl = tvShow.getDisplayImagePath();
         } else {
             imageUrl = ImageUrl.THUMBNAIL + tvShow.getBackdropPath();
-            if (maxItems == Integer.MAX_VALUE && !"New TV show".equals(type) && !tvShow.isDetailsFetched()) {
-                fetchDetails(tvShow, type);
-            }
+        }
+        // Fetch details to get next_episode_to_air (for badge) and updated image/meta.
+        // Removal of stale items only happens in the "see all" view.
+        if (!tvShow.isDetailsFetched()) {
+            fetchDetails(tvShow, type);
         }
 
         Glide.with(context)
@@ -115,6 +121,9 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
                         if (!response.isSuccessful() || response.body() == null) return;
                         TVShowDetailsResponse details = response.body();
 
+                        // Always store next_episode_to_air so the badge can show the correct state
+                        tvShow.setNextEpisodeExists(details.getNext_episode_to_air() != null);
+
                         if ("SEASON".equals(type)) {
                             List<TVShowDetailsResponse.Season> seasons = details.getSeasons();
                             if (seasons != null) {
@@ -127,32 +136,32 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
                                     }
                                 }
                                 if (latest != null) {
-                                    if (!BadgeHelper.isNotOlderThan(latest.getAir_date(), 30)) {
+                                    if (maxItems == Integer.MAX_VALUE
+                                            && !BadgeHelper.isNotOlderThan(latest.getAir_date(), 30)) {
                                         int pos = tvShowList.indexOf(tvShow);
-                                        if (pos != -1) {
-                                            tvShowList.remove(pos);
-                                            if (pos < maxItems) notifyItemRemoved(pos);
-                                        }
+                                        if (pos != -1) { tvShowList.remove(pos); notifyItemRemoved(pos); }
                                         return;
                                     }
                                     tvShow.setDisplayImagePath(ImageUrl.POSTER + latest.getPoster_path());
                                     String airDate = latest.getAir_date();
                                     if (airDate != null) {
                                         tvShow.setDisplayDate(airDate);
-                                        String year = airDate.length() >= 4 ? airDate.substring(0, 4) : "";
-                                        tvShow.setDisplaySeasonInfo(year + " · S" + latest.getSeason_number());
+                                        if (maxItems == Integer.MAX_VALUE) {
+                                            tvShow.setDisplaySeasonInfo("S" + latest.getSeason_number());
+                                        } else {
+                                            String year = airDate.length() >= 4 ? airDate.substring(0, 4) : "";
+                                            tvShow.setDisplaySeasonInfo(year + " · S" + latest.getSeason_number());
+                                        }
                                     }
                                 }
                             }
                         } else {
                             TVShowDetailsResponse.LastEpisodeToAir ep = details.getLast_episode_to_air();
                             if (ep != null) {
-                                if (!BadgeHelper.isNotOlderThan(ep.getAir_date(), 30)) {
+                                if (maxItems == Integer.MAX_VALUE
+                                        && !BadgeHelper.isNotOlderThan(ep.getAir_date(), 30)) {
                                     int pos = tvShowList.indexOf(tvShow);
-                                    if (pos != -1) {
-                                        tvShowList.remove(pos);
-                                        if (pos < maxItems) notifyItemRemoved(pos);
-                                    }
+                                    if (pos != -1) { tvShowList.remove(pos); notifyItemRemoved(pos); }
                                     return;
                                 }
                                 if (ep.getStill_path() != null) {
@@ -160,8 +169,12 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
                                 }
                                 String airDate = ep.getAir_date();
                                 if (airDate != null) {
-                                    String year = airDate.length() >= 4 ? airDate.substring(0, 4) : "";
-                                    tvShow.setDisplaySeasonInfo(year + " · S" + ep.getSeason_number());
+                                    if (maxItems == Integer.MAX_VALUE) {
+                                        tvShow.setDisplaySeasonInfo("S" + ep.getSeason_number());
+                                    } else {
+                                        String year = airDate.length() >= 4 ? airDate.substring(0, 4) : "";
+                                        tvShow.setDisplaySeasonInfo(year + " · S" + ep.getSeason_number());
+                                    }
                                     tvShow.setDisplayDate(airDate);
                                 }
                             }

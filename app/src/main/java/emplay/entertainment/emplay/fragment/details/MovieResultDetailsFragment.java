@@ -313,6 +313,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
             if (WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId())) {
                 WatchlistHelper.removeMovie(databaseHelper, userId, movieDetails.getId());
                 safeRunOnUiThread(() -> {
+                    if (binding == null) return;
                     binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
                     Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
                 });
@@ -322,6 +323,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         movieDetails.getTitle(), movieDetails.getPosterPath(), genresString,
                         movieDetails.getVoteAverage()) != -1;
                 safeRunOnUiThread(() -> {
+                    if (binding == null) return;
                     binding.movieInfo.icLibrary.setImageResource(
                             saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
                     Toast.makeText(requireContext(),
@@ -399,9 +401,11 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private void updateSaveBtnIcon(String userId, int id) {
         new Thread(() -> {
             boolean saved = WatchlistHelper.isMovieSaved(databaseHelper, userId, id);
-            safeRunOnUiThread(() ->
-                    binding.movieInfo.icLibrary.setImageResource(
-                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist));
+            safeRunOnUiThread(() -> {
+                if (binding == null) return;
+                binding.movieInfo.icLibrary.setImageResource(
+                        saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+            });
         }).start();
     }
 
@@ -449,6 +453,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
     @SuppressLint("SetTextI18n")
     private void handleNoWatchProviders() {
+        if (binding == null) return;
         handleNoWatchProviders(
                 binding.movieInfo.wtwReleased.layoutWtwEmpty,
                 binding.movieInfo.wtwReleased.rvProviders,

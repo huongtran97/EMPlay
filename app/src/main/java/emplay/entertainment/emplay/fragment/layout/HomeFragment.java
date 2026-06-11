@@ -69,10 +69,10 @@ import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.adapter.tvshow.UpComingTVAdapter;
 import emplay.entertainment.emplay.adapter.movie.UpcomingMovieAdapter;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import emplay.entertainment.emplay.api.movie.MovieReleaseDatesResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 
@@ -84,7 +84,8 @@ public class HomeFragment extends BaseFragment {
     private ViewPager2 vpTrendingBanner;  // ViewPager2 that hosts the hero banner cards
     private LinearLayout llHeroDots;
     private TextSwitcher tvHeroTitle;
-    private TextView tvHeroYear, tvHeroRating;
+    private TextView tvHeroYear, tvHeroRating, tvHeroCertification;
+    private View viewCertDot;
     private RecyclerView rvWhatsNew;
     private WhatsNewTVAdapter whatsNewTVAdapter;
     private WhatsNewMovieAdapter whatsNewMovieAdapter;
@@ -102,9 +103,17 @@ public class HomeFragment extends BaseFragment {
     private final List<MovieModel> cachedMovies = new ArrayList<>();
     private final List<MovieModel> nowPlayingPool = new ArrayList<>(); // Full theater-only pool fetched from API
     private final List<MovieModel> heroBatch = new ArrayList<>();      // The 5 movies picked for this session
+    private final Set<Integer> nowPlayingMovieIds = new java.util.HashSet<>(); // IDs from now_playing endpoint
+    private boolean nowPlayingIdsFetched = false; // True once now-playing IDs have been captured (even if empty)
+    private List<MovieModel> rawUpcomingMovies = null; // Unfiltered upcoming list, held until nowPlayingIdsFetched is true
+    private final Set<Integer> onAirTVIds = new java.util.HashSet<>(); // IDs from on_the_air endpoint — used to filter upcoming TV section
+    private boolean onAirTVIdsFetched = false; // True once on-air TV IDs have been captured (even if empty)
+    private List<TVShowModel> rawUpcomingTVShows = null; // Unfiltered upcoming TV list, held until onAirTVIdsFetched is true
     private final Random random = new Random();
     private long lastFetchTime = 0;
     private static final long CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+    private static final String PROVIDER_CACHE_PREFS = "provider_cache";
+    private static final long PROVIDER_CACHE_TTL_MS = 24 * 60 * 60 * 1000L; // 24 hours
     private android.os.Handler providerCheckHandler;
     private View heroSkeleton;
     private com.facebook.shimmer.ShimmerFrameLayout shimmerLayout;
@@ -138,7 +147,7 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie  = view.findViewById(R.id.btnWhatsNewMovie);
 
         // Set up adapter with empty list — data is loaded asynchronously via fetchNowPlayingMovies()
-        DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireActivity());
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireContext());
         trendingAdapter = new TrendingBannerAdapter(
                 requireContext(),
                 new ArrayList<>(),
@@ -166,10 +175,12 @@ public class HomeFragment extends BaseFragment {
             }
         });
 
-        llHeroDots  = view.findViewById(R.id.llHeroDots);
-        tvHeroTitle = view.findViewById(R.id.tvHeroTitle);
-        tvHeroYear  = view.findViewById(R.id.tvHeroYear);
-        tvHeroRating = view.findViewById(R.id.tvHeroRating);
+        llHeroDots          = view.findViewById(R.id.llHeroDots);
+        tvHeroTitle         = view.findViewById(R.id.tvHeroTitle);
+        tvHeroYear          = view.findViewById(R.id.tvHeroYear);
+        tvHeroRating        = view.findViewById(R.id.tvHeroRating);
+        tvHeroCertification = view.findViewById(R.id.tvHeroCertification);
+        viewCertDot         = view.findViewById(R.id.viewCertDot);
 
         // TextSwitcher factory — each call to setText() cross-fades between two TextView instances
         tvHeroTitle.setFactory(new ViewSwitcher.ViewFactory() {
@@ -195,8 +206,8 @@ public class HomeFragment extends BaseFragment {
         tvHeroTitle.setInAnimation(heroInAnim);
         tvHeroTitle.setOutAnimation(heroOutAnim);
 
-        // Keep adjacent pages in memory so swipe feels instant (no reload on swipe back)
-        vpTrendingBanner.setOffscreenPageLimit(2);
+        // Keep one adjacent page in memory so swipe feels instant (no reload on swipe back)
+        vpTrendingBanner.setOffscreenPageLimit(1);
 
         // Custom page transformer: stack/fan effect with scale + parallax + depth
         vpTrendingBanner.setPageTransformer((page, position) -> {
@@ -249,9 +260,10 @@ public class HomeFragment extends BaseFragment {
                 activateDot(position);
                 tvHeroTitle.setText(movie.getTitle());
 
-                // Build "Language • dd/mm/yyyy" format
+                // Use type-3 theatrical date if available, fall back to primary release_date
                 String lang = movie.getOriginalLanguage();
-                String date = movie.getReleaseDate();
+                String date = movie.getTheatricalDate() != null
+                        ? movie.getTheatricalDate() : movie.getReleaseDate();
                 String formatted = (date != null && date.length() == 10)
                         ? date.substring(8, 10) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4)
                         : "";
@@ -260,6 +272,12 @@ public class HomeFragment extends BaseFragment {
                         ? langStr + " • " + formatted : langStr + formatted);
 
                 tvHeroRating.setText(getString(R.string.rating_format, movie.getVoteAverage()));
+
+                String cert = movie.getCertification();
+                boolean hasCert = cert != null && !cert.isEmpty();
+                tvHeroCertification.setVisibility(hasCert ? View.VISIBLE : View.GONE);
+                viewCertDot.setVisibility(hasCert ? View.VISIBLE : View.GONE);
+                if (hasCert) tvHeroCertification.setText(cert);
 
                 // Use cached palette color if already extracted, otherwise wait for Palette callback
                 int cached = bannerColors.get(position, 0);
@@ -387,9 +405,6 @@ public class HomeFragment extends BaseFragment {
         rvUpcomingTvShows.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        RecyclerView.RecycledViewPool sharedPool = new RecyclerView.RecycledViewPool();
-        rvUpcomingMovies.setRecycledViewPool(sharedPool);
-        rvUpcomingTvShows.setRecycledViewPool(sharedPool);
 
         // heroSection extends behind the transparent status bar (edge-to-edge).
         // Push the banner content below the status bar; the animated background shows through.
@@ -406,6 +421,7 @@ public class HomeFragment extends BaseFragment {
         fetchTrendingMovies();
         fetchWhatsNewTVShows();
         fetchUpComingMovie();
+        fetchOnAirTVShows();
         fetchUpcomingTVShows();
 
         return view;
@@ -445,6 +461,17 @@ public class HomeFragment extends BaseFragment {
             lastFetchTime = now;
         } else {
             showNowPlayingBanner();
+            // View was recreated (e.g. returning from another tab or backstack) while nowPlayingPool
+            // is still cached, so fetchNowPlayingMovies() was skipped. Unblock both upcoming sections
+            // so their callbacks can render once data arrives.
+            if (!nowPlayingIdsFetched) {
+                nowPlayingIdsFetched = true;
+                applyUpcomingMovieFilter();
+            }
+            if (!onAirTVIdsFetched) {
+                onAirTVIdsFetched = true;
+                applyUpcomingTVFilter();
+            }
         }
     }
 
@@ -457,6 +484,12 @@ public class HomeFragment extends BaseFragment {
         }
         resetBackground();
         heroBatch.clear();
+        nowPlayingMovieIds.clear();
+        nowPlayingIdsFetched = false;
+        rawUpcomingMovies = null;
+        onAirTVIds.clear();
+        onAirTVIdsFetched = false;
+        rawUpcomingTVShows = null;
         heroSection         = null;
         heroSectionFill     = null;
         heroSkeleton        = null;
@@ -485,10 +518,10 @@ public class HomeFragment extends BaseFragment {
         btnWhatsNewMovie.setIconTint(ColorStateList.valueOf(showTV ? 0xFF888888 : 0xFFFFFFFF));
     }
 
-    // Fetches two pages of now-playing movies concurrently, date/language-filters them,
-    // then checks each against the watch-providers API. Only movies with no streaming
-    // providers in the user's region (theater-only) reach the hero banner.
     private void fetchNowPlayingMovies() {
+        String region = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getString("pref_region", "CA");
+
         AtomicInteger pagesRemaining = new AtomicInteger(2);
         List<MovieModel> allResults = new ArrayList<>();
 
@@ -500,39 +533,34 @@ public class HomeFragment extends BaseFragment {
                     List<MovieModel> results = response.body().getResults();
                     if (results != null) allResults.addAll(results);
                 }
-                // Wait for both pages before processing
                 if (pagesRemaining.decrementAndGet() == 0) processNowPlayingResults(allResults);
             }
 
             @Override
             public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
                 Log.e("HomeFragment", "Failed to fetch now playing movies", t);
-                // Still process whatever was collected from the other page
                 if (pagesRemaining.decrementAndGet() == 0) processNowPlayingResults(allResults);
             }
         };
 
-        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies(), 1), pageCallback);
-        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies(), 2), pageCallback);
+        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies(), 1, region), pageCallback);
+        safeEnqueue(apiService.getNowPlayingMovies(TMDBpath.nowPlayingMovies(), 2, region), pageCallback);
     }
 
-    // Applies date and language filters to raw now-playing results,
-    // then hands off to provider checks to finalize the theater-only pool.
+    // Filters now-playing results down to English-first candidates, then hands off to the
+    // release-dates check which verifies type 3 (Theatrical) and extracts cert + correct date.
+    // No date pre-filter: now_playing is already TMDB's curated "in theaters" list.
     private void processNowPlayingResults(List<MovieModel> allResults) {
+        nowPlayingMovieIds.clear();
+        for (MovieModel m : allResults) nowPlayingMovieIds.add(m.getMovieId());
+        nowPlayingIdsFetched = true;
+        applyUpcomingMovieFilter();
+
         if (allResults.isEmpty()) return;
 
-        // Date-filter: keep only movies released within the last 60 days
         List<MovieModel> candidates = new ArrayList<>();
-        LocalDate today = LocalDate.now();
         for (MovieModel m : allResults) {
-            if (m.getPosterPath() == null) continue;
-            String rd = m.getReleaseDate();
-            if (rd == null || rd.isEmpty()) continue;
-            try {
-                long days = ChronoUnit.DAYS.between(LocalDate.parse(rd), today);
-                if (days < 0 || days > 60) continue;
-            } catch (Exception ignored) { continue; }
-            candidates.add(m);
+            if (m.getPosterPath() != null) candidates.add(m);
         }
         if (candidates.isEmpty()) return;
 
@@ -544,86 +572,182 @@ public class HomeFragment extends BaseFragment {
         }
         List<MovieModel> finalCandidates = englishOnly.size() >= 5 ? englishOnly : candidates;
 
-        // Provider checks will further filter to theater-only movies using the user's region
-        filterByTheatersOnly(finalCandidates);
+        filterByTheatricalRelease(finalCandidates);
     }
 
+    // For each candidate, fetch release_dates and keep only movies that have a type 3 (wide Theatrical)
+    // release in the user's region (or US as fallback). Sets theatricalDate and certification on the model.
+    // Results are cached in SharedPreferences for 24 hours to avoid redundant API calls.
+    private void filterByTheatricalRelease(List<MovieModel> candidates) {
+        SharedPreferences regionPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String region = regionPrefs.getString("pref_region", "US");
+        SharedPreferences rdCache = requireContext()
+                .getSharedPreferences(PROVIDER_CACHE_PREFS, android.content.Context.MODE_PRIVATE);
+        long now = System.currentTimeMillis();
 
-
-    // For each candidate, check if it has flatrate streaming providers in the user's region.
-    // Movies without flatrate providers are still exclusively in theaters.
-    private void filterByTheatersOnly(List<MovieModel> candidates) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        String region = prefs.getString("pref_region", "US");
         AtomicInteger remaining = new AtomicInteger(candidates.size());
-        List<MovieModel> theaterOnly = new ArrayList<>();
+        List<MovieModel> qualified = new ArrayList<>();
 
         providerCheckHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-        for (int i = 0; i < candidates.size(); i++) {
-            MovieModel movie = candidates.get(i);
-            providerCheckHandler.postDelayed(
-                    () -> enqueueWithRetry(movie, region, theaterOnly, remaining, candidates, 0),
-                    i * 200L // stagger requests 200ms apart to avoid 429
-            );
+        int apiCallIndex = 0;
+
+        for (MovieModel movie : candidates) {
+            // ── Phase 1: release_dates cache ──
+            boolean rdCached = (now - rdCache.getLong("rd_ts_" + movie.getMovieId() + "_" + region, 0L))
+                    < PROVIDER_CACHE_TTL_MS;
+
+            if (!rdCached) {
+                int delay = apiCallIndex++ * 200;
+                providerCheckHandler.postDelayed(
+                        () -> fetchReleaseDates(movie, region, qualified, remaining, candidates, rdCache),
+                        delay);
+                continue;
+            }
+
+            boolean hasType3 = rdCache.getBoolean("rd_has3_" + movie.getMovieId() + "_" + region, false);
+            if (!hasType3) {
+                onBothChecksDone(remaining, candidates, qualified);
+                continue;
+            }
+
+            String d = rdCache.getString("rd_date3_" + movie.getMovieId() + "_" + region, null);
+            if (d != null && !d.isEmpty()) movie.setTheatricalDate(d);
+            String c = rdCache.getString("rd_cert3_" + movie.getMovieId() + "_" + region, null);
+            if (c != null && !c.isEmpty()) movie.setCertification(c);
+
+            // ── Phase 2: provider cache ──
+            boolean pCached = (now - rdCache.getLong("pt_" + movie.getMovieId() + "_" + region, 0L))
+                    < PROVIDER_CACHE_TTL_MS;
+
+            if (!pCached) {
+                int delay = apiCallIndex++ * 200;
+                providerCheckHandler.postDelayed(
+                        () -> fetchProviders(movie, region, qualified, remaining, candidates, rdCache),
+                        delay);
+            } else {
+                if (rdCache.getBoolean("p_" + movie.getMovieId() + "_" + region, true))
+                    qualified.add(movie);
+                onBothChecksDone(remaining, candidates, qualified);
+            }
         }
     }
-    private void enqueueWithRetry(MovieModel movie, String region,
-                                  List<MovieModel> theaterOnly,
-                                  AtomicInteger remaining,
-                                  List<MovieModel> candidates,
-                                  int retryCount) {
+
+    private void fetchReleaseDates(MovieModel movie, String region,
+                                   List<MovieModel> qualified,
+                                   AtomicInteger remaining,
+                                   List<MovieModel> candidates,
+                                   SharedPreferences rdCache) {
+        safeEnqueue(apiService.getMovieReleaseDates(TMDBpath.movieReleaseDates(movie.getMovieId())),
+                new Callback<MovieReleaseDatesResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieReleaseDatesResponse> call,
+                                           @NonNull Response<MovieReleaseDatesResponse> response) {
+                        boolean hasType3 = false;
+                        String theatricalDate = null;
+                        String certification = null;
+
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<MovieReleaseDatesResponse.CountryReleaseDates> results =
+                                    response.body().getResults();
+                            if (results != null) {
+                                MovieReleaseDatesResponse.CountryReleaseDates countryEntry = null;
+                                MovieReleaseDatesResponse.CountryReleaseDates usEntry = null;
+                                for (MovieReleaseDatesResponse.CountryReleaseDates entry : results) {
+                                    if (region.equals(entry.getCountry())) countryEntry = entry;
+                                    if ("US".equals(entry.getCountry())) usEntry = entry;
+                                }
+                                MovieReleaseDatesResponse.CountryReleaseDates target =
+                                        countryEntry != null ? countryEntry : usEntry;
+                                if (target != null && target.getReleaseDates() != null) {
+                                    for (MovieReleaseDatesResponse.ReleaseDate rd : target.getReleaseDates()) {
+                                        if (rd.getType() == 3) {
+                                            hasType3 = true;
+                                            String raw = rd.getReleaseDate();
+                                            theatricalDate = (raw != null && raw.length() >= 10)
+                                                    ? raw.substring(0, 10) : null;
+                                            certification = rd.getCertification();
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        rdCache.edit()
+                                .putBoolean("rd_has3_" + movie.getMovieId() + "_" + region, hasType3)
+                                .putString("rd_date3_" + movie.getMovieId() + "_" + region,
+                                        theatricalDate != null ? theatricalDate : "")
+                                .putString("rd_cert3_" + movie.getMovieId() + "_" + region,
+                                        certification != null ? certification : "")
+                                .putLong("rd_ts_" + movie.getMovieId() + "_" + region, System.currentTimeMillis())
+                                .apply();
+
+                        if (!hasType3) {
+                            onBothChecksDone(remaining, candidates, qualified);
+                            return;
+                        }
+                        if (theatricalDate != null) movie.setTheatricalDate(theatricalDate);
+                        if (certification != null && !certification.isEmpty())
+                            movie.setCertification(certification);
+                        // Type 3 confirmed — now check streaming providers
+                        fetchProviders(movie, region, qualified, remaining, candidates, rdCache);
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<MovieReleaseDatesResponse> call, @NonNull Throwable t) {
+                        onBothChecksDone(remaining, candidates, qualified);
+                    }
+                });
+    }
+
+    private void fetchProviders(MovieModel movie, String region,
+                                 List<MovieModel> qualified,
+                                 AtomicInteger remaining,
+                                 List<MovieModel> candidates,
+                                 SharedPreferences cache) {
         safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movie.getMovieId())),
                 new Callback<TVShowProviderResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TVShowProviderResponse> call,
                                            @NonNull Response<TVShowProviderResponse> response) {
-                        // Retry with exponential backoff on 429
-                        if (response.code() == 429 && retryCount < 3) {
-                            long backoff = (retryCount + 1) * 500L; // 500ms, 1000ms, 1500ms
-                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(
-                                    () -> enqueueWithRetry(movie, region, theaterOnly, remaining, candidates, retryCount + 1),
-                                    backoff
-                            );
-                            return;
-                        }
                         boolean hasDigital = false;
                         if (response.isSuccessful() && response.body() != null) {
                             Map<String, RegionProvidersModel> providerMap = response.body().getResults();
                             if (providerMap != null && providerMap.containsKey(region)) {
-                                RegionProvidersModel regionData = providerMap.get(region);
-                                if (regionData != null) {
-                                    // Filter: subscription + rent + buy
-                                    boolean hasFlatrate = regionData.getFlatrate() != null
-                                            && !regionData.getFlatrate().isEmpty();
-                                    boolean hasRent = regionData.getRent() != null
-                                            && !regionData.getRent().isEmpty();
-                                    boolean hasBuy = regionData.getBuy() != null
-                                            && !regionData.getBuy().isEmpty();
-                                    hasDigital = hasFlatrate || hasRent || hasBuy;
+                                RegionProvidersModel r = providerMap.get(region);
+                                if (r != null) {
+                                    hasDigital = (r.getFlatrate() != null && !r.getFlatrate().isEmpty())
+                                            || (r.getRent() != null && !r.getRent().isEmpty())
+                                            || (r.getBuy() != null && !r.getBuy().isEmpty());
                                 }
                             }
                         }
-                        if (!hasDigital) theaterOnly.add(movie);
-                        onProviderCheckDone(remaining, candidates, theaterOnly);
+                        boolean isTheaterOnly = !hasDigital;
+                        cache.edit()
+                                .putBoolean("p_" + movie.getMovieId() + "_" + region, isTheaterOnly)
+                                .putLong("pt_" + movie.getMovieId() + "_" + region, System.currentTimeMillis())
+                                .apply();
+                        if (isTheaterOnly) qualified.add(movie);
+                        onBothChecksDone(remaining, candidates, qualified);
                     }
 
                     @Override
                     public void onFailure(@NonNull Call<TVShowProviderResponse> call, @NonNull Throwable t) {
-                        // Network failure — assume theater-only to avoid incorrectly excluding the movie
-                        theaterOnly.add(movie);
-                        onProviderCheckDone(remaining, candidates, theaterOnly);
+                        // Network failure — assume theater-only
+                        qualified.add(movie);
+                        onBothChecksDone(remaining, candidates, qualified);
                     }
                 });
     }
 
-    private void onProviderCheckDone(AtomicInteger remaining, List<MovieModel> candidates,
-                                     List<MovieModel> theaterOnly) {
+    private void onBothChecksDone(AtomicInteger remaining, List<MovieModel> candidates,
+                                   List<MovieModel> qualified) {
         if (remaining.decrementAndGet() != 0) return;
-        Set<Integer> theaterIds = new java.util.HashSet<>();
-        for (MovieModel m : theaterOnly) theaterIds.add(m.getMovieId());
+        Set<Integer> qualifiedIds = new java.util.HashSet<>();
+        for (MovieModel m : qualified) qualifiedIds.add(m.getMovieId());
         nowPlayingPool.clear();
         for (MovieModel m : candidates) {
-            if (theaterIds.contains(m.getMovieId())) nowPlayingPool.add(m);
+            if (qualifiedIds.contains(m.getMovieId())) nowPlayingPool.add(m);
         }
         if (!nowPlayingPool.isEmpty()) showNowPlayingBanner();
     }
@@ -657,19 +781,27 @@ public class HomeFragment extends BaseFragment {
         MovieModel first = heroBatch.get(0);
         tvHeroTitle.setCurrentText(first.getTitle());
 
-        // Convert TMDB date format "yyyy-MM-dd" → "dd/MM/yyyy"
-        String date = first.getReleaseDate();
+        // Use type-3 theatrical date if available, fall back to primary release_date
+        String date = first.getTheatricalDate() != null
+                ? first.getTheatricalDate() : first.getReleaseDate();
         String formatted = (date != null && date.length() == 10)
                 ? date.substring(8, 10) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4)
                 : "";
 
-        // Build "EN • 15/03/2024" — omit separator if either part is missing
         String lang    = first.getOriginalLanguage();
         String langStr = (lang != null) ? lang.toUpperCase(Locale.ROOT) : "";
         tvHeroYear.setText((!langStr.isEmpty() && !formatted.isEmpty())
                 ? langStr + " • " + formatted : langStr + formatted);
 
         tvHeroRating.setText(getString(R.string.rating_format, first.getVoteAverage()));
+
+        String cert = first.getCertification();
+        boolean hasCert = cert != null && !cert.isEmpty();
+        if (tvHeroCertification != null) {
+            tvHeroCertification.setVisibility(hasCert ? View.VISIBLE : View.GONE);
+            if (hasCert) tvHeroCertification.setText(cert);
+        }
+        if (viewCertDot != null) viewCertDot.setVisibility(hasCert ? View.VISIBLE : View.GONE);
     }
 
     // Picks the next 5 movies from a persistent no-repeat shuffle of nowPlayingPool.
@@ -813,16 +945,61 @@ public class HomeFragment extends BaseFragment {
                     public void onResponse(@NonNull Call<UpComingMovieResponse> call,
                                            @NonNull Response<UpComingMovieResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<MovieModel> filtered = new ArrayList<>();
+                            List<MovieModel> raw = new ArrayList<>();
                             for (MovieModel movie : response.body().getResults()) {
-                                if (movie.getPosterPath() != null) filtered.add(movie);
+                                if (movie.getPosterPath() != null) raw.add(movie);
                             }
-                            upcomingMovieAdapter.updateData(filtered);
+                            rawUpcomingMovies = raw;
+                            applyUpcomingMovieFilter();
                         }
                     }
                     @Override
                     public void onFailure(@NonNull Call<UpComingMovieResponse> call, @NonNull Throwable t) {
                         Log.e("HomeFragment", "Failed to fetch upcoming movies", t);
+                    }
+                });
+    }
+
+    private void applyUpcomingMovieFilter() {
+        if (rawUpcomingMovies == null || upcomingMovieAdapter == null) return;
+        if (!nowPlayingIdsFetched) return;
+
+        List<MovieModel> toUpcoming = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+        for (MovieModel m : rawUpcomingMovies) {
+            if (nowPlayingMovieIds.contains(m.getMovieId())) continue;
+            String rd = m.getReleaseDate();
+            if (rd != null && rd.length() == 10) {
+                try { if (!LocalDate.parse(rd).isAfter(today)) continue; } catch (Exception ignored) {}
+            }
+            toUpcoming.add(m);
+        }
+        upcomingMovieAdapter.updateData(toUpcoming);
+    }
+
+    private void fetchOnAirTVShows() {
+        safeEnqueue(apiService.getOnAirTVShows(TMDBpath.onAirTVShows(), 1),
+                new Callback<TVShowResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TVShowResponse> call,
+                                           @NonNull Response<TVShowResponse> response) {
+                        onAirTVIds.clear();
+                        if (response.isSuccessful() && response.body() != null
+                                && response.body().getResults() != null) {
+                            for (TVShowModel tv : response.body().getResults()) {
+                                onAirTVIds.add(tv.getTVShowId());
+                            }
+                        }
+                        onAirTVIdsFetched = true;
+                        applyUpcomingTVFilter();
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                        // Unblock upcoming section even on failure; it'll show all shows unfiltered
+                        onAirTVIdsFetched = true;
+                        applyUpcomingTVFilter();
+
+                        Log.e("HomeFragment", "Failed to fetch on-air TV shows", t);
                     }
                 });
     }
@@ -836,11 +1013,12 @@ public class HomeFragment extends BaseFragment {
                     public void onResponse(@NonNull Call<UpComingTVShowsResponse> call,
                                            @NonNull Response<UpComingTVShowsResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<TVShowModel> filtered = new ArrayList<>();
+                            List<TVShowModel> raw = new ArrayList<>();
                             for (TVShowModel tv : response.body().getResults()) {
-                                if (tv.getPosterPath() != null) filtered.add(tv);
+                                if (tv.getPosterPath() != null) raw.add(tv);
                             }
-                            upComingTVAdapter.updateData(filtered);
+                            rawUpcomingTVShows = raw;
+                            applyUpcomingTVFilter();
                         }
                     }
                     @Override
@@ -848,6 +1026,24 @@ public class HomeFragment extends BaseFragment {
                         Log.e("HomeFragment", "Failed to fetch upcoming TV shows", t);
                     }
                 });
+    }
+
+    private void applyUpcomingTVFilter() {
+        if (rawUpcomingTVShows == null || upComingTVAdapter == null) return;
+        if (!onAirTVIdsFetched) return;
+        LocalDate today = LocalDate.now();
+        List<TVShowModel> filtered = new ArrayList<>();
+        for (TVShowModel tv : rawUpcomingTVShows) {
+            if (onAirTVIds.contains(tv.getTVShowId())) continue;
+            String fd = tv.getFirstAirDate();
+            if (fd != null && fd.length() == 10) {
+                try {
+                    if (!LocalDate.parse(fd).isAfter(today)) continue;
+                } catch (Exception ignored) {}
+            }
+            filtered.add(tv);
+        }
+        upComingTVAdapter.updateData(filtered);
     }
 
     // Rebuilds dot indicators when the banner data changes — skips if count is unchanged

@@ -40,6 +40,7 @@ public class TVShowModel implements Serializable, MediaItem {
     private String displayDate;
     private String displaySeasonInfo;
     private boolean detailsFetched;
+    private transient Boolean nextEpisodeExists; // null=unknown, true=still airing, false=ended/hiatus
 
     public TVShowModel() {}
 
@@ -138,4 +139,7 @@ public class TVShowModel implements Serializable, MediaItem {
 
     public boolean isDetailsFetched() { return detailsFetched; }
     public void setDetailsFetched(boolean detailsFetched) { this.detailsFetched = detailsFetched; }
+
+    public Boolean getNextEpisodeExists() { return nextEpisodeExists; }
+    public void setNextEpisodeExists(Boolean nextEpisodeExists) { this.nextEpisodeExists = nextEpisodeExists; }
 }

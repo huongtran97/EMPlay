@@ -248,7 +248,10 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
         // Genre chips
         List<String> genres = new ArrayList<>();
-        for (TVShowDetailsResponse.Genre g : tvDetails.getGenres()) genres.add(g.getName());
+        List<TVShowDetailsResponse.Genre> rawGenres = tvDetails.getGenres();
+        if (rawGenres != null) {
+            for (TVShowDetailsResponse.Genre g : rawGenres) genres.add(g.getName());
+        }
         buildGenreChips(binding.tvInfoCard.tvshowInfoGenres, genres);
 
         // Seasons list
@@ -329,6 +332,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             if (WatchlistHelper.isTVShowSaved(databaseHelper, userId, tvDetails.getId())) {
                 WatchlistHelper.removeTVShow(databaseHelper, userId, tvDetails.getId());
                 safeRunOnUiThread(() -> {
+                    if (binding == null) return;
                     binding.tvInfoCard.icLibrary.setImageResource(R.drawable.ic_watchlist);
                     Toast.makeText(requireContext(), "TV Show removed from library", Toast.LENGTH_SHORT).show();
                 });
@@ -338,6 +342,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                         tvDetails.getName(), tvDetails.getPoster_path(), genresString,
                         tvDetails.getVote_average()) != -1;
                 safeRunOnUiThread(() -> {
+                    if (binding == null) return;
                     binding.tvInfoCard.icLibrary.setImageResource(
                             saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
                     Toast.makeText(requireContext(),
@@ -415,9 +420,11 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private void updateSaveBtnIcon(String userId, int id) {
         new Thread(() -> {
             boolean saved = WatchlistHelper.isTVShowSaved(databaseHelper, userId, id);
-            safeRunOnUiThread(() ->
-                    binding.tvInfoCard.icLibrary.setImageResource(
-                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist));
+            safeRunOnUiThread(() -> {
+                if (binding == null) return;
+                binding.tvInfoCard.icLibrary.setImageResource(
+                        saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+            });
         }).start();
     }
 
@@ -433,6 +440,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
     private void updateTrailerButton(List<TVShowsTrailerResponses.TrailerModel> trailers) {
         this.trailers = trailers != null ? trailers : new ArrayList<>();
+        if (binding == null) return;
         binding.tvInfoCard.trailerBtn.setOnClickListener(v -> {
             if (!this.trailers.isEmpty()) {
                 String videoKey = this.trailers.get(0).getKey();
@@ -461,6 +469,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     }
 
     private void handleNoWatchProviders() {
+        if (binding == null) return;
         handleNoWatchProviders(
                 binding.tvInfoCard.wtwReleased.layoutWtwEmpty,
                 binding.tvInfoCard.wtwReleased.rvProviders,

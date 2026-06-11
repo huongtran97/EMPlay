@@ -190,6 +190,29 @@
                     android:textSize="@dimen/text_meta"
                     android:textStyle="bold" />
 
+                <!-- Dot separator before certification — hidden when cert is unavailable -->
+                <View
+                    android:id="@+id/viewCertDot"
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="#40FFFFFF"
+                    android:layerType="software"
+                    android:visibility="gone" />
+
+                <!-- Certification badge (PG-13, R, etc.) — hidden when unavailable -->
+                <TextView
+                    android:id="@+id/tvHeroCertification"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_cert_badge"
+                    android:paddingHorizontal="5dp"
+                    android:paddingVertical="2dp"
+                    android:textColor="#99FFFFFF"
+                    android:textSize="@dimen/text_meta"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
         </LinearLayout>

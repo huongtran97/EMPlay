@@ -69,7 +69,7 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
         if (!rel.isEmpty()) meta += " · " + rel;
         holder.tvMeta.setText(meta);
 
-        BadgeHelper.applyWhatsNewBadge(holder.tvBadge, releaseDateStr, 14);
+        BadgeHelper.applyMovieBadge(holder.tvBadge, releaseDateStr);
 
         Glide.with(context)
                 .load(ImageUrl.POSTER + movie.getPosterPath())

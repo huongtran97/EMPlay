@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -138,8 +139,11 @@ public abstract class BasePosterAdapter<T extends MediaItem>
                     .into(holder.image);
         }
 
+        bindBadge(holder, item);
         holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
     }
+
+    protected void bindBadge(PosterViewHolder holder, T item) {}
 
     // Runs Palette on a background thread (Palette.from().generate() is already async).
     private void extractPaletteColor(Bitmap bitmap, int position) {
@@ -166,9 +170,11 @@ public abstract class BasePosterAdapter<T extends MediaItem>
 
     public static class PosterViewHolder extends RecyclerView.ViewHolder {
         final ImageView image;
+        @Nullable public final TextView badge;
         public PosterViewHolder(@NonNull View itemView, int imageViewId) {
             super(itemView);
             image = itemView.findViewById(imageViewId);
+            badge = itemView.findViewById(R.id.tvBadge);
         }
     }
 }

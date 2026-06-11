@@ -42,6 +42,8 @@ public class MovieModel implements Serializable, MediaItem {
     
     private String username;
     private String savedTimestamp;
+    private transient String theatricalDate;
+    private transient String certification;
 
     public MovieModel() {}
 
@@ -112,4 +114,10 @@ public class MovieModel implements Serializable, MediaItem {
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
+
+    public String getTheatricalDate() { return theatricalDate; }
+    public void setTheatricalDate(String theatricalDate) { this.theatricalDate = theatricalDate; }
+
+    public String getCertification() { return certification; }
+    public void setCertification(String certification) { this.certification = certification; }
 }

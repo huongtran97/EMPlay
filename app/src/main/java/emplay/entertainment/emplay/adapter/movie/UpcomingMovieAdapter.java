@@ -7,6 +7,7 @@ import java.util.List;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.BasePosterAdapter;
 import emplay.entertainment.emplay.models.movie.MovieModel;
+import emplay.entertainment.emplay.tool.BadgeHelper;
 
 /**
  * Upcoming movies row on the Home screen — thin wrapper over BasePosterAdapter.
@@ -26,4 +27,10 @@ public class UpcomingMovieAdapter extends BasePosterAdapter<MovieModel> {
 
     @Override
     protected int getImageViewId() { return R.id.header; }
+
+    @Override
+    protected void bindBadge(PosterViewHolder holder, MovieModel item) {
+        if (holder.badge == null) return;
+        BadgeHelper.applyMovieBadge(holder.badge, item.getReleaseDate());
+    }
 }

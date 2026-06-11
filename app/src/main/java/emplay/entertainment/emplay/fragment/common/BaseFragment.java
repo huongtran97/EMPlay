@@ -178,7 +178,7 @@ public abstract class BaseFragment extends Fragment {
         if (releaseDateStr == null || releaseDateStr.isEmpty()) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LocalDate release    = LocalDate.parse(releaseDateStr);
-            boolean isUnreleased = release.isAfter(LocalDate.now());
+            boolean isUnreleased = !release.isBefore(LocalDate.now()); // treats today as unreleased
             releasedRoot.setVisibility(isUnreleased ? View.GONE  : View.VISIBLE);
             unreleasedRoot.setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
             comingSoonBadge.setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
@@ -199,6 +199,18 @@ public abstract class BaseFragment extends Fragment {
         long releaseMillis = releaseDate.atStartOfDay(ZoneId.systemDefault())
                 .toInstant().toEpochMilli();
         long diff = releaseMillis - System.currentTimeMillis();
+
+        // Release date is today (past midnight) or already passed — treat as released.
+        if (diff <= 0) {
+            if (onFinish != null) onFinish.run();
+            return;
+        }
+
+        // Populate values immediately so blocks aren't blank before the first tick.
+        unreleasedBinding.tvDays.setText(String.valueOf(diff / 86400000));
+        unreleasedBinding.tvHours.setText(String.format(Locale.ROOT, "%02d", (diff % 86400000) / 3600000));
+        unreleasedBinding.tvMinutes.setText(String.format(Locale.ROOT, "%02d", (diff % 3600000) / 60000));
+        unreleasedBinding.tvSeconds.setText(String.format(Locale.ROOT, "%02d", (diff % 60000) / 1000));
 
         countDownTimer = new CountDownTimer(diff, 1000) {
             @Override
