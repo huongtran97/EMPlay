@@ -8,7 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#0D0D12">
+        android:background="#141414">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollView"
@@ -41,7 +41,7 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginTop="20dp"
-                    android:background="#1E1E1E" />
+                    android:background="#2E2E2E" />
 
                 <!-- Cast label -->
                 <TextView
@@ -51,9 +51,9 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
-                    android:text="CAST"
+                    android:text="@string/cast"
                     android:textColor="#777777"
-                    android:textSize="@dimen/text_badge"
+                    android:textSize="@dimen/text_section_header"
                     android:letterSpacing="0.15"
                     android:fontFamily="sans-serif-medium" />
 
@@ -65,7 +65,8 @@
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:clipToPadding="false"
-                    android:scrollbars="none" />
+                    android:scrollbars="none"
+                    android:background="#141414"/>
 
                 <!-- Divider -->
                 <View
@@ -75,7 +76,7 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginEnd="20dp"
                     android:layout_marginTop="20dp"
-                    android:background="#1E1E1E" />
+                    android:background="#2E2E2E" />
 
                 <!-- Suggestion label -->
                 <TextView
@@ -85,18 +86,11 @@
                     android:layout_marginStart="20dp"
                     android:layout_marginTop="16dp"
                     android:layout_marginBottom="8dp"
-                    android:text="YOU MIGHT ALSO LIKE"
+                    android:text="@string/you_might_also_like"
                     android:textColor="#777777"
-                    android:textSize="@dimen/text_badge"
+                    android:textSize="@dimen/text_section_header"
                     android:letterSpacing="0.15"
                     android:fontFamily="sans-serif-medium" />
-
-                <!-- Suggestion RecyclerView -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/search_result_suggestion_recyclerview"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"/>
 
                 <!-- Suggestion Pagination Bar -->
                 <LinearLayout
@@ -115,7 +109,7 @@
                         android:layout_height="36dp"
                         android:src="@drawable/ic_arrow_back"
                         android:background="@drawable/rounded_btn_bg"
-                        android:contentDescription="Previous page"
+                        android:contentDescription="@string/pre_page"
                         android:enabled="false" />
 
                     <TextView
@@ -133,9 +127,19 @@
                         android:layout_height="36dp"
                         android:src="@drawable/ic_arrow_forward"
                         android:background="@drawable/rounded_btn_bg"
-                        android:contentDescription="Next page" />
+                        android:contentDescription="@string/next_page" />
 
                 </LinearLayout>
+
+                <!-- Suggestion RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/search_result_suggestion_recyclerview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    android:background="#141414"/>
+
+
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

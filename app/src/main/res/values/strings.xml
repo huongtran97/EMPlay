@@ -118,6 +118,8 @@
     <string name="show_backdrop">show backdrop\n</string>
     <string name="sort_newest_first">Newest first</string>
     <string name="sort_a_z">A–Z</string>
+    <string name="you_might_also_like">YOU MIGHT ALSO LIKE</string>
+    <string name="cast">CAST</string>
 
 
 </resources>
