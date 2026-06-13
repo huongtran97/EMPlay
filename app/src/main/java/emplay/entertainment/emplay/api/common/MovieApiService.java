@@ -37,6 +37,11 @@ public interface MovieApiService {
             @Query("path") String path);
 
     @GET("api/tmdb")
+    Call<MovieResponse> getTopRatedMovies(
+            @Query("path") String path,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
     Call<MovieDetailsResponse> getMovieDetails(
             @Query("path") String path);
 
@@ -159,5 +164,20 @@ public interface MovieApiService {
     @GET("api/tmdb")
     Call<TVShowResponse> getOnAirTVShows(
             @Query("path") String path,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
+    Call<MovieResponse> getMoviesByOrigin(
+            @Query("path") String path,
+            @Query("with_origin_country") String countryCode,
+            @Query("sort_by") String sortBy,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
+    Call<TVShowResponse> getTVShowsByOrigin(
+            @Query("path") String path,
+            @Query("with_origin_country") String countryCode,
+            @Query("with_genres") Integer genreId,
+            @Query("sort_by") String sortBy,
             @Query("page") int page);
 }

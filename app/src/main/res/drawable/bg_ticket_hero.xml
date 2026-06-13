@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="-7dp"
+    android:insetRight="-7dp">
+    <!-- This inset hack allows us to draw circles that are clipped by the parent,
+         simulating punch holes on the dashed line.
+         Wait, a better way is to use a VectorDrawable for the punch holes effect
+         or just handle it in the layout XML with overlapping Views.
+         Let's stick to a clean background shape first. -->
+    <shape>
+        <solid android:color="@color/bg_surface" />
+        <corners android:radius="14dp" />
+    </shape>
+</inset>

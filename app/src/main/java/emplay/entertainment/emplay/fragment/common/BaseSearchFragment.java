@@ -1,9 +1,8 @@
 package emplay.entertainment.emplay.fragment.common;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -14,12 +13,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.core.widget.NestedScrollView;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,20 +28,25 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.adapter.common.GenresAdapter;
+import emplay.entertainment.emplay.adapter.common.OriginAdapter;
 import emplay.entertainment.emplay.adapter.common.TrendingSearchAdapter;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.GenresResponse;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.database.DatabaseHelper;
-import emplay.entertainment.emplay.fragment.common.TrendingSeeAllFragment;
+import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
+import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
+import emplay.entertainment.emplay.fragment.genre.OriginResultsFragment;
 import emplay.entertainment.emplay.models.common.GenresModel;
 import emplay.entertainment.emplay.models.common.MediaItem;
+import emplay.entertainment.emplay.models.common.OriginModel;
 import emplay.entertainment.emplay.models.common.SharedViewModel;
-import emplay.entertainment.emplay.tool.BadgeHelper;
+import emplay.entertainment.emplay.models.movie.MovieModel;
+import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -53,14 +55,15 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
 
     protected GenresAdapter genresAdapter;
     protected TrendingSearchAdapter trendingAdapter;
-    protected final List<GenresModel> genresList = new ArrayList<>();
-    protected final List<T> trendingList = new ArrayList<>();
-    protected RecyclerView rvGenres, rvSearchResults, rvTrendingSearches;
+    protected List<GenresModel> genresList = new ArrayList<>();
+    protected RecyclerView rvGenres, rvSearchResults, rvTrendingSearches, rvOrigin;
     protected MovieApiService apiService;
     protected TextInputEditText etSearch;
     protected SharedViewModel viewModel;
     protected MaterialButton btnMovie, btnTvShow;
-    protected NestedScrollView svSearchDefault;
+    private MaterialButton btnGenreMovies, btnGenreTV;
+    private boolean genreIsTV = false;
+    protected View svSearchDefault;
     protected FlexboxLayout pillsContainer;
     protected View recentSearch;
     protected DatabaseHelper dbHelper;
@@ -71,59 +74,97 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.search_view, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
-        dbHelper = DatabaseHelper.getInstance(requireContext());
         apiService = ApiClient.getClient().create(MovieApiService.class);
+        dbHelper = DatabaseHelper.getInstance(requireContext());
 
-        etSearch = view.findViewById(R.id.etSearch);
-        rvSearchResults = view.findViewById(R.id.rvSearchResults);
         rvGenres = view.findViewById(R.id.rvGenres);
+        rvSearchResults = view.findViewById(R.id.rvSearchResults);
         rvTrendingSearches = view.findViewById(R.id.rvTrendingSearches);
+        rvOrigin = view.findViewById(R.id.rvOrigin);
+        etSearch = view.findViewById(R.id.etSearch);
+        btnMovie = view.findViewById(R.id.btnMovie);
+        btnTvShow = view.findViewById(R.id.btnTvShow);
         svSearchDefault = view.findViewById(R.id.svSearchDefault);
         pillsContainer = view.findViewById(R.id.pillsContainer);
         recentSearch = view.findViewById(R.id.recentSearch);
         clearAll = view.findViewById(R.id.btnClearAll);
-        btnMovie = view.findViewById(R.id.btnMovie);
-        btnTvShow = view.findViewById(R.id.btnTvShow);
         btnSeeAll = view.findViewById(R.id.btnSeeAll);
 
-        if (clearAll != null) {
-            clearAll.setPaintFlags(clearAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            clearAll.setOnClickListener(v -> clearHistory());
-        }
-        btnMovie.setOnClickListener(v -> onMovieTabClick());
-        btnTvShow.setOnClickListener(v -> onTVTabClick());
-        btnSeeAll.setOnClickListener(v -> navigateTo(TrendingSeeAllFragment.newInstance(isTVTab())));
-
         genresAdapter = new GenresAdapter(genresList, this::onGenreSelected);
-        rvGenres.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-        rvGenres.setNestedScrollingEnabled(false);
         rvGenres.setAdapter(genresAdapter);
+        rvGenres.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
-        trendingAdapter = new TrendingSearchAdapter(requireContext(), trendingList, this::onTrendingSelected);
-        rvTrendingSearches.setLayoutManager(new LinearLayoutManager(requireContext()));
+        trendingAdapter = new TrendingSearchAdapter<>(requireContext(), new ArrayList<>(), (item, v) -> onTrendingSelected(item));
         rvTrendingSearches.setAdapter(trendingAdapter);
 
+        setupOriginSection();
         setupSearchResultAdapter();
-        setupSearchInput();
         setupResultObserver();
+        setupSearchInput();
         loadRecentSearches();
+        updateToggleUI();
+
         fetchGenres();
         fetchTrending();
 
-        if (savedInstanceState != null) {
-            etSearch.setText(savedInstanceState.getString("searchQuery", ""));
+        btnGenreMovies = view.findViewById(R.id.btnGenreMovies);
+        btnGenreTV = view.findViewById(R.id.btnGenreTV);
+
+        btnMovie.setOnClickListener(v -> onMovieTabClick());
+        btnTvShow.setOnClickListener(v -> onTVTabClick());
+        clearAll.setOnClickListener(v -> clearHistory());
+
+        if (btnGenreMovies != null) {
+            btnGenreMovies.setOnClickListener(v -> {
+                genreIsTV = false;
+                updateGenreToggleUI();
+                loadGenres(apiService.getGenresMovie(TMDBpath.genresMovie()));
+            });
+        }
+        if (btnGenreTV != null) {
+            btnGenreTV.setOnClickListener(v -> {
+                genreIsTV = true;
+                updateGenreToggleUI();
+                loadGenres(apiService.getGenresTVShows(TMDBpath.genresTVShows()));
+            });
         }
 
-        updateToggleUI();
+        if (savedInstanceState != null) {
+            lastQuery = savedInstanceState.getString("last_query", "");
+            if (!lastQuery.isEmpty()) {
+                etSearch.setText(lastQuery);
+                performSearchQuery(lastQuery);
+            }
+        }
+
         return view;
     }
 
-    // Abstract hooks — subclasses provide the type-specific behavior
+    private void setupOriginSection() {
+        List<OriginModel> origins = new ArrayList<>();
+        origins.add(new OriginModel("KR", "Korean", "한"));
+        origins.add(new OriginModel("JP", "Japanese", "日"));
+        origins.add(new OriginModel("JP", "Anime", "ア"));
+        origins.add(new OriginModel("CN", "Chinese", "中"));
+        origins.add(new OriginModel("FR", "French", "É"));
+        origins.add(new OriginModel("GB", "British", "B"));
+
+        OriginAdapter originAdapter = new OriginAdapter(origins, origin -> {
+            boolean defaultTV = "KR".equals(origin.getCountryCode())
+                    || "CN".equals(origin.getCountryCode())
+                    || "Anime".equals(origin.getName());
+            boolean isAnime = "Anime".equals(origin.getName());
+            String code = isAnime ? "JP" : origin.getCountryCode();
+            navigateTo(OriginResultsFragment.newInstance(
+                    code, origin.getName(), origin.getGlyph(), isAnime, defaultTV));
+        });
+        rvOrigin.setAdapter(originAdapter);
+        rvOrigin.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+    }
 
     protected abstract void setupSearchResultAdapter();
     protected abstract void setupResultObserver();
@@ -131,37 +172,49 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     protected abstract void fetchTrending();
     protected abstract void performSearchQuery(String query);
     protected abstract void clearSearchResults();
-    protected abstract void onGenreSelected(GenresModel genre);
+    protected abstract void onGenreSelected(GenresModel genresModel);
     protected abstract void onTrendingSelected(MediaItem item);
-    /** Returns true if this is the TV tab; controls toggle highlight and "See all" destination. */
-    protected abstract boolean isTVTab();
+
+    protected void onItemClicked(MediaItem item, @Nullable View sharedElement) {
+        Fragment fragment;
+        String transitionName = null;
+        if (item instanceof MovieModel) {
+            fragment = MovieResultDetailsFragment.newInstance(item.getMediaId());
+            if (sharedElement != null) transitionName = "poster_transition";
+        } else if (item instanceof TVShowModel) {
+            fragment = TVShowResultDetailsFragment.newInstance(item.getMediaId());
+            if (sharedElement != null) transitionName = "poster_transition";
+        } else {
+            return;
+        }
+        navigateTo(fragment, sharedElement, transitionName);
+    }
+
+    protected boolean isTVTab() { return false; }
     protected abstract void onMovieTabClick();
     protected abstract void onTVTabClick();
 
-    // Common implementations
-
-    private void setupSearchInput() {
+    protected void setupSearchInput() {
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
-                boolean hasText = s.length() > 0;
-                svSearchDefault.setVisibility(hasText ? View.GONE : View.VISIBLE);
-                rvSearchResults.setVisibility(hasText ? View.VISIBLE : View.GONE);
-                searchHandler.removeCallbacks(pendingSearch);
-                pendingSearch = BaseSearchFragment.this::performSearch;
-                searchHandler.postDelayed(pendingSearch, 300);
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
+                lastQuery = s.toString().trim();
+                if (pendingSearch != null) searchHandler.removeCallbacks(pendingSearch);
+                if (lastQuery.isEmpty()) {
+                    clearSearchResults();
+                    rvSearchResults.setVisibility(View.GONE);
+                    svSearchDefault.setVisibility(View.VISIBLE);
+                } else {
+                    pendingSearch = () -> performSearchQuery(lastQuery);
+                    searchHandler.postDelayed(pendingSearch, 600);
+                }
             }
-            @Override public void afterTextChanged(Editable s) {}
         });
 
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                String query = Objects.requireNonNull(etSearch.getText()).toString().trim();
-                if (!query.isEmpty()) {
-                    dbHelper.addRecentSearch(query);
-                    loadRecentSearches();
-                }
-                hideKeyboard();
+                performSearch();
                 return true;
             }
             return false;
@@ -169,94 +222,87 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     }
 
     protected void loadRecentSearches() {
+        List<String> history = dbHelper.getRecentSearches();
+        recentSearch.setVisibility(history.isEmpty() ? View.GONE : View.VISIBLE);
         pillsContainer.removeAllViews();
-        List<String> searches = dbHelper.getRecentSearches();
-        recentSearch.setVisibility(searches.isEmpty() ? View.GONE : View.VISIBLE);
-        for (String query : searches) {
-            View pillView = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.search_pill_item, pillsContainer, false);
-            TextView tvPill = pillView.findViewById(R.id.tvPillText);
-            tvPill.setText(query);
-            pillView.setOnClickListener(v -> {
-                etSearch.setText(query);
-                etSearch.setSelection(query.length());
+        for (String q : history) {
+            View pill = LayoutInflater.from(requireContext()).inflate(R.layout.search_pill_item, pillsContainer, false);
+            TextView tv = pill.findViewById(R.id.tvPillText);
+            tv.setText(q);
+            pill.setOnClickListener(v -> {
+                etSearch.setText(q);
+                performSearch();
             });
-            pillsContainer.addView(pillView);
+            pillsContainer.addView(pill);
         }
     }
 
     protected void clearHistory() {
         dbHelper.clearRecentSearches();
-        pillsContainer.removeAllViews();
-        recentSearch.setVisibility(View.GONE);
+        loadRecentSearches();
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     protected void performSearch() {
-        String query = Objects.requireNonNull(etSearch.getText()).toString().trim();
-        if (!query.isEmpty()) {
-            if (query.equals(lastQuery)) return;
-            lastQuery = query;
-            performSearchQuery(query);
-        } else {
-            lastQuery = "";
-            clearSearchResults();
+        if (etSearch.getText() == null) return;
+        String q = etSearch.getText().toString().trim();
+        if (!q.isEmpty()) {
+            dbHelper.addRecentSearch(q);
+            hideKeyboard();
+            performSearchQuery(q);
         }
     }
 
-    // Shared genre-loading helper — subclass just passes the right API call.
     protected void loadGenres(Call<GenresResponse> call) {
         safeEnqueue(call, new Callback<GenresResponse>() {
             @Override
-            public void onResponse(@NonNull Call<GenresResponse> call,
-                                   @NonNull Response<GenresResponse> response) {
+            public void onResponse(@NonNull Call<GenresResponse> call, @NonNull Response<GenresResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Context ctx = getContext();
-                    List<GenresModel> genres = response.body().getGenres();
-                    if (genres != null && !genres.isEmpty() && genresList.isEmpty()) {
-                        for (GenresModel g : genres) {
-                            genresList.add(new GenresModel(
-                                    g.getId(), g.getName(),
-                                    BadgeHelper.getGenreColor(ctx, g.getId())));
-                        }
-                        genresAdapter.notifyItemRangeInserted(0, genresList.size());
+                    genresList.clear();
+                    List<GenresModel> full = response.body().getGenres();
+                    if (full != null) {
+                        genresList.addAll(full.subList(0, Math.min(5, full.size())));
+                        genresList.add(new GenresModel(-1, "All " + full.size() + " genres ›", 0));
                     }
+                    genresAdapter.notifyDataSetChanged();
                 }
             }
-
-            @Override
-            public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Failed to load genres", Toast.LENGTH_SHORT).show();
-            }
+            @Override public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {}
         });
+    }
+
+    private void updateGenreToggleUI() {
+        if (btnGenreMovies == null || btnGenreTV == null) return;
+        int accent = ContextCompat.getColor(requireContext(), R.color.accent);
+        int onAccent = ContextCompat.getColor(requireContext(), R.color.on_accent);
+        int text2 = ContextCompat.getColor(requireContext(), R.color.text_2);
+        btnGenreMovies.setBackgroundTintList(ColorStateList.valueOf(genreIsTV ? Color.TRANSPARENT : accent));
+        btnGenreMovies.setTextColor(genreIsTV ? text2 : onAccent);
+        btnGenreMovies.setStrokeWidth(genreIsTV ? dpToPx(1) : 0);
+        btnGenreTV.setBackgroundTintList(ColorStateList.valueOf(genreIsTV ? accent : Color.TRANSPARENT));
+        btnGenreTV.setTextColor(genreIsTV ? onAccent : text2);
+        btnGenreTV.setStrokeWidth(genreIsTV ? 0 : dpToPx(1));
     }
 
     protected void updateToggleUI() {
         boolean tv = isTVTab();
-        btnMovie.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(),
-                tv ? R.color.toggle_bg : R.color.red_primary));
-        btnMovie.setTextColor(tv ? Color.parseColor("#888888") : Color.WHITE);
-        btnMovie.setIconTint(ContextCompat.getColorStateList(requireContext(),
-                tv ? android.R.color.darker_gray : android.R.color.white));
-
-        btnTvShow.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(),
-                tv ? R.color.red_primary : R.color.toggle_bg));
-        btnTvShow.setTextColor(tv ? Color.WHITE : Color.parseColor("#888888"));
-        btnTvShow.setIconTint(ContextCompat.getColorStateList(requireContext(),
-                tv ? android.R.color.white : android.R.color.darker_gray));
+        btnMovie.setBackgroundTintList(ColorStateList.valueOf(tv ? Color.TRANSPARENT : ContextCompat.getColor(requireContext(), R.color.accent)));
+        btnMovie.setTextColor(tv ? ContextCompat.getColor(requireContext(), R.color.text_2) : ContextCompat.getColor(requireContext(), R.color.on_accent));
+        btnMovie.setStrokeWidth(tv ? dpToPx(1) : 0);
+        
+        btnTvShow.setBackgroundTintList(ColorStateList.valueOf(tv ? ContextCompat.getColor(requireContext(), R.color.accent) : Color.TRANSPARENT));
+        btnTvShow.setTextColor(tv ? ContextCompat.getColor(requireContext(), R.color.on_accent) : ContextCompat.getColor(requireContext(), R.color.text_2));
+        btnTvShow.setStrokeWidth(tv ? 0 : dpToPx(1));
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        searchHandler.removeCallbacks(pendingSearch);
+        if (pendingSearch != null) searchHandler.removeCallbacks(pendingSearch);
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (etSearch != null) {
-            outState.putString("searchQuery", Objects.requireNonNull(etSearch.getText()).toString());
-        }
+        outState.putString("last_query", lastQuery);
     }
 }

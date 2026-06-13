@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_base">
+
+    <!-- Ghost glyph — native-script character, top-right, behind content -->
+    <TextView
+        android:id="@+id/tvOriginGhostGlyph"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-14dp"
+        android:layout_marginEnd="6dp"
+        android:fontFamily="@font/playfair_display"
+        android:textSize="88sp"
+        android:textColor="@color/text_1"
+        android:alpha="0.05"
+        android:importantForAccessibility="no"
+        tools:text="한"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Back button -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_margin="12dp"
+        android:background="@drawable/bg_circle_dark"
+        app:backgroundTint="#B30B0F19"
+        android:src="@drawable/ic_chevron_left"
+        app:tint="@color/text_1"
+        android:scaleType="centerInside"
+        android:contentDescription="@string/cd_back"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Header block: eyebrow + origin title -->
+    <LinearLayout
+        android:id="@+id/headerBlock"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="50dp"
+        android:paddingEnd="13dp"
+        android:paddingTop="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            style="@style/TextAppearance.EMPlay.Micro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/eyebrow_origin"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tvOriginTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/playfair_display"
+            android:textSize="20sp"
+            android:textColor="@color/text_1"
+            tools:text="Korean" />
+
+    </LinearLayout>
+
+    <!-- Movies / TV Toggle -->
+    <LinearLayout
+        android:id="@+id/toggleRow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toBottomOf="@id/headerBlock"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOriginMovies"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:text="@string/label_movies"
+            android:textColor="@color/text_3"
+            android:textSize="11sp"
+            android:paddingHorizontal="10dp"
+            android:minWidth="0dp"
+            app:cornerRadius="14dp"
+            app:strokeColor="@color/border"
+            app:strokeWidth="@dimen/hairline" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOriginTV"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginStart="6dp"
+            android:text="@string/label_tv"
+            android:textColor="@color/on_accent"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingHorizontal="10dp"
+            android:minWidth="0dp"
+            app:backgroundTint="@color/accent"
+            app:cornerRadius="14dp" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/origin_results_recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:paddingHorizontal="13dp"
+        android:paddingTop="10dp"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/toggleRow"
+        app:layout_constraintBottom_toTopOf="@id/pagination_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Pagination Bar -->
+    <LinearLayout
+        android:id="@+id/pagination_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="@color/bg_base"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageButton
+            android:id="@+id/btn_prev"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_arrow_back"
+            android:background="@drawable/rounded_btn_bg"
+            android:contentDescription="@string/pre_page"
+            android:enabled="false" />
+
+        <TextView
+            android:id="@+id/page_indicator"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/page_1"
+            android:textColor="@color/text_3"
+            android:textSize="12sp" />
+
+        <ImageButton
+            android:id="@+id/btn_next"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_arrow_forward"
+            android:background="@drawable/rounded_btn_bg"
+            android:contentDescription="@string/next_page" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

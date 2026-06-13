@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Semi-transparent bg_surface (approx 62% opacity as per design blueprint) -->
+    <solid android:color="#9E171E31" />
+    <corners android:radius="27dp" />
+    <!-- Hairline border 0.5dp -->
+    <stroke
+        android:width="0.5dp"
+        android:color="#26EDF0F7" />
+</shape>

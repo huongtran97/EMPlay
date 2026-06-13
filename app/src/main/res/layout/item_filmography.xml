@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="9dp">
+
+        <TextView
+            android:id="@+id/tvYear"
+            style="@style/TextAppearance.EMPlay.Label"
+            android:layout_width="34dp"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/playfair_display"
+            android:textColor="@color/accent"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="2026" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="11dp"
+            android:layout_marginEnd="11dp"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/tvRating"
+            app:layout_constraintStart_toEndOf="@id/tvYear"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                style="@style/TextAppearance.EMPlay.Title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_1"
+                android:textSize="12sp"
+                tools:text="Dune: Part Three" />
+
+            <TextView
+                android:id="@+id/tvRole"
+                style="@style/TextAppearance.EMPlay.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="1dp"
+                android:textColor="@color/text_3"
+                tools:text="as Chani · Movie" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvRating"
+            style="@style/TextAppearance.EMPlay.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/accent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="★ 8.2" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/hairline"
+        android:background="@color/border"
+        android:alpha="0.3" />
+
+</LinearLayout>
