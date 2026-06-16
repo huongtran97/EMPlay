@@ -27,7 +27,7 @@
             android:background="@drawable/bg_type_badge"
             android:paddingHorizontal="5dp"
             android:paddingVertical="2dp"
-            android:textSize="8sp"
+            android:textSize="@dimen/text_micro"
             android:textStyle="bold"
             android:visibility="gone" />
 

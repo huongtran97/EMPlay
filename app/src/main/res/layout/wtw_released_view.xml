@@ -69,6 +69,26 @@
 
     </LinearLayout>
 
+    <!-- Now in Theaters badge — visible when movie is currently playing in theaters -->
+    <TextView
+        android:id="@+id/now_in_theaters_badge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/now_in_theaters"
+        android:textColor="#E53935"
+        android:textSize="@dimen/text_badge"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:background="@drawable/bg_badge_theaters"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_wtw_title" />
+
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout_wtw"
         android:layout_width="wrap_content"
@@ -85,7 +105,7 @@
         app:tabPaddingEnd="12dp"
         app:tabTextAppearance="@style/TabTextAppearance"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_wtw_title">
+        app:layout_constraintTop_toBottomOf="@+id/now_in_theaters_badge">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"

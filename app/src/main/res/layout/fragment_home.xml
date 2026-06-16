@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EMPlay · HOME VIEW
+     Ticket hero (Now Showing) + Trending + On Air + Top Rated filmstrip + Coming Soon
+     Bottom glass nav bar -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_base">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="72dp"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Top bar: brand + icons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="13dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="13dp"
+                android:paddingBottom="8dp">
+
+                <TextView
+                    android:id="@+id/tv_brand"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/playfair_display_medium"
+                    android:letterSpacing="0.1"
+                    android:text="@string/brand_name"
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_chip" />
+
+                <ImageButton
+                    android:id="@+id/btn_search"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_search"
+                    android:src="@drawable/ic_search"
+                    android:tint="@color/text_3" />
+
+                <ImageButton
+                    android:id="@+id/btn_notifications"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_marginStart="4dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/cd_notifications"
+                    android:src="@drawable/ic_bell"
+                    android:tint="@color/text_3" />
+
+            </LinearLayout>
+
+            <!-- Eyebrow: NOW SHOWING · IN THEATERS -->
+            <TextView
+                android:id="@+id/tv_now_showing_eyebrow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="13dp"
+                android:layout_marginBottom="7dp"
+                android:fontFamily="@font/inter_semibold"
+                android:letterSpacing="0.18"
+                android:text="@string/home_eyebrow_now_showing"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/text_caption" />
+
+            <!-- TICKET HERO CARD -->
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="11dp"
+                android:layout_marginEnd="11dp"
+                app:cardBackgroundColor="@color/bg_surface"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Left: poster + title -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <ImageView
+                            android:id="@+id/img_hero_poster"
+                            android:layout_width="match_parent"
+                            android:layout_height="84dp"
+                            android:background="@color/bg_dark"
+                            android:contentDescription="@null"
+                            android:scaleType="centerCrop" />
+
+                        <TextView
+                            android:id="@+id/tv_hero_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:fontFamily="@font/playfair_display"
+                            android:text="The Mandalorian and Grogu"
+                            android:textColor="@color/text_1"
+                            android:textSize="@dimen/text_meta" />
+
+                        <TextView
+                            android:id="@+id/tv_hero_genre"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="Sci-fi · PG"
+                            android:textColor="@color/text_3"
+                            android:textSize="@dimen/text_badge" />
+
+                    </LinearLayout>
+
+                    <!-- Ticket tear line -->
+                    <FrameLayout
+                        android:layout_width="2dp"
+                        android:layout_height="match_parent">
+                        <View
+                            android:layout_width="2dp"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/ticket_tear_line" />
+                    </FrameLayout>
+
+                    <!-- Right: admit one stub -->
+                    <LinearLayout
+                        android:layout_width="84dp"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:id="@+id/tv_admit_one"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/inter"
+                            android:letterSpacing="0.12"
+                            android:text="@string/memorabilia_admit_one"
+                            android:textColor="@color/text_3"
+                            android:textSize="@dimen/text_caption" />
+
+                        <TextView
+                            android:id="@+id/tv_hero_rating"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            android:fontFamily="@font/playfair_display"
+                            android:text="6.8"
+                            android:textColor="@color/accent"
+                            android:textSize="@dimen/text_headline" />
+
+                        <Button
+                            android:id="@+id/btn_hero_trailer"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_btn_primary"
+                            android:fontFamily="@font/inter_semibold"
+                            android:padding="5dp"
+                            android:text="@string/action_trailer"
+                            android:textColor="@color/on_accent"
+                            android:textSize="@dimen/text_badge" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Pager dots -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="13dp"
+                    android:layout_height="3dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@color/accent" />
+                <View
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="@color/border" />
+                <View
+                    android:layout_width="3dp"
+                    android:layout_height="3dp"
+                    android:background="@color/border" />
+
+            </LinearLayout>
+
+            <!-- ── TRENDING THIS WEEK ── -->
+            <include
+                android:id="@+id/header_trending"
+                layout="@layout/section_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp" />
+
+            <!-- Movie/TV chip row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                android:paddingBottom="9dp">
+
+                <TextView
+                    android:id="@+id/tv_trending_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/ic_flame"
+                    android:drawablePadding="4dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/home_section_trending"
+                    android:textColor="@color/text_1"
+                    android:textSize="@dimen/text_meta" />
+
+                <TextView
+                    android:id="@+id/chip_movies_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_active"
+                    android:paddingStart="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/label_movies"
+                    android:textColor="@color/on_accent"
+                    android:textSize="@dimen/text_badge" />
+
+                <TextView
+                    android:id="@+id/chip_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_chip_inactive"
+                    android:paddingStart="8dp"
+                    android:paddingTop="1dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="1dp"
+                    android:text="@string/label_tv"
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+            <!-- Trending horizontal scroll -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="13dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/row_trending"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </HorizontalScrollView>
+
+            <!-- ── ON THE AIR ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="13dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="13dp"
+                android:paddingBottom="9dp">
+
+                <TextView
+                    android:id="@+id/tv_on_air_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/ic_broadcast"
+                    android:drawablePadding="4dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/home_section_on_air"
+                    android:textColor="@color/text_1"
+                    android:textSize="@dimen/text_meta" />
+
+                <TextView
+                    android:id="@+id/tv_on_air_see_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="13dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/row_on_air"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </HorizontalScrollView>
+
+            <!-- ── TOP RATED FILMSTRIP ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="13dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="13dp"
+                android:paddingBottom="9dp">
+
+                <TextView
+                    android:id="@+id/tv_top_rated_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/ic_trophy"
+                    android:drawablePadding="4dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/home_section_top_rated"
+                    android:textColor="@color/text_1"
+                    android:textSize="@dimen/text_meta" />
+
+                <TextView
+                    android:id="@+id/tv_top_rated_see_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+            <!-- Filmstrip container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/filmstrip"
+                android:orientation="vertical"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp">
+
+                <!-- Top sprocket holes row -->
+                <LinearLayout
+                    android:id="@+id/row_sprockets_top"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="11dp"
+                    android:paddingEnd="11dp" />
+
+                <!-- Films -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="11dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="4dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/row_top_rated"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal" />
+
+                </HorizontalScrollView>
+
+                <!-- Bottom sprocket holes row -->
+                <LinearLayout
+                    android:id="@+id/row_sprockets_bottom"
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="11dp"
+                    android:paddingEnd="11dp" />
+
+            </LinearLayout>
+
+            <!-- ── COMING SOON ── -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="13dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="13dp"
+                android:paddingBottom="9dp">
+
+                <TextView
+                    android:id="@+id/tv_coming_soon_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableStart="@drawable/ic_calendar"
+                    android:drawablePadding="4dp"
+                    android:fontFamily="@font/inter_semibold"
+                    android:text="@string/home_section_coming_soon"
+                    android:textColor="@color/text_1"
+                    android:textSize="@dimen/text_meta" />
+
+                <TextView
+                    android:id="@+id/tv_coming_soon_see_all"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="13dp"
+                android:paddingBottom="14dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/row_coming_soon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal" />
+
+            </HorizontalScrollView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Glass bottom nav -->
+    <include
+        android:id="@+id/bottom_nav"
+        layout="@layout/component_bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginBottom="12dp" />
+
+</FrameLayout>

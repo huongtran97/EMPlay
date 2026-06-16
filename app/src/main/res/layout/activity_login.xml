@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EMPlay · LOGIN VIEW
+     TMDB primary auth, Google secondary, guest link -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_base"
+    android:fillViewport="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- ADMIT ONE watermark -->
+        <TextView
+            android:id="@+id/tv_watermark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:alpha="0.04"
+            android:fontFamily="@font/playfair_display_medium"
+            android:letterSpacing="0.25"
+            android:rotation="-90"
+            android:text="@string/memorabilia_admit_one"
+            android:textColor="@color/text_1"
+            android:textSize="@dimen/text_display_xl" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="560dp"
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="24dp">
+
+            <!-- Hero / brand section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingTop="36dp">
+
+                <TextView
+                    android:id="@+id/tv_brand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/playfair_display_medium"
+                    android:letterSpacing="0.18"
+                    android:text="@string/brand_name"
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_display_s"
+                    android:textStyle="bold" />
+
+                <!-- Gold divider line -->
+                <View
+                    android:layout_width="38dp"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="13dp"
+                    android:layout_marginBottom="13dp"
+                    android:alpha="0.5"
+                    android:background="@color/accent" />
+
+                <TextView
+                    android:id="@+id/tv_tagline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/playfair_display"
+                    android:gravity="center"
+                    android:text="@string/login_tagline"
+                    android:textColor="@color/text_2"
+                    android:textSize="@dimen/text_meta"
+                    android:textStyle="italic" />
+
+                <TextView
+                    android:id="@+id/tv_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="7dp"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="1.6"
+                    android:text="@string/login_subtitle"
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+            <!-- Auth buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_tmdb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_btn_primary"
+                    android:fontFamily="@font/inter_semibold"
+                    android:padding="11dp"
+                    android:text="@string/login_tmdb"
+                    android:textColor="@color/on_accent"
+                    android:textSize="@dimen/text_divider_label" />
+
+                <Button
+                    android:id="@+id/btn_google"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@drawable/bg_btn_secondary"
+                    android:padding="11dp"
+                    android:text="@string/login_google"
+                    android:textColor="@color/text_1"
+                    android:textSize="@dimen/text_divider_label" />
+
+                <TextView
+                    android:id="@+id/tv_guest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:padding="4dp"
+                    android:text="@string/login_guest"
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_badge" />
+
+                <TextView
+                    android:id="@+id/tv_legal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="1.6"
+                    android:text="@string/login_legal"
+                    android:textColor="@color/text_dim"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</ScrollView>

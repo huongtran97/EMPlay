@@ -18,7 +18,7 @@
         android:layout_height="26dp"
         android:scaleType="centerCrop"
         android:background="@drawable/bg_provider_fallback"
-        android:contentDescription="@null" />
+        android:contentDescription="@string/cd_provider_logo" />
 
     <!-- Provider name + quality -->
     <LinearLayout

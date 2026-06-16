@@ -1,19 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ── Spec spacing tokens (base unit 4dp) ── -->
+    <dimen name="space_xs">4dp</dimen>
+    <dimen name="space_s">8dp</dimen>
+    <dimen name="space_m">12dp</dimen>
+    <dimen name="space_l">16dp</dimen>
+    <dimen name="space_xl">24dp</dimen>
+    <dimen name="space_xxl">32dp</dimen>
+
+    <!-- ── Spec corner radius tokens ── -->
+    <dimen name="radius_s">8dp</dimen>
+    <dimen name="radius_m">12dp</dimen>
+    <dimen name="radius_l">16dp</dimen>
+    <dimen name="radius_pill">50dp</dimen>
+
+    <!-- Legacy spacing aliases (keep until layouts migrate to spec names) -->
+    <dimen name="spacing_1">4dp</dimen>
+    <dimen name="spacing_2">8dp</dimen>
+    <dimen name="spacing_3">12dp</dimen>
+    <dimen name="spacing_4">16dp</dimen>
+    <dimen name="spacing_5">20dp</dimen>
+    <dimen name="spacing_6">24dp</dimen>
+
+    <!-- Legacy radius aliases -->
+    <dimen name="radius_sm">8dp</dimen>
+    <dimen name="radius_md">12dp</dimen>
+    <dimen name="radius_lg">16dp</dimen>
+    <dimen name="radius_xl">16dp</dimen>
+    <dimen name="radius_2xl">18dp</dimen>
+
+    <!-- Layout Specific -->
     <dimen name="size_banner_height">380dp</dimen>
-
-    <!-- TEXT SIZES -->
-    <dimen name="text_badge">11sp</dimen>           <!-- "Now in theaters", "Coming Soon", countdown unit labels (D/H/M/S) -->
-    <dimen name="text_divider_label">12sp</dimen>   <!-- "or" divider in login screen -->
-    <dimen name="text_meta">13sp</dimen>            <!-- hero language, hero rating, login subtitle, notify button -->
-    <dimen name="text_chip">14sp</dimen>            <!-- all meta chips, filter buttons, button labels, see_all, upcoming sub-label -->
-    <dimen name="text_poster_rating">15sp</dimen>   <!-- rating on detail screen poster row -->
-    <dimen name="text_body">16sp</dimen>            <!-- overview, read_more, expected release date label -->
-    <dimen name="text_section_header">18sp</dimen>  <!-- "What's New", "Upcoming" section headers -->
-    <dimen name="text_title">22sp</dimen>           <!-- hero banner title, detail screen title -->
-    <dimen name="text_subtitle">20sp</dimen>         <!-- dialog/screen subtitles, cast name, watchlist/profile headers -->
-    <dimen name="text_countdown">24sp</dimen>       <!-- countdown timer digits -->
-    <dimen name="text_app_name">30sp</dimen>        <!-- "Emplay" on login screen -->
-    <dimen name="text_countdown_large">38sp</dimen> <!-- large season countdown digit -->
-
+    <dimen name="hairline">0.5dp</dimen>
+    <!-- Legacy mappings for stability during transition -->
+    <dimen name="text_micro">8sp</dimen>
+    <dimen name="text_tiny">9sp</dimen>
+    <dimen name="text_caption">10sp</dimen>
+    <dimen name="text_badge">11sp</dimen>
+    <dimen name="text_divider_label">12sp</dimen>
+    <dimen name="text_meta">13sp</dimen>
+    <dimen name="text_chip">14sp</dimen>
+    <dimen name="text_poster_rating">15sp</dimen>
+    <dimen name="text_body">16sp</dimen>
+    <dimen name="text_section_header">18sp</dimen>
+    <dimen name="text_headline">19sp</dimen>
+    <dimen name="text_subtitle">20sp</dimen>
+    <dimen name="text_title">22sp</dimen>
+    <dimen name="text_countdown">24sp</dimen>
+    <dimen name="text_display_s">25sp</dimen>
+    <dimen name="text_display_m">26sp</dimen>
+    <dimen name="text_app_name">30sp</dimen>
+    <dimen name="text_display_l">32sp</dimen>
+    <dimen name="text_countdown_large">38sp</dimen>
+    <dimen name="text_display_xl">46sp</dimen>
+    <dimen name="text_hero_s">80sp</dimen>
+    <dimen name="text_hero_m">88sp</dimen>
+    <dimen name="text_hero_l">96sp</dimen>
+    <dimen name="text_hero_xl">100sp</dimen>
 </resources>

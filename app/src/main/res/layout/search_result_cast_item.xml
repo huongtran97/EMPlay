@@ -1,54 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/search_result_cast_item_container"
-    android:layout_width="100dp"
+    android:layout_width="60dp"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
+    android:layout_marginEnd="8dp"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:clickable="true"
     android:focusable="true"
     android:background="?android:attr/selectableItemBackgroundBorderless">
 
-    <FrameLayout
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="8dp">
-
-        <ImageView
-            android:id="@+id/cast_poster_profile"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:contentDescription="@null" />
-    </FrameLayout>
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/cast_poster_profile"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:scaleType="centerCrop"
+        android:background="@color/bg_surface"
+        android:contentDescription="@string/cd_actor_photo"
+        app:shapeAppearanceOverlay="@style/EMPlay.Circle" />
 
     <TextView
         android:id="@+id/cast_name_profile"
+        style="@style/TextAppearance.EMPlay.Label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="4dp"
-        android:fontFamily="sans-serif-black"
+        android:layout_marginTop="6dp"
         android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        android:textSize="@dimen/text_poster_rating"
+        android:textColor="@color/text_1"
+        android:textSize="@dimen/text_badge"
+        android:textStyle="bold"
         android:maxLines="2"
         android:ellipsize="end" />
 
     <TextView
         android:id="@+id/cast_character_profile"
+        style="@style/TextAppearance.EMPlay.Caption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
         android:layout_marginTop="2dp"
-        android:layout_marginEnd="4dp"
         android:layout_marginBottom="8dp"
-        android:fontFamily="sans-serif-light"
         android:textAlignment="center"
-        android:textColor="#9E9E9E"
-        android:textSize="@dimen/text_poster_rating"
+        android:textColor="@color/text_3"
+        android:textSize="@dimen/text_badge"
         android:maxLines="2"
         android:ellipsize="end" />
 

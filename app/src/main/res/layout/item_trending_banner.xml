@@ -2,51 +2,160 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipChildren="false">
+    android:paddingHorizontal="11dp"
+    android:paddingVertical="8dp">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardHeroPoster"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="4dp"
-        app:layout_constraintDimensionRatio="W,2:3"
+    <!-- Ticket Container -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/ticketContainer"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@drawable/bg_ticket_hero"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageView
-            android:id="@+id/ivHeroPoster"
-            android:layout_width="match_parent"
+        <!-- Left Section (Info) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/leftSection"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:contentDescription="@string/show_poster"
-            android:scaleType="centerCrop" />
+            android:padding="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/dashedLine">
 
-        <!-- Button is inside the card, renders above the poster -->
-        <LinearLayout
-            android:id="@+id/btnHeroWatchlist"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:layout_gravity="top|end"
-            android:layout_margin="10dp"
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/ivHeroPoster"
+                android:layout_width="match_parent"
+                android:layout_height="133dp"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/show_poster"
+                android:background="#1E2A45"
+                app:shapeAppearanceOverlay="@style/RoundedCorners.8dp"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+            <TextView
+                android:id="@+id/tvHeroTitle"
+                style="@style/TextAppearance.EMPlay.DisplaySm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                app:layout_constraintTop_toBottomOf="@id/ivHeroPoster"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:text="The Mandalorian" />
+
+            <TextView
+                android:id="@+id/tvHeroMeta"
+                style="@style/TextAppearance.EMPlay.Caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                app:layout_constraintTop_toBottomOf="@id/tvHeroTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:text="Sci-fi · PG" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Dashed Line Separator -->
+        <View
+            android:id="@+id/dashedLine"
+            android:layout_width="2dp"
+            android:layout_height="0dp"
+            android:background="@drawable/line_ticket_dash"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/leftSection"
+            app:layout_constraintEnd_toStartOf="@+id/rightSection"
+            app:layout_constraintHorizontal_bias="0.75" />
+
+        <!-- Punch Holes (Simulated) -->
+        <View
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginTop="-7dp"
             android:background="@drawable/bg_circle_dark"
-            android:gravity="center"
-            android:orientation="horizontal">
+            app:backgroundTint="@color/bg_base"
+            app:layout_constraintTop_toTopOf="@id/dashedLine"
+            app:layout_constraintStart_toStartOf="@id/dashedLine"
+            app:layout_constraintEnd_toEndOf="@id/dashedLine" />
 
-            <ImageView
-                android:id="@+id/icHeroWatchlist"
-                android:layout_width="18dp"
-                android:layout_height="18dp"
-                android:src="@drawable/ic_watchlist"
-                android:contentDescription="@string/add_to_watchlist" />
+        <!-- Ticket tear line -->
+        <FrameLayout
+            android:layout_width="2dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="@id/dashedLine"
+            app:layout_constraintBottom_toBottomOf="@id/dashedLine"
+            app:layout_constraintStart_toStartOf="@id/dashedLine"
+            app:layout_constraintEnd_toEndOf="@id/dashedLine">
+            <View
+                android:layout_width="2dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/ticket_tear_line" />
+        </FrameLayout>
+
+        <View
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_marginBottom="-7dp"
+            android:background="@drawable/bg_circle_dark"
+            app:backgroundTint="@color/bg_base"
+            app:layout_constraintBottom_toBottomOf="@id/dashedLine"
+            app:layout_constraintStart_toStartOf="@id/dashedLine"
+            app:layout_constraintEnd_toEndOf="@id/dashedLine" />
+
+
+        <!-- Right Section (CTA/Rating) -->
+        <LinearLayout
+            android:id="@+id/rightSection"
+            android:layout_width="84dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="10dp"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:id="@+id/tvAdmitOne"
+                style="@style/TextAppearance.EMPlay.Micro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.15"
+                android:text="@string/memorabilia_admit_one"
+                android:gravity="center"
+                android:textColor="@color/text_3" />
+
+            <TextView
+                android:id="@+id/tvHeroRating"
+                style="@style/TextAppearance.EMPlay.DisplayLg"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textColor="@color/accent"
+                tools:text="6.8" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHeroTrailer"
+                style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="32dp"
+                android:padding="0dp"
+                android:text="@string/action_trailer"
+                android:textAllCaps="false"
+                android:textColor="@color/on_accent"
+                android:textSize="@dimen/text_badge"
+                android:textStyle="bold"
+                app:backgroundTint="@color/accent"
+                app:cornerRadius="7dp" />
 
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

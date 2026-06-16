@@ -4,22 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#141414">
+    android:background="@color/bg_base">
 
-    <!-- HERO BACKDROP  (16:9)-->
+    <!-- HERO BACKDROP (16:9) -->
     <ImageView
         android:id="@+id/backdropView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:scaleType="centerCrop"
-        android:contentDescription="@string/show_icon"
+        android:contentDescription="@null"
+        android:background="#2A2030"
         app:layout_constraintDimensionRatio="16:9"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_percent="1.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Gradient scrim (fades backdrop into background) -->
+    <!-- Gradient scrim -->
     <View
         android:id="@+id/backdropScrim"
         android:layout_width="0dp"
@@ -31,61 +31,55 @@
         app:layout_constraintTop_toTopOf="@+id/backdropView" />
 
     <!-- Back / Share row -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_buttons_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginTop="14dp"
+        android:padding="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/btn_back"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="14dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:background="@drawable/bg_circle_dark"
-            android:src="@drawable/ic_arrow_back"
-            android:scaleType="center"
-            android:padding="0dp"
-            android:contentDescription="@string/back" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+            app:backgroundTint="#B30B0F19"
+            android:src="@drawable/ic_chevron_left"
+            app:tint="@color/text_1"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/cd_back"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageButton
             android:id="@+id/btn_share"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="14dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:background="@drawable/bg_circle_dark"
+            app:backgroundTint="#B30B0F19"
             android:src="@drawable/ic_share"
-            android:scaleType="center"
-            android:padding="0dp"
-            android:contentDescription="@string/share" />
+            app:tint="@color/text_1"
+            android:scaleType="centerInside"
+            android:contentDescription="@string/share"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- POSTER  (anchored bottom-left, overlaps backdrop)-->
+    <!-- POSTER (2:3, overlapping backdrop) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/poster_container"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="-56dp"
-        android:translationZ="4dp"
+        android:layout_width="92dp"
+        android:layout_height="132dp"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="-44dp"
         app:cardCornerRadius="10dp"
         app:cardElevation="0dp"
-        app:strokeColor="#555566"
-        app:strokeWidth="1dp"
-        app:cardBackgroundColor="#1E1E28"
-        app:layout_constraintWidth_percent="0.32"
-        app:layout_constraintDimensionRatio="2:3"
+        app:strokeColor="#2EEDF0F7"
+        app:strokeWidth="0.5dp"
+        app:cardBackgroundColor="#171E31"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/backdropView">
 
@@ -93,8 +87,9 @@
             android:id="@+id/imageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:contentDescription="@string/show_icon"
-            android:scaleType="centerCrop" />
+            android:contentDescription="@string/show_poster"
+            android:scaleType="centerCrop"
+            android:transitionName="poster_transition" />
 
         <!-- Coming Soon badge -->
         <TextView
@@ -104,8 +99,8 @@
             android:layout_gravity="top|center_horizontal"
             android:layout_marginTop="8dp"
             android:text="@string/coming_soon"
-            android:textColor="@color/accent_amber"
-            android:textSize="@dimen/text_badge"
+            android:textColor="@color/accent"
+            android:textSize="@dimen/text_caption"
             android:textStyle="bold"
             android:letterSpacing="0.1"
             android:paddingStart="8dp"
@@ -118,22 +113,22 @@
     </com.google.android.material.card.MaterialCardView>
 
     <!-- TITLE (right of poster) -->
-
     <TextView
         android:id="@+id/movie_title"
+        style="@style/TextAppearance.EMPlay.DisplayLg"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
+        android:layout_marginStart="12dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="25dp"
-        android:fontFamily="@font/bebas_neue"
-        android:text="@string/title"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_title"
+        android:layout_marginTop="0dp"
+        android:textColor="@color/text_1"
         android:lineSpacingMultiplier="1.15"
         app:layout_constraintStart_toEndOf="@+id/poster_container"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/backdropView" />
+        app:layout_constraintTop_toTopOf="@+id/poster_container"
+        app:layout_constraintBottom_toTopOf="@+id/rating_row"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:text="Dune: Part Three" />
 
     <!-- Rating Row -->
     <LinearLayout
@@ -142,22 +137,19 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:clipChildren="false"
-        android:layout_marginStart="6dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginTop="6dp"
         app:layout_constraintStart_toEndOf="@+id/poster_container"
         app:layout_constraintTop_toBottomOf="@+id/movie_title">
 
-        <!-- Rating -->
         <TextView
             android:id="@+id/tvPosterRating"
+            style="@style/TextAppearance.EMPlay.Label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_marginTop="4dp"
             android:text="@string/rating_format"
-            android:textColor="#FFC107"
-            android:textSize="@dimen/text_poster_rating"/>
+            android:textColor="@color/accent" />
+
     </LinearLayout>
 
     <!-- Genres chips -->
@@ -165,12 +157,10 @@
         android:id="@+id/movie_info_genres"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
+        android:layout_marginStart="12dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
+        android:layout_marginTop="5dp"
         app:flexWrap="wrap"
-        app:alignItems="flex_start"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/poster_container"
         app:layout_constraintTop_toBottomOf="@+id/rating_row" />
@@ -180,261 +170,149 @@
         android:id="@+id/meta_row"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="13dp"
+        android:layout_marginEnd="13dp"
+        android:layout_marginTop="9dp"
         app:flexWrap="wrap"
-        app:alignItems="flex_start"
-        app:justifyContent="flex_start"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/action_buttons">
+        app:layout_constraintTop_toBottomOf="@+id/poster_container">
 
         <TextView
-            android:id="@+id/movie_release_date"
+            android:id="@+id/movie_certification"
+            style="@style/GenreChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_year"
-            android:drawablePadding="5dp"
-            android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginBottom="7dp"
-            android:textColor="#52A872"
-            android:textSize="@dimen/text_chip"
-            android:fontFamily="sans-serif-medium"
-            app:drawableStartCompat="@drawable/ic_calendar_small"
-            app:drawableTint="#52A872"
-            tools:text="2026" />
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            android:visibility="gone"
+            tools:text="14A" />
 
         <TextView
             android:id="@+id/movie_runtime"
+            style="@style/GenreChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_runtime"
-            android:drawablePadding="5dp"
-            android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginBottom="7dp"
-            android:textColor="#6BB8E8"
-            android:textSize="@dimen/text_chip"
-            android:fontFamily="sans-serif-medium"
-            app:drawableStartCompat="@drawable/ic_history"
-            app:drawableTint="#6BB8E8"
-            tools:text="120 min" />
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            tools:text="2h 46m" />
+
+        <TextView
+            android:id="@+id/movie_release_date"
+            style="@style/GenreChipStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            tools:text="22 May 2026" />
 
         <TextView
             android:id="@+id/movie_language"
+            style="@style/GenreChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_language"
-            android:drawablePadding="5dp"
-            android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginBottom="7dp"
-            android:textColor="#C9943A"
-            android:textSize="@dimen/text_chip"
-            android:fontFamily="sans-serif-medium"
-            app:drawableStartCompat="@drawable/ic_language"
-            app:drawableTint="#C9943A"
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
             tools:text="English" />
 
         <TextView
             android:id="@+id/movie_product_country"
+            style="@style/GenreChipStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_chip_country"
-            android:drawablePadding="5dp"
-            android:gravity="center_vertical"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:layout_marginEnd="7dp"
-            android:layout_marginBottom="7dp"
-            android:textColor="#D46060"
-            android:textSize="@dimen/text_chip"
-            android:fontFamily="sans-serif-medium"
-            app:drawableStartCompat="@drawable/ic_map_pin"
-            app:drawableTint="#D46060"
-            tools:text="United States of America" />
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="5dp"
+            tools:text="Canada" />
 
     </com.google.android.flexbox.FlexboxLayout>
 
-    <!-- Divider -->
-    <View
-        android:id="@+id/divider_meta"
-        android:layout_width="0dp"
-        android:layout_height="0.5dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="14dp"
-        android:background="#1E1E28"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/meta_row" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/poster_genre_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="poster_container,movie_info_genres" />
-
-    <!-- ACTION BUTTONS-->
+    <!-- ACTION BUTTONS -->
     <LinearLayout
         android:id="@+id/action_buttons"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="12dp"
-        android:baselineAligned="false"
+        android:layout_marginStart="13dp"
+        android:layout_marginEnd="13dp"
+        android:layout_marginTop="4dp"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/poster_container">
+        app:layout_constraintTop_toBottomOf="@+id/meta_row">
 
-        <LinearLayout
+        <!-- Watch Trailer -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/trailer_btn"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1.3"
+            android:layout_marginEnd="7dp"
+            android:text="@string/action_watch_trailer"
+            android:textColor="@color/on_accent"
+            android:textSize="@dimen/text_divider_label"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            app:backgroundTint="@color/accent"
+            app:cornerRadius="8dp" />
+
+        <!-- My List (Ticket Stub) -->
+        <LinearLayout
+            android:id="@+id/add_to_library_btn"
             android:layout_width="0dp"
             android:layout_height="44dp"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
-            android:background="@drawable/bg_button_trailer"
-            android:orientation="horizontal"
+            android:background="@drawable/bg_button_ticket_stub"
+            android:orientation="vertical"
             android:gravity="center"
             android:clickable="true"
             android:focusable="true">
-
-            <ImageView
-                android:layout_width="14dp"
-                android:layout_height="14dp"
-                android:src="@drawable/ic_play"
-                android:contentDescription="@null"
-                app:tint="#D46060" />
 
             <TextView
+                android:id="@+id/tvMyListLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="7dp"
-                android:fontFamily="sans-serif-medium"
-                android:text="@string/trailer"
-                android:textColor="#D46060"
-                android:textSize="@dimen/text_chip"
-                android:letterSpacing="0.05" />
+                android:text="@string/detail_btn_mylist"
+                android:textColor="@color/text_1"
+                android:textSize="@dimen/text_badge"
+                android:textStyle="bold"
+                android:lineSpacingMultiplier="1.0" />
+
+            <TextView
+                style="@style/TextAppearance.EMPlay.Micro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/memorabilia_admit_one"
+                android:textColor="@color/text_3"
+                android:letterSpacing="0.1"
+                android:textSize="@dimen/text_caption" />
 
         </LinearLayout>
 
-        <LinearLayout
-            android:id="@+id/add_to_library_btn"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            android:background="@drawable/bg_add_to_library_btn"
-            android:clickable="true"
-            android:focusable="true">
-
-            <ImageView
-                android:id="@+id/ic_library"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_watchlist"
-                android:contentDescription="@null"
-                app:tint="#AAAAAA" />
-
-        </LinearLayout>
+        <!-- ic_library for code compatibility -->
+        <ImageView
+            android:id="@+id/ic_library"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            android:visibility="gone"
+            android:contentDescription="@null" />
 
     </LinearLayout>
-    <!-- BARRIER -->
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/poster_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="tvPosterRating,action_buttons"
-        tools:ignore="NotSibling" />
 
-    <!-- WHERE TO WATCH -->
-    <include
-        android:id="@+id/wtw_released"
-        layout="@layout/wtw_released_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider_meta" />
-
-    <include
-        android:id="@+id/wtw_unreleased"
-        layout="@layout/wtw_unreleased_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider_meta" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/wtw_anchor"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="bottom"
-        app:constraint_referenced_ids="wtw_released,wtw_unreleased" />
-
-    <!-- Second Divider -->
-    <View
-        android:id="@+id/divider_overview"
-        android:layout_width="0dp"
-        android:layout_height="0.5dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="16dp"
-        android:background="#1E1E28"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/wtw_anchor" />
-
-    <!-- OVERVIEW  -->
+    <!-- OVERVIEW -->
     <TextView
         android:id="@+id/search_result_overview"
+        style="@style/TextAppearance.EMPlay.Body"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="13dp"
         android:layout_marginTop="14dp"
-        android:layout_marginEnd="16dp"
-        android:fontFamily="sans-serif"
-        android:lineSpacingExtra="4dp"
-        android:justificationMode="inter_word"
-        tools:targetApi="o"
-        android:text="@string/overview"
-        android:textColor="#999999"
-        android:textSize="@dimen/text_body"
+        android:layout_marginEnd="13dp"
         android:maxLines="4"
         android:ellipsize="end"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider_overview" />
+        app:layout_constraintTop_toBottomOf="@+id/action_buttons"
+        tools:text="Paul Atreides faces the consequences of the holy war he set in motion, as the empire collapses around him…" />
 
     <TextView
         android:id="@+id/read_more_text"
@@ -444,11 +322,38 @@
         android:paddingTop="4dp"
         android:paddingBottom="12dp"
         android:text="@string/read_more"
-        android:textColor="@color/accent_red"
-        android:textSize="@dimen/text_body"
+        android:textColor="@color/accent"
+        android:textSize="@dimen/text_meta"
         android:textStyle="bold"
         android:visibility="gone"
         app:layout_constraintStart_toStartOf="@+id/search_result_overview"
         app:layout_constraintTop_toBottomOf="@+id/search_result_overview" />
+
+    <!-- WHERE TO WATCH -->
+    <include
+        android:id="@+id/wtw_released"
+        layout="@layout/wtw_released_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="13dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/read_more_text"
+        tools:ignore="NotSibling" />
+
+    <include
+        android:id="@+id/wtw_unreleased"
+        layout="@layout/wtw_unreleased_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="13dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="13dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/read_more_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

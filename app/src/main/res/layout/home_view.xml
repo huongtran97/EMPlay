@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#141414"
+    android:background="@color/bg_base"
     android:fillViewport="true">
 
     <LinearLayout
@@ -14,375 +14,472 @@
         android:clipChildren="false"
         android:clipToPadding="false">
 
-        <!-- HERO SECTION (palette background covers banner + meta) -->
+        <!-- HEADER / BRANDING -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="13dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="8dp">
+
+            <ImageView
+                android:id="@+id/tvBrandName"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_logo_wordmark"
+                android:contentDescription="@string/brand_name"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_bell"
+                    app:tint="@color/text_3"
+                    android:contentDescription="@string/cd_notifications" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- NOW SHOWING EYEBROW -->
+        <TextView
+            android:id="@+id/tvNowShowingEyebrow"
+            style="@style/TextAppearance.EMPlay.Micro"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="13dp"
+            android:layout_marginBottom="7dp"
+            android:text="@string/home_eyebrow_now_showing"
+            android:textColor="@color/accent" />
+
+        <!-- HERO SECTION (Ticket Banner) -->
         <LinearLayout
             android:id="@+id/heroSection"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/bg_hero_section"
-            android:elevation="0dp"
-            android:foreground="@drawable/bg_hero_section_border">
+            android:clipChildren="false">
 
             <com.facebook.shimmer.ShimmerFrameLayout
-                android:id="@+id/shimmerLayout"
-                android:layout_width="match_parent"
+                android:id="@+id/shimmerHero"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:shimmer_duration="1200"
-                app:shimmer_tilt="20">
+                android:paddingHorizontal="11dp"
+                android:paddingVertical="8dp">
 
-                <!-- Skeleton shown while theater-only pool is being built -->
-                <FrameLayout
-                    android:id="@+id/heroSkeleton"
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:visibility="visible">
-
-                    <!-- Cover banner + dots + badge + title + meta area -->
-                    <View
-                        android:id="@+id/skeletonShimmer"
-                        android:layout_width="match_parent"
-                        android:layout_height="500dp"
-                        android:background="@drawable/shimmer_gradient" />
-
-                    <!-- Dots placeholder -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom|center_horizontal"
-                        android:layout_marginBottom="106dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical">
-                        <View android:layout_width="20dp" android:layout_height="7dp" android:layout_marginEnd="5dp" android:background="#33FFFFFF" />
-                        <View android:layout_width="7dp" android:layout_height="7dp" android:layout_marginEnd="5dp" android:background="#1AFFFFFF" />
-                        <View android:layout_width="7dp" android:layout_height="7dp" android:layout_marginEnd="5dp" android:background="#1AFFFFFF" />
-                        <View android:layout_width="7dp" android:layout_height="7dp" android:background="#1AFFFFFF" />
-                    </LinearLayout>
-
-                    <!-- Badge placeholder -->
-                    <View
-                        android:layout_width="110dp"
-                        android:layout_height="14dp"
-                        android:layout_gravity="bottom|center_horizontal"
-                        android:layout_marginBottom="82dp"
-                        android:background="#1AFFFFFF" />
-
-                    <!-- Title placeholder -->
-                    <View
-                        android:layout_width="160dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="bottom|center_horizontal"
-                        android:layout_marginBottom="50dp"
-                        android:background="#1AFFFFFF" />
-
-                    <!-- Meta row placeholder -->
-                    <View
-                        android:layout_width="100dp"
-                        android:layout_height="12dp"
-                        android:layout_gravity="bottom|center_horizontal"
-                        android:layout_marginBottom="26dp"
-                        android:background="#1AFFFFFF" />
-
-                </FrameLayout>
+                    android:layout_height="match_parent"
+                    android:background="@drawable/shimmer_rect" />
 
             </com.facebook.shimmer.ShimmerFrameLayout>
 
-
-
-            <!-- HERO BANNER -->
-            <FrameLayout
-                android:id="@+id/heroBannerContainer"
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpTrendingBanner"
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_height="wrap_content"
                 android:visibility="gone"
-                android:clipChildren="false">
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:overScrollMode="never" />
 
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/vpTrendingBanner"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipChildren="false"
-                    android:clipToPadding="false"
-                    android:overScrollMode="never" />
-
-            </FrameLayout>
-
-            <View
-                android:id="@+id/viewBannerFade"
-                android:layout_width="match_parent"
-                android:layout_height="32dp"
-                android:layout_marginTop="-32dp"/>
-
-            <!-- PAGINATION DOTS — gone until banner is ready -->
+            <!-- PAGINATION DOTS -->
             <LinearLayout
                 android:id="@+id/llHeroDots"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="8dp"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:visibility="gone"/>
+                android:orientation="horizontal" />
 
-            <!-- NOW IN THEATERS badge — gone until banner is ready -->
-            <TextView
-                android:id="@+id/tvHeroBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/bg_badge_theaters"
-                android:paddingHorizontal="9dp"
-                android:paddingVertical="3dp"
-                android:text="@string/now_in_theaters"
-                android:textColor="#E57373"
-                android:textSize="@dimen/text_badge"
-                android:letterSpacing="0.09"
-                android:textAllCaps="true"
-                android:textStyle="bold"
-                android:visibility="gone"/>
+        </LinearLayout>
 
-            <!-- MOVIE TITLE — gone until banner is ready -->
-            <TextSwitcher
-                android:id="@+id/tvHeroTitle"
+        <!-- TRENDING SECTION -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="13dp"
+            android:paddingTop="20dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:layout_marginHorizontal="20dp"
-                android:gravity="center"
-                android:visibility="gone"/>
+                android:layout_marginBottom="9dp">
 
-            <!-- Meta row — gone until banner is ready -->
-            <LinearLayout
-                android:id="@+id/llHeroMeta"
-                android:layout_width="wrap_content"
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Overline"
+                    android:layout_width="183dp"
+                    android:layout_height="46dp"
+                    android:drawablePadding="6dp"
+                    android:gravity="fill_vertical"
+                    android:text="@string/home_section_trending"
+                    app:drawableStartCompat="@drawable/ic_flame"
+                    app:drawableTint="@color/accent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTrendingMovies"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_movies"
+                        android:textColor="@color/on_accent"
+                        android:textSize="@dimen/text_badge"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="8dp"
+                        android:minWidth="0dp"
+                        app:backgroundTint="@color/accent"
+                        app:cornerRadius="14dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnTrendingTV"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_tv"
+                        android:textColor="@color/text_3"
+                        android:textSize="@dimen/text_badge"
+                        android:layout_marginStart="4dp"
+                        android:paddingHorizontal="8dp"
+                        android:minWidth="0dp"
+                        app:cornerRadius="14dp"
+                        app:strokeColor="@color/border"
+                        app:strokeWidth="@dimen/hairline" />
+                </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerTrending"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTrending"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="6dp"
-                android:layout_marginBottom="16dp"
-                android:gravity="center_vertical"
+                android:visibility="gone"
                 android:orientation="horizontal"
-                android:visibility="gone">
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/movie_item" />
 
-                <!-- Language -->
+        </LinearLayout>
+
+        <!-- ON AIR / EPISODES -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="13dp"
+            android:paddingTop="20dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="9dp">
+
                 <TextView
-                    android:id="@+id/tvHeroYear"
+                    style="@style/TextAppearance.EMPlay.Overline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="#80FFFFFF"
-                    android:textSize="@dimen/text_meta" />
+                    android:drawablePadding="6dp"
+                    android:gravity="fill_vertical"
+                    android:text="@string/home_section_on_air"
+                    app:drawableStartCompat="@drawable/ic_broadcast"
+                    app:drawableTint="@color/accent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <!-- Dot separator -->
-                <View
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginHorizontal="8dp"
-                    android:background="#40FFFFFF"
-                    android:layerType="software" />
-
-                <!-- Star rating -->
                 <TextView
-                    android:id="@+id/tvHeroRating"
+                    style="@style/TextAppearance.EMPlay.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:drawablePadding="4dp"
-                    android:textColor="#FFD600"
-                    android:textSize="@dimen/text_meta"
-                    android:textStyle="bold" />
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/text_3"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
 
-                <!-- Dot separator before certification — hidden when cert is unavailable -->
-                <View
-                    android:id="@+id/viewCertDot"
-                    android:layout_width="3dp"
-                    android:layout_height="3dp"
-                    android:layout_marginHorizontal="8dp"
-                    android:background="#40FFFFFF"
-                    android:layerType="software"
-                    android:visibility="gone" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- Certification badge (PG-13, R, etc.) — hidden when unavailable -->
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerOnAir"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvOnAir"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        </LinearLayout>
+
+        <!-- TOP RATED / FILMSTRIP (Memorabilia 2) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="20dp">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="13dp"
+                android:layout_marginBottom="9dp">
+
                 <TextView
-                    android:id="@+id/tvHeroCertification"
+                    style="@style/TextAppearance.EMPlay.Overline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_cert_badge"
-                    android:paddingHorizontal="5dp"
-                    android:paddingVertical="2dp"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="@dimen/text_meta"
-                    android:textStyle="bold"
-                    android:visibility="gone" />
+                    android:drawablePadding="6dp"
+                    android:gravity="fill_vertical"
+                    android:text="@string/home_section_top_rated"
+                    app:drawableStartCompat="@drawable/ic_trophy"
+                    app:drawableTint="@color/accent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </LinearLayout>
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/text_3"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/filmstrip"
+                android:paddingVertical="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    tools:ignore="UselessParent">
+
+                    <!-- Top Punch Holes -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="11dp"
+                        android:layout_marginBottom="4dp">
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                    </LinearLayout>
+
+                    <com.facebook.shimmer.ShimmerFrameLayout
+                        android:id="@+id/shimmerTopRated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="11dp"
+                        android:paddingVertical="5dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <include layout="@layout/shimmer_item_filmstrip" />
+                            <include layout="@layout/shimmer_item_filmstrip" />
+                            <include layout="@layout/shimmer_item_filmstrip" />
+                            <include layout="@layout/shimmer_item_filmstrip" />
+                            <include layout="@layout/shimmer_item_filmstrip" />
+
+                        </LinearLayout>
+
+                    </com.facebook.shimmer.ShimmerFrameLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvTopRated"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="11dp"
+                        android:paddingVertical="5dp"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:listitem="@layout/item_filmstrip_movie" />
+
+                    <!-- Bottom Punch Holes -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="11dp"
+                        android:layout_marginTop="4dp">
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                        <View android:layout_width="11dp" android:layout_height="6dp" android:background="@drawable/bg_film_hole" android:layout_marginEnd="11dp"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </FrameLayout>
 
         </LinearLayout>
 
-        <!-- WHAT'S NEW -->
+        <!-- COMING SOON -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            tools:ignore="UseCompoundDrawables">
+            android:orientation="vertical"
+            android:paddingHorizontal="13dp"
+            android:paddingTop="20dp"
+            android:paddingBottom="80dp">
 
-            <ImageView
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="6dp"
-                android:contentDescription="@string/show_icon"
-                app:srcCompat="@drawable/ic_auto_awesome"
-                app:tint="#F5C518" />
-
-            <TextView
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/whats_new"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/text_section_header"
-                android:textStyle="bold" />
+                android:layout_marginBottom="9dp">
+
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Overline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="6dp"
+                    android:gravity="fill_vertical"
+                    android:text="@string/home_section_coming_soon"
+                    app:drawableStartCompat="@drawable/ic_calendar"
+                    app:drawableTint="@color/accent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/text_3"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerUpcomingMovies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvUpcomingMovies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_marginBottom="12dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerUpcomingTV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <include layout="@layout/shimmer_item_poster"
+                        tools:ignore="TooManyViews" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+                    <include layout="@layout/shimmer_item_poster" />
+
+                </LinearLayout>
+
+            </com.facebook.shimmer.ShimmerFrameLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvUpcomingTvShows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
         </LinearLayout>
-
-        <!-- Filter buttons row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnWhatsNewTvShow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:text="@string/tv_show"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/text_chip"
-                android:textStyle="bold"
-                app:backgroundTint="#E50914"
-                app:cornerRadius="20dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnWhatsNewMovie"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/movie"
-                android:textAllCaps="false"
-                android:textColor="#888888"
-                android:textSize="@dimen/text_chip"
-                app:backgroundTint="#1E1E1E"
-                app:cornerRadius="20dp"
-                app:strokeColor="#2A2A2A"
-                app:strokeWidth="1dp" />
-
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/tvWhatsNewSeeAll"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/see_all"
-                android:textColor="#666666"
-                android:textSize="@dimen/text_chip" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvWhatsNew"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:paddingHorizontal="14dp"
-            android:nestedScrollingEnabled="false" />
-
-        <!-- UPCOMING -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingBottom="10dp"
-            tools:ignore="UseCompoundDrawables">
-
-            <ImageView
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="6dp"
-                android:contentDescription="@string/show_icon"
-                app:srcCompat="@drawable/ic_calendar"
-                app:tint="#C98A1A" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/upcoming"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/text_section_header"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/movie"
-                android:textColor="#666666"
-                android:textSize="@dimen/text_chip" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvUpcomingMovies"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:clipToPadding="false"
-            android:paddingHorizontal="14dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/tv_show"
-                android:textColor="#666666"
-                android:textSize="@dimen/text_chip" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvUpcomingTvShows"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:clipToPadding="false"
-            android:paddingHorizontal="14dp" />
 
     </LinearLayout>
 

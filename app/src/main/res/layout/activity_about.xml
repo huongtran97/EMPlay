@@ -57,7 +57,7 @@
                     android:text="@string/emplay"
                     android:textColor="#FFFFFF"
                     android:textSize="@dimen/text_app_name"
-                    android:fontFamily="@font/bebas_neue"
+                    android:fontFamily="@font/playfair_display"
                     android:letterSpacing="0.05" />
 
                 <TextView

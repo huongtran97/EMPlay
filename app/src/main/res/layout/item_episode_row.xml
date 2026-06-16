@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EMPlay · ITEM: Episode Row (TV Detail)
+     Thumbnail with episode number overlay | title/runtime/date | watched checkmark or "in Nd" badge -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <!-- Episode still + number overlay -->
+    <FrameLayout
+        android:layout_width="84dp"
+        android:layout_height="48dp">
+
+        <ImageView
+            android:id="@+id/img_episode_still"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_dark_teal"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop" />
+
+        <!-- Episode number circle -->
+        <TextView
+            android:id="@+id/tv_ep_number"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_ep_number_circle"
+            android:fontFamily="@font/playfair_display"
+            android:gravity="center"
+            android:text="5"
+            android:textColor="@color/text_1"
+            android:textSize="@dimen/text_badge" />
+
+    </FrameLayout>
+
+    <!-- Title + meta -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_ep_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/inter_semibold"
+            android:text="What She Left Behind"
+            android:textColor="@color/text_1"
+            android:textSize="@dimen/text_divider_label" />
+
+        <TextView
+            android:id="@+id/tv_ep_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="52m · May 29"
+            android:textColor="@color/text_3"
+            android:textSize="@dimen/text_badge" />
+
+    </LinearLayout>
+
+    <!-- Watched check -->
+    <ImageView
+        android:id="@+id/ic_watched"
+        android:layout_width="13dp"
+        android:layout_height="13dp"
+        android:contentDescription="@string/cd_watched"
+        android:src="@drawable/ic_check"
+        android:tint="@color/accent"
+        android:visibility="gone" />
+
+    <!-- Days-until badge -->
+    <TextView
+        android:id="@+id/badge_days"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_badge_days_small"
+        android:fontFamily="@font/inter_semibold"
+        android:paddingStart="7dp"
+        android:paddingTop="1dp"
+        android:paddingEnd="7dp"
+        android:paddingBottom="1dp"
+        android:text="In 5d"
+        android:textColor="@color/accent"
+        android:textSize="@dimen/text_caption"
+        android:visibility="gone" />
+
+</LinearLayout>

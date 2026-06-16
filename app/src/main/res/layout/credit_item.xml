@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
-    android:backgroundTint="#1A1A1A"
+    android:backgroundTint="@color/bg_surface"
     cardview:cardCornerRadius="8dp"
     cardview:cardElevation="4dp">
 
@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:contentDescription="@null" />
+            android:contentDescription="@string/cd_actor_photo" />
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

@@ -7,6 +7,7 @@
     android:layout_height="160dp"
     android:layout_margin="5dp"
     android:backgroundTint="@android:color/transparent"
+    android:focusable="true"
     cardview:cardCornerRadius="8dp">
 
     <FrameLayout
@@ -17,6 +18,7 @@
             android:id="@+id/header"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="@string/show_poster"
             android:scaleType="centerCrop" />
 
         <TextView
@@ -28,7 +30,7 @@
             android:background="@drawable/bg_type_badge"
             android:paddingHorizontal="5dp"
             android:paddingVertical="2dp"
-            android:textSize="8sp"
+            android:textSize="@dimen/text_badge"
             android:textStyle="bold"
             android:visibility="gone" />
 

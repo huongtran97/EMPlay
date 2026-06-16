@@ -4,284 +4,415 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#141414"
-    android:scrollbars="none">
+    android:background="@color/bg_base"
+    android:scrollbars="none"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="100dp">
 
-        <LinearLayout
+        <ImageView
+            android:id="@+id/tvBrandName"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_logo_wordmark"
+            android:contentDescription="@string/brand_name"/>
+
+        <!-- Member Card -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/memberCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="20dp"
-            android:paddingBottom="16dp">
+            android:layout_marginHorizontal="13dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_member_card"
+            android:padding="13dp">
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/civAvatar"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/avatar"
-                app:civ_border_width="2dp" />
+            <!-- Simulated Punch Holes -->
+            <View
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginStart="-8dp"
+                android:background="@drawable/bg_member_card"
+                app:backgroundTint="@color/bg_base"
+                app:strokeColor="#66E3B566"
+                app:strokeWidth="0.5dp"
+                android:rotation="45"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <View
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginEnd="-8dp"
+                android:background="@drawable/bg_member_card"
+                app:backgroundTint="@color/bg_base"
+                app:strokeColor="#66E3B566"
+                app:strokeWidth="0.5dp"
+                android:rotation="45"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
-                android:id="@+id/tvProfileName"
+                android:id="@+id/tvClubLabel"
+                style="@style/TextAppearance.EMPlay.DisplaySm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/user_name"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/text_subtitle"
-                android:textStyle="bold" />
+                android:text="@string/profile_club"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/text_badge"
+                android:letterSpacing="0.2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
-                android:id="@+id/tvProfileEmail"
+                android:id="@+id/tvMemberCardLabel"
+                style="@style/TextAppearance.EMPlay.Micro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/user_email"
-                android:textColor="#666666"
-                android:textSize="@dimen/text_divider_label"
-                android:visibility="invisible"/>
+                android:text="@string/profile_member_card"
+                android:textColor="@color/text_3"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- Guest state (shown when not authenticated) -->
+            <LinearLayout
+                android:id="@+id/guestBanner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:visibility="gone"
+                app:layout_constraintTop_toBottomOf="@id/tvClubLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/browsing_as_guest"
+                    android:textColor="@color/text_2"
+                    android:textSize="@dimen/text_meta" />
+
+                <Button
+                    android:id="@+id/btnGuestSignIn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/guest_create_account"
+                    android:textColor="@color/on_accent"
+                    android:textSize="@dimen/text_divider_label"
+                    android:backgroundTint="@color/accent"
+                    android:paddingHorizontal="16dp"
+                    style="@style/Widget.MaterialComponents.Button" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/userInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@id/tvClubLabel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/civAvatar"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:src="@drawable/avatar"
+                    app:civ_border_color="@color/border"
+                    app:civ_border_width="0.5dp" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="11dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvProfileName"
+                        style="@style/TextAppearance.EMPlay.Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/user_name"
+                        android:textColor="@color/text_1"
+                        android:textSize="@dimen/text_chip" />
+
+                    <TextView
+                        android:id="@+id/tvProfileEmail"
+                        style="@style/TextAppearance.EMPlay.Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        tools:text="TMDB · @username"
+                        android:textColor="@color/text_3" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvMemberSince"
+                style="@style/TextAppearance.EMPlay.Micro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/member_since"
-                android:textColor="#666666"
-                android:textSize="@dimen/text_meta" />
+                android:layout_marginTop="11dp"
+                android:text="@string/profile_member_since"
+                android:textColor="@color/text_3"
+                app:layout_constraintTop_toBottomOf="@id/userInfo"
+                app:layout_constraintStart_toStartOf="parent" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#1E1E1E" />
-
+        <!-- Stats Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false"
-            android:orientation="horizontal"
-            android:padding="14dp">
+            android:layout_marginHorizontal="13dp"
+            android:layout_marginTop="11dp"
+            android:background="@drawable/bg_member_card"
+            app:backgroundTint="@color/bg_surface"
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@drawable/bg_stat_box"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp">
-
+                android:paddingVertical="10dp">
                 <TextView
                     android:id="@+id/tvMoviesCount"
+                    style="@style/TextAppearance.EMPlay.DisplaySm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/zero"
-                    android:textColor="#FFFFFF"
-                    android:textSize="@dimen/text_section_header"
-                    android:textStyle="bold" />
-
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_body" />
                 <TextView
+                    style="@style/TextAppearance.EMPlay.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="@string/movies_saved"
-                    android:textColor="#666666"
-                    android:textSize="@dimen/text_meta" />
-
+                    android:text="@string/stat_watchlist"
+                    android:textColor="@color/text_3" />
             </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/line_ticket_dash"
+                android:alpha="0.3" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_stat_box"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp">
-
+                android:paddingVertical="10dp">
                 <TextView
                     android:id="@+id/tvTvShowsCount"
+                    style="@style/TextAppearance.EMPlay.DisplaySm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/zero"
-                    android:textColor="#FFFFFF"
-                    android:textSize="@dimen/text_section_header"
-                    android:textStyle="bold" />
-
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_body" />
                 <TextView
+                    style="@style/TextAppearance.EMPlay.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="@string/tv_shows_saved"
-                    android:textColor="#666666"
-                    android:textSize="@dimen/text_meta" />
-
+                    android:text="@string/stat_favorites"
+                    android:textColor="@color/text_3" />
             </LinearLayout>
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@drawable/line_ticket_dash"
+                android:alpha="0.3" />
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_stat_box"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:padding="10dp">
-
+                android:paddingVertical="10dp">
                 <TextView
                     android:id="@+id/tvTopGenre"
+                    style="@style/TextAppearance.EMPlay.DisplaySm"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/genre"
-                    android:textColor="#E50914"
-                    android:textSize="@dimen/text_chip"
-                    android:textStyle="bold" />
-
+                    android:text="@string/stat_no_data"
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_body" />
                 <TextView
+                    style="@style/TextAppearance.EMPlay.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="@string/top_genre"
-                    android:textColor="#666666"
-                    android:textSize="@dimen/text_meta" />
-
+                    android:text="@string/stat_rated"
+                    android:textColor="@color/text_3" />
             </LinearLayout>
 
         </LinearLayout>
 
+        <!-- Taste Profile (Hidden for now to match layout compatibility) -->
         <LinearLayout
             android:id="@+id/llTasteProfileHeader"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingBottom="10dp"
-            tools:ignore="UseCompoundDrawables">
-
-            <ImageView
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="6dp"
-                android:contentDescription="@string/show_icon"
-                android:src="@drawable/ic_bar_chart"
-                app:tint="#5BA3D9" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/taste_profile"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/text_section_header"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
+            android:layout_height="1dp"
+            android:visibility="gone"
+            android:orientation="horizontal" />
         <LinearLayout
             android:id="@+id/llTasteProfile"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:orientation="vertical"
-            android:paddingHorizontal="14dp" />
+            android:layout_height="1dp"
+            android:visibility="gone"
+            android:orientation="vertical" />
 
-        <LinearLayout
+        <!-- Recently Saved Section -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="14dp"
-            android:paddingBottom="10dp">
-
-            <ImageView
-                android:layout_width="15dp"
-                android:layout_height="15dp"
-                android:layout_marginEnd="6dp"
-                android:contentDescription="@string/show_icon"
-                android:src="@drawable/ic_watchlist"
-                app:tint="#C98A1A" />
+            android:paddingHorizontal="13dp"
+            android:layout_marginTop="14dp"
+            android:layout_marginBottom="8dp">
 
             <TextView
-                android:layout_width="0dp"
+                style="@style/TextAppearance.EMPlay.Micro"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/recently_saved"
-                android:textColor="#FFFFFF"
-                android:textSize="@dimen/text_section_header"
-                android:textStyle="bold" />
+                android:text="@string/mylist_title"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
 
             <TextView
                 android:id="@+id/tvRecentlySavedSeeAll"
+                style="@style/TextAppearance.EMPlay.Caption"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/see_all"
-                android:textColor="#666666"
-                android:textSize="@dimen/text_badge" />
+                android:text="@string/action_see_all"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvRecentlySaved"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="14dp"
-            android:paddingHorizontal="14dp"
-            android:clipToPadding="false" />
+            android:nestedScrollingEnabled="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
+        <!-- Settings List -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="14dp"
-            android:layout_marginBottom="16dp"
-            android:background="@drawable/bg_setting_container"
+            android:layout_marginHorizontal="13dp"
+            android:layout_marginTop="8dp"
             android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/llTheme"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingVertical="11dp"
+                android:paddingHorizontal="1dp">
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:src="@drawable/ic_moon"
+                    app:tint="@color/text_2"
+                    android:contentDescription="@null" />
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="@string/settings_theme"
+                    android:textColor="@color/text_2"
+                    android:textSize="@dimen/text_divider_label" />
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_deep_blue"
+                    android:textColor="@color/text_3" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="@dimen/hairline" android:background="@color/border" android:alpha="0.3" />
 
             <LinearLayout
                 android:id="@+id/llAbout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="13dp">
+                android:orientation="vertical"
+                android:paddingHorizontal="1dp">
 
-                <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/show_icon"
-                    android:src="@drawable/ic_info"
-                    app:tint="#666666" />
-
-                <TextView
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/about"
-                    android:textColor="#CCCCCC"
-                    android:textSize="@dimen/text_body" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="11dp">
+                    <ImageView
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:src="@drawable/ic_info"
+                        app:tint="@color/text_2"
+                        android:contentDescription="@null" />
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="@string/about"
+                        android:textColor="@color/text_2"
+                        android:textSize="@dimen/text_divider_label" />
+                </LinearLayout>
 
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:contentDescription="@string/show_icon"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="#333333" />
+                <!-- TMDB attribution — mandatory per §10.1 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingBottom="11dp">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="18dp"
+                        android:src="@drawable/tmdb_logo1"
+                        android:scaleType="fitStart"
+                        android:contentDescription="@string/tmdb" />
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Micro"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/tmdb_data_attribution"
+                        android:textColor="@color/text_3" />
+                </LinearLayout>
 
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#1E1E1E" />
+            <View android:layout_width="match_parent" android:layout_height="@dimen/hairline" android:background="@color/border" android:alpha="0.3" />
+            <View android:id="@+id/dividerDeleteAccount" android:layout_width="match_parent" android:layout_height="@dimen/hairline" android:background="@color/border" android:alpha="0.3" />
 
             <LinearLayout
                 android:id="@+id/llLogout"
@@ -289,32 +420,25 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="13dp"
+                android:paddingVertical="11dp"
+                android:paddingHorizontal="1dp"
                 tools:ignore="UseCompoundDrawables">
-
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/show_icon"
-                    android:src="@drawable/logout"
-                    app:tint="#E05555" />
-
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:src="@drawable/ic_sign_out"
+                    app:tint="@color/error"
+                    android:contentDescription="@null" />
                 <TextView
                     android:id="@+id/tvLogoutLabel"
-                    android:layout_width="wrap_content"
+                    style="@style/TextAppearance.EMPlay.Label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/log_out"
-                    android:textColor="#E05555"
-                    android:textSize="@dimen/text_body" />
-
+                    android:layout_marginStart="12dp"
+                    android:text="@string/action_sign_out"
+                    android:textColor="@color/error"
+                    android:textSize="@dimen/text_divider_label" />
             </LinearLayout>
-
-            <View
-                android:id="@+id/dividerDeleteAccount"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#1E1E1E" />
 
             <LinearLayout
                 android:id="@+id/llDeleteAccount"
@@ -322,24 +446,22 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:padding="13dp"
-                tools:ignore="UseCompoundDrawables">
-
+                android:paddingVertical="11dp"
+                android:paddingHorizontal="1dp">
                 <ImageView
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_marginEnd="12dp"
-                    android:contentDescription="@string/show_icon"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
                     android:src="@drawable/ic_delete"
-                    app:tint="#444444" />
-
+                    app:tint="@color/text_3"
+                    android:contentDescription="@null" />
                 <TextView
-                    android:layout_width="wrap_content"
+                    style="@style/TextAppearance.EMPlay.Label"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
                     android:text="@string/delete_account"
-                    android:textColor="#555555"
-                    android:textSize="@dimen/text_body" />
-
+                    android:textColor="@color/text_3"
+                    android:textSize="@dimen/text_divider_label" />
             </LinearLayout>
 
         </LinearLayout>

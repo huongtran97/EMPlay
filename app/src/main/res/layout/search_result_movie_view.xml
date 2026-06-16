@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/search_result_fragment">
@@ -8,7 +9,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#141414">
+        android:background="@color/bg_base">
 
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollView"
@@ -24,111 +25,80 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="24dp">
+                android:paddingBottom="100dp">
 
-                <!-- Movie info card (bound directly via ViewBinding) -->
+                <!-- Movie info card -->
                 <include
                     android:id="@+id/movie_info"
                     layout="@layout/movie_information"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
-                <!-- Divider -->
-                <View
-                    android:id="@+id/view"
+                <!-- Cast Header -->
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginTop="20dp"
-                    android:background="#2E2E2E" />
-
-                <!-- Cast label -->
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/cast"
-                    android:textColor="#777777"
-                    android:textSize="@dimen/text_section_header"
-                    android:letterSpacing="0.15"
-                    android:fontFamily="sans-serif-medium" />
+                    android:paddingHorizontal="13dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="9dp">
+
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/detail_section_cast"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/detail_all_cast"
+                        android:textColor="@color/text_3"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <!-- Cast RecyclerView -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/search_result_cast_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     android:clipToPadding="false"
-                    android:scrollbars="none"
-                    android:background="#141414"/>
+                    android:scrollbars="none" />
 
-                <!-- Divider -->
-                <View
-                    android:id="@+id/view2"
+                <!-- Suggestion Header -->
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginEnd="20dp"
-                    android:layout_marginTop="20dp"
-                    android:background="#2E2E2E" />
-
-                <!-- Suggestion label -->
-                <TextView
-                    android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/you_might_also_like"
-                    android:textColor="#777777"
-                    android:textSize="@dimen/text_section_header"
-                    android:letterSpacing="0.15"
-                    android:fontFamily="sans-serif-medium" />
+                    android:paddingHorizontal="13dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="9dp">
 
-                <!-- Suggestion Pagination Bar -->
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/detail_section_also_like"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Suggestion Pagination Bar (Stub for compatibility) -->
                 <LinearLayout
                     android:id="@+id/suggestion_pagination_bar"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
+                    android:layout_height="1dp"
                     android:visibility="gone">
-
-                    <ImageButton
-                        android:id="@+id/suggestion_btn_prev"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/ic_arrow_back"
-                        android:background="@drawable/rounded_btn_bg"
-                        android:contentDescription="@string/pre_page"
-                        android:enabled="false" />
-
-                    <TextView
-                        android:id="@+id/suggestion_page_indicator"
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:textColor="#888888"
-                        android:textSize="@dimen/text_meta" />
-
-                    <ImageButton
-                        android:id="@+id/suggestion_btn_next"
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:src="@drawable/ic_arrow_forward"
-                        android:background="@drawable/rounded_btn_bg"
-                        android:contentDescription="@string/next_page" />
-
+                    <TextView android:id="@+id/suggestion_page_indicator" android:layout_width="1dp" android:layout_height="1dp"/>
+                    <ImageButton android:id="@+id/suggestion_btn_prev" android:layout_width="1dp" android:layout_height="1dp" android:contentDescription="@null"/>
+                    <ImageButton android:id="@+id/suggestion_btn_next" android:layout_width="1dp" android:layout_height="1dp" android:contentDescription="@null"/>
                 </LinearLayout>
 
                 <!-- Suggestion RecyclerView -->
@@ -136,10 +106,10 @@
                     android:id="@+id/search_result_suggestion_recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:background="#141414"/>
-
-
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false" />
 
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

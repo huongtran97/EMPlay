@@ -2,11 +2,11 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="104dp"
-    android:layout_height="62dp"
+    android:layout_width="80dp"
+    android:layout_height="72dp"
     android:layout_marginEnd="8dp"
-    app:cardBackgroundColor="@color/bg_surface"
-    app:cardCornerRadius="11dp"
+    app:cardBackgroundColor="@color/surface_high"
+    app:cardCornerRadius="@dimen/radius_m"
     app:cardElevation="0dp"
     app:strokeColor="@color/border"
     app:strokeWidth="@dimen/hairline">
@@ -17,30 +17,32 @@
 
         <TextView
             android:id="@+id/tvGhostGlyph"
-            style="@style/TextAppearance.EMPlay.DisplayLg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="-4dp"
-            android:layout_marginBottom="-16dp"
+            android:alpha="0.05"
+            android:fontFamily="sans-serif"
             android:textColor="@color/text_1"
-            android:alpha="0.06"
-            android:textSize="54sp"
+            android:textSize="@dimen/text_hero_s"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="한" />
 
         <TextView
             android:id="@+id/tvOriginName"
-            style="@style/TextAppearance.EMPlay.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:fontFamily="@font/inter"
+            android:textAllCaps="true"
             android:textColor="@color/text_1"
-            android:textSize="13sp"
+            android:textSize="@dimen/text_badge"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="Korean" />
+            tools:text="KOREAN" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

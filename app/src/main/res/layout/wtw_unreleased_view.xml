@@ -67,7 +67,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/text_countdown"
                 android:textStyle="bold"
-                android:fontFamily="@font/bebas_neue"
+                android:fontFamily="@font/inter"
                 android:letterSpacing="0.03"
                 tools:text="06" />
             <TextView
@@ -78,7 +78,7 @@
                 android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.12"
                 android:layout_marginTop="3dp"
-                android:fontFamily="@font/bebas_neue" />
+                android:fontFamily="@font/inter" />
         </LinearLayout>
 
         <LinearLayout
@@ -98,7 +98,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/text_countdown"
                 android:textStyle="bold"
-                android:fontFamily="@font/bebas_neue"
+                android:fontFamily="@font/inter"
                 android:letterSpacing="0.03"
                 tools:text="01" />
             <TextView
@@ -109,7 +109,7 @@
                 android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.12"
                 android:layout_marginTop="3dp"
-                android:fontFamily="@font/bebas_neue" />
+                android:fontFamily="@font/inter" />
         </LinearLayout>
 
         <LinearLayout
@@ -129,7 +129,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/text_countdown"
                 android:textStyle="bold"
-                android:fontFamily="@font/bebas_neue"
+                android:fontFamily="@font/inter"
                 android:letterSpacing="0.03"
                 tools:text="16" />
             <TextView
@@ -140,7 +140,7 @@
                 android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.12"
                 android:layout_marginTop="3dp"
-                android:fontFamily="@font/bebas_neue" />
+                android:fontFamily="@font/inter" />
         </LinearLayout>
 
         <LinearLayout
@@ -159,7 +159,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="@dimen/text_countdown"
                 android:textStyle="bold"
-                android:fontFamily="@font/bebas_neue"
+                android:fontFamily="@font/inter"
                 android:letterSpacing="0.03"
                 tools:text="36" />
             <TextView
@@ -170,7 +170,7 @@
                 android:textSize="@dimen/text_badge"
                 android:letterSpacing="0.12"
                 android:layout_marginTop="3dp"
-                android:fontFamily="@font/bebas_neue" />
+                android:fontFamily="@font/inter" />
         </LinearLayout>
 
     </LinearLayout>

@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:fontFamily="@font/bebas_neue"
+        android:fontFamily="@font/playfair_display"
         android:text="@string/policy"
         android:textColor="#FFFFFF"
         android:textSize="@dimen/text_title" />

@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#141414">
+    android:background="@color/bg_base">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -15,198 +15,188 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:paddingBottom="100dp">
 
-            <!-- Profile Image + info -->
-            <LinearLayout
+            <!-- Back Button -->
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_circle_dark"
+                app:backgroundTint="#B30B0F19"
+                android:src="@drawable/ic_chevron_left"
+                app:tint="@color/text_1"
+                android:scaleType="centerInside"
+                android:contentDescription="@string/cd_back" />
+
+            <!-- Header: Profile + Initial Ghost Glyph -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="20dp">
+                android:paddingHorizontal="13dp">
 
-                <ImageView
+                <TextView
+                    android:id="@+id/tvGhostGlyph"
+                    style="@style/TextAppearance.EMPlay.DisplayLg"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:alpha="0.05"
+                    android:textSize="@dimen/text_hero_l"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Z" />
+
+                <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/cast_detail_image"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:contentDescription="@string/show_poster"/>
+                    android:layout_width="74dp"
+                    android:layout_height="74dp"
+                    android:scaleType="centerCrop"
+                    android:contentDescription="@string/cd_actor_photo"
+                    android:background="@color/bg_surface"
+                    app:shapeAppearanceOverlay="@style/EMPlay.Circle"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    tools:src="@tools:sample/avatars" />
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="13dp"
                     android:orientation="vertical"
-                    android:gravity="center_vertical">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/cast_detail_image"
+                    app:layout_constraintTop_toTopOf="@id/cast_detail_image"
+                    app:layout_constraintBottom_toBottomOf="@id/cast_detail_image">
 
                     <TextView
                         android:id="@+id/cast_detail_name"
+                        style="@style/TextAppearance.EMPlay.DisplayLg"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:fontFamily="@font/bebas_neue"
-                        android:textColor="#FFFFFF"
-                        android:textSize="@dimen/text_subtitle"/>
+                        android:textColor="@color/text_1"
+                        android:textSize="@dimen/text_headline"
+                        tools:text="Zendaya" />
 
                     <TextView
-                        android:id="@+id/cast_detail_department"
+                        android:id="@+id/cast_detail_meta"
+                        style="@style/TextAppearance.EMPlay.Caption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:fontFamily="sans-serif"
-                        android:textColor="#E53935"
-                        android:textSize="@dimen/text_meta"/>
-
-                    <TextView
-                        android:id="@+id/cast_detail_birthday"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:fontFamily="sans-serif"
-                        android:textColor="#888888"
-                        android:textSize="@dimen/text_meta"/>
-
-                    <TextView
-                        android:id="@+id/cast_detail_place"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:fontFamily="sans-serif"
-                        android:textColor="#888888"
-                        android:textSize="@dimen/text_meta"/>
+                        android:lineSpacingMultiplier="1.5"
+                        tools:text="Acting · Born Sep 1, 1996\nOakland, California" />
 
                 </LinearLayout>
 
-            </LinearLayout>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:background="#1E1E1E"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Biography -->
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="8dp">
-
-                <TextView
-                    android:id="@+id/biography_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/bio"
-                    android:textColor="#777777"
-                    android:textSize="@dimen/text_badge"
-                    android:letterSpacing="0.15"
-                    android:fontFamily="sans-serif-medium"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"/>
+                android:orientation="vertical"
+                android:paddingHorizontal="13dp"
+                android:paddingTop="16dp">
 
                 <TextView
                     android:id="@+id/cast_detail_biography"
-                    android:layout_width="0dp"
+                    style="@style/TextAppearance.EMPlay.Body"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="20dp"
-                    android:fontFamily="sans-serif"
-                    android:lineSpacingExtra="4dp"
-                    android:textColor="#BBBBBB"
-                    android:textSize="@dimen/text_meta"
                     android:maxLines="4"
                     android:ellipsize="end"
-                    android:breakStrategy="high_quality"
-                    android:hyphenationFrequency="full"
-                    android:justificationMode="inter_word"
-                    tools:targetApi="o"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/biography_title"/>
+                    tools:text="American actress and singer..." />
 
                 <TextView
                     android:id="@+id/read_more_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="12dp"
-                    android:text="@string/read_more"
-                    android:textColor="#E53935"
+                    android:text="@string/cast_more"
+                    android:textColor="@color/accent"
                     android:textSize="@dimen/text_divider_label"
                     android:textStyle="bold"
-                    android:visibility="gone"
-                    app:layout_constraintStart_toStartOf="@id/cast_detail_biography"
-                    app:layout_constraintTop_toBottomOf="@id/cast_detail_biography"/>
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    android:visibility="gone" />
 
-            <!-- Divider -->
-            <View
+            </LinearLayout>
+
+            <!-- Known For -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginTop="8dp"
-                android:background="#1E1E1E"/>
-
-            <!-- Known for -->
-            <TextView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/credit"
-                android:textColor="#777777"
-                android:textSize="@dimen/text_badge"
-                android:letterSpacing="0.15"
-                android:fontFamily="sans-serif-medium"/>
+                android:paddingHorizontal="13dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="9dp">
+
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Micro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cast_known_for"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/cast_detail_credits_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"/>
-
-            <!-- "Known For" pagination bar -->
-            <LinearLayout
-                android:id="@+id/credits_pagination_bar"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                android:clipToPadding="false"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:visibility="gone">
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/credit_item" />
 
-                <ImageButton
-                    android:id="@+id/credits_btn_prev"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:background="@drawable/rounded_btn_bg"
-                    android:contentDescription="@string/pre_page"
-                    android:enabled="false" />
+            <!-- Filmography -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="13dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="6dp">
+
+                <TextView
+                    style="@style/TextAppearance.EMPlay.Micro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cast_filmography"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/credits_page_indicator"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    style="@style/TextAppearance.EMPlay.Caption"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:textColor="#888888"
-                    android:textSize="@dimen/text_meta" />
+                    android:textColor="@color/text_3"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="42 titles ›" />
 
-                <ImageButton
-                    android:id="@+id/credits_btn_next"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:src="@drawable/ic_arrow_forward"
-                    android:background="@drawable/rounded_btn_bg"
-                    android:contentDescription="@string/next_page" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFilmography"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="13dp"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_filmography" />
+
+            <!-- Stub Pagination Bar -->
+            <LinearLayout
+                android:id="@+id/credits_pagination_bar"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:visibility="gone">
+                <ImageButton android:id="@+id/credits_btn_prev" android:layout_width="1dp" android:layout_height="1dp" android:contentDescription="@null"/>
+                <ImageButton android:id="@+id/credits_btn_next" android:layout_width="1dp" android:layout_height="1dp" android:contentDescription="@null"/>
             </LinearLayout>
 
         </LinearLayout>

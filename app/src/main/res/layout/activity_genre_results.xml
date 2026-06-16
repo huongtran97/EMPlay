@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- EMPlay · GENRE RESULTS VIEW
+     Eyebrow + title, Movies/TV chips, sort chips, 3-column poster grid -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_base">
+
+    <!-- Watermark ghost letter (decorative) -->
+    <TextView
+        android:id="@+id/tv_watermark_letter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:alpha="0.045"
+        android:fontFamily="@font/playfair_display_medium"
+        android:text="S"
+        android:textColor="@color/text_1"
+        android:textSize="@dimen/text_hero_l" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Back button -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btn_back"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_back_button"
+                android:contentDescription="@string/cd_back"
+                android:src="@drawable/ic_chevron_left" />
+
+        </FrameLayout>
+
+        <!-- Eyebrow + category title -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="50dp"
+            android:paddingEnd="13dp"
+            android:paddingBottom="13dp">
+
+            <TextView
+                android:id="@+id/tv_eyebrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:fontFamily="@font/inter_semibold"
+                android:letterSpacing="0.18"
+                android:text="@string/eyebrow_genre"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/text_caption" />
+
+            <TextView
+                android:id="@+id/tv_category_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/playfair_display"
+                android:text="Science Fiction"
+                android:textColor="@color/text_1"
+                android:textSize="@dimen/text_subtitle" />
+
+        </LinearLayout>
+
+        <!-- Movies / TV + Filters row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingBottom="13dp">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/chip_movies"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_chip_active"
+                    android:paddingStart="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="2dp"
+                    android:text="@string/label_movies"
+                    android:textColor="@color/on_accent"
+                    android:textSize="@dimen/text_badge" />
+
+                <TextView
+                    android:id="@+id/chip_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_chip_inactive"
+                    android:paddingStart="8dp"
+                    android:paddingTop="1dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="1dp"
+                    android:text="@string/label_tv"
+                    android:textColor="@color/text_2"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_filters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_adjustments"
+                    android:tint="@color/text_2" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:text="@string/action_filters"
+                    android:textColor="@color/text_2"
+                    android:textSize="@dimen/text_badge" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Sort chips -->
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="13dp"
+            android:paddingBottom="10dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/row_sort_chips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+
+        </HorizontalScrollView>
+
+        <!-- 3-column poster grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_results"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingBottom="24dp" />
+
+    </LinearLayout>
+
+</FrameLayout>
