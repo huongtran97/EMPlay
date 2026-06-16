@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -17,7 +16,6 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -29,7 +27,7 @@ public class TopRatedMovieAdapter extends RecyclerView.Adapter<TopRatedMovieAdap
     private final OnMovieClickListener listener;
 
     public interface OnMovieClickListener {
-        void onMovieClick(MovieModel movie);
+        void onMovieClick(MovieModel movie, View sharedElement);
     }
 
     public TopRatedMovieAdapter(Context context, List<MovieModel> movies, OnMovieClickListener listener) {
@@ -51,7 +49,7 @@ public class TopRatedMovieAdapter extends RecyclerView.Adapter<TopRatedMovieAdap
         MovieModel movie = movies.get(position);
 
         Glide.with(context)
-                .load(ImageUrl.POSTER + movie.getPosterPath())
+                .load(ImageUrl.of(ImageUrl.POSTER, movie.getPosterPath()))
                 .placeholder(R.drawable.bg_poster_placeholder)
                 .into(holder.ivPoster);
 
@@ -62,7 +60,8 @@ public class TopRatedMovieAdapter extends RecyclerView.Adapter<TopRatedMovieAdap
                 ? movie.getReleaseDate().substring(0, 4) : "";
         holder.tvMeta.setText(String.format(Locale.getDefault(), "%s · ★ %.1f", year, movie.getVoteAverage()));
 
-        holder.itemView.setOnClickListener(v -> listener.onMovieClick(movie));
+        holder.ivPoster.setTransitionName("poster_" + movie.getMovieId());
+        holder.itemView.setOnClickListener(v -> listener.onMovieClick(movie, holder.ivPoster));
     }
 
     @Override

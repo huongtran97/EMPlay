@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.adapter.tvshow;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,36 +20,25 @@ import java.util.Objects;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
-import emplay.entertainment.emplay.api.common.TMDBpath;
-import emplay.entertainment.emplay.api.tvshow.TVShowDetailsResponse;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
-import emplay.entertainment.emplay.tool.BadgeHelper;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.ViewHolder> {
-
     private final Context context;
     private final List<TVShowModel> tvShowList;
-    private final MovieApiService apiService;
     private final OnItemClickListener listener;
     private final int maxItems;
 
     public interface OnItemClickListener {
-        void onItemClick(TVShowModel tvShow);
+        void onItemClick(TVShowModel tvShow, View sharedElement);
     }
 
-    public WhatsNewTVAdapter(Context context, List<TVShowModel> tvShowList,
-                             MovieApiService apiService, OnItemClickListener listener) {
+    public WhatsNewTVAdapter(Context context, List<TVShowModel> tvShowList, MovieApiService apiService, OnItemClickListener listener) {
         this(context, tvShowList, apiService, listener, Integer.MAX_VALUE);
     }
 
-    public WhatsNewTVAdapter(Context context, List<TVShowModel> tvShowList,
-                             MovieApiService apiService, OnItemClickListener listener, int maxItems) {
+    public WhatsNewTVAdapter(Context context, List<TVShowModel> tvShowList, MovieApiService apiService, OnItemClickListener listener, int maxItems) {
         this.context = context;
         this.tvShowList = tvShowList;
-        this.apiService = apiService;
         this.listener = listener;
         this.maxItems = maxItems;
     }
@@ -62,159 +50,41 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
         return new ViewHolder(view);
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TVShowModel tvShow = tvShowList.get(position);
-        holder.tvTitle.setText(tvShow.getName());
-
-        String firstAirDate = tvShow.getFirstAirDate();
-        if (maxItems == Integer.MAX_VALUE) {
-            BadgeHelper.applyWhatsNewTVBadge(holder.tvBadge, firstAirDate, tvShow.getNextEpisodeExists());
-        } else {
-            BadgeHelper.applyTVStatusBadge(holder.tvBadge, firstAirDate, tvShow.getNextEpisodeExists());
-        }
-
-        String type = BadgeHelper.getTVShowType(firstAirDate);
-
-        String dateForMeta = tvShow.getDisplayDate() != null ? tvShow.getDisplayDate() : firstAirDate;
-        String rel = BadgeHelper.formatRelativeDate(dateForMeta);
-        String seasonInfo = tvShow.getDisplaySeasonInfo();
-        String meta;
-        if (seasonInfo != null) {
-            meta = seasonInfo;
-        } else if (maxItems != Integer.MAX_VALUE) {
-            meta = (firstAirDate != null && firstAirDate.length() >= 4) ? firstAirDate.substring(0, 4) : "";
-        } else {
-            meta = "";
-        }
-        if (!rel.isEmpty()) meta += " · " + rel;
-        holder.tvMeta.setText(meta);
-
-        String imageUrl;
-        if (tvShow.getDisplayImagePath() != null) {
-            imageUrl = tvShow.getDisplayImagePath();
-        } else {
-            imageUrl = ImageUrl.THUMBNAIL + tvShow.getBackdropPath();
-        }
-        // Fetch details to get next_episode_to_air (for badge) and updated image/meta.
-        // Removal of stale items only happens in the "see all" view.
-        if (!tvShow.isDetailsFetched()) {
-            fetchDetails(tvShow, type);
-        }
 
         Glide.with(context)
-                .load(imageUrl)
+                .load(ImageUrl.of(ImageUrl.CARD, tvShow.getBackdropPath()))
                 .placeholder(R.drawable.bg_poster_placeholder)
                 .into(holder.ivThumb);
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(tvShow));
-    }
+        holder.tvTitle.setText(tvShow.getName());
+        holder.tvMeta.setText(tvShow.getFirstAirDate());
 
-    private void fetchDetails(TVShowModel tvShow, String type) {
-        tvShow.setDetailsFetched(true);
-        apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvShow.getTVShowId()))
-                .enqueue(new Callback<TVShowDetailsResponse>() {
-                    @Override
-                    public void onResponse(@NonNull Call<TVShowDetailsResponse> call,
-                                           @NonNull Response<TVShowDetailsResponse> response) {
-                        if (!response.isSuccessful() || response.body() == null) return;
-                        TVShowDetailsResponse details = response.body();
-
-                        // Always store next_episode_to_air so the badge can show the correct state
-                        tvShow.setNextEpisodeExists(details.getNext_episode_to_air() != null);
-
-                        if ("SEASON".equals(type)) {
-                            List<TVShowDetailsResponse.Season> seasons = details.getSeasons();
-                            if (seasons != null) {
-                                TVShowDetailsResponse.Season latest = null;
-                                for (TVShowDetailsResponse.Season s : seasons) {
-                                    if (s.getSeason_number() > 0 && s.getPoster_path() != null) {
-                                        if (latest == null || s.getSeason_number() > latest.getSeason_number()) {
-                                            latest = s;
-                                        }
-                                    }
-                                }
-                                if (latest != null) {
-                                    if (maxItems == Integer.MAX_VALUE
-                                            && !BadgeHelper.isNotOlderThan(latest.getAir_date(), 30)) {
-                                        int pos = tvShowList.indexOf(tvShow);
-                                        if (pos != -1) { tvShowList.remove(pos); notifyItemRemoved(pos); }
-                                        return;
-                                    }
-                                    tvShow.setDisplayImagePath(ImageUrl.POSTER + latest.getPoster_path());
-                                    String airDate = latest.getAir_date();
-                                    if (airDate != null) {
-                                        tvShow.setDisplayDate(airDate);
-                                        if (maxItems == Integer.MAX_VALUE) {
-                                            tvShow.setDisplaySeasonInfo("S" + latest.getSeason_number());
-                                        } else {
-                                            String year = airDate.length() >= 4 ? airDate.substring(0, 4) : "";
-                                            tvShow.setDisplaySeasonInfo(year + " · S" + latest.getSeason_number());
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            TVShowDetailsResponse.LastEpisodeToAir ep = details.getLast_episode_to_air();
-                            if (ep != null) {
-                                if (maxItems == Integer.MAX_VALUE
-                                        && !BadgeHelper.isNotOlderThan(ep.getAir_date(), 30)) {
-                                    int pos = tvShowList.indexOf(tvShow);
-                                    if (pos != -1) { tvShowList.remove(pos); notifyItemRemoved(pos); }
-                                    return;
-                                }
-                                if (ep.getStill_path() != null) {
-                                    tvShow.setDisplayImagePath(ImageUrl.THUMBNAIL + ep.getStill_path());
-                                }
-                                String airDate = ep.getAir_date();
-                                if (airDate != null) {
-                                    if (maxItems == Integer.MAX_VALUE) {
-                                        tvShow.setDisplaySeasonInfo("S" + ep.getSeason_number());
-                                    } else {
-                                        String year = airDate.length() >= 4 ? airDate.substring(0, 4) : "";
-                                        tvShow.setDisplaySeasonInfo(year + " · S" + ep.getSeason_number());
-                                    }
-                                    tvShow.setDisplayDate(airDate);
-                                }
-                            }
-                        }
-
-                        int pos = tvShowList.indexOf(tvShow);
-                        if (pos != -1) notifyItemChanged(pos);
-                    }
-
-                    @Override
-                    public void onFailure(@NonNull Call<TVShowDetailsResponse> call, @NonNull Throwable t) {
-                        // keep defaults
-                    }
-                });
+        holder.ivThumb.setTransitionName("poster_" + tvShow.getTVShowId());
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(tvShow, holder.ivThumb));
     }
 
     @Override
     public int getItemCount() {
-        return tvShowList.size();
+        return Math.min(tvShowList.size(), maxItems);
     }
 
-    public void updateData(List<TVShowModel> newList) {
-        List<TVShowModel> capped = newList != null
-                ? new ArrayList<>(newList.subList(0, Math.min(newList.size(), maxItems)))
-                : new ArrayList<>();
-        List<TVShowModel> oldList = new ArrayList<>(tvShowList);
+    public void updateData(List<TVShowModel> newData) {
+        List<TVShowModel> oldData = new ArrayList<>(tvShowList);
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return oldList.size(); }
-            @Override public int getNewListSize() { return capped.size(); }
+            @Override public int getOldListSize() { return oldData.size(); }
+            @Override public int getNewListSize() { return newData != null ? newData.size() : 0; }
             @Override public boolean areItemsTheSame(int o, int n) {
-                return oldList.get(o).getTVShowId() == capped.get(n).getTVShowId();
+                return oldData.get(o).getTVShowId() == newData.get(n).getTVShowId();
             }
             @Override public boolean areContentsTheSame(int o, int n) {
-                TVShowModel a = oldList.get(o), b = capped.get(n);
-                return Objects.equals(a.getName(), b.getName())
-                        && Objects.equals(a.getPosterPath(), b.getPosterPath());
+                return Objects.equals(oldData.get(o).getName(), newData.get(n).getName());
             }
         });
         tvShowList.clear();
-        tvShowList.addAll(capped);
+        if (newData != null) tvShowList.addAll(newData);
         diff.dispatchUpdatesTo(this);
     }
 
@@ -224,10 +94,10 @@ public class WhatsNewTVAdapter extends RecyclerView.Adapter<WhatsNewTVAdapter.Vi
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivThumb = itemView.findViewById(R.id.ivEpisodeThumb);
-            tvTitle = itemView.findViewById(R.id.tvShowTitle);
-            tvMeta = itemView.findViewById(R.id.tvEpisodeMeta);
-            tvBadge = itemView.findViewById(R.id.tvEpisodeBadge);
+            ivThumb = itemView.findViewById(R.id.ivThumb);
+            tvTitle = itemView.findViewById(R.id.tvTitle);
+            tvMeta = itemView.findViewById(R.id.tvMeta);
+            tvBadge = itemView.findViewById(R.id.tvBadge);
         }
     }
 }
