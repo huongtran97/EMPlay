@@ -20,6 +20,11 @@ public class WatchProviderHelper {
         void onRegionSelected(String regionCode);
     }
 
+    public static String defaultRegion() {
+        String country = Locale.getDefault().getCountry();
+        return (country != null && !country.isEmpty()) ? country.toUpperCase(Locale.ROOT) : "US";
+    }
+
     public static void showRegionPicker(Context context, Map<String, RegionProvidersModel> providerResults, RegionSelectedListener listener) {
         if (providerResults == null || providerResults.isEmpty()) return;
         

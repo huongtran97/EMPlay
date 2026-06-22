@@ -460,7 +460,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                            @NonNull Response<TVShowProviderResponse> response) {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
                         watchProviderResults = response.body().getResults();
-                        bindTVProviders("CA");
+                        bindTVProviders(WatchProviderHelper.defaultRegion());
                         binding.wtwReleased.btnRegion.setOnClickListener(v ->
                                 WatchProviderHelper.showRegionPicker(requireContext(),
                                         watchProviderResults, region -> {

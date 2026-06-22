@@ -538,7 +538,14 @@ public class MovieResultDetailsFragment extends BaseFragment {
                                            @NonNull Response<TVShowProviderResponse> response) {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
                         watchProviderResults = response.body().getResults();
-                        bindMovieProviders("CA");
+                        String region = WatchProviderHelper.defaultRegion();
+                        bindMovieProviders(region);
+                        binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
+                                        selectedRegion -> {
+                                            userHasSelectedRegion = true;
+                                            bindMovieProviders(selectedRegion);
+                                        }));
                     }
                     @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
                                                     @NonNull Throwable t) {}
@@ -602,12 +609,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        wtw.btnRegion.setOnClickListener(v ->
-                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
-                        selectedRegion -> {
-                            userHasSelectedRegion = true;
-                            bindMovieProviders(selectedRegion);
-                        }));
     }
 
     private void handleNoWatchProviders() {
