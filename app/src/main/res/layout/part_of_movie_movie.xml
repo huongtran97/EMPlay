@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="@drawable/divider_bottom">
+
+    <!-- Poster -->
+    <ImageView
+        android:id="@+id/imgPoster"
+        android:layout_width="48dp"
+        android:layout_height="84dp"
+        android:layout_marginEnd="10dp"
+        android:scaleType="centerCrop"
+        android:background="@drawable/bg_ep_thumb"
+        android:contentDescription="@null"
+        tools:background="#1C3036" />
+
+    <!-- Number badge overlaid on thumbnail (set in adapter via ViewOverlay or FrameLayout) -->
+    <!--
+        Tip: wrap imgEpThumb + tvEpNumber in a FrameLayout if you want
+        the number badge rendered directly over the thumbnail in XML.
+        Shown separately here for clarity.
+    -->
+
+    <!-- Title + runtime + air date -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvMovieTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_1"
+            android:maxLines="2"
+            android:ellipsize="end"
+            tools:text="What She Left Behind" />
+
+        <TextView
+            android:id="@+id/tvMeta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="11sp"
+            android:textColor="@color/text_3"
+            tools:text="52m · May 29" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/chipRating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@color/accent"
+        android:textSize="@dimen/text_badge"
+        android:textStyle="bold"
+        android:text="@string/rating_format"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+</LinearLayout>

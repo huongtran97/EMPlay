@@ -25,7 +25,8 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "emplay.db";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 14;
+    static final long CACHE_TTL_MS = 24 * 60 * 60 * 1000L;
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_SHOWS = "tvshows";
     public static final String TABLE_USER_PROFILE = "profile";
@@ -44,6 +45,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_VOTE_AVERAGE = "vote_average";
     public static final String COLUMN_SEARCH_QUERY = "search_query";
     public static final String COLUMN_TIMESTAMP = "timestamp";
+    private static final String TABLE_CATALOG_META = "catalog_meta";
+    private static final String COLUMN_META_KEY = "meta_key";
+    private static final String COLUMN_LAST_FETCHED_MS = "last_fetched_ms";
 
     // Singleton — 1 DB connection shared across the app to avoid "database locked" issues.
     private static DatabaseHelper instance;
@@ -108,6 +112,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_SEARCH_QUERY + " TEXT UNIQUE, " +
                     COLUMN_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
 
+    private static final String CREATE_TABLE_CATALOG_META =
+            "CREATE TABLE " + TABLE_CATALOG_META + " (" +
+                    COLUMN_META_KEY + " TEXT PRIMARY KEY, " +
+                    COLUMN_LAST_FETCHED_MS + " INTEGER NOT NULL)";
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("PRAGMA foreign_keys = ON;");
@@ -117,11 +126,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_USER_MOVIES);
         db.execSQL(CREATE_TABLE_USER_SHOWS);
         db.execSQL(CREATE_TABLE_RECENT_SEARCHES);
+        db.execSQL(CREATE_TABLE_CATALOG_META);
         Log.d("DatabaseHelper", "All tables created successfully");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATALOG_META);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENT_SEARCHES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_SHOWS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_MOVIES);
@@ -235,6 +246,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return movies;
+    }
+
+    /** Records the current time as the last successful fetch for a named catalog key. */
+    public void updateCatalogFetchTime(String key) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_META_KEY, key);
+        values.put(COLUMN_LAST_FETCHED_MS, System.currentTimeMillis());
+        db.insertWithOnConflict(TABLE_CATALOG_META, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    /**
+     * Returns true if the catalog data for {@code key} has never been fetched or was last
+     * fetched more than 24 hours ago. Callers should trigger a background refresh when true.
+     */
+    public boolean isCatalogStale(String key) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        android.database.Cursor cursor = db.query(TABLE_CATALOG_META,
+                new String[]{COLUMN_LAST_FETCHED_MS},
+                COLUMN_META_KEY + " = ?", new String[]{key},
+                null, null, null);
+        try {
+            if (!cursor.moveToFirst()) return true;
+            long lastFetched = cursor.getLong(0);
+            return System.currentTimeMillis() - lastFetched > CACHE_TTL_MS;
+        } finally {
+            cursor.close();
+        }
     }
 
     public List<TVShowModel> getSavedTVShows(String userId) {

@@ -1,6 +1,11 @@
 package emplay.entertainment.emplay.adapter.tvshow;
 
 import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
@@ -9,17 +14,55 @@ import emplay.entertainment.emplay.adapter.common.BasePosterAdapter;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import emplay.entertainment.emplay.tool.BadgeHelper;
 
-/**
- * Upcoming TV shows row on the Home screen — thin wrapper over BasePosterAdapter.
- */
 public class UpComingTVAdapter extends BasePosterAdapter<TVShowModel> {
 
+    private static final int VIEW_TYPE_ITEM = 0;
+    private static final int VIEW_TYPE_MORE = 1;
+
+    private boolean mShowMoreItem = false;
+    private Runnable mOnMoreClick;
+
     public interface OnItemClickListener {
-        void onItemClick(TVShowModel tv);
+        void onItemClick(TVShowModel tvShow, View sharedElement);
     }
 
     public UpComingTVAdapter(Context context, List<TVShowModel> data, OnItemClickListener listener) {
         super(context, data, listener::onItemClick);
+    }
+
+    public void setShowMoreItem(boolean show, Runnable onMoreClick) {
+        mShowMoreItem = show;
+        mOnMoreClick = onMoreClick;
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return (mShowMoreItem && position == mData.size()) ? VIEW_TYPE_MORE : VIEW_TYPE_ITEM;
+    }
+
+    @Override
+    public int getItemCount() {
+        return mShowMoreItem ? mData.size() + 1 : mData.size();
+    }
+
+    @NonNull
+    @Override
+    public PosterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_MORE) {
+            View v = LayoutInflater.from(mContext).inflate(R.layout.item_suggestion_more, parent, false);
+            return new PosterViewHolder(v, R.id.header);
+        }
+        return super.onCreateViewHolder(parent, viewType);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull PosterViewHolder holder, int position) {
+        if (getItemViewType(position) == VIEW_TYPE_MORE) {
+            holder.itemView.setOnClickListener(v -> { if (mOnMoreClick != null) mOnMoreClick.run(); });
+            return;
+        }
+        super.onBindViewHolder(holder, position);
     }
 
     @Override
@@ -31,6 +74,6 @@ public class UpComingTVAdapter extends BasePosterAdapter<TVShowModel> {
     @Override
     protected void bindBadge(PosterViewHolder holder, TVShowModel item) {
         if (holder.badge == null) return;
-        BadgeHelper.applyTVStatusBadge(holder.badge, item.getFirstAirDate(), item.getNextEpisodeExists());
+        BadgeHelper.applyTVStatusBadge(holder.badge, item.getFirstAirDate(), null);
     }
 }

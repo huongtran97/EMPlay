@@ -1,61 +1,54 @@
 package emplay.entertainment.emplay.fragment.details;
 
-import android.annotation.SuppressLint;
-import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.CreditAdapter;
+import emplay.entertainment.emplay.adapter.common.FilmographyAdapter;
+import emplay.entertainment.emplay.tool.ReadHelper;
 import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.PersonCreditsResponse;
+import emplay.entertainment.emplay.api.common.PersonCreditsResponse.CreditItem;
 import emplay.entertainment.emplay.api.common.PersonDetailsResponse;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
-import emplay.entertainment.emplay.tool.ReadHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- *  Cast member detail screen: photo, biography (with Read More/Less), and a paginated
- *  grid of movies/TV shows the person has appeared in.
- */
 public class CastDetailFragment extends BaseFragment {
 
     private static final String ARG_PERSON_ID = "PERSON_ID";
-    private static final int PAGE_SIZE = 9; // 3-column grid × 3 rows per page
     private int personId;
+    private String personName;
     private MovieApiService apiService;
     private ImageView profileImage;
-    private TextView nameText, departmentText, birthdayText, placeOfBirthText, biographyText, creditsPageIndicator, readMoreText;
-    private RecyclerView creditsRecyclerView;
-    private LinearLayout creditsPaginationBar;
-    private ImageButton creditsBtnPrev, creditsBtnNext;
+    private TextView nameText, metaText, biographyText, creditsPageIndicator, readMoreText, ghostGlyphText;
+    private TextView btnKnownForSeeAll, tvBackToTop;
+    private RecyclerView creditsRecyclerView, filmographyRecyclerView;
     private CreditAdapter creditAdapter;
-    private final List<PersonCreditsResponse.CreditItem> allCredits = new ArrayList<>();
-    private int creditsPage = 1;
-    private boolean isExpanded = false;
+    private FilmographyAdapter filmographyAdapter;
+    private List<CreditItem> allCredits = new ArrayList<>();
 
     public static CastDetailFragment newInstance(int personId) {
         CastDetailFragment fragment = new CastDetailFragment();
@@ -65,53 +58,43 @@ public class CastDetailFragment extends BaseFragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            personId = getArguments().getInt(ARG_PERSON_ID);
+        }
+        apiService = ApiClient.getClient().create(MovieApiService.class);
+    }
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.cast_details_view, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.activity_cast, container, false);
 
         profileImage = view.findViewById(R.id.cast_detail_image);
         nameText = view.findViewById(R.id.cast_detail_name);
-        departmentText = view.findViewById(R.id.cast_detail_department);
-        birthdayText = view.findViewById(R.id.cast_detail_birthday);
-        placeOfBirthText = view.findViewById(R.id.cast_detail_place);
+        metaText = view.findViewById(R.id.cast_detail_meta);
         biographyText = view.findViewById(R.id.cast_detail_biography);
         readMoreText = view.findViewById(R.id.read_more_text);
-        creditsRecyclerView = view.findViewById(R.id.cast_detail_credits_recyclerview);
-        creditsPaginationBar = view.findViewById(R.id.credits_pagination_bar);
+        ghostGlyphText = view.findViewById(R.id.tvGhostGlyph);
         creditsPageIndicator = view.findViewById(R.id.credits_page_indicator);
-        creditsBtnPrev = view.findViewById(R.id.credits_btn_prev);
-        creditsBtnNext = view.findViewById(R.id.credits_btn_next);
 
-        // Read More / Less
-        ReadHelper.setup(biographyText, readMoreText, isExpanded, expanded -> isExpanded = expanded);
-
-        creditAdapter = new CreditAdapter(new ArrayList<>(), requireContext(), this::onCreditClicked);
-        creditsRecyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-        creditsRecyclerView.setAdapter(creditAdapter);
-        creditsRecyclerView.setNestedScrollingEnabled(false);
-
-        creditsBtnPrev.setOnClickListener(v -> {
-            creditsPage--;
-            showCreditsPage();
-            creditsRecyclerView.scrollToPosition(0);
-        });
-        creditsBtnNext.setOnClickListener(v -> {
-            creditsPage++;
-            showCreditsPage();
-            creditsRecyclerView.scrollToPosition(0);
+        creditsRecyclerView = view.findViewById(R.id.cast_detail_credits_recyclerview);
+        filmographyRecyclerView = view.findViewById(R.id.rvFilmography);
+        btnKnownForSeeAll = view.findViewById(R.id.btn_known_for_see_all);
+        tvBackToTop = view.findViewById(R.id.tvBackToTop);
+        tvBackToTop.setOnClickListener(v -> {
+            androidx.core.widget.NestedScrollView sv = view.findViewById(R.id.castScrollView);
+            sv.smoothScrollTo(0, 0);
         });
 
-        apiService = ApiClient.getClient().create(MovieApiService.class);
+        view.findViewById(R.id.btn_back).setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        btnKnownForSeeAll.setOnClickListener(v ->
+                navigateTo(KnownForSeeAllFragment.newInstance(personId, personName)));
 
-        if (getArguments() != null) {
-            personId = getArguments().getInt(ARG_PERSON_ID, -1);
-            if (personId != -1) {
-                fetchPersonDetails();
-                fetchPersonCredits();
-            }
-        }
+        fetchPersonDetails();
+        fetchPersonCredits();
 
         return view;
     }
@@ -122,33 +105,38 @@ public class CastDetailFragment extends BaseFragment {
             public void onResponse(@NonNull Call<PersonDetailsResponse> call, @NonNull Response<PersonDetailsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     PersonDetailsResponse person = response.body();
-
-                    nameText.setText(person.getName());
-                    departmentText.setText(person.getKnownForDepartment() != null
-                            ? person.getKnownForDepartment() : "");
-                    birthdayText.setText(person.getBirthday() != null
-                            ? "Born: " + person.getBirthday() : "");
-                    placeOfBirthText.setText(person.getPlaceOfBirth() != null
-                            ? person.getPlaceOfBirth() : "");
-                    String bio = person.getBiography() != null && !person.getBiography().isEmpty()
-                            ? person.getBiography() : "No biography available.";
-                    biographyText.setText(bio);
-
-                    ReadHelper.bind(biographyText, readMoreText, isExpanded);
-
-                    if (person.getProfilePath() != null) {
-                        Glide.with(CastDetailFragment.this)
-                                .load("https://image.tmdb.org/t/p/w500" + person.getProfilePath())
-                                .apply(new RequestOptions().circleCrop())
-                                .placeholder(R.drawable.avatar)
-                                .into(profileImage);
+                    personName = person.getName();
+                    nameText.setText(personName);
+                    
+                    if (person.getName() != null && !person.getName().isEmpty()) {
+                        ghostGlyphText.setText(person.getName().substring(0, 1).toUpperCase());
                     }
+
+                    String bio = person.getBiography();
+                    if (bio != null && !bio.isEmpty()) {
+                        biographyText.setText(bio);
+                        ReadHelper.setup(biographyText, readMoreText, false, null);
+                    }
+
+                    String dept = person.getKnownForDepartment();
+                    String birth = person.getBirthday();
+                    String place = person.getPlaceOfBirth();
+                    StringBuilder meta = new StringBuilder();
+                    if (dept != null) meta.append(dept);
+                    if (birth != null) meta.append(" · Born ").append(birth);
+                    if (place != null) meta.append("\n").append(place);
+                    metaText.setText(meta.toString());
+
+                    Glide.with(requireContext())
+                            .load(ImageUrl.of(ImageUrl.PROFILE, person.getProfilePath()))
+                            .placeholder(R.drawable.bg_poster_placeholder)
+                            .into(profileImage);
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<PersonDetailsResponse> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Failed to load person details", Toast.LENGTH_SHORT).show();
+                Log.e("CastDetailFragment", "Failed to fetch person details", t);
             }
         });
     }
@@ -158,75 +146,65 @@ public class CastDetailFragment extends BaseFragment {
             @Override
             public void onResponse(@NonNull Call<PersonCreditsResponse> call, @NonNull Response<PersonCreditsResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    List<PersonCreditsResponse.CreditItem> cast = response.body().getCast();
-                    List<PersonCreditsResponse.CreditItem> crew = response.body().getCrew();
+                    allCredits = response.body().getCast();
+                    if (allCredits == null) allCredits = new ArrayList<>();
 
-                    allCredits.clear();
-                    java.util.Set<Integer> seenIds = new java.util.HashSet<>();
+                    List<CreditItem> filmographyList = new ArrayList<>(allCredits);
+                    Collections.sort(filmographyList, (a, b) -> {
+                        String dateA = a.getDisplayDate();
+                        String dateB = b.getDisplayDate();
+                        if (dateA == null) return 1;
+                        if (dateB == null) return -1;
+                        return dateB.compareTo(dateA);
+                    });
 
-                    if (cast != null) {
-                        for (PersonCreditsResponse.CreditItem item : cast) {
-                            boolean hasImage = (item.getPosterPath() != null && !item.getPosterPath().isEmpty())
-                                    || (item.getBackdropPath() != null && !item.getBackdropPath().isEmpty());
-                            if (hasImage && !seenIds.contains(item.getId())) {
-                                allCredits.add(item);
-                                seenIds.add(item.getId());
+                    List<CreditItem> knownFor = new ArrayList<>(allCredits);
+                    Collections.sort(knownFor, (a, b) -> Double.compare(b.getPopularity(), a.getPopularity()));
+                    List<CreditItem> top10 = knownFor.subList(0, Math.min(5, knownFor.size()));
+
+                    creditAdapter = new CreditAdapter(top10, requireContext(), (item, view) -> onCreditClicked(item, view));
+                    creditsRecyclerView.setAdapter(creditAdapter);
+                    creditsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+
+                    filmographyAdapter = new FilmographyAdapter(filmographyList, (item, view) -> onCreditClicked(item, view));
+                    filmographyRecyclerView.setAdapter(filmographyAdapter);
+
+                    btnKnownForSeeAll.setVisibility(View.VISIBLE);
+
+                    int totalCount = allCredits.size();
+                    creditsPageIndicator.setText(String.format(java.util.Locale.getDefault(), "%d titles ›", totalCount));
+                    if (filmographyAdapter.hasMore()) {
+                        creditsPageIndicator.setOnClickListener(v -> {
+                            if (filmographyAdapter.isExpanded()) {
+                                filmographyAdapter.collapse();
+                                creditsPageIndicator.setText(String.format(java.util.Locale.getDefault(), "%d titles ›", totalCount));
+                                tvBackToTop.setVisibility(View.GONE);
+                            } else {
+                                filmographyAdapter.showAll();
+                                creditsPageIndicator.setText(R.string.see_less);
+                                tvBackToTop.setVisibility(View.VISIBLE);
                             }
-                        }
+                        });
                     }
-
-                    if (crew != null) {
-                        for (PersonCreditsResponse.CreditItem item : crew) {
-                            boolean hasImage = (item.getPosterPath() != null && !item.getPosterPath().isEmpty())
-                                    || (item.getBackdropPath() != null && !item.getBackdropPath().isEmpty());
-                            if (hasImage && !seenIds.contains(item.getId())) {
-                                allCredits.add(item);
-                                seenIds.add(item.getId());
-                            }
-                        }
-                    }
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        allCredits.sort((a, b) -> Double.compare(b.getPopularity(), a.getPopularity()));
-                    }
-                    creditsPage = 1;
-                    showCreditsPage();
                 }
             }
 
             @Override
             public void onFailure(@NonNull Call<PersonCreditsResponse> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Failed to load credits", Toast.LENGTH_SHORT).show();
+                Log.e("CastDetailFragment", "Failed to fetch person credits", t);
             }
         });
     }
 
-    @SuppressLint("SetTextI18n")
-    private void showCreditsPage() {
-        int total = allCredits.size();
-        int totalPages = (int) Math.ceil((double) total / PAGE_SIZE);
-        int fromIndex = (creditsPage - 1) * PAGE_SIZE;
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, total);
-
-        creditAdapter.updateData(new ArrayList<>(allCredits.subList(fromIndex, toIndex)));
-
-        if (totalPages > 1) {
-            creditsPaginationBar.setVisibility(View.VISIBLE);
-            creditsPageIndicator.setText("Page " + creditsPage + " of " + totalPages);
-            creditsBtnPrev.setEnabled(creditsPage > 1);
-            creditsBtnNext.setEnabled(creditsPage < totalPages);
-        } else {
-            creditsPaginationBar.setVisibility(View.GONE);
-        }
-    }
-
-    private void onCreditClicked(PersonCreditsResponse.CreditItem credit) {
+    private void onCreditClicked(CreditItem item, View sharedElement) {
         Fragment fragment;
-        if ("tv".equals(credit.getMediaType())) {
-            fragment = TVShowResultDetailsFragment.newInstance(credit.getId());
+        if ("movie".equals(item.getMediaType())) {
+            fragment = MovieResultDetailsFragment.newInstance(item.getId());
+        } else if ("tv".equals(item.getMediaType())) {
+            fragment = TVShowResultDetailsFragment.newInstance(item.getId());
         } else {
-            fragment = MovieResultDetailsFragment.newInstance(credit.getId());
+            return;
         }
-        navigateTo(fragment);
+        navigateTo(fragment, sharedElement, "poster_transition");
     }
 }

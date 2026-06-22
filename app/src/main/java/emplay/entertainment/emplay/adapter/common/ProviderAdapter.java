@@ -17,12 +17,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.common.ProviderModel;
 
 public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public static final int TYPE_STREAM = 0;
     public static final int TYPE_RENT_BUY = 1;
+    public static final int TYPE_SIMPLE = 2;
 
     private List<ProviderModel> providers = new ArrayList<>();
     private final int viewType;
@@ -49,7 +51,10 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int type) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        if (type == TYPE_STREAM) {
+        if (type == TYPE_SIMPLE) {
+            return new SimpleViewHolder(
+                    inflater.inflate(R.layout.item_provider, parent, false));
+        } else if (type == TYPE_STREAM) {
             return new StreamViewHolder(
                     inflater.inflate(R.layout.item_provider_fallback, parent, false));
         } else {
@@ -61,7 +66,9 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         ProviderModel provider = providers.get(position);
-        if (holder instanceof StreamViewHolder) {
+        if (holder instanceof SimpleViewHolder) {
+            ((SimpleViewHolder) holder).bind(provider);
+        } else if (holder instanceof StreamViewHolder) {
             ((StreamViewHolder) holder).bind(provider);
         } else {
             ((RentBuyViewHolder) holder).bind(provider);
@@ -71,6 +78,31 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     @Override
     public int getItemCount() {
         return providers.size();
+    }
+
+    static class SimpleViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgProviderLogo;
+        TextView tvProviderName;
+
+        SimpleViewHolder(View itemView) {
+            super(itemView);
+            imgProviderLogo = itemView.findViewById(R.id.imgProviderLogo);
+            tvProviderName = itemView.findViewById(R.id.tvProviderName);
+        }
+
+        void bind(ProviderModel provider) {
+            tvProviderName.setText(provider.getProviderName());
+            String logoPath = provider.getLogoPath();
+            if (logoPath != null && !logoPath.isEmpty()) {
+                imgProviderLogo.setVisibility(View.VISIBLE);
+                Glide.with(itemView.getContext())
+                        .load(ImageUrl.of(ImageUrl.ORIGINAL, logoPath))
+                        .transform(new RoundedCorners(4))
+                        .into(imgProviderLogo);
+            } else {
+                imgProviderLogo.setVisibility(View.GONE);
+            }
+        }
     }
 
     /**
@@ -89,7 +121,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void bind(ProviderModel provider) {
             tvName.setText(provider.getProviderName());
             Glide.with(itemView.getContext())
-                    .load("https://image.tmdb.org/t/p/original" + provider.getLogoPath())
+                    .load(ImageUrl.of(ImageUrl.ORIGINAL, provider.getLogoPath()))
                     .placeholder(R.drawable.bg_provider_fallback)
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);
@@ -113,7 +145,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void bind(ProviderModel provider) {
             tvName.setText(provider.getProviderName());
             Glide.with(itemView.getContext())
-                    .load("https://image.tmdb.org/t/p/original" + provider.getLogoPath())
+                    .load(ImageUrl.of(ImageUrl.ORIGINAL, provider.getLogoPath()))
                     .placeholder(R.drawable.bg_provider_fallback)
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);

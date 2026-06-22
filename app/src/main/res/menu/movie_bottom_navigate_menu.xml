@@ -2,20 +2,20 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Home"
-        android:icon="@drawable/movie_home"
+    <item android:title="@string/home"
+        android:icon="@drawable/ic_home"
         android:id="@+id/menu_movie_home"
         />
-    <item android:title="Search"
-        android:icon="@drawable/movie_search"
+    <item android:title="@string/search"
+        android:icon="@drawable/ic_search"
         android:id="@+id/menu_movie_search"
         />
-    <item android:title="Watchlist"
-        android:icon="@drawable/ic_watchlist"
+    <item android:title="@string/nav_mylist"
+        android:icon="@drawable/ic_mylist_ticket"
         android:id="@+id/menu_movie_watchlist"
         />
-    <item android:title="Profile"
-        android:icon="@drawable/movie_profile"
+    <item android:title="@string/profile"
+        android:icon="@drawable/ic_profile"
         android:id="@+id/menu_movie_profile"
         />
 </menu>

@@ -46,6 +46,9 @@ public class MovieDetailsResponse {
     @SerializedName("production_countries")
     private List<ProductionCountry> production_countries;
 
+    @SerializedName("belongs_to_collection")
+    private BelongsToCollection belongsToCollection;
+
     public MovieDetailsResponse(int id, String title, String posterPath, String overview, float rating) {
     }
 
@@ -217,6 +220,18 @@ public class MovieDetailsResponse {
 
 
     }
+    public BelongsToCollection getBelongsToCollection() { return belongsToCollection; }
+
+    public static class BelongsToCollection {
+        @SerializedName("id")
+        private int id;
+        @SerializedName("name")
+        private String name;
+
+        public int getId() { return id; }
+        public String getName() { return name; }
+    }
+
     public static class ProductionCountry {
         @SerializedName("iso_3166_1")
         private String isoCodeMovie;

@@ -133,11 +133,11 @@ public class WhatsNewFragment extends BaseFragment {
         });
     }
 
-    private void onTVShowClicked(TVShowModel tvShow) {
-        navigateTo(TVShowResultDetailsFragment.newInstance(tvShow.getTVShowId()));
+    private void onTVShowClicked(TVShowModel tvShow, View sharedElement) {
+        navigateTo(TVShowResultDetailsFragment.newInstance(tvShow.getTVShowId()), sharedElement, "poster_transition");
     }
 
-    private void onMovieClicked(MovieModel movie) {
-        navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()));
+    private void onMovieClicked(MovieModel movie, View sharedElement) {
+        navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()), sharedElement, "poster_transition");
     }
 }

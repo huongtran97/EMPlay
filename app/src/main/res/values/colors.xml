@@ -1,61 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="white">#FFFFFF</color>
-    <color name="black">#FF000000</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- EMPlay Cinema Memorabilia Palette -->
+    <color name="bg_base">#0B0F19</color>
+    <color name="bg_surface">#171E31</color>
+    <color name="surface_high">#1F2740</color>
+    <color name="filmstrip">#070A12</color>
 
-    <!-- Genre colors -->
-    <color name="genre_action">#E53935</color>
-    <color name="genre_adventure">#FF7043</color>
-    <color name="genre_animation">#FB8C00</color>
-    <color name="genre_comedy">#FDD835</color>
-    <color name="genre_crime">#FFFFFF</color>
-    <color name="genre_documentary">#78909C</color>
-    <color name="genre_drama">#43A047</color>
-    <color name="genre_family">#26C6DA</color>
-    <color name="genre_fantasy">#AB47BC</color>
-    <color name="genre_history">#8D6E63</color>
-    <color name="genre_horror">#8E24AA</color>
-    <color name="genre_kids">#FFCA28</color>
-    <color name="genre_music">#EC407A</color>
-    <color name="genre_mystery">#5C6BC0</color>
-    <color name="genre_news">#90A4AE</color>
-    <color name="genre_reality">#FF7043</color>
-    <color name="genre_romance">#E91E8C</color>
-    <color name="genre_scifi">#1E88E5</color>
-    <color name="genre_soap">#F48FB1</color>
-    <color name="genre_talk">#80CBC4</color>
-    <color name="genre_thriller">#F4511E</color>
-    <color name="genre_tv_movie">#29B6F6</color>
-    <color name="genre_war">#546E7A</color>
-    <color name="genre_western">#A1887F</color>
-    <color name="genre_default">#FFFFFF</color>
+    <color name="accent">#E3B566</color>
+    <color name="on_accent">#3A2A0C</color>
 
+    <color name="text_1">#EDF0F7</color>
+    <color name="text_2">#B9C0D4</color>
+    <color name="text_3">#8590AB</color>
 
-    <color name="default_background_color">#A8474646</color>
-    <color name="selected_background_color">#A8555454</color>
-    <color name="colorNormal">#000000</color>
-    <color name="bottom_nav_background">#141414</color>
-    <color name="bottom_nav_indicator">#E53935</color>
-    <color name="red_primary">#E50914</color>
-    <color name="toggle_bg">#1E1E1E</color>
-    <color name="pill_bg">#2E2E2E</color>
+    <color name="border">#2A3450</color>
+    <color name="hairline_row">#151B2C</color>
+    <color name="airing">#7FBF9A</color>
+    <color name="error">#D45A5A</color>
 
-    <!-- UI Components Colors -->
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#9E9E9E</color>
-    <color name="text_tertiary">#888888</color>
-    <color name="text_hint">#666666</color>
-    <color name="text_disabled">#444444</color>
-    <color name="text_overview">#CCCCCC</color>
+    <!-- Generic mappings for stability during transition -->
+    <color name="white">@color/text_1</color>
+    <color name="black">#000000</color>
+    <color name="text_primary">@color/text_1</color>
+    <color name="text_secondary">@color/text_2</color>
+    <color name="text_tertiary">@color/text_3</color>
 
-    <color name="accent_red">#E53935</color>
-    <color name="accent_amber">#C98A1A</color>
-    <color name="accent_yellow">#F5C518</color>
+    <!-- Genre tiles use surface_high per spec R10 — no per-genre accent colours -->
+    <color name="genre_default">@color/surface_high</color>
+    <color name="text_overview">@color/text_2</color>
+    <color name="text_hint">@color/text_3</color>
+    <color name="bottom_nav_background">@color/bg_surface</color>
+    <color name="accent_amber">@color/accent</color>
+    <color name="accent_red">@color/error</color>
+    <color name="red_primary">@color/error</color>
+    <color name="text_disabled">@color/text_3</color>
+    <color name="toggle_bg">@color/bg_surface</color>
 
-    <color name="bg_dark_chip">#1E1E1E</color>
-    <color name="bg_countdown_block">#2A2A2A</color>
-    <color name="divider_dark">#1E1E1E</color>
-    <color name="space_separator">#444444</color>
+    <!-- Placeholder fill tints for backdrop / poster areas -->
+    <color name="text_dim">#4E5872</color>
+    <color name="bg_dark">#1F2740</color>
+    <color name="bg_dark_purple">#2A2030</color>
+    <color name="bg_dark_teal">#1C3036</color>
+
+    <!-- Search dropdown tokens -->
+    <color name="ripple_accent">#33E3B566</color>
+    <color name="badge_tv_bg">#267FBF9A</color>
+    <color name="badge_accent_bg">#26E3B566</color>
+
 </resources>

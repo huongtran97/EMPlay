@@ -20,6 +20,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.TlsVersion;
 import okhttp3.logging.HttpLoggingInterceptor;
+import com.google.gson.GsonBuilder;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -104,12 +105,12 @@ public class ApiClient {
             }
 
             OkHttpClient okHttpClient = clientBuilder.build();
-            glideClient = okHttpClient;
 
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .client(okHttpClient)
-                    .addConverterFactory(GsonConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(
+                            new GsonBuilder().setLenient().create()))
                     .build();
         }
         return retrofit;
@@ -143,8 +144,23 @@ public class ApiClient {
         @NonNull
         public Response intercept(@NonNull Chain chain) throws IOException {
             Request request = chain.request();
+            HttpUrl url = request.url();
+
+            // Inject global TMDB compliance params on every /api/tmdb call.
+            // The proxy forwards all query params to TMDB; direct mode copies them during rewrite.
+            if (url.encodedPath().contains("/api/tmdb")) {
+                HttpUrl.Builder urlBuilder = url.newBuilder();
+                if (url.queryParameter("language") == null) {
+                    urlBuilder.addQueryParameter("language", "en-US");
+                }
+                if (url.queryParameter("include_adult") == null) {
+                    urlBuilder.addQueryParameter("include_adult", "false");
+                }
+                request = request.newBuilder().url(urlBuilder.build()).build();
+                url = request.url();
+            }
+
             if (!USE_PROXY) {
-                HttpUrl url = request.url();
 
                 if (url.encodedPath().contains("/api/tmdb")) {
                     String path = url.queryParameter("path");

@@ -12,6 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:baselineAligned="false"
         android:orientation="horizontal"
         android:paddingHorizontal="4dp"
         android:gravity="center_vertical">
@@ -88,7 +89,7 @@
         android:layout_marginStart="4dp"
         android:layout_marginEnd="4dp"
         android:textColor="@color/text_2"
-        android:maxLines="4"
+        android:maxLines="1"
         android:ellipsize="end" />
 
     <TextView

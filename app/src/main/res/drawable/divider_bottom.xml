@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Transparent fill (row itself has no background) -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+
+    <!-- Bottom hairline only: offset top by (height - 0.5dp) using a large top inset -->
+    <item
+        android:top="-1dp"
+        android:left="-1dp"
+        android:right="-1dp"
+        android:bottom="0dp">
+        <shape android:shape="rectangle">
+            <stroke
+                android:width="0.5dp"
+                android:color="@color/hairline_row" />
+            <solid android:color="@android:color/transparent" />
+        </shape>
+    </item>
+
+</layer-list>

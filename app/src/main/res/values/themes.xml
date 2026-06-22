@@ -1,20 +1,44 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Theme.EMPlay" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.EMPlay" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">#DD10090B</item>
-        <item name="colorPrimaryVariant">#059C8D8D</item>
-        <item name="colorOnPrimary">#9C8D8D</item>
+        <item name="colorPrimary">@color/bg_base</item>
+        <item name="colorPrimaryVariant">@color/bg_surface</item>
+        <item name="colorOnPrimary">@color/text_1</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">#AD151515</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/black</item>
+        <item name="colorSecondary">@color/accent</item>
+        <item name="colorOnSecondary">@color/on_accent</item>
+
+        <!-- Backgrounds -->
+        <item name="android:windowBackground">@color/bg_base</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+
+        <!-- Default fonts -->
+        <item name="fontFamily">@font/inter</item>
+        <item name="android:fontFamily">@font/inter</item>
+
+        <!-- Bottom Nav -->
+        <item name="bottomNavigationStyle">@style/Widget.EMPlay.BottomNavigationView</item>
+
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="HiddenTitleTheme" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Widget.EMPlay.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="itemActiveIndicatorStyle">@style/Widget.EMPlay.BottomNavIndicator</item>
+        <item name="itemIconSize">20dp</item>
+        <item name="itemIconTint">@color/bottom_nav_selector</item>
+        <item name="itemTextColor">@color/bottom_nav_selector</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.EMPlay.Micro</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.EMPlay.Micro</item>
+        <item name="labelVisibilityMode">labeled</item>
+    </style>
+
+    <style name="Widget.EMPlay.BottomNavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#29E3B566</item>
+    </style>
+
+    <style name="HiddenTitleTheme" parent="Theme.EMPlay">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
     </style>
@@ -26,31 +50,105 @@
     </style>
 
     <style name="TextHintStyle" parent="TextAppearance.AppCompat.Small">
-        <item name="android:textColor">@color/black</item>
+        <item name="android:textColor">@color/text_3</item>
         <item name="android:textStyle">italic</item>
     </style>
 
     <style name="RatingBar" parent="Theme.AppCompat">
-        <item name="colorControlActivated">#FFC107</item>
-        <item name="colorControlHighlight">#FFC107</item>
+        <item name="colorControlActivated">@color/accent</item>
+        <item name="colorControlHighlight">@color/accent</item>
     </style>
 
     <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
         <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">@font/inter</item>
     </style>
 
     <!--Chip Style-->
     <style name="ChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
-        <item name="android:textColor">#AAAAAA</item>
+        <item name="android:textColor">@color/text_2</item>
         <item name="android:textSize">12sp</item>
         <item name="chipBackgroundColor">@android:color/transparent</item>
-        <item name="chipStrokeColor">#2E2E2E</item>
-        <item name="chipStrokeWidth">1dp</item>
-        <item name="chipCornerRadius">20dp</item>
+        <item name="chipStrokeColor">@color/border</item>
+        <item name="chipStrokeWidth">@dimen/hairline</item>
+        <item name="chipCornerRadius">@dimen/radius_pill</item>
         <item name="chipMinHeight">32dp</item>
         <item name="checkedIconVisible">false</item>
         <item name="rippleColor">@android:color/transparent</item>
     </style>
 
+    <style name="RoundedCorners.8dp" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="ShapeAppearance.EMPlay.TopRounded8dp" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSizeTopLeft">8dp</item>
+        <item name="cornerSizeTopRight">8dp</item>
+        <item name="cornerSizeBottomLeft">0dp</item>
+        <item name="cornerSizeBottomRight">0dp</item>
+    </style>
+
+    <style name="EMPlay.Circle" parent="">
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Search dropdown styles -->
+    <style name="TextAppearance.EMPlay.SearchTab" parent="TextAppearance.Design.Tab">
+        <item name="android:fontFamily">@font/inter_semibold</item>
+        <item name="android:textSize">12sp</item>
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="ShapeAppearance.EMPlay.PosterThumb" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">5dp</item>
+    </style>
+
+    <style name="ShapeAppearance.EMPlay.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+    <!-- Meta chip used in detail screens (transparent + border) -->
+    <style name="Widget.EMPlay.Chip" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/bg_chip</item>
+        <item name="android:textColor">@color/text_2</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
+
+    <!-- Accent-filled chip for rating / selected state -->
+    <style name="Widget.EMPlay.ChipAccent" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/bg_tab_selected</item>
+        <item name="android:textColor">@color/on_accent</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:paddingStart">10dp</item>
+        <item name="android:paddingEnd">10dp</item>
+        <item name="android:paddingTop">3dp</item>
+        <item name="android:paddingBottom">3dp</item>
+    </style>
+
+    <!--Genre Chip Style-->
+    <style name="GenreChipStyle">
+        <item name="android:textColor">@color/text_2</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:background">@drawable/bg_chip_cinematic</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:paddingTop">1dp</item>
+        <item name="android:paddingBottom">1dp</item>
+    </style>
 
 </resources>

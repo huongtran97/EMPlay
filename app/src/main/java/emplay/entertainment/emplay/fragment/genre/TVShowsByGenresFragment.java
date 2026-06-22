@@ -1,13 +1,11 @@
 package emplay.entertainment.emplay.fragment.genre;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
@@ -30,23 +29,24 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-/**
- *  TV show genre browser — same 18-item pagination trick as MovieByGenresFragment.
- */
 public class TVShowsByGenresFragment extends BaseFragment {
-    private static final String ARG_GENRE_ID = "GENRE_ID";
+
+    private static final String ARG_GENRE_ID   = "GENRE_ID";
     private static final String ARG_GENRE_NAME = "GENRE_NAME";
-    private static final int ITEMS_PER_PAGE = 18; // 6 rows of 3 items
-    private RecyclerView tvByGenreRecyclerview;
-    private TVShowByGenreAdapter tvByGenreAdapter;
-    private TextView pageIndicator;
-    private ImageButton btnPrev;
-    private ImageButton btnNext;
+
+    private RecyclerView recyclerView;
+    private TVShowByGenreAdapter adapter;
+    private ProgressBar loadingIndicator;
+    private TextView chipPopularity, chipRating, chipNewest;
     private MovieApiService apiService;
+
     private int genreId;
-    private int currentPage = 1;
-    private int totalCustomPages = 1;
-    private boolean isLoading = false;
+    private String sortToken = FilterBottomSheetFragment.SORT_POPULAR;
+    private int filterYearFrom = 1940;
+    private int filterYearTo   = Calendar.getInstance().get(Calendar.YEAR);
+    private int nextTmdbPage   = 1;
+    private int totalTmdbPages = 1;
+    private boolean isLoading  = false;
 
     public static TVShowsByGenresFragment newInstance(int genreId, String genreName) {
         TVShowsByGenresFragment fragment = new TVShowsByGenresFragment();
@@ -59,123 +59,134 @@ public class TVShowsByGenresFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.tv_by_genre_view, container, false);
 
-        tvByGenreRecyclerview = view.findViewById(R.id.tv_by_genre_recyclerview);
+        recyclerView     = view.findViewById(R.id.tv_by_genre_recyclerview);
+        loadingIndicator = view.findViewById(R.id.loadingIndicator);
+        chipPopularity   = view.findViewById(R.id.chipPopularity);
+        chipRating       = view.findViewById(R.id.chipRating);
+        chipNewest       = view.findViewById(R.id.chipNewest);
+
         TextView genreNameHeader = view.findViewById(R.id.tv_genres);
-        pageIndicator = view.findViewById(R.id.page_indicator);
-        btnPrev = view.findViewById(R.id.btn_prev);
-        btnNext = view.findViewById(R.id.btn_next);
+        TextView tvGhostGlyph   = view.findViewById(R.id.tvGhostGlyph);
 
-        tvByGenreAdapter = new TVShowByGenreAdapter(new ArrayList<>(), requireContext(), this::onItemClick);
-
-        GridLayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
-        tvByGenreRecyclerview.setLayoutManager(layoutManager);
-        tvByGenreRecyclerview.setHasFixedSize(true);
-        tvByGenreRecyclerview.setAdapter(tvByGenreAdapter);
-
-        btnPrev.setOnClickListener(v -> {
-            if (currentPage > 1) {
-                currentPage--;
-                fetchTVShowsByGenre(genreId);
-                tvByGenreRecyclerview.scrollToPosition(0);
-            }
-        });
-
-        btnNext.setOnClickListener(v -> {
-            if (currentPage < totalCustomPages) {
-                currentPage++;
-                fetchTVShowsByGenre(genreId);
-                tvByGenreRecyclerview.scrollToPosition(0);
-            }
-        });
+        adapter = new TVShowByGenreAdapter(requireContext(), new ArrayList<>(), this::onItemClick);
+        GridLayoutManager lm = new GridLayoutManager(requireContext(), 3);
+        recyclerView.setLayoutManager(lm);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+        recyclerView.addOnScrollListener(infiniteScrollListener(lm));
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
         if (getArguments() != null) {
             genreId = getArguments().getInt(ARG_GENRE_ID, -1);
-            String genreNameString = getArguments().getString(ARG_GENRE_NAME, "Unknown Genre");
-            genreNameHeader.setText(genreNameString);
-
-            if (genreId != -1) {
-                fetchTVShowsByGenre(genreId);
-            } else {
-                Toast.makeText(requireContext(), "Invalid genre ID", Toast.LENGTH_SHORT).show();
+            String genreName = getArguments().getString(ARG_GENRE_NAME, "");
+            genreNameHeader.setText(genreName);
+            if (tvGhostGlyph != null && !genreName.isEmpty()) {
+                tvGhostGlyph.setText(String.valueOf(genreName.charAt(0)).toUpperCase());
             }
         }
 
+        updateChipSelectionUi();
+        chipPopularity.setOnClickListener(v -> applySortChip(FilterBottomSheetFragment.SORT_POPULAR));
+        chipRating.setOnClickListener(v -> applySortChip(FilterBottomSheetFragment.SORT_RATING));
+        chipNewest.setOnClickListener(v -> applySortChip(FilterBottomSheetFragment.SORT_NEWEST));
+
+        view.findViewById(R.id.btnFilter).setOnClickListener(v -> openFilterSheet());
+
+        if (genreId != -1) fetchPage(true);
         return view;
     }
 
-    private void onItemClick(TVShowModel tvShowModel) {
-        navigateTo(TVShowResultDetailsFragment.newInstance(tvShowModel.getTVShowId()));
+    private void applySortChip(String token) {
+        if (token.equals(sortToken)) return;
+        sortToken = token;
+        updateChipSelectionUi();
+        fetchPage(true);
     }
 
-    private void fetchTVShowsByGenre(int genreId) {
-        if (isLoading) return;
-        isLoading = true;
+    private void updateChipSelectionUi() {
+        chipPopularity.setSelected(FilterBottomSheetFragment.SORT_POPULAR.equals(sortToken));
+        chipRating.setSelected(FilterBottomSheetFragment.SORT_RATING.equals(sortToken));
+        chipNewest.setSelected(FilterBottomSheetFragment.SORT_NEWEST.equals(sortToken));
+    }
 
-        // Work out which TMDB pages overlap with the 18 items.
-        // If the slice spans two TMDB pages, fetch both and trim to 18 items window.
-        int startItemIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-        int firstTmdbPage = (startItemIndex / 20) + 1;
-        int secondTmdbPage = ((startItemIndex + ITEMS_PER_PAGE - 1) / 20) + 1;
-
-        List<TVShowModel> combinedResults = new ArrayList<>();
-
-        fetchTmdbPage(genreId, firstTmdbPage, combinedResults, () -> {
-            if (firstTmdbPage != secondTmdbPage) {
-                fetchTmdbPage(genreId, secondTmdbPage, combinedResults, () -> {
-                    processResults(combinedResults, startItemIndex);
-                });
-            } else {
-                processResults(combinedResults, startItemIndex);
-            }
+    private void openFilterSheet() {
+        FilterBottomSheetFragment sheet = FilterBottomSheetFragment.newInstance(
+                sortToken, filterYearFrom, filterYearTo);
+        sheet.setFilterListener((token, from, to) -> {
+            sortToken      = token;
+            filterYearFrom = from;
+            filterYearTo   = to;
+            updateChipSelectionUi();
+            fetchPage(true);
         });
+        sheet.show(getParentFragmentManager(), "filter");
     }
 
-    private void fetchTmdbPage(int genreId, int page, List<TVShowModel> accumulator, Runnable onDone) {
-        Call<TVShowResponse> call = apiService.getTVShowsByGenre(TMDBpath.discoverTVShows(), genreId, page);
+    private RecyclerView.OnScrollListener infiniteScrollListener(GridLayoutManager lm) {
+        return new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                if (dy <= 0) return;
+                int totalItems  = lm.getItemCount();
+                int lastVisible = lm.findLastVisibleItemPosition();
+                if (!isLoading && nextTmdbPage <= totalTmdbPages && lastVisible >= totalItems - 10) {
+                    fetchPage(false);
+                }
+            }
+        };
+    }
+
+    private void fetchPage(boolean reset) {
+        if (isLoading) return;
+        if (!reset && nextTmdbPage > totalTmdbPages) return;
+        isLoading = true;
+        if (reset) {
+            nextTmdbPage = 1;
+            totalTmdbPages = 1;
+        }
+        loadingIndicator.setVisibility(View.VISIBLE);
+
+        String sortBy = MovieByGenresFragment.resolveApiSort(sortToken, true);
+        String gteYear = filterYearFrom > 1940 ? filterYearFrom + "-01-01" : null;
+        String lteYear = filterYearTo < Calendar.getInstance().get(Calendar.YEAR)
+                ? filterYearTo + "-12-31" : null;
+
+        int pageToFetch = nextTmdbPage;
+        Call<TVShowResponse> call = apiService.getTVShowsByGenre(
+                TMDBpath.discoverTVShows(), genreId, sortBy, gteYear, lteYear, pageToFetch);
         safeEnqueue(call, new Callback<TVShowResponse>() {
             @Override
-            public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
+            public void onResponse(@NonNull Call<TVShowResponse> call,
+                                   @NonNull Response<TVShowResponse> response) {
+                isLoading = false;
+                loadingIndicator.setVisibility(View.GONE);
                 if (response.isSuccessful() && response.body() != null) {
-                    TVShowResponse body = response.body();
-                    // Total results helps us calculate total custom pages
-                    int totalResults = body.getTotal_results();
-                    totalCustomPages = (int) Math.ceil((double) totalResults / ITEMS_PER_PAGE);
-
-                    if (body.getResults() != null) {
-                        accumulator.addAll(body.getResults());
+                    totalTmdbPages = response.body().getTotal_pages();
+                    List<TVShowModel> results = response.body().getResults();
+                    if (reset) {
+                        adapter.updateData(results != null ? results : new ArrayList<>());
+                        recyclerView.scrollToPosition(0);
+                    } else {
+                        if (results != null) adapter.appendData(results);
                     }
+                    nextTmdbPage = pageToFetch + 1;
                 }
-                onDone.run();
             }
 
             @Override
             public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
                 isLoading = false;
-                onDone.run();
+                loadingIndicator.setVisibility(View.GONE);
             }
         });
     }
 
-    @SuppressLint("SetTextI18n")
-    private void processResults(List<TVShowModel> combinedResults, int startItemIndex) {
-        isLoading = false;
-        // combinedResults starts from the beginning of firstTmdbPage, so we offset into it
-        // to find where our 18-item window actually starts.
-        int offsetInFirstPage = startItemIndex % 20;
-        
-        List<TVShowModel> subset = new ArrayList<>();
-        for (int i = offsetInFirstPage; i < offsetInFirstPage + ITEMS_PER_PAGE && i < combinedResults.size(); i++) {
-            subset.add(combinedResults.get(i));
-        }
-
-        tvByGenreAdapter.updateData(subset);
-        pageIndicator.setText("Page " + currentPage + " of " + totalCustomPages);
-        btnPrev.setEnabled(currentPage > 1);
-        btnNext.setEnabled(currentPage < totalCustomPages);
+    private void onItemClick(TVShowModel tv, View sharedElement) {
+        navigateTo(TVShowResultDetailsFragment.newInstance(tv.getTVShowId()), sharedElement, "poster_transition");
     }
 }

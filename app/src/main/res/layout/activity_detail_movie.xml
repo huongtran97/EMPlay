@@ -1,403 +1,458 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- EMPlay · DETAIL · MOVIE VIEW
-     Header variant B: 16:9 backdrop + overlapping poster (−44dp lift)
-     Sections: meta chips, actions, overview, Where to Watch, Cast, Collection, You May Also Like -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_base">
+    android:background="@color/bg_base"
+    android:fillViewport="true">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
+        <!-- BACKDROP + BACK BUTTON -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <ImageView
+                android:id="@+id/imgBackdrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/cd_backdrop"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_poster_gradient" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@drawable/scrim_top" />
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_margin="12dp"
+                android:background="@drawable/bg_circle_scrim"
+                android:src="@drawable/ic_chevron_left"
+                android:contentDescription="@string/cd_back"
+                android:padding="8dp" />
+
+        </FrameLayout>
+
+        <!-- POSTER + TITLE ROW -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:orientation="horizontal"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingBottom="0dp"
+            android:layout_marginTop="-44dp"
+            android:gravity="bottom"
+            android:clipChildren="false"
+            android:clipToPadding="false">
 
-            <!-- BACKDROP 16:9 -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="150dp">
+            <ImageView
+                android:id="@+id/imgPoster"
+                android:layout_width="92dp"
+                android:layout_height="132dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/bg_poster"
+                android:contentDescription="@string/cd_poster"
+                android:layout_marginEnd="12dp"
+                tools:background="#4A2A18" />
 
-                <ImageView
-                    android:id="@+id/img_backdrop"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/bg_dark_purple"
-                    android:contentDescription="@null"
-                    android:scaleType="centerCrop" />
-
-                <Button
-                    android:id="@+id/btn_back"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_margin="12dp"
-                    android:background="@drawable/bg_back_button"
-                    android:contentDescription="@string/cd_back"
-                    android:src="@drawable/ic_chevron_left" />
-
-            </FrameLayout>
-
-            <!-- Poster overlapping backdrop + title block -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="-44dp"
-                android:gravity="bottom"
-                android:orientation="horizontal"
-                android:paddingStart="13dp"
-                android:paddingEnd="13dp">
-
-                <ImageView
-                    android:id="@+id/img_poster"
-                    android:layout_width="92dp"
-                    android:layout_height="132dp"
-                    android:background="@drawable/bg_poster_placeholder"
-                    android:contentDescription="@null"
-                    android:elevation="2dp"
-                    android:scaleType="centerCrop" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:paddingBottom="4dp">
-
-                    <TextView
-                        android:id="@+id/tv_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="6dp"
-                        android:fontFamily="@font/playfair_display"
-                        android:text="Dune: Part Three"
-                        android:textColor="@color/text_1"
-                        android:textSize="@dimen/text_section_header" />
-
-                    <!-- Genre + rating chips -->
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:id="@+id/chip_genre"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/bg_chip_inactive"
-                            android:paddingStart="8dp"
-                            android:paddingTop="1dp"
-                            android:paddingEnd="8dp"
-                            android:paddingBottom="1dp"
-                            android:text="Sci-fi"
-                            android:textColor="@color/text_2"
-                            android:textSize="@dimen/text_badge" />
-
-                        <TextView
-                            android:id="@+id/chip_rating"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="5dp"
-                            android:background="@drawable/bg_chip_inactive"
-                            android:paddingStart="8dp"
-                            android:paddingTop="1dp"
-                            android:paddingEnd="8dp"
-                            android:paddingBottom="1dp"
-                            android:text="★ 8.2"
-                            android:textColor="@color/accent"
-                            android:textSize="@dimen/text_badge" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Certification / runtime / release chips -->
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="13dp"
-                android:paddingTop="9dp"
-                android:paddingBottom="10dp">
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginBottom="4dp">
 
                 <TextView
-                    android:id="@+id/chip_cert"
+                    android:id="@+id/tvNowInTheatersBadge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_chip_inactive"
-                    android:paddingStart="8dp"
-                    android:paddingTop="1dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="1dp"
-                    android:text="14A"
-                    android:textColor="@color/text_2"
-                    android:textSize="@dimen/text_badge" />
+                    android:layout_marginBottom="7dp"
+                    android:text="@string/now_in_theaters"
+                    android:textColor="#E53935"
+                    android:textSize="@dimen/text_badge"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="@drawable/bg_badge_theaters"
+                    android:visibility="gone" />
 
                 <TextView
-                    android:id="@+id/chip_runtime"
+                    android:id="@+id/tvMovieTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:background="@drawable/bg_chip_inactive"
-                    android:paddingStart="8dp"
-                    android:paddingTop="1dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="1dp"
-                    android:text="2h 46m"
-                    android:textColor="@color/text_2"
-                    android:textSize="@dimen/text_badge" />
-
-                <TextView
-                    android:id="@+id/chip_release"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="5dp"
-                    android:background="@drawable/bg_chip_inactive"
-                    android:paddingStart="8dp"
-                    android:paddingTop="1dp"
-                    android:paddingEnd="8dp"
-                    android:paddingBottom="1dp"
-                    android:text="22 May 2026"
-                    android:textColor="@color/text_2"
-                    android:textSize="@dimen/text_badge" />
-
-            </LinearLayout>
-
-            <!-- Action buttons: Watch Trailer + My List -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="13dp"
-                android:paddingEnd="13dp">
-
-                <Button
-                    android:id="@+id/btn_trailer"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1.3"
-                    android:background="@drawable/bg_btn_primary"
-                    android:fontFamily="@font/inter_semibold"
-                    android:padding="9dp"
-                    android:text="@string/action_watch_trailer"
-                    android:textColor="@color/on_accent"
-                    android:textSize="@dimen/text_divider_label" />
-
-                <LinearLayout
-                    android:id="@+id/btn_my_list"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="7dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_btn_stub"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="6dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/detail_btn_mylist"
-                        android:textColor="@color/text_1"
-                        android:textSize="@dimen/text_badge" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFamily="@font/inter"
-                        android:letterSpacing="0.1"
-                        android:text="@string/memorabilia_admit_one"
-                        android:textColor="@color/text_3"
-                        android:textSize="@dimen/text_caption" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- Overview -->
-            <TextView
-                android:id="@+id/tv_overview"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:lineSpacingMultiplier="1.6"
-                android:paddingStart="13dp"
-                android:paddingTop="14dp"
-                android:paddingEnd="13dp"
-                android:text="Paul Atreides faces the consequences of the holy war he set in motion…"
-                android:textColor="@color/text_2"
-                android:textSize="@dimen/text_divider_label" />
-
-            <!-- WHERE TO WATCH -->
-            <TextView
-                android:id="@+id/tv_where_label"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/inter_semibold"
-                android:paddingStart="13dp"
-                android:paddingTop="14dp"
-                android:paddingEnd="13dp"
-                android:paddingBottom="9dp"
-                android:text="@string/detail_section_where_to_watch"
-                android:textColor="@color/text_1"
-                android:textSize="@dimen/text_meta" />
-
-            <LinearLayout
-                android:id="@+id/row_providers"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="13dp"
-                android:paddingEnd="13dp" />
-
-            <!-- CAST -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="13dp"
-                android:paddingTop="14dp"
-                android:paddingEnd="13dp"
-                android:paddingBottom="9dp">
-
-                <TextView
-                    android:id="@+id/tv_cast_label"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:fontFamily="@font/inter_semibold"
-                    android:text="@string/detail_section_cast"
+                    android:layout_marginBottom="6dp"
+                    android:textSize="@dimen/text_headline"
+                    android:fontFamily="@font/playfair_display_medium"
                     android:textColor="@color/text_1"
-                    android:textSize="@dimen/text_meta" />
+                    android:lineSpacingMultiplier="1.15"
+                    tools:text="Dune: Part Three" />
 
-                <TextView
-                    android:id="@+id/tv_all_cast"
-                    android:layout_width="wrap_content"
+                <com.google.android.flexbox.FlexboxLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="4dp"
-                    android:text="@string/detail_all_cast"
-                    android:textColor="@color/text_3"
-                    android:textSize="@dimen/text_badge" />
+                    android:layout_marginBottom="10dp"
+                    app:flexWrap="wrap"
+                    app:alignItems="center"
+                    app:justifyContent="flex_start">
+
+                    <TextView
+                        android:id="@+id/chipGenre"
+                        style="@style/Widget.EMPlay.Chip"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        tools:text="Sci-fi" />
+
+                    <TextView
+                        android:id="@+id/chipCert"
+                        style="@style/Widget.EMPlay.Chip"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        android:visibility="gone"
+                        tools:text="14+" />
+
+                    <TextView
+                        android:id="@+id/chipRuntime"
+                        style="@style/Widget.EMPlay.Chip"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        tools:text="2h 46m" />
+
+                    <TextView
+                        android:id="@+id/chipReleaseDate"
+                        style="@style/Widget.EMPlay.Chip"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        tools:text="2026" />
+
+                    <TextView
+                        android:id="@+id/chipCountry"
+                        style="@style/Widget.EMPlay.Chip"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        tools:text="KR" />
+
+                    <TextView
+                        android:id="@+id/chipRating"
+                        style="@style/Widget.EMPlay.ChipAccent"
+                        android:layout_marginEnd="5dp"
+                        android:layout_marginBottom="5dp"
+                        tools:text="★ 8.2" />
+
+                </com.google.android.flexbox.FlexboxLayout>
+
 
             </LinearLayout>
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="13dp"
-                android:scrollbars="none">
+        </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/row_cast"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="13dp"
+        android:paddingEnd="13dp"
+        android:paddingTop="10dp">
 
-            </HorizontalScrollView>
+        <!-- OVERVIEW -->
+        <TextView
+            android:id="@+id/tvOverview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:textSize="@dimen/text_meta"
+            android:textColor="@color/text_2"
+            android:lineSpacingMultiplier="1.6"
+            android:ellipsize="end"
+            tools:text="Overview" />
 
-            <!-- PART OF collection -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/card_collection"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="13dp"
-                android:layout_marginTop="14dp"
-                android:layout_marginEnd="13dp"
-                app:cardBackgroundColor="@color/bg_surface"
-                app:cardCornerRadius="10dp"
+        <TextView
+            android:id="@+id/read_more_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp"
+            android:text="@string/read_more"
+            android:textColor="@color/accent"
+            android:textSize="@dimen/text_meta"
+            android:textStyle="bold"
+            android:visibility="gone" />
+    </LinearLayout>
+
+        <!-- CTA BUTTONS -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2.3"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingTop="9dp"
+            android:paddingBottom="@dimen/spacing_3">
+
+            <Button
+                android:id="@+id/btnWatchTrailer"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1.3"
+                android:layout_marginEnd="7dp"
+                android:text="@string/action_watch_trailer"
+                android:textSize="@dimen/text_body"
+                android:textStyle="bold"
+                android:textColor="@color/on_accent"
+                android:backgroundTint="@color/accent"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                app:cornerRadius="8dp" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/btnMyList"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/ticket_tear_line"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="8dp"
                 app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="10dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/inter"
-                            android:letterSpacing="0.12"
-                            android:text="@string/detail_part_of"
-                            android:textColor="@color/text_3"
-                            android:textSize="@dimen/text_caption" />
-
-                        <TextView
-                            android:id="@+id/tv_collection_name"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:fontFamily="@font/playfair_display"
-                            android:text="The Dune Collection"
-                            android:textColor="@color/text_1"
-                            android:textSize="@dimen/text_meta" />
-
-                    </LinearLayout>
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center">
 
                     <TextView
-                        android:id="@+id/tv_collection_count"
+                        android:id="@+id/tvMyList"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="3 movies ›"
-                        android:textColor="@color/accent"
-                        android:textSize="@dimen/text_badge" />
+                        android:text="@string/detail_btn_mylist"
+                        android:textSize="@dimen/text_chip"
+                        android:textColor="@color/text_1" />
+
+                    <TextView
+                        android:id="@+id/tvAdmitOne"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/memorabilia_admit_one"
+                        android:textSize="@dimen/text_chip"
+                        android:letterSpacing="0.08"
+                        android:textColor="@color/text_3" />
 
                 </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
-
-            <!-- YOU MAY ALSO LIKE -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingStart="13dp"
-                android:paddingTop="14dp"
-                android:paddingEnd="13dp"
-                android:paddingBottom="9dp">
-
-                <TextView
-                    android:id="@+id/tv_also_like_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/inter_semibold"
-                    android:text="@string/detail_section_also_like"
-                    android:textColor="@color/text_1"
-                    android:textSize="@dimen/text_meta" />
-
-            </LinearLayout>
-
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="13dp"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:id="@+id/row_also_like"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
-
-            </HorizontalScrollView>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
 
-    </ScrollView>
 
-</FrameLayout>
+
+        <!-- WHERE TO WATCH -->
+        <include
+            android:id="@+id/wtw_released"
+            layout="@layout/wtw_released_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <include
+            android:id="@+id/wtw_unreleased"
+            layout="@layout/wtw_unreleased_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <!-- CAST -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingTop="14dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="9dp">
+
+                <TextView
+                    android:id="@+id/tvCastLabel"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/detail_section_cast"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_1" />
+
+                <TextView
+                    android:id="@+id/tvAllCast"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/detail_all_cast"
+                    android:textSize="@dimen/text_body"
+                    android:textColor="@color/text_3"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false"
+                android:scrollbars="none" />
+
+        </LinearLayout>
+
+        <!-- PART OF COLLECTION -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingTop="14dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardCollection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/bg_surface"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/border"
+                app:strokeWidth="0.5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <!-- Clickable header row -->
+                    <LinearLayout
+                        android:id="@+id/layoutCollectionHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tvPartOfLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/detail_part_of"
+                                android:textSize="@dimen/text_badge"
+                                android:letterSpacing="0.12"
+                                android:textColor="@color/text_3" />
+
+                            <TextView
+                                android:id="@+id/tvCollectionName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="3dp"
+                                android:textSize="13sp"
+                                android:fontFamily="@font/playfair_display_medium"
+                                android:textColor="@color/text_1"
+                                tools:text="The Dune Collection" />
+
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tvCollectionCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:textSize="13sp"
+                            android:textColor="@color/text_3"
+                            tools:text="3 movies" />
+
+                        <ImageView
+                            android:id="@+id/ivCollectionChevron"
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginStart="6dp"
+                            android:src="@drawable/ic_chevron_right"
+                            android:contentDescription="@null"
+                            app:tint="@color/text_3" />
+
+                    </LinearLayout>
+
+                    <!-- Dropdown list -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvCollection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+        <!-- YOU MAY ALSO LIKE -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="20dp">
+
+            <TextView
+                android:id="@+id/tvAlsoLikeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="9dp"
+                android:text="@string/detail_section_also_like"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_1" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvAlsoLike"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="never"
+                android:clipToPadding="false"
+                tools:listitem="@layout/movie_item"
+                tools:itemCount="4" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

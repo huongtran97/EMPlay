@@ -1,10 +1,8 @@
 package emplay.entertainment.emplay.fragment.details;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,72 +10,78 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.transition.TransitionInflater;
 
 import com.bumptech.glide.Glide;
+import com.google.android.flexbox.FlexDirection;
+import com.google.android.flexbox.FlexWrap;
+import com.google.android.flexbox.FlexboxLayoutManager;
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.tabs.TabLayout;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.adapter.common.CastAdapter;
+import emplay.entertainment.emplay.adapter.common.ProviderAdapter;
+import emplay.entertainment.emplay.adapter.movie.CollectionAdapter;
 import emplay.entertainment.emplay.adapter.movie.SuggestionMovieAdapter;
 import emplay.entertainment.emplay.api.auth.TMDBWatchlistApiService;
 import emplay.entertainment.emplay.api.auth.model.TMDBAccountStatesResponse;
 import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistRequest;
 import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistStatusResponse;
-import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
-import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
+import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.api.movie.CollectionResponse;
 import emplay.entertainment.emplay.api.movie.MovieCreditsResponse;
 import emplay.entertainment.emplay.api.movie.MovieDetailsResponse;
+import emplay.entertainment.emplay.api.movie.MovieReleaseDatesResponse;
 import emplay.entertainment.emplay.api.movie.MovieSimilarResponse;
 import emplay.entertainment.emplay.api.movie.MoviesTrailerResponses;
-import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
-import emplay.entertainment.emplay.databinding.SearchResultMovieViewBinding;
-import emplay.entertainment.emplay.fragment.common.BaseFragment;
-import emplay.entertainment.emplay.models.common.CastModel;
-import emplay.entertainment.emplay.models.movie.MovieModel;
-import emplay.entertainment.emplay.tool.LanguageMapper;
-import emplay.entertainment.emplay.tool.PaginationHelper;
-import emplay.entertainment.emplay.tool.ReadHelper;
-import emplay.entertainment.emplay.tool.UiUtils;
-import emplay.entertainment.emplay.tool.WatchProviderHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
+import emplay.entertainment.emplay.databinding.ActivityDetailMovieBinding;
+import emplay.entertainment.emplay.databinding.WtwReleasedViewBinding;
+import emplay.entertainment.emplay.fragment.common.BaseFragment;
+import emplay.entertainment.emplay.fragment.common.SeeAllFragment;
+import emplay.entertainment.emplay.tool.ReadHelper;
+import emplay.entertainment.emplay.tool.WatchProviderHelper;
+import emplay.entertainment.emplay.models.common.CastModel;
+import emplay.entertainment.emplay.models.common.ProviderModel;
+import emplay.entertainment.emplay.models.common.RegionProvidersModel;
+import emplay.entertainment.emplay.models.movie.MovieModel;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieResultDetailsFragment extends BaseFragment {
     private static final String ARG_MOVIE_ID = "MOVIE_ID";
-    private static final int PAGE_SIZE = 9;
-    private SearchResultMovieViewBinding binding;
+
+    private ActivityDetailMovieBinding binding;
     private int movieId;
-    private boolean isNowPlaying = false;
     private final List<CastModel> castList = new ArrayList<>();
-    private final List<MovieModel> allSuggestions = new ArrayList<>();
-    private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private CastAdapter castAdapter;
-    private SuggestionMovieAdapter suggestionMovieAdapter;
+    private SuggestionMovieAdapter alsoLikeAdapter;
+    private CollectionAdapter collectionAdapter;
+    private boolean isCollectionExpanded = false;
+    private Map<String, RegionProvidersModel> watchProviderResults;
+    private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private MovieApiService apiService;
     private TMDBWatchlistApiService watchlistApiService;
     private DatabaseHelper databaseHelper;
-    private Map<String, RegionProvidersModel> watchProviderResults;
-    private PaginationHelper<MovieModel> paginationHelper;
     private boolean tmdbMovieInWatchlist = false;
+    private boolean isNowPlaying = false;
+    private boolean userHasSelectedRegion = false;
     private android.os.Handler fetchHandler;
 
     public static MovieResultDetailsFragment newInstance(int movieId) {
@@ -88,53 +92,49 @@ public class MovieResultDetailsFragment extends BaseFragment {
         return fragment;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setSharedElementEnterTransition(TransitionInflater.from(requireContext())
+                .inflateTransition(android.R.transition.move));
+    }
+
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = SearchResultMovieViewBinding.inflate(inflater, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        binding = ActivityDetailMovieBinding.inflate(inflater, container, false);
 
-        databaseHelper = DatabaseHelper.getInstance(requireActivity());
         apiService = ApiClient.getClient().create(MovieApiService.class);
         watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
+        databaseHelper = DatabaseHelper.getInstance(requireContext());
 
-        castAdapter = new CastAdapter(castList, requireActivity(), cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
-        suggestionMovieAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(), movie -> {
-            if (movie != null) navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()));
-        });
+        castAdapter = new CastAdapter(castList, requireContext(),
+                cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
+        binding.rvCast.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvCast.setAdapter(castAdapter);
 
-        binding.searchResultCastRecyclerview.setAdapter(castAdapter);
-        binding.searchResultCastRecyclerview.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.tvAllCast.setOnClickListener(v ->
+                navigateTo(SeeAllFragment.newInstance(SeeAllFragment.TYPE_CAST_MOVIE, movieId,
+                        getString(R.string.detail_section_cast))));
 
-        binding.searchResultSuggestionRecyclerview.setAdapter(suggestionMovieAdapter);
-        binding.searchResultSuggestionRecyclerview.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-        binding.searchResultSuggestionRecyclerview.setNestedScrollingEnabled(false);
+        alsoLikeAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(),
+                (movie, view) -> navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()),
+                        view, "poster_transition"));
+        binding.rvAlsoLike.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        binding.rvAlsoLike.setAdapter(alsoLikeAdapter);
 
-        paginationHelper = new PaginationHelper<>(PAGE_SIZE, allSuggestions, new PaginationHelper.PaginationCallback<MovieModel>() {
-            @Override
-            public void onPageUpdated(List<MovieModel> pageItems) {
-                suggestionMovieAdapter.updateData(pageItems);
-            }
+        collectionAdapter = new CollectionAdapter(new ArrayList<>(), requireContext(),
+                id -> navigateTo(MovieResultDetailsFragment.newInstance(id)));
+        binding.rvCollection.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvCollection.setAdapter(collectionAdapter);
 
-            @Override
-            public void onUiUpdate(int currentPage, int totalPages, boolean hasPrev, boolean hasNext) {
-                PaginationHelper.updatePaginationBar(binding.suggestionPaginationBar, 
-                        binding.suggestionPageIndicator, 
-                        binding.suggestionBtnPrev, 
-                        binding.suggestionBtnNext, 
-                        currentPage, totalPages, hasPrev, hasNext);
-            }
-        });
+        binding.layoutCollectionHeader.setOnClickListener(v -> toggleCollectionDropdown());
 
-        binding.suggestionBtnPrev.setOnClickListener(v -> {
-            paginationHelper.prevPage();
-            binding.searchResultSuggestionRecyclerview.scrollToPosition(0);
-        });
-        binding.suggestionBtnNext.setOnClickListener(v -> {
-            paginationHelper.nextPage();
-            binding.searchResultSuggestionRecyclerview.scrollToPosition(0);
-        });
-
-        binding.movieInfo.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
+        binding.btnBack.setOnClickListener(v ->
+                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         if (getArguments() != null) {
             movieId = getArguments().getInt(ARG_MOVIE_ID, -1);
@@ -144,34 +144,12 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 fetchHandler.postDelayed(this::fetchCastList,       150);
                 fetchHandler.postDelayed(this::fetchSuggestionList, 300);
                 fetchHandler.postDelayed(this::fetchTrailers,       450);
+                fetchHandler.postDelayed(this::fetchCertification,  600);
+                fetchHandler.postDelayed(this::fetchMovieProviders, 750);
             }
         }
 
         return binding.getRoot();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        // Edge-to-edge hero: clear root top padding, push buttons below status bar instead
-        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
-            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(v.getPaddingLeft(), 0, v.getPaddingRight(), v.getPaddingBottom());
-            binding.movieInfo.topButtonsRow.setPadding(0, bars.top, 0, 0);
-            return insets;
-        });
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        setDarkStatusBar();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        requireActivity().getWindow().setStatusBarColor(0xFF0A0A0A);
     }
 
     @Override
@@ -181,163 +159,167 @@ public class MovieResultDetailsFragment extends BaseFragment {
             fetchHandler.removeCallbacksAndMessages(null);
             fetchHandler = null;
         }
-        cancelCountdown();
         binding = null;
     }
 
-    @SuppressLint({"SetTextI18n", "DefaultLocale"})
-    private void bindMovieDetails(MovieDetailsResponse mDetails) {
+    private void fetchMovieDetails() {
+        safeEnqueue(apiService.getMovieDetails(TMDBpath.movieDetails(movieId)),
+                new Callback<MovieDetailsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieDetailsResponse> call,
+                                           @NonNull Response<MovieDetailsResponse> response) {
+                        if (response.isSuccessful() && response.body() != null)
+                            bindMovieDetails(response.body());
+                    }
+                    @Override public void onFailure(@NonNull Call<MovieDetailsResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void fetchCollectionCount(int collectionId) {
+        safeEnqueue(apiService.getCollectionDetails(TMDBpath.collectionDetails(collectionId)),
+                new Callback<CollectionResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<CollectionResponse> call,
+                                           @NonNull Response<CollectionResponse> response) {
+                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
+                        List<CollectionResponse.Part> parts = response.body().getParts();
+                        int count = parts != null ? parts.size() : 0;
+                        if (count > 0) {
+                            binding.tvCollectionCount.setText(
+                                    String.format(java.util.Locale.getDefault(), "%d movie%s", count, count == 1 ? "" : "s"));
+                            collectionAdapter.updateData(parts);
+                        }
+                    }
+                    @Override public void onFailure(@NonNull Call<CollectionResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void toggleCollectionDropdown() {
+        isCollectionExpanded = !isCollectionExpanded;
+        androidx.transition.TransitionManager.beginDelayedTransition(
+                (android.view.ViewGroup) binding.cardCollection);
+        binding.rvCollection.setVisibility(isCollectionExpanded ? View.VISIBLE : View.GONE);
+        binding.ivCollectionChevron.animate()
+                .rotation(isCollectionExpanded ? 90f : 0f)
+                .setDuration(200)
+                .start();
+    }
+
+    private void bindMovieDetails(MovieDetailsResponse d) {
         if (binding == null) return;
 
-        // Title & share
-        binding.movieInfo.movieTitle.setText(mDetails.getTitle());
-        binding.movieInfo.btnShare.setOnClickListener(v -> {
-            String slug = mDetails.getTitle().toLowerCase(Locale.ROOT).replace(" ", "-");
-            String url = "https://www.themoviedb.org/movie/" + mDetails.getId() + "-" + slug;
-            Intent shareIntent = new Intent(Intent.ACTION_SEND);
-            shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, mDetails.getTitle() + "\n" + url);
-            startActivity(Intent.createChooser(shareIntent, "Share via"));
-        });
+        Glide.with(requireContext())
+                .load(ImageUrl.of(ImageUrl.BACKDROP, d.getBackdropPath()))
+                .placeholder(R.drawable.bg_poster_placeholder)
+                .into(binding.imgBackdrop);
 
-        // Rating
-        binding.movieInfo.tvPosterRating.setText(String.format("★ %.1f", mDetails.getVoteAverage()));
+        Glide.with(requireContext())
+                .load(ImageUrl.of(ImageUrl.POSTER, d.getPosterPath()))
+                .placeholder(R.drawable.bg_poster_placeholder)
+                .into(binding.imgPoster);
 
-        // Images
-        String backdropPath = mDetails.getBackdropPath();
-        Glide.with(this)
-                .load(backdropPath != null && !backdropPath.isEmpty()
-                        ? ImageUrl.BACKDROP + backdropPath
-                        : ImageUrl.POSTER + mDetails.getPosterPath())
-                .error(R.drawable.placeholder_image)
-                .into(binding.movieInfo.backdropView);
+        binding.tvMovieTitle.setText(d.getTitle());
+        binding.chipRating.setText(String.format(java.util.Locale.getDefault(),
+                "★ %.1f", d.getVoteAverage()));
+        binding.tvOverview.setText(d.getOverview());
+        ReadHelper.setup(binding.tvOverview, binding.readMoreText, false, expanded -> {});
 
-        // Release date — year only
-        String rd = mDetails.getReleaseDate();
-        binding.movieInfo.movieReleaseDate.setText((rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "");
+        List<MovieDetailsResponse.Genre> genres = d.getGenres();
+        if (genres != null && !genres.isEmpty()) {
+            binding.chipGenre.setText(genres.get(0).getName());
+            binding.chipGenre.setVisibility(View.VISIBLE);
+        } else {
+            binding.chipGenre.setVisibility(View.GONE);
+        }
 
-        // Determine if the movie is currently in theaters (released within past 45 days)
-        if (rd != null && !rd.isEmpty()) {
+        int runtime = d.getRuntime();
+        if (runtime > 0) {
+            binding.chipRuntime.setText(String.format(java.util.Locale.getDefault(),
+                    "%dh %dm", runtime / 60, runtime % 60));
+        }
+
+        String rd = d.getReleaseDate();
+        binding.chipReleaseDate.setText((rd != null && rd.length() >= 4) ? rd.substring(0, 4) : "");
+        List<MovieDetailsResponse.ProductionCountry> countries = d.getProduction_countries();
+        if (countries != null && !countries.isEmpty()) {
+            binding.chipCountry.setText(countries.get(0).getName());
+        }
+
+
+        if (rd != null && !rd.isEmpty() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             try {
                 LocalDate releaseDate = LocalDate.parse(rd);
-                long days = java.time.temporal.ChronoUnit.DAYS.between(releaseDate, LocalDate.now());
-                isNowPlaying = days >= 0 && days <= 45;
-            } catch (Exception ignored) {
-                isNowPlaying = false;
-            }
-        }
-        fetchWatchProviders();
-        // Runtime
-        binding.movieInfo.movieRuntime.setText(mDetails.getRuntime() + " min");
-
-        // Language
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            binding.movieInfo.movieLanguage.setText(" " + LanguageMapper.getLanguageName(mDetails.getOriginalLanguage()));
-        }
-
-        // Production country
-        List<MovieDetailsResponse.ProductionCountry> countries = mDetails.getProduction_countries();
-        if (countries != null && !countries.isEmpty()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                String countryNames = countries.stream()
-                        .map(MovieDetailsResponse.ProductionCountry::getName)
-                        .collect(Collectors.joining(", "));
-                binding.movieInfo.movieProductCountry.setText(countryNames);
-            }
-        } else {
-            binding.movieInfo.movieProductCountry.setVisibility(View.GONE);
+                boolean isUnreleased = !releaseDate.isBefore(LocalDate.now());
+                long daysOut = java.time.temporal.ChronoUnit.DAYS.between(releaseDate, LocalDate.now());
+                isNowPlaying = !isUnreleased && daysOut <= 45;
+                binding.tvNowInTheatersBadge.setVisibility(isNowPlaying ? View.VISIBLE : View.GONE);
+                binding.wtwReleased.getRoot().setVisibility((!isUnreleased && !isNowPlaying) ? View.VISIBLE : View.GONE);
+                binding.wtwUnreleased.getRoot().setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
+                if (isUnreleased) {
+                    startCountdown(releaseDate, binding.wtwUnreleased, () -> {
+                        if (binding == null) return;
+                        binding.wtwUnreleased.getRoot().setVisibility(View.GONE);
+                        binding.wtwReleased.getRoot().setVisibility(View.VISIBLE);
+                    });
+                }
+            } catch (Exception ignored) {}
         }
 
-        // Size chip icons to match text
-        sizeChipIcon(binding.movieInfo.movieReleaseDate);
-        sizeChipIcon(binding.movieInfo.movieRuntime);
-        sizeChipIcon(binding.movieInfo.movieLanguage);
-        sizeChipIcon(binding.movieInfo.movieProductCountry);
+        MovieDetailsResponse.BelongsToCollection collection = d.getBelongsToCollection();
+        if (collection != null && collection.getName() != null) {
+            binding.tvCollectionName.setText(collection.getName());
+            binding.cardCollection.setVisibility(View.VISIBLE);
+            fetchCollectionCount(collection.getId());
+        }
 
-        // Genre chips
-        List<String> genres = new ArrayList<>();
-        for (MovieDetailsResponse.Genre g : mDetails.getGenres()) genres.add(g.getName());
-
-        buildGenreChips(binding.movieInfo.movieInfoGenres, genres);
-
-        // Overview and read more/less
-        binding.movieInfo.searchResultOverview.setText(mDetails.getOverview());
-        ReadHelper.setup(binding.movieInfo.searchResultOverview, binding.movieInfo.readMoreText, false, null);
-
-        // Images
-        Glide.with(this)
-                .load(ImageUrl.POSTER + mDetails.getPosterPath())
-                .error(R.drawable.placeholder_image)
-                .into(binding.movieInfo.imageView);
-
-        // Watchlist button
-        updateWatchlistButton(mDetails);
-
-        // Coming soon / released visibility
-        applyReleaseVisibility(
-                mDetails.getReleaseDate(),
-                binding.movieInfo.wtwReleased.getRoot(),
-                binding.movieInfo.wtwUnreleased.getRoot(),
-                binding.movieInfo.comingSoonBadge,
-                () -> startCountdown(LocalDate.parse(mDetails.getReleaseDate()),
-                        binding.movieInfo.wtwUnreleased, () -> {
-                            binding.movieInfo.wtwUnreleased.getRoot().setVisibility(View.GONE);
-                            binding.movieInfo.wtwReleased.getRoot().setVisibility(View.VISIBLE);
-                        })
-        );
-        // Blurred background
-        UiUtils.setupBlurredBackground(this, mDetails.getBackdropPath(), mDetails.getPosterPath(), binding.searchResultFragment);
-
+        updateWatchlistButton(d);
     }
 
     private void updateWatchlistButton(MovieDetailsResponse movieDetails) {
         AuthManager auth = AuthManager.getInstance(requireContext());
-        switch (auth.getAuthType()) {
-            case NONE:
-            case GUEST:
-                binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
-                binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> showLoginPromptDialog());
-                break;
-            case GOOGLE:
-                setupGoogleMovieWatchlistButton(auth.getUserId(), movieDetails);
-                break;
-            case TMDB:
-                setupTMDBMovieWatchlistButton(auth, movieDetails);
-                break;
+        if (auth.getAuthType() == AuthManager.AuthType.TMDB) {
+            setupTMDBMovieWatchlistButton(auth, movieDetails);
+        } else if (auth.getAuthType() == AuthManager.AuthType.GOOGLE) {
+            setupGoogleMovieWatchlistButton(auth.getUserId(), movieDetails);
+        } else {
+            binding.btnMyList.setOnClickListener(v -> showLoginPromptDialog());
         }
     }
 
     private void setupGoogleMovieWatchlistButton(String userId, MovieDetailsResponse movieDetails) {
-        updateSaveBtnIcon(userId, movieDetails.getId());
-        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> new Thread(() -> {
-            if (WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId())) {
+        updateSaveBtnState(userId, movieDetails.getId());
+        binding.btnMyList.setOnClickListener(v -> new Thread(() -> {
+            boolean wasSaved = WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId());
+            if (wasSaved) {
                 WatchlistHelper.removeMovie(databaseHelper, userId, movieDetails.getId());
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
-                    binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
+                    applyMyListState(false);
                     Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
                 });
             } else {
                 String genresString = buildGenresString(movieDetails.getGenres());
-                boolean saved = WatchlistHelper.saveMovie(databaseHelper, userId, movieDetails.getId(),
-                        movieDetails.getTitle(), movieDetails.getPosterPath(), genresString,
+                boolean saved = WatchlistHelper.saveMovie(databaseHelper, userId,
+                        movieDetails.getId(), movieDetails.getTitle(),
+                        movieDetails.getPosterPath(), genresString,
                         movieDetails.getVoteAverage()) != -1;
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
-                    binding.movieInfo.icLibrary.setImageResource(
-                            saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
-                    Toast.makeText(requireContext(),
-                            saved ? "Movie added to library" : "Failed to add Movie",
-                            Toast.LENGTH_SHORT).show();
+                    if (saved) {
+                        applyMyListState(true);
+                        Toast.makeText(requireContext(), "Movie added to library", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to add Movie", Toast.LENGTH_SHORT).show();
+                    }
                 });
             }
         }).start());
     }
 
     private void setupTMDBMovieWatchlistButton(AuthManager auth, MovieDetailsResponse movieDetails) {
-        binding.movieInfo.icLibrary.setImageResource(R.drawable.ic_watchlist);
-        binding.movieInfo.addToLibraryBtn.setEnabled(false);
-
+        binding.btnMyList.setEnabled(false);
         safeEnqueue(watchlistApiService.getAccountStates(
                 TMDBpath.movieAccountStates(movieDetails.getId()), auth.getTMDBSessionId()),
                 new Callback<TMDBAccountStatesResponse>() {
@@ -349,25 +331,24 @@ public class MovieResultDetailsFragment extends BaseFragment {
                                 && response.body() != null && response.body().watchlist;
                         applyTMDBMovieWatchlistState(auth, movieDetails.getId());
                     }
-
                     @Override
-                    public void onFailure(@NonNull Call<TMDBAccountStatesResponse> call, @NonNull Throwable t) {
-                        if (binding != null) binding.movieInfo.addToLibraryBtn.setEnabled(true);
+                    public void onFailure(@NonNull Call<TMDBAccountStatesResponse> call,
+                                          @NonNull Throwable t) {
+                        if (binding != null) binding.btnMyList.setEnabled(true);
                     }
                 });
     }
 
     private void applyTMDBMovieWatchlistState(AuthManager auth, int mediaId) {
         if (binding == null) return;
-        binding.movieInfo.icLibrary.setImageResource(tmdbMovieInWatchlist ? R.drawable.ic_check : R.drawable.ic_watchlist);
-        binding.movieInfo.addToLibraryBtn.setEnabled(true);
-        binding.movieInfo.addToLibraryBtn.setOnClickListener(v -> toggleTMDBMovieWatchlist(auth, mediaId));
+        applyMyListState(tmdbMovieInWatchlist);
+        binding.btnMyList.setEnabled(true);
+        binding.btnMyList.setOnClickListener(v -> toggleTMDBMovieWatchlist(auth, mediaId));
     }
 
     private void toggleTMDBMovieWatchlist(AuthManager auth, int mediaId) {
-        binding.movieInfo.addToLibraryBtn.setEnabled(false);
+        binding.btnMyList.setEnabled(false);
         boolean addToWatchlist = !tmdbMovieInWatchlist;
-
         safeEnqueue(watchlistApiService.updateWatchlist(
                 TMDBpath.accountAddToWatchlist(auth.getTMDBAccountId()),
                 auth.getTMDBSessionId(),
@@ -379,219 +360,286 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         if (binding == null) return;
                         if (response.isSuccessful() && response.body() != null) {
                             tmdbMovieInWatchlist = addToWatchlist;
+                            applyMyListState(tmdbMovieInWatchlist);
                             Toast.makeText(requireContext(),
                                     addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist",
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
                         }
-                        applyTMDBMovieWatchlistState(auth, mediaId);
+                        binding.btnMyList.setEnabled(true);
                     }
-
                     @Override
-                    public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call, @NonNull Throwable t) {
+                    public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call,
+                                          @NonNull Throwable t) {
                         if (binding != null) {
                             Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
-                            applyTMDBMovieWatchlistState(auth, mediaId);
+                            binding.btnMyList.setEnabled(true);
                         }
                     }
                 });
     }
 
-    private void updateSaveBtnIcon(String userId, int id) {
+    private void applyMyListState(boolean isSaved) {
+        if (binding == null || !isAdded()) return;
+        MaterialCardView card = binding.btnMyList;
+        int accentColor  = ContextCompat.getColor(requireContext(), R.color.accent);
+        int borderColor  = ContextCompat.getColor(requireContext(), R.color.border);
+        int onAccent     = ContextCompat.getColor(requireContext(), R.color.on_accent);
+        int textColor1   = ContextCompat.getColor(requireContext(), R.color.text_1);
+
+        card.setCardBackgroundColor(isSaved ? accentColor : android.graphics.Color.TRANSPARENT);
+        card.setStrokeColor(isSaved ? accentColor : borderColor);
+        binding.tvMyList.setText(isSaved ? R.string.detail_saved : R.string.detail_btn_mylist);
+        binding.tvMyList.setTextColor(isSaved ? onAccent : textColor1);
+        binding.tvAdmitOne.setVisibility(isSaved ? View.GONE : View.VISIBLE);
+    }
+
+    private void updateSaveBtnState(String userId, int id) {
         new Thread(() -> {
             boolean saved = WatchlistHelper.isMovieSaved(databaseHelper, userId, id);
             safeRunOnUiThread(() -> {
                 if (binding == null) return;
-                binding.movieInfo.icLibrary.setImageResource(
-                        saved ? R.drawable.ic_check : R.drawable.ic_watchlist);
+                applyMyListState(saved);
             });
         }).start();
     }
 
     private String buildGenresString(List<MovieDetailsResponse.Genre> genres) {
-        if (genres == null) return "";
+        if (genres == null || genres.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
-        for (MovieDetailsResponse.Genre g : genres) {
-            if (sb.length() > 0) sb.append(",");
-            sb.append(g.getName());
+        for (int i = 0; i < genres.size(); i++) {
+            sb.append(genres.get(i).getName());
+            if (i < genres.size() - 1) sb.append(",");
         }
         return sb.toString();
     }
 
-    private void updateTrailerButton(List<MoviesTrailerResponses.TrailerModel> trailers) {
+    private void fetchCastList() {
+        safeEnqueue(apiService.getMovieCredits(TMDBpath.movieCredits(movieId)),
+                new Callback<MovieCreditsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieCreditsResponse> call,
+                                           @NonNull Response<MovieCreditsResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<CastModel> newCast = new ArrayList<>();
+                            for (MovieCreditsResponse.Cast c : response.body().getCast()) {
+                                newCast.add(new CastModel(c.getId(), c.getCastName(),
+                                        c.getProfilePath(), c.getCharacter()));
+                            }
+                            castAdapter.updateData(newCast.subList(0, Math.min(10, newCast.size())));
+                        }
+                    }
+                    @Override public void onFailure(@NonNull Call<MovieCreditsResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void fetchSuggestionList() {
+        safeEnqueue(apiService.getMovieSimilar(TMDBpath.movieSimilar(movieId)),
+                new Callback<MovieSimilarResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieSimilarResponse> call,
+                                           @NonNull Response<MovieSimilarResponse> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            List<MovieModel> results = new ArrayList<>(response.body().getResults());
+                            alsoLikeAdapter.updateData(results.subList(0, Math.min(10, results.size())));
+                            if (binding != null && results.size() > 10) {
+                                alsoLikeAdapter.setShowMoreItem(true,
+                                        () -> navigateTo(SeeAllFragment.newInstance(
+                                                SeeAllFragment.TYPE_SIMILAR_MOVIE, movieId,
+                                                getString(R.string.detail_section_also_like))));
+                            }
+                        }
+                    }
+                    @Override public void onFailure(@NonNull Call<MovieSimilarResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void fetchTrailers() {
+        safeEnqueue(apiService.getMoviesTrailer(TMDBpath.movieTrailer(movieId)),
+                new Callback<MoviesTrailerResponses>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MoviesTrailerResponses> call,
+                                           @NonNull Response<MoviesTrailerResponses> response) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            trailers = response.body().getResults();
+                            updateTrailerButton();
+                        }
+                    }
+                    @Override public void onFailure(@NonNull Call<MoviesTrailerResponses> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void updateTrailerButton() {
         if (binding == null) return;
-        this.trailers = trailers != null ? trailers : new ArrayList<>();
-        binding.movieInfo.trailerBtn.setOnClickListener(v -> {
-            if (!this.trailers.isEmpty()) {
-                String videoKey = this.trailers.get(0).getKey();
+        binding.btnWatchTrailer.setOnClickListener(v -> {
+            if (!trailers.isEmpty()) {
                 Intent intent = new Intent(getContext(), TrailerActivity.class);
-                intent.putExtra("TRAILER_ID", videoKey);
+                intent.putExtra("TRAILER_ID", trailers.get(0).getKey());
                 startActivity(intent);
             } else {
                 Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
             }
         });
-
     }
 
-    private void applyWatchProviders(String region) {
-        if (binding == null) return;
-        binding.movieInfo.wtwReleased.tvRegion.setText(region);
-        binding.movieInfo.wtwReleased.layoutWtwEmpty.setVisibility(View.GONE);
-        binding.movieInfo.wtwReleased.rvProviders.setVisibility(View.VISIBLE);
-        binding.movieInfo.wtwReleased.tabLayoutWtw.setVisibility(View.VISIBLE);
-        RegionProvidersModel providers = watchProviderResults.get(region);
-        if (providers != null) {
-            WatchProviderHelper.setupProviderTabs(requireContext(),
-                    binding.movieInfo.wtwReleased.tabLayoutWtw,
-                    binding.movieInfo.wtwReleased.rvProviders, providers);
-        } else {
-            handleNoWatchProviders();
+    private void fetchCertification() {
+        safeEnqueue(apiService.getMovieReleaseDates(TMDBpath.movieReleaseDates(movieId)),
+                new Callback<MovieReleaseDatesResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MovieReleaseDatesResponse> call,
+                                           @NonNull Response<MovieReleaseDatesResponse> response) {
+                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
+                        String cert = parseCaCertification(response.body());
+                        if (cert != null && !cert.isEmpty()) {
+                            binding.chipCert.setText(cert);
+                            binding.chipCert.setVisibility(View.VISIBLE);
+                        }
+                    }
+                    @Override public void onFailure(@NonNull Call<MovieReleaseDatesResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private String parseCaCertification(MovieReleaseDatesResponse response) {
+        if (response.getResults() == null) return null;
+        String ca = null, us = null;
+        for (MovieReleaseDatesResponse.CountryReleaseDates entry : response.getResults()) {
+            List<MovieReleaseDatesResponse.ReleaseDate> dates = entry.getReleaseDates();
+            if (dates == null || dates.isEmpty()) continue;
+            String cert = firstNonEmptyCert(dates);
+            if (cert == null) continue;
+            if ("CA".equals(entry.getCountry())) ca = cert;
+            else if ("US".equals(entry.getCountry()) && us == null) us = cert;
         }
+        return ca != null ? ca : us;
     }
 
-    @SuppressLint("SetTextI18n")
+    private String firstNonEmptyCert(List<MovieReleaseDatesResponse.ReleaseDate> dates) {
+        for (MovieReleaseDatesResponse.ReleaseDate d : dates) {
+            if (d.getType() == 3 && d.getCertification() != null && !d.getCertification().isEmpty())
+                return d.getCertification();
+        }
+        for (MovieReleaseDatesResponse.ReleaseDate d : dates) {
+            if (d.getCertification() != null && !d.getCertification().isEmpty())
+                return d.getCertification();
+        }
+        return null;
+    }
+
+    private void fetchMovieProviders() {
+        safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movieId)),
+                new Callback<TVShowProviderResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<TVShowProviderResponse> call,
+                                           @NonNull Response<TVShowProviderResponse> response) {
+                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
+                        watchProviderResults = response.body().getResults();
+                        bindMovieProviders("CA");
+                    }
+                    @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void bindMovieProviders(String region) {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.tvRegion.setText(region);
+
+        RegionProvidersModel regionData = watchProviderResults != null
+                ? watchProviderResults.get(region) : null;
+        if (regionData == null) {
+            handleNoWatchProviders();
+            return;
+        }
+
+        List<ProviderModel> stream = craveFirst(regionData.getFlatrate() != null
+                ? regionData.getFlatrate() : new ArrayList<>());
+        List<ProviderModel> rent   = craveFirst(regionData.getRent() != null
+                ? regionData.getRent()     : new ArrayList<>());
+        List<ProviderModel> buy    = craveFirst(regionData.getBuy() != null
+                ? regionData.getBuy()      : new ArrayList<>());
+
+        ProviderAdapter streamAdapter  = new ProviderAdapter(ProviderAdapter.TYPE_STREAM);
+        ProviderAdapter rentBuyAdapter = new ProviderAdapter(ProviderAdapter.TYPE_RENT_BUY);
+
+        wtw.layoutWtwEmpty.setVisibility(View.GONE);
+        wtw.tabLayoutWtw.setVisibility(View.VISIBLE);
+        FlexboxLayoutManager flexLm = new FlexboxLayoutManager(requireContext());
+        flexLm.setFlexDirection(FlexDirection.ROW);
+        flexLm.setFlexWrap(FlexWrap.WRAP);
+        wtw.rvProviders.setLayoutManager(flexLm);
+        wtw.rvProviders.setAdapter(streamAdapter);
+        streamAdapter.submitList(stream);
+        applyWtwEmptyState(wtw, stream.isEmpty());
+
+        wtw.tabLayoutWtw.clearOnTabSelectedListeners();
+        wtw.tabLayoutWtw.selectTab(wtw.tabLayoutWtw.getTabAt(0));
+        wtw.tabLayoutWtw.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getPosition()) {
+                    case 1:
+                        rentBuyAdapter.submitList(rent);
+                        wtw.rvProviders.setAdapter(rentBuyAdapter);
+                        applyWtwEmptyState(wtw, rent.isEmpty());
+                        break;
+                    case 2:
+                        rentBuyAdapter.submitList(buy);
+                        wtw.rvProviders.setAdapter(rentBuyAdapter);
+                        applyWtwEmptyState(wtw, buy.isEmpty());
+                        break;
+                    default:
+                        wtw.rvProviders.setAdapter(streamAdapter);
+                        applyWtwEmptyState(wtw, stream.isEmpty());
+                        break;
+                }
+            }
+            @Override public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        wtw.btnRegion.setOnClickListener(v ->
+                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
+                        selectedRegion -> {
+                            userHasSelectedRegion = true;
+                            bindMovieProviders(selectedRegion);
+                        }));
+    }
+
     private void handleNoWatchProviders() {
         if (binding == null) return;
-        handleNoWatchProviders(
-                binding.movieInfo.wtwReleased.layoutWtwEmpty,
-                binding.movieInfo.wtwReleased.rvProviders,
-                binding.movieInfo.wtwReleased.tabLayoutWtw
-        );
-        if (isNowPlaying) {
-            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setText("NOW PLAYING IN THEATERS");
-            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTextColor(
-                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.accent_amber));
-            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTypeface(null, android.graphics.Typeface.BOLD);
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.rvProviders.setVisibility(View.GONE);
+        wtw.tabLayoutWtw.setVisibility(View.GONE);
+        if (isNowPlaying && !userHasSelectedRegion) {
+            wtw.layoutWtwEmpty.setVisibility(View.GONE);
         } else {
-            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setText(getString(R.string.unavailable_country));
-            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTextColor(
-                    androidx.core.content.ContextCompat.getColor(requireContext(), R.color.text_disabled));
-            binding.movieInfo.wtwReleased.tvWtwEmptyMsg.setTypeface(null, android.graphics.Typeface.NORMAL);
+            wtw.layoutWtwEmpty.setVisibility(View.VISIBLE);
+            wtw.tvWtwEmptyMsg.setText(getString(R.string.unavailable_country));
+            wtw.tvWtwEmptyMsg.setTextColor(
+                    ContextCompat.getColor(requireContext(), R.color.text_disabled));
+            wtw.tvWtwEmptyMsg.setTypeface(null, android.graphics.Typeface.NORMAL);
         }
     }
 
-    private void fetchMovieDetails() {
-        safeEnqueue(apiService.getMovieDetails(TMDBpath.movieDetails(movieId)), new Callback<MovieDetailsResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<MovieDetailsResponse> call, @NonNull Response<MovieDetailsResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    bindMovieDetails(response.body());
-                } else if (getContext() != null) {
-                    Toast.makeText(getContext(), "Failed to retrieve movie details", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call<MovieDetailsResponse> call, @NonNull Throwable t) {
-                if (getContext() != null) Toast.makeText(getContext(), "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
+    private void applyWtwEmptyState(WtwReleasedViewBinding wtw, boolean isEmpty) {
+        wtw.rvProviders.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        wtw.layoutWtwEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
     }
 
-    private void fetchTrailers() {
-        safeEnqueue(apiService.getMoviesTrailer(TMDBpath.movieTrailer(movieId)), new Callback<MoviesTrailerResponses>() {
-            @Override
-            public void onResponse(@NonNull Call<MoviesTrailerResponses> call, @NonNull Response<MoviesTrailerResponses> response) {
-                if (response.isSuccessful()) {
-                    MoviesTrailerResponses trailerResponses = response.body();
-                    List<MoviesTrailerResponses.TrailerModel> allTrailers = trailerResponses != null ? trailerResponses.getResults() : null;
-
-                    if (allTrailers == null || allTrailers.isEmpty()) {
-                        updateTrailerButton(new ArrayList<>());
-                        return;
-                    }
-
-                    List<MoviesTrailerResponses.TrailerModel> filtered = new ArrayList<>();
-                    for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
-                        if ("YouTube".equalsIgnoreCase(trailer.getSite()) && "Trailer".equalsIgnoreCase(trailer.getType())) {
-                            filtered.add(trailer);
-                        }
-                    }
-                    if (filtered.isEmpty()) {
-                        for (MoviesTrailerResponses.TrailerModel trailer : allTrailers) {
-                            if ("YouTube".equalsIgnoreCase(trailer.getSite())) filtered.add(trailer);
-                        }
-                    }
-                    updateTrailerButton(filtered);
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<MoviesTrailerResponses> call, @NonNull Throwable t) {
-                Log.e("MovieResultDetails", "Trailer fetch failed", t);
-            }
+    private List<ProviderModel> craveFirst(List<ProviderModel> providers) {
+        List<ProviderModel> sorted = new ArrayList<>(providers);
+        sorted.sort((a, b) -> {
+            boolean ac = a.getProviderName() != null
+                    && a.getProviderName().toLowerCase(java.util.Locale.ROOT).contains("crave");
+            boolean bc = b.getProviderName() != null
+                    && b.getProviderName().toLowerCase(java.util.Locale.ROOT).contains("crave");
+            return ac == bc ? 0 : (ac ? -1 : 1);
         });
-    }
-
-    private void fetchCastList() {
-        safeEnqueue(apiService.getMovieCredits(TMDBpath.movieCredits(movieId)), new Callback<MovieCreditsResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<MovieCreditsResponse> call, @NonNull Response<MovieCreditsResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<MovieCreditsResponse.Cast> raw = response.body().getCast();
-                    if (raw != null) {
-                        List<CastModel> newCast = new ArrayList<>();
-                        for (MovieCreditsResponse.Cast c : raw) {
-                            newCast.add(new CastModel(c.getId(), c.getCastName(), c.getProfilePath(), c.getCharacter()));
-                        }
-                        castAdapter.updateData(newCast);
-                    }
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call<MovieCreditsResponse> call, @NonNull Throwable t) {
-                if (getContext() != null) Toast.makeText(getContext(), "Error fetching cast: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void fetchSuggestionList() {
-        safeEnqueue(apiService.getMovieSimilar(TMDBpath.movieSimilar(movieId)), new Callback<MovieSimilarResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<MovieSimilarResponse> call, @NonNull Response<MovieSimilarResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    List<MovieModel> results = response.body().getResults();
-                    List<MovieModel> suggestions = new ArrayList<>();
-                    if (results != null) {
-                        for (MovieModel m : results) {
-                            if (m.getPosterPath() != null) suggestions.add(m);
-                        }
-                    }
-                    paginationHelper.updateData(suggestions);
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call<MovieSimilarResponse> call, @NonNull Throwable t) {
-                if (getContext() != null) Toast.makeText(getContext(), "Failed to load recommendations", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void fetchWatchProviders() {
-        String defaultRegion = Locale.getDefault().getCountry();
-        safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movieId)), new Callback<TVShowProviderResponse>() {
-            @Override
-            public void onResponse(@NonNull Call<TVShowProviderResponse> call, @NonNull Response<TVShowProviderResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    watchProviderResults = response.body().getResults();
-                    String region = watchProviderResults.containsKey(defaultRegion)
-                            ? defaultRegion
-                            : watchProviderResults.isEmpty() ? null : watchProviderResults.keySet().iterator().next();
-                    if (region != null) {
-                        applyWatchProviders(region);
-                        binding.movieInfo.wtwReleased.btnRegion.setOnClickListener(v -> 
-                                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults, MovieResultDetailsFragment.this::applyWatchProviders));
-                    } else {
-                        handleNoWatchProviders();
-                    }
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Call<TVShowProviderResponse> call, @NonNull Throwable t) {
-                Log.e("MovieDetails", "Provider fetch failed", t);
-                handleNoWatchProviders();
-            }
-        });
+        return sorted;
     }
 }

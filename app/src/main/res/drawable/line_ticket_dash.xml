@@ -1,12 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rotate xmlns:android="http://schemas.android.com/apk/res/android"
-    android:fromDegrees="90"
-    android:toDegrees="90">
-    <shape android:shape="line">
-        <stroke
-            android:width="2dp"
-            android:color="@color/border"
-            android:dashWidth="2dp"
-            android:dashGap="6dp" />
-    </shape>
-</rotate>
+<!--
+    EMPlay · line_ticket_dash  (vertical dashed separator)
+
+    FIX: android:shape="line" always draws HORIZONTAL — useless on a tall
+    narrow View. Instead we use a layer-list of rectangle "dashes" spaced
+    evenly from top to bottom via android:top offset.
+
+    Apply to a View with:
+        android:layout_width="2dp"
+        android:layout_height="0dp"   ← constrained by ConstraintLayout
+        android:background="@drawable/line_ticket_dash"
+    No layerType needed.
+
+    Each dash is 7dp tall, gap is 5dp → period = 12dp.
+    Adjust the android:top values if your card height changes.
+    For a fully dynamic version, use DashedLineDrawable.java (see note below).
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:top="0dp"   android:bottom="0dp"><shape android:shape="rectangle"><solid android:color="@android:color/transparent"/></shape></item>
+
+    <!-- Dash 1 -->
+    <item android:top="0dp"   android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 2 -->
+    <item android:top="12dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 3 -->
+    <item android:top="24dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 4 -->
+    <item android:top="36dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 5 -->
+    <item android:top="48dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 6 -->
+    <item android:top="60dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 7 -->
+    <item android:top="72dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 8 -->
+    <item android:top="84dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 9 -->
+    <item android:top="96dp"  android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 10 -->
+    <item android:top="108dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 11 -->
+    <item android:top="120dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 12 -->
+    <item android:top="132dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 13 -->
+    <item android:top="144dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 14 -->
+    <item android:top="156dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 15 -->
+    <item android:top="168dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 16 -->
+    <item android:top="180dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 17 -->
+    <item android:top="192dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+    <!-- Dash 18 -->
+    <item android:top="204dp" android:height="7dp"><shape android:shape="rectangle"><solid android:color="#80E3B566"/><corners android:radius="1dp"/></shape></item>
+
+</layer-list>

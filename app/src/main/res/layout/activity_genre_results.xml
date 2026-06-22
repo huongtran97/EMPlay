@@ -8,7 +8,7 @@
 
     <!-- Watermark ghost letter (decorative) -->
     <TextView
-        android:id="@+id/tv_watermark_letter"
+        android:id="@+id/tvGhostGlyph"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
@@ -60,7 +60,7 @@
                 android:textSize="@dimen/text_caption" />
 
             <TextView
-                android:id="@+id/tv_category_title"
+                android:id="@+id/movie_genres"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/playfair_display"
@@ -116,7 +116,7 @@
             </LinearLayout>
 
             <LinearLayout
-                android:id="@+id/btn_filters"
+                android:id="@+id/btnFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
@@ -153,13 +153,58 @@
                 android:id="@+id/row_sort_chips"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/chipPopularity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:text="@string/sort_popular"
+                    android:textSize="@dimen/text_divider_label"
+                    android:textColor="@color/chip_sort_text"
+                    android:background="@drawable/bg_tab_chip_selector"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:tag="chip_popular" />
+
+                <TextView
+                    android:id="@+id/chipRating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/sort_top_rated"
+                    android:textSize="@dimen/text_divider_label"
+                    android:textColor="@color/chip_sort_text"
+                    android:background="@drawable/bg_tab_chip_selector"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:id="@+id/chipNewest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/sort_newest"
+                    android:textSize="@dimen/text_divider_label"
+                    android:textColor="@color/chip_sort_text"
+                    android:background="@drawable/bg_tab_chip_selector"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
 
         </HorizontalScrollView>
 
         <!-- 3-column poster grid -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_results"
+            android:id="@+id/movie_by_genre_recyclerview"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -167,6 +212,16 @@
             android:paddingStart="13dp"
             android:paddingEnd="13dp"
             android:paddingBottom="24dp" />
+
+        <!-- Infinite scroll loading indicator -->
+        <ProgressBar
+            android:id="@+id/loadingIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="12dp"
+            android:indeterminateTint="@color/accent"
+            android:visibility="gone" />
 
     </LinearLayout>
 

@@ -11,7 +11,7 @@
     <ImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@drawable/e_logo"
+        android:src="@drawable/ic_logo_punch_e"
         android:contentDescription="@string/emplay_logo"
         android:layout_marginBottom="12dp" />
 
@@ -44,9 +44,9 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:text="@string/login_register"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/on_accent"
         android:textSize="@dimen/text_poster_rating"
-        android:backgroundTint="#E53935"
+        android:backgroundTint="@color/accent"
         android:layout_marginBottom="12dp"
         android:stateListAnimator="@null"/>
 

@@ -7,50 +7,12 @@
     android:background="@color/bg_base"
     android:orientation="vertical">
 
-    <!-- Toggle Buttons Row -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:padding="14dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnMovie"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/label_movies"
-            android:textColor="@color/on_accent"
-            android:textSize="@dimen/text_badge"
-            android:textStyle="bold"
-            android:paddingHorizontal="12dp"
-            android:minWidth="0dp"
-            app:backgroundTint="@color/accent"
-            app:cornerRadius="14dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnTvShow"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="@string/label_tv"
-            android:textColor="@color/text_2"
-            android:textSize="@dimen/text_badge"
-            android:paddingHorizontal="12dp"
-            android:minWidth="0dp"
-            app:cornerRadius="14dp"
-            app:strokeColor="@color/border"
-            app:strokeWidth="@dimen/hairline" />
-
-    </LinearLayout>
-
     <!-- Search Input -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="44dp"
         android:layout_marginHorizontal="13dp"
+        android:layout_marginTop="8dp"
         android:layout_marginBottom="14dp"
         app:cardBackgroundColor="@color/bg_surface"
         app:cardCornerRadius="11dp"
@@ -101,145 +63,287 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/svSearchDefault"
+    <!-- Body: default state with dropdown overlay -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="none">
+        android:layout_weight="1">
 
-        <LinearLayout
+        <!-- Default state (genres, trending, recent) -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/svSearchDefault"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="80dp">
+            android:layout_height="match_parent"
+            android:scrollbars="none">
 
-            <!-- RECENTLY SEARCHED -->
             <LinearLayout
-                android:id="@+id/recentSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="14dp"
-                android:visibility="gone">
+                android:paddingBottom="80dp">
 
-                <com.google.android.flexbox.FlexboxLayout
-                    android:id="@+id/pillsContainer"
+                <!-- RECENTLY SEARCHED -->
+                <LinearLayout
+                    android:id="@+id/recentSearch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    app:flexWrap="wrap" />
+                    android:orientation="vertical"
+                    android:paddingHorizontal="14dp"
+                    android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/btnClearAll"
-                    style="@style/TextAppearance.EMPlay.Caption"
-                    android:layout_width="wrap_content"
+                    <com.google.android.flexbox.FlexboxLayout
+                        android:id="@+id/pillsContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        app:flexWrap="wrap" />
+
+                    <TextView
+                        android:id="@+id/btnClearAll"
+                        style="@style/TextAppearance.EMPlay.Caption"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="20dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:text="@string/clear_all"
+                        android:textStyle="italic" />
+
+                </LinearLayout>
+
+                <!-- SEARCH BY ORIGIN (clickable entry) -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/sectionSearchByOrigin"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="20dp"
+                    android:paddingHorizontal="13dp"
+                    android:paddingVertical="10dp"
+                    android:layout_marginBottom="4dp"
                     android:clickable="true"
                     android:focusable="true"
-                    android:text="@string/clear_all"
-                    android:textStyle="italic" />
+                    android:background="?attr/selectableItemBackground">
+
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Micro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_section_origin"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                    <ImageView
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/text_3"
+                        android:contentDescription="@null"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- BROWSE BY GENRE -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="13dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Micro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_section_genres"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvGenres"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="13dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="3"
+                    tools:listitem="@layout/genres_item" />
+
+                <!-- POPULAR RIGHT NOW -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="13dp"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        style="@style/TextAppearance.EMPlay.Micro"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/search_section_popular"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvPopularSearches"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:listitem="@layout/item_search_trending" />
 
             </LinearLayout>
 
-            <!-- SEARCH BY ORIGIN (clickable entry) -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/sectionSearchByOrigin"
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- Dropdown overlay (GONE until user types) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardDropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:layout_marginHorizontal="4dp"
+            android:visibility="gone"
+            app:cardBackgroundColor="@color/bg_surface"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp"
+            app:cardMaxElevation="12dp">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="13dp"
-                android:paddingVertical="10dp"
-                android:layout_marginBottom="4dp"
-                android:clickable="true"
-                android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:orientation="vertical">
 
-                <TextView
-                    style="@style/TextAppearance.EMPlay.Micro"
-                    android:layout_width="wrap_content"
+                <!-- Tab row (Movies / TV Shows) — GONE in PEOPLE-only state -->
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayoutSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:background="@color/bg_surface"
+                    android:paddingHorizontal="4dp"
+                    android:visibility="gone"
+                    app:tabGravity="start"
+                    app:tabIndicatorColor="@color/accent"
+                    app:tabIndicatorHeight="2dp"
+                    app:tabMinWidth="0dp"
+                    app:tabMode="scrollable"
+                    app:tabPaddingEnd="12dp"
+                    app:tabPaddingStart="9dp"
+                    app:tabRippleColor="@color/ripple_accent"
+                    app:tabSelectedTextColor="@color/accent"
+                    app:tabTextAppearance="@style/TextAppearance.EMPlay.SearchTab"
+                    app:tabTextColor="@color/text_3"
+                    app:tabUnboundedRipple="false" />
+
+                <!-- Results list -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvDropdownResults"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/search_section_origin"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    android:maxHeight="320dp"
+                    android:nestedScrollingEnabled="false"
+                    android:overScrollMode="never"
+                    android:clipToPadding="false"
+                    android:paddingBottom="4dp" />
 
-                <ImageView
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:src="@drawable/ic_chevron_right"
-                    app:tint="@color/text_3"
-                    android:contentDescription="@null"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                <!-- Pagination bar -->
+                <LinearLayout
+                    android:id="@+id/paginationBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="8dp"
+                    android:visibility="gone">
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:layout_gravity="top"
+                        android:background="@color/hairline_row" />
 
-            <!-- BROWSE BY GENRE -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="13dp"
-                android:layout_marginBottom="10dp">
+                    <ImageButton
+                        android:id="@+id/btnPrev"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@null"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_chevron_left"
+                        app:tint="@color/text_2" />
 
-                <TextView
-                    style="@style/TextAppearance.EMPlay.Micro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/search_section_genres"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    <TextView
+                        android:id="@+id/tvPageIndicator"
+                        style="@style/TextAppearance.EMPlay.Caption"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textColor="@color/text_3" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <ImageButton
+                        android:id="@+id/btnNext"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@null"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/text_2" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvGenres"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:nestedScrollingEnabled="false"
-                android:paddingHorizontal="13dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="3"
-                tools:listitem="@layout/genres_item" />
+                </LinearLayout>
 
-            <!-- POPULAR RIGHT NOW -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="13dp"
-                android:layout_marginBottom="10dp">
+                <!-- People footer (VISIBLE when mixed results) -->
+                <LinearLayout
+                    android:id="@+id/footerPeople"
+                    android:layout_width="match_parent"
+                    android:layout_height="36dp"
+                    android:background="@color/bg_surface"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="13dp"
+                    android:visibility="gone">
 
-                <TextView
-                    style="@style/TextAppearance.EMPlay.Micro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/search_section_popular"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="0.5dp"
+                        android:layout_gravity="top"
+                        android:background="@color/hairline_row" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:id="@+id/tvPeopleSnippet"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/inter"
+                        android:maxLines="1"
+                        android:textColor="@color/text_3"
+                        android:textSize="11sp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvPopularSearches"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_search_trending" />
+                    <TextView
+                        android:id="@+id/tvSeePeople"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:fontFamily="@font/inter"
+                        android:paddingStart="8dp"
+                        android:text="@string/search_see_people"
+                        android:textColor="@color/accent"
+                        android:textSize="11sp" />
 
-        </LinearLayout>
+                </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+            </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvSearchResults"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingHorizontal="13dp"
-        android:visibility="gone" />
+        </androidx.cardview.widget.CardView>
+
+    </FrameLayout>
 
 </LinearLayout>

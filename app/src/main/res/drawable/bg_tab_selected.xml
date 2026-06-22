@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    EMPlay · bg_tab_selected.xml
+    Selected tab / active chip — solid accent fill, no visible stroke
+    Used by: selected season tab in rvSeasonTabs, active meta chip (e.g. "Movies" toggle)
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <corners android:radius="14dp" />
+
+    <stroke
+        android:width="0.5dp"
+        android:color="@color/accent" />
+
+    <solid android:color="@color/accent" />
+    <!-- accent = #E3B566 -->
+
+</shape>

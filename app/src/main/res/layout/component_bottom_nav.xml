@@ -2,9 +2,12 @@
 <!-- EMPlay · BOTTOM NAV COMPONENT
      Glass-morphism pill bar: Home / Search / My List / Profile -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/movie_bottom_navigation_container"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
+    android:layout_height="55dp"
     android:background="@drawable/bg_bottom_nav"
+    android:baselineAligned="false"
     android:gravity="center_vertical"
     android:orientation="horizontal">
 
@@ -18,11 +21,11 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:contentDescription="@string/nav_home"
             android:src="@drawable/ic_home"
-            android:tint="@color/text_2" />
+            app:tint="@color/text_2" />
 
     </LinearLayout>
 
@@ -36,11 +39,11 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:contentDescription="@string/nav_search"
             android:src="@drawable/ic_search"
-            android:tint="@color/text_2" />
+            app:tint="@color/text_2" />
 
     </LinearLayout>
 
@@ -54,11 +57,11 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:contentDescription="@string/nav_mylist"
             android:src="@drawable/ic_ticket"
-            android:tint="@color/text_2" />
+            app:tint="@color/text_2" />
 
     </LinearLayout>
 
@@ -72,11 +75,11 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:contentDescription="@string/nav_profile"
             android:src="@drawable/ic_user"
-            android:tint="@color/text_2" />
+            app:tint="@color/text_2" />
 
     </LinearLayout>
 

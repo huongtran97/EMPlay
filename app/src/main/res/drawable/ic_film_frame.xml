@@ -1,4 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
-<vector xmlns:android="http://schemas.android.com/apk/res/android">
-
+<!-- ═══ ic_film_frame.xml · SIGNATURE 2/2 — episode frame with sprocket dot rails ═══ -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24.0" android:viewportHeight="24.0">
+    <path
+        android:pathData="M3,5 H21 V19 H3 Z"
+        android:strokeColor="#FFFFFF" android:strokeWidth="2"
+        android:strokeLineCap="round" android:strokeLineJoin="round"/>
+    <!-- Sprocket rails: point subpaths in place of dashed strokes -->
+    <path
+        android:pathData="M7,7.6 v0.01 M7,12 v0.01 M7,16.4 v0.01 M17,7.6 v0.01 M17,12 v0.01 M17,16.4 v0.01"
+        android:strokeColor="#FFFFFF" android:strokeWidth="2"
+        android:strokeLineCap="round" android:strokeLineJoin="round"/>
 </vector>

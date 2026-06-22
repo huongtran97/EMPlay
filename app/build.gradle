@@ -35,6 +35,7 @@ android {
         debug {
             buildConfigField "String", "API_KEY", "\"${localProperties['API_KEY']}\""
             buildConfigField "String", "APP_TOKEN", "\"${localProperties['APP_TOKEN']}\""
+            buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties['GOOGLE_WEB_CLIENT_ID'] ?: ''}\""
         }
         release {
             minifyEnabled true
@@ -42,6 +43,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", "\"\""
             buildConfigField "String", "APP_TOKEN", "\"${localProperties['APP_TOKEN'] ?: ''}\""
+            buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties['GOOGLE_WEB_CLIENT_ID'] ?: ''}\""
         }
     }
 
@@ -58,6 +60,7 @@ android {
 
     lint {
         disable 'NotificationPermission'
+        lintConfig file("lint.xml")
     }
 }
 
@@ -115,4 +118,5 @@ dependencies {
     implementation 'androidx.browser:browser:1.8.0'
     implementation 'me.relex:circleindicator:2.1.6'
     implementation 'androidx.palette:palette:1.0.0'
+    implementation 'androidx.dynamicanimation:dynamicanimation:1.0.0'
 }

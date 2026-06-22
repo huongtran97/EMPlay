@@ -1,5 +1,10 @@
 package emplay.entertainment.emplay.api.common;
 
+import java.util.List;
+
+import emplay.entertainment.emplay.models.common.CountryModel;
+import emplay.entertainment.emplay.api.common.MultiSearchResponse;
+import emplay.entertainment.emplay.api.movie.CollectionResponse;
 import emplay.entertainment.emplay.api.movie.MovieCreditsResponse;
 import emplay.entertainment.emplay.api.movie.MovieDetailsResponse;
 import emplay.entertainment.emplay.api.movie.MovieResponse;
@@ -37,6 +42,16 @@ public interface MovieApiService {
             @Query("path") String path);
 
     @GET("api/tmdb")
+    Call<MovieResponse> getPopularMovies(
+            @Query("path") String path,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
+    Call<TVShowResponse> getPopularTVShows(
+            @Query("path") String path,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
     Call<MovieResponse> getTopRatedMovies(
             @Query("path") String path,
             @Query("page") int page);
@@ -54,6 +69,12 @@ public interface MovieApiService {
     Call<TVShowResponse> searchTVShows(
             @Query("path") String path,
             @Query("query") String query);
+
+    @GET("api/tmdb")
+    Call<MultiSearchResponse> searchMulti(
+            @Query("path") String path,
+            @Query("query") String query,
+            @Query("language") String language);
 
     @GET("api/tmdb")
     Call<MovieCreditsResponse> getMovieCredits(
@@ -87,7 +108,8 @@ public interface MovieApiService {
             @Query("sort_by") String sortBy,
             @Query("include_video") boolean includeVideo,
             @Query("language") String language,
-            @Query("page") int page);
+            @Query("page") int page,
+            @Query("region") String region);
 
     @GET("api/tmdb")
     Call<UpComingTVShowsResponse> getUpcomingTVShows(
@@ -97,7 +119,8 @@ public interface MovieApiService {
             @Query("sort_by") String sortBy,
             @Query("include_video") boolean includeVideo,
             @Query("language") String language,
-            @Query("page") int page);
+            @Query("page") int page,
+            @Query("region") String region);
 
     @GET("api/tmdb")
     Call<MoviesTrailerResponses> getMoviesTrailer(
@@ -139,12 +162,18 @@ public interface MovieApiService {
     Call<MovieResponse> getMoviesByGenre(
             @Query("path") String path,
             @Query("with_genres") int genreId,
+            @Query("sort_by") String sortBy,
+            @Query("primary_release_date.gte") String yearGte,
+            @Query("primary_release_date.lte") String yearLte,
             @Query("page") int page);
 
     @GET("api/tmdb")
     Call<TVShowResponse> getTVShowsByGenre(
             @Query("path") String path,
             @Query("with_genres") int genreId,
+            @Query("sort_by") String sortBy,
+            @Query("first_air_date.gte") String yearGte,
+            @Query("first_air_date.lte") String yearLte,
             @Query("page") int page);
 
     @GET("api/tmdb")
@@ -171,6 +200,8 @@ public interface MovieApiService {
             @Query("path") String path,
             @Query("with_origin_country") String countryCode,
             @Query("sort_by") String sortBy,
+            @Query("primary_release_date.gte") String yearGte,
+            @Query("primary_release_date.lte") String yearLte,
             @Query("page") int page);
 
     @GET("api/tmdb")
@@ -179,5 +210,15 @@ public interface MovieApiService {
             @Query("with_origin_country") String countryCode,
             @Query("with_genres") Integer genreId,
             @Query("sort_by") String sortBy,
+            @Query("first_air_date.gte") String yearGte,
+            @Query("first_air_date.lte") String yearLte,
             @Query("page") int page);
+
+    @GET("api/tmdb")
+    Call<List<CountryModel>> getCountries(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<CollectionResponse> getCollectionDetails(
+            @Query("path") String path);
 }

@@ -1,6 +1,8 @@
 package emplay.entertainment.emplay.fragment.common;
 
 import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
@@ -29,6 +31,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.transition.ChangeBounds;
+import androidx.transition.ChangeImageTransform;
+import androidx.transition.TransitionSet;
 
 import emplay.entertainment.emplay.activity.LoginActivity;
 
@@ -53,8 +58,6 @@ public abstract class BaseFragment extends Fragment {
     private long lastNavTime = 0;
     private final List<Call<?>> pendingCalls = new ArrayList<>();
 
-    // Current background color — tracked so argb animation starts from the right value.
-    // Defaults to near-black. Subclasses that use animateBackground() share this state.
     @ColorInt
     private int currentBgColor = 0xFF0D0D0D;
 
@@ -62,9 +65,6 @@ public abstract class BaseFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Default: respect system bars padding (status bar + nav bar).
-        // Fragments that want edge-to-edge (e.g. HomeFragment) should override
-        // onViewCreated, call super, then clear the top padding for their hero area.
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(v.getPaddingLeft(), bars.top, v.getPaddingRight(), v.getPaddingBottom());
@@ -72,7 +72,6 @@ public abstract class BaseFragment extends Fragment {
         });
     }
 
-    // Dynamic background color — used by fragments with a Palette banner
     protected void animateBackground(@ColorInt int toColor) {
         View root = getView();
         if (root == null || !isAdded()) return;
@@ -100,7 +99,6 @@ public abstract class BaseFragment extends Fragment {
     }
 
 
-    // Retrofit
     protected <T> void safeEnqueue(Call<T> call, Callback<T> callback) {
         pendingCalls.add(call);
         call.enqueue(new Callback<T>() {
@@ -125,7 +123,6 @@ public abstract class BaseFragment extends Fragment {
         pendingCalls.clear();
     }
 
-    // UI thread
     protected void safeRunOnUiThread(Runnable runnable) {
         if (getActivity() != null) {
             getActivity().runOnUiThread(() -> {
@@ -134,25 +131,42 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-    // Navigation
     protected void navigateTo(Fragment fragment) {
+        navigateTo(fragment, null, null);
+    }
+
+    protected void navigateTo(Fragment fragment, @Nullable View sharedElement, @Nullable String transitionName) {
         if (!isAdded()) return;
         long now = SystemClock.elapsedRealtime();
         if (now - lastNavTime < 500) return;
         lastNavTime = now;
+
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(
-                R.anim.slide_in_right,
-                R.anim.slide_out_left,
-                R.anim.slide_in_left,
-                R.anim.slide_out_right
-        );
+
+        if (sharedElement != null && transitionName != null) {
+            TransitionSet transitionSet = new TransitionSet();
+            transitionSet.addTransition(new ChangeBounds());
+            transitionSet.addTransition(new ChangeImageTransform());
+            transitionSet.setDuration(350);
+
+            fragment.setSharedElementEnterTransition(transitionSet);
+            fragment.setSharedElementReturnTransition(transitionSet);
+
+            transaction.addSharedElement(sharedElement, transitionName);
+        } else {
+            transaction.setCustomAnimations(
+                    R.anim.slide_in_right,
+                    R.anim.slide_out_left,
+                    R.anim.slide_in_left,
+                    R.anim.slide_out_right
+            );
+        }
+
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
-    // Genre chips
     protected void buildGenreChips(FlexboxLayout container, List<String> genres) {
         if (container == null || genres == null) return;
         float density = getResources().getDisplayMetrics().density;
@@ -177,14 +191,13 @@ public abstract class BaseFragment extends Fragment {
     }
 
 
-    // Release visibility
     protected void applyReleaseVisibility(String releaseDateStr, View releasedRoot,
                                           View unreleasedRoot, View comingSoonBadge,
                                           Runnable onUnreleased) {
         if (releaseDateStr == null || releaseDateStr.isEmpty()) return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LocalDate release    = LocalDate.parse(releaseDateStr);
-            boolean isUnreleased = !release.isBefore(LocalDate.now()); // treats today as unreleased
+            boolean isUnreleased = !release.isBefore(LocalDate.now());
             releasedRoot.setVisibility(isUnreleased ? View.GONE  : View.VISIBLE);
             unreleasedRoot.setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
             comingSoonBadge.setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
@@ -192,7 +205,6 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-    // Countdown timer
     protected void startCountdown(LocalDate releaseDate,
                                   WtwUnreleasedViewBinding unreleasedBinding,
                                   Runnable onFinish) {
@@ -206,13 +218,11 @@ public abstract class BaseFragment extends Fragment {
                 .toInstant().toEpochMilli();
         long diff = releaseMillis - System.currentTimeMillis();
 
-        // Release date is today (past midnight) or already passed — treat as released.
         if (diff <= 0) {
             if (onFinish != null) onFinish.run();
             return;
         }
 
-        // Populate values immediately so blocks aren't blank before the first tick.
         unreleasedBinding.tvDays.setText(String.valueOf(diff / 86400000));
         unreleasedBinding.tvHours.setText(String.format(Locale.ROOT, "%02d", (diff % 86400000) / 3600000));
         unreleasedBinding.tvMinutes.setText(String.format(Locale.ROOT, "%02d", (diff % 3600000) / 60000));
@@ -240,7 +250,6 @@ public abstract class BaseFragment extends Fragment {
         }.start();
     }
 
-    // Scales the drawableStart of a chip TextView to match its text height.
     protected static void sizeChipIcon(TextView tv) {
         Drawable[] drawables = TextViewCompat.getCompoundDrawablesRelative(tv);
         Drawable icon = drawables[0];
@@ -264,7 +273,6 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
-    // Transparent status bar with dark icons — used by detail screens with a full-bleed hero image
     protected void setDarkStatusBar() {
         if (!isAdded()) return;
         android.view.Window window = requireActivity().getWindow();
@@ -295,5 +303,20 @@ public abstract class BaseFragment extends Fragment {
                         startActivity(new Intent(requireContext(), LoginActivity.class)))
                 .setNegativeButton(android.R.string.cancel, null)
                 .show();
+    }
+
+    protected void performTicketTearAnimation(View button, TextView label, boolean isSaved) {
+        if (button == null || label == null || !isAdded()) return;
+
+        button.setBackground(ContextCompat.getDrawable(requireContext(),
+                isSaved ? R.drawable.bg_button_ticket_stub_solid : R.drawable.bg_button_ticket_stub));
+
+        label.setText(isSaved ? R.string.detail_saved : R.string.detail_btn_mylist);
+
+        PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat(View.TRANSLATION_Y, 0f, -dpToPx(4), 0f);
+        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(button, pvhY);
+        animator.setDuration(400);
+        animator.setInterpolator(new DecelerateInterpolator());
+        animator.start();
     }
 }

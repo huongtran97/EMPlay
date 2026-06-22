@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Playfair Display at weight 500 (Medium) — backed by the embedded variable TTF -->
+<font-family xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <font
+        android:font="@font/playfair_display_var"
+        android:fontWeight="500"
+        android:fontStyle="normal"
+        app:font="@font/playfair_display_var"
+        app:fontWeight="500"
+        app:fontStyle="normal" />
+
+</font-family>

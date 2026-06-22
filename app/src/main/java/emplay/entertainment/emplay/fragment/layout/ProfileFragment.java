@@ -418,7 +418,7 @@ public class ProfileFragment extends BaseFragment {
 
     // Shared
 
-    private void onItemClicked(Object item) {
+    private void onItemClicked(MediaItem item, View view) {
         if (item instanceof MovieModel) {
             navigateTo(MovieResultDetailsFragment.newInstance(((MovieModel) item).getMovieId()));
         } else if (item instanceof TVShowModel) {

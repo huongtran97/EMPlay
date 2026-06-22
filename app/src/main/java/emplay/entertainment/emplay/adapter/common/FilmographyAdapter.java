@@ -17,25 +17,27 @@ import emplay.entertainment.emplay.api.common.PersonCreditsResponse.CreditItem;
 
 public class FilmographyAdapter extends RecyclerView.Adapter<FilmographyAdapter.ViewHolder> {
 
+    private static final int COLLAPSE_LIMIT = 5;
+
+    private final List<CreditItem> fullList;
     private final List<CreditItem> credits;
     private final OnCreditClickListener listener;
+    private boolean expanded = false;
 
     public interface OnCreditClickListener {
-        void onCreditClick(CreditItem item);
+        void onCreditClick(CreditItem item, View sharedElement);
     }
 
     public FilmographyAdapter(List<CreditItem> credits, OnCreditClickListener listener) {
-        this.credits = credits;
+        this.fullList = new ArrayList<>(credits);
+        this.credits = new ArrayList<>(credits.subList(0, Math.min(COLLAPSE_LIMIT, credits.size())));
         this.listener = listener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_film_frame, parent, false); // Re-using item_filmography? Wait.
-        // Actually, the plan says item_filmography.xml
-        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_filmography, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_filmography_row, parent, false);
         return new ViewHolder(view);
     }
 
@@ -43,19 +45,18 @@ public class FilmographyAdapter extends RecyclerView.Adapter<FilmographyAdapter.
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CreditItem item = credits.get(position);
 
-        String date = "movie".equals(item.getMediaType()) ? item.getReleaseDate() : item.getFirstAirDate();
+        String date = item.getDisplayDate();
         String year = (date != null && date.length() >= 4) ? date.substring(0, 4) : "—";
         
         holder.tvYear.setText(year);
-        holder.tvTitle.setText("movie".equals(item.getMediaType()) ? item.getTitle() : item.getName());
+        holder.tvTitle.setText(item.getDisplayTitle());
         
         String role = item.getCharacter();
         String type = "movie".equals(item.getMediaType()) ? "Movie" : "TV";
         holder.tvRole.setText(String.format("as %s · %s", (role == null || role.isEmpty()) ? "TBA" : role, type));
         
         holder.tvRating.setText(String.format(Locale.getDefault(), "★ %.1f", item.getVoteAverage()));
-        
-        holder.itemView.setOnClickListener(v -> listener.onCreditClick(item));
+        holder.itemView.setOnClickListener(v -> listener.onCreditClick(item, null));
     }
 
     @Override
@@ -63,15 +64,39 @@ public class FilmographyAdapter extends RecyclerView.Adapter<FilmographyAdapter.
         return credits.size();
     }
 
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    public void showAll() {
+        expanded = true;
+        credits.clear();
+        credits.addAll(fullList);
+        notifyDataSetChanged();
+    }
+
+    @android.annotation.SuppressLint("NotifyDataSetChanged")
+    public void collapse() {
+        expanded = false;
+        credits.clear();
+        credits.addAll(fullList.subList(0, Math.min(COLLAPSE_LIMIT, fullList.size())));
+        notifyDataSetChanged();
+    }
+
+    public boolean isExpanded() {
+        return expanded;
+    }
+
+    public boolean hasMore() {
+        return fullList.size() > COLLAPSE_LIMIT;
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvYear, tvTitle, tvRole, tvRating;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            tvYear = itemView.findViewById(R.id.tvYear);
-            tvTitle = itemView.findViewById(R.id.tvTitle);
-            tvRole = itemView.findViewById(R.id.tvRole);
-            tvRating = itemView.findViewById(R.id.tvRating);
+            tvYear = itemView.findViewById(R.id.tv_year);
+            tvTitle = itemView.findViewById(R.id.tv_film_title);
+            tvRole = itemView.findViewById(R.id.tv_film_role);
+            tvRating = itemView.findViewById(R.id.tv_film_rating);
         }
     }
 }

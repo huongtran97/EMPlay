@@ -2,11 +2,14 @@
 <!-- EMPlay · CAST INFO VIEW
      Avatar + name/bio, "Known For" horizontal scroll, Filmography list with gold serif year column -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_base">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/castScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none">
@@ -20,35 +23,47 @@
             <!-- Back button -->
             <Button
                 android:id="@+id/btn_back"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_margin="12dp"
                 android:background="@drawable/bg_back_button"
                 android:contentDescription="@string/cd_back"
                 android:src="@drawable/ic_chevron_left" />
 
-            <!-- Avatar + name/bio row -->
+            <!-- Avatar + name/meta row (FrameLayout hosts the ghost glyph overlay) -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tvGhostGlyph"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:alpha="0.05"
+                    android:fontFamily="@font/playfair_display"
+                    android:textColor="@color/text_1"
+                    android:textSize="@dimen/text_hero_l"
+                    tools:text="Z" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingStart="13dp"
-                android:paddingTop="0dp"
                 android:paddingEnd="13dp"
                 android:paddingBottom="13dp">
 
-                <!-- Avatar circle with initial -->
-                <TextView
-                    android:id="@+id/tv_avatar_initial"
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/cast_detail_image"
                     android:layout_width="74dp"
                     android:layout_height="74dp"
                     android:background="@drawable/bg_cast_avatar"
-                    android:fontFamily="@font/playfair_display"
-                    android:gravity="center"
-                    android:text="Z"
-                    android:textColor="@color/text_3"
-                    android:textSize="@dimen/text_display_m" />
+                    android:contentDescription="@string/cd_actor_photo"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/EMPlay.Circle"
+                    tools:src="@tools:sample/avatars" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -58,68 +73,98 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_cast_name"
+                        android:id="@+id/cast_detail_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:fontFamily="@font/playfair_display"
-                        android:text="Zendaya"
                         android:textColor="@color/text_1"
-                        android:textSize="@dimen/text_headline" />
+                        android:textSize="@dimen/text_headline"
+                        tools:text="Zendaya" />
 
                     <TextView
-                        android:id="@+id/tv_cast_meta"
+                        android:id="@+id/cast_detail_meta"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:lineSpacingMultiplier="1.5"
-                        android:text="Acting · Born Sep 1, 1996\nOakland, California"
                         android:textColor="@color/text_3"
-                        android:textSize="@dimen/text_badge" />
+                        android:textSize="@dimen/text_badge"
+                        tools:text="Acting · Born Sep 1, 1996\nOakland, California" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
+            </FrameLayout>
+
             <!-- Biography excerpt -->
             <TextView
-                android:id="@+id/tv_biography"
+                android:id="@+id/cast_detail_biography"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lineSpacingMultiplier="1.6"
+                android:maxLines="4"
+                android:ellipsize="end"
                 android:paddingStart="13dp"
                 android:paddingEnd="13dp"
-                android:text="American actress and singer, known for Euphoria, Spider-Man and Dune…"
                 android:textColor="@color/text_2"
-                android:textSize="@dimen/text_divider_label" />
+                android:textSize="@dimen/text_divider_label"
+                tools:text="American actress and singer, known for Euphoria, Spider-Man and Dune…" />
+
+            <TextView
+                android:id="@+id/read_more_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="13dp"
+                android:layout_marginTop="4dp"
+                android:text="@string/cast_more"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/text_divider_label"
+                android:textStyle="bold"
+                android:visibility="gone" />
 
             <!-- KNOWN FOR -->
-            <TextView
-                android:id="@+id/tv_known_for_eyebrow"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/inter_semibold"
-                android:letterSpacing="0.18"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="13dp"
                 android:paddingTop="14dp"
                 android:paddingEnd="13dp"
-                android:paddingBottom="9dp"
-                android:text="@string/cast_known_for"
-                android:textColor="@color/accent"
-                android:textSize="@dimen/text_caption" />
+                android:paddingBottom="9dp">
 
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingStart="13dp"
-                android:scrollbars="none">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/inter_semibold"
+                    android:letterSpacing="0.18"
+                    android:text="@string/cast_known_for"
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_caption" />
 
-                <LinearLayout
-                    android:id="@+id/row_known_for"
+                <TextView
+                    android:id="@+id/btn_known_for_see_all"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal" />
+                    android:text="@string/action_see_all"
+                    android:textColor="@color/accent"
+                    android:textSize="@dimen/text_badge"
+                    android:visibility="gone" />
 
-            </HorizontalScrollView>
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/cast_detail_credits_recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:orientation="horizontal"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/movie_item" />
 
             <!-- FILMOGRAPHY header -->
             <LinearLayout
@@ -133,7 +178,6 @@
                 android:paddingBottom="6dp">
 
                 <TextView
-                    android:id="@+id/tv_filmography_label"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -143,25 +187,41 @@
                     android:textSize="@dimen/text_meta" />
 
                 <TextView
-                    android:id="@+id/tv_filmography_count"
+                    android:id="@+id/credits_page_indicator"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="4dp"
-                    android:text="42 titles ›"
                     android:textColor="@color/text_3"
-                    android:textSize="@dimen/text_badge" />
+                    android:textSize="@dimen/text_badge"
+                    tools:text="42 titles ›" />
 
             </LinearLayout>
 
             <!-- Filmography list -->
-            <LinearLayout
-                android:id="@+id/list_filmography"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFilmography"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical" />
+                android:nestedScrollingEnabled="false"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/item_filmography_row" />
+
+            <TextView
+                android:id="@+id/tvBackToTop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"
+                android:text="@string/back_to_top"
+                android:textColor="@color/accent"
+                android:textSize="@dimen/text_badge"
+                android:visibility="gone" />
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </FrameLayout>

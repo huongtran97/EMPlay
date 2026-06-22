@@ -15,6 +15,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -23,23 +24,40 @@ import emplay.entertainment.emplay.models.common.MediaItem;
 public class WatchlistGridAdapter extends RecyclerView.Adapter<WatchlistGridAdapter.GridViewHolder> {
 
     private final Context context;
-    private List<MediaItem> items;
+    private final List<MediaItem> items = new ArrayList<>();
     private final OnItemClickListener listener;
 
     public interface OnItemClickListener {
-        void onItemClick(MediaItem item);
+        void onItemClick(MediaItem item, View sharedElement);
     }
 
     public WatchlistGridAdapter(Context context, OnItemClickListener listener) {
         this.context = context;
-        this.items = new ArrayList<>();
         this.listener = listener;
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    public void setData(List<MediaItem> newItems) {
-        this.items = newItems != null ? newItems : new ArrayList<>();
+    public void setData(List<MediaItem> data) {
+        items.clear();
+        if (data != null) items.addAll(data);
         notifyDataSetChanged();
+    }
+
+    public MediaItem getItem(int position) {
+        return items.get(position);
+    }
+
+    public void removeItem(int position) {
+        if (position >= 0 && position < items.size()) {
+            items.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
+
+    public void restoreItem(int position, MediaItem item) {
+        int insertAt = Math.min(position, items.size());
+        items.add(insertAt, item);
+        notifyItemInserted(insertAt);
     }
 
     @NonNull
@@ -49,25 +67,20 @@ public class WatchlistGridAdapter extends RecyclerView.Adapter<WatchlistGridAdap
         return new GridViewHolder(view);
     }
 
-    @SuppressLint("StringFormatInvalid")
     @Override
     public void onBindViewHolder(@NonNull GridViewHolder holder, int position) {
         MediaItem item = items.get(position);
-        
-        holder.title.setText(item.getTitle());
-        holder.rating.setText(
-                holder.itemView.getContext().getString(R.string.rating_format, item.getVoteAverage())
-        );
-        
-        holder.upcomingDate.setVisibility(View.GONE);
 
-        String url = ImageUrl.THUMBNAIL + item.getPosterPath();
         Glide.with(context)
-                .load(url)
-                .placeholder(R.drawable.placeholder_image)
+                .load(ImageUrl.of(ImageUrl.THUMBNAIL, item.getPosterPath()))
+                .placeholder(R.drawable.bg_poster_placeholder)
                 .into(holder.poster);
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
+        holder.title.setText(item.getTitle());
+        holder.rating.setText(String.format(Locale.getDefault(), "%.1f", item.getVoteAverage()));
+        
+        holder.poster.setTransitionName("poster_" + item.getMediaId());
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.poster));
     }
 
     @Override
@@ -85,16 +98,6 @@ public class WatchlistGridAdapter extends RecyclerView.Adapter<WatchlistGridAdap
             title = itemView.findViewById(R.id.tvPosterTitle);
             rating = itemView.findViewById(R.id.tvPosterRating);
             upcomingDate = itemView.findViewById(R.id.tvUpcomingDate);
-
-            // Set fixed aspect ratio for poster if needed
-            itemView.post(() -> {
-                int width = itemView.getWidth();
-                if (width > 0) {
-                    ViewGroup.LayoutParams lp = poster.getLayoutParams();
-                    lp.height = (int) (width * 1.5);
-                    poster.setLayoutParams(lp);
-                }
-            });
         }
     }
 }

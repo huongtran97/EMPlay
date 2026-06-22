@@ -72,9 +72,12 @@ public class BadgeHelper {
 
     /**
      * Movie status badge.
-     *  release_date ≤ today → "NOW SHOWING" (green)
-     *  release_date > today → "COMING SOON"  (amber)
+     *  release_date ≤ today          → "NOW SHOWING"  (green)
+     *  release_date tomorrow         → "Tomorrow"     (amber)
+     *  release_date 2–30 days away   → "In X days"   (amber)
+     *  release_date > 30 days away   → "In X months" (amber)
      */
+    @SuppressLint("SetTextI18n")
     public static void applyMovieBadge(TextView badge, String releaseDateStr) {
         if (releaseDateStr == null || releaseDateStr.isEmpty()) {
             badge.setVisibility(View.GONE);
@@ -85,10 +88,19 @@ public class BadgeHelper {
             Date releaseDate = sdf.parse(releaseDateStr);
             if (releaseDate == null) { badge.setVisibility(View.GONE); return; }
             badge.setVisibility(View.VISIBLE);
-            if (releaseDate.after(new Date())) {
-                badge.setText("COMING SOON");
-                badge.setTextColor(Color.parseColor("#C98A1A"));
+            long diffMs = releaseDate.getTime() - new Date().getTime();
+            if (diffMs > 0) {
+                long daysUntil = (long) Math.ceil((double) diffMs / (1000L * 60 * 60 * 24));
+                badge.setTextColor(Color.parseColor("#EDF0F7"));
                 badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+                if (daysUntil == 1) {
+                    badge.setText("Tomorrow");
+                } else if (daysUntil <= 30) {
+                    badge.setText("In " + daysUntil + " days");
+                } else {
+                    long months = Math.max(1, daysUntil / 30);
+                    badge.setText("In " + months + (months == 1 ? " month" : " months"));
+                }
             } else {
                 badge.setText("NOW SHOWING");
                 badge.setTextColor(Color.parseColor("#4DB87A"));
@@ -101,25 +113,40 @@ public class BadgeHelper {
 
     /**
      * TV show status badge.
-     *  first_air_date > today                          → "COMING SOON"  (amber)
+     *  first_air_date tomorrow         → "Tomorrow"     (amber)
+     *  first_air_date 2–30 days away   → "In X days"   (amber)
+     *  first_air_date > 30 days away   → "In X months" (amber)
      *  first_air_date ≤ today AND nextEpisodeExists    → "NOW SHOWING"  (green)
      *  first_air_date ≤ today AND !nextEpisodeExists   → "FULL SERIES"  (muted blue)
      *  nextEpisodeExists == null (unknown)             → "NOW SHOWING"  as provisional
      */
+    @SuppressLint("SetTextI18n")
     public static void applyTVStatusBadge(TextView badge, String firstAirDate, Boolean nextEpisodeExists) {
         badge.setVisibility(View.VISIBLE);
         boolean isFuture = false;
+        long daysUntil = 0;
         if (firstAirDate != null && !firstAirDate.isEmpty()) {
             try {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
                 Date aired = sdf.parse(firstAirDate);
-                if (aired != null && aired.after(new Date())) isFuture = true;
+                if (aired != null && aired.after(new Date())) {
+                    isFuture = true;
+                    long diffMs = aired.getTime() - new Date().getTime();
+                    daysUntil = (long) Math.ceil((double) diffMs / (1000L * 60 * 60 * 24));
+                }
             } catch (ParseException ignored) {}
         }
         if (isFuture) {
-            badge.setText("COMING SOON");
-            badge.setTextColor(Color.parseColor("#C98A1A"));
+            badge.setTextColor(Color.parseColor("#EDF0F7"));
             badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2A1A00")));
+            if (daysUntil == 1) {
+                badge.setText("Tomorrow");
+            } else if (daysUntil <= 30) {
+                badge.setText("In " + daysUntil + " days");
+            } else {
+                long months = Math.max(1, daysUntil / 30);
+                badge.setText("In " + months + (months == 1 ? " month" : " months"));
+            }
         } else if (Boolean.FALSE.equals(nextEpisodeExists)) {
             badge.setText("FULL SERIES");
             badge.setTextColor(Color.parseColor("#9BB5CC"));
@@ -259,6 +286,30 @@ public class BadgeHelper {
         }
     }
 
+    public static int getGenreColorByName(Context context, String genreName) {
+        if (genreName == null) return ContextCompat.getColor(context, R.color.accent);
+        switch (genreName) {
+            case "Action":       return Color.parseColor("#E53935");
+            case "Adventure":    return Color.parseColor("#FB8C00");
+            case "Animation":    return Color.parseColor("#8E24AA");
+            case "Comedy":       return Color.parseColor("#FDD835");
+            case "Crime":        return Color.parseColor("#546E7A");
+            case "Documentary":  return Color.parseColor("#00897B");
+            case "Drama":        return Color.parseColor("#1E88E5");
+            case "Family":       return Color.parseColor("#43A047");
+            case "Fantasy":      return Color.parseColor("#7B1FA2");
+            case "Horror":       return Color.parseColor("#B71C1C");
+            case "Mystery":      return Color.parseColor("#37474F");
+            case "Romance":      return Color.parseColor("#E91E63");
+            case "Science Fiction":
+            case "Sci-Fi & Fantasy": return Color.parseColor("#0288D1");
+            case "Thriller":     return Color.parseColor("#F4511E");
+            case "War":          return Color.parseColor("#6D4C41");
+            case "Western":      return Color.parseColor("#A1887F");
+            default:             return ContextCompat.getColor(context, R.color.accent);
+        }
+    }
+
     private static boolean isIsNew(String dateStr) {
         boolean isNew = false;
         if (dateStr != null && !dateStr.isEmpty()) {
@@ -275,71 +326,4 @@ public class BadgeHelper {
         return isNew;
     }
 
-    public static int getGenreColorByName(Context context, String genreName) {
-        if (genreName == null) return ContextCompat.getColor(context, R.color.genre_default);
-        int colorRes;
-        switch (genreName.toLowerCase(Locale.ROOT)) {
-            case "action":
-            case "action & adventure":  colorRes = R.color.genre_action;      break;
-            case "adventure":           colorRes = R.color.genre_adventure;   break;
-            case "animation":           colorRes = R.color.genre_animation;   break;
-            case "comedy":              colorRes = R.color.genre_comedy;      break;
-            case "crime":               colorRes = R.color.genre_crime;       break;
-            case "documentary":         colorRes = R.color.genre_documentary; break;
-            case "drama":               colorRes = R.color.genre_drama;       break;
-            case "family":              colorRes = R.color.genre_family;      break;
-            case "fantasy":             colorRes = R.color.genre_fantasy;     break;
-            case "history":             colorRes = R.color.genre_history;     break;
-            case "horror":              colorRes = R.color.genre_horror;      break;
-            case "kids":                colorRes = R.color.genre_kids;        break;
-            case "music":               colorRes = R.color.genre_music;       break;
-            case "mystery":             colorRes = R.color.genre_mystery;     break;
-            case "news":                colorRes = R.color.genre_news;        break;
-            case "reality":             colorRes = R.color.genre_reality;     break;
-            case "romance":             colorRes = R.color.genre_romance;     break;
-            case "science fiction":
-            case "sci-fi & fantasy":    colorRes = R.color.genre_scifi;       break;
-            case "soap":                colorRes = R.color.genre_soap;        break;
-            case "talk":                colorRes = R.color.genre_talk;        break;
-            case "thriller":            colorRes = R.color.genre_thriller;    break;
-            case "tv movie":            colorRes = R.color.genre_tv_movie;    break;
-            case "war":
-            case "war & politics":      colorRes = R.color.genre_war;         break;
-            case "western":             colorRes = R.color.genre_western;     break;
-            default:                    colorRes = R.color.genre_default;     break;
-        }
-        return ContextCompat.getColor(context, colorRes);
-    }
-
-    public static int getGenreColor(Context context, int genreId) {
-        int colorRes;
-        switch (genreId) {
-            case 28: case 10759: colorRes = R.color.genre_action;      break;
-            case 12:             colorRes = R.color.genre_adventure;   break;
-            case 16:             colorRes = R.color.genre_animation;   break;
-            case 35:             colorRes = R.color.genre_comedy;      break;
-            case 80:             colorRes = R.color.genre_crime;       break;
-            case 99:             colorRes = R.color.genre_documentary; break;
-            case 18:             colorRes = R.color.genre_drama;       break;
-            case 10751:          colorRes = R.color.genre_family;      break;
-            case 14:             colorRes = R.color.genre_fantasy;     break;
-            case 36:             colorRes = R.color.genre_history;     break;
-            case 27:             colorRes = R.color.genre_horror;      break;
-            case 10762:          colorRes = R.color.genre_kids;        break;
-            case 10402:          colorRes = R.color.genre_music;       break;
-            case 9648:           colorRes = R.color.genre_mystery;     break;
-            case 10763:          colorRes = R.color.genre_news;        break;
-            case 10764:          colorRes = R.color.genre_reality;     break;
-            case 10749:          colorRes = R.color.genre_romance;     break;
-            case 878: case 10765:colorRes = R.color.genre_scifi;       break;
-            case 10766:          colorRes = R.color.genre_soap;        break;
-            case 10767:          colorRes = R.color.genre_talk;        break;
-            case 53:             colorRes = R.color.genre_thriller;    break;
-            case 10770:          colorRes = R.color.genre_tv_movie;    break;
-            case 10752: case 10768: colorRes = R.color.genre_war;      break;
-            case 37:             colorRes = R.color.genre_western;     break;
-            default:             colorRes = R.color.genre_default;     break;
-        }
-        return ContextCompat.getColor(context, colorRes);
-    }
 }

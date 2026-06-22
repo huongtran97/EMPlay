@@ -53,6 +53,8 @@ public class TVShowDetailsResponse {
     private List<SpokenLanguage> spoken_languages;
     @SerializedName("production_countries")
     private List<ProductionCountry> production_countries;
+    @SerializedName("origin_country")
+    private List<String> origin_country;
     @SerializedName("tv")
     private TVShowModel tvDetails;
 
@@ -271,6 +273,10 @@ public class TVShowDetailsResponse {
 
     public void setProduction_countries(List<ProductionCountry> production_countries) {
         this.production_countries = production_countries;
+    }
+
+    public List<String> getOrigin_country() {
+        return origin_country;
     }
 
     public TVShowModel getTVShowDetails() { return tvDetails;

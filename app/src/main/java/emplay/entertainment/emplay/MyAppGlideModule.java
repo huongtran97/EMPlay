@@ -25,7 +25,7 @@ public final class MyAppGlideModule extends AppGlideModule {
     public void applyOptions(@NonNull Context context, @NonNull GlideBuilder builder) {
         builder.setDiskCache(new InternalCacheDiskCacheFactory(context, 150 * 1024 * 1024));
         builder.setDefaultRequestOptions(new RequestOptions()
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .timeout(15000)); // 15s is plenty for images
     }
 

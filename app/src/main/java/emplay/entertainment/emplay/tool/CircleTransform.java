@@ -37,8 +37,20 @@ public class CircleTransform extends BitmapTransformation {
         float r = size / 2f;
         canvas.drawCircle(r, r, r, paint);
 
-        squaredBitmap.recycle();
+        if (squaredBitmap != toTransform) {
+            squaredBitmap.recycle();
+        }
         return bitmap;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof CircleTransform;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID.hashCode();
     }
 
     @Override

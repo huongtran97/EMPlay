@@ -1,146 +1,281 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- EMPlay · LOGIN VIEW
      TMDB primary auth, Google secondary, guest link -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_base"
-    android:fillViewport="true">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <FrameLayout
+    <!-- Layer 1: static fallback shown before dynamic posters arrive -->
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
 
-        <!-- ADMIT ONE watermark -->
-        <TextView
-            android:id="@+id/tv_watermark"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:alpha="0.04"
-            android:fontFamily="@font/playfair_display_medium"
-            android:letterSpacing="0.25"
-            android:rotation="-90"
-            android:text="@string/memorabilia_admit_one"
-            android:textColor="@color/text_1"
-            android:textSize="@dimen/text_display_xl" />
+    <!-- Layer 2: 2-column × 4-row poster mosaic (invisible until loaded) -->
+    <LinearLayout
+        android:id="@+id/poster_mosaic"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="560dp"
-            android:orientation="vertical"
-            android:paddingStart="22dp"
-            android:paddingEnd="22dp"
-            android:paddingBottom="24dp">
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageView android:id="@+id/poster_0"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null"
+                tools:ignore="NestedWeights" />
+            <ImageView android:id="@+id/poster_1"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null" />
+        </LinearLayout>
 
-            <!-- Hero / brand section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:paddingTop="36dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageView android:id="@+id/poster_2"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null"
+                tools:ignore="NestedWeights" />
+            <ImageView android:id="@+id/poster_3"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null" />
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_brand"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/playfair_display_medium"
-                    android:letterSpacing="0.18"
-                    android:text="@string/brand_name"
-                    android:textColor="@color/accent"
-                    android:textSize="@dimen/text_display_s"
-                    android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageView android:id="@+id/poster_4"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null"
+                tools:ignore="NestedWeights" />
+            <ImageView android:id="@+id/poster_5"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null" />
+        </LinearLayout>
 
-                <!-- Gold divider line -->
-                <View
-                    android:layout_width="38dp"
-                    android:layout_height="1dp"
-                    android:layout_marginTop="13dp"
-                    android:layout_marginBottom="13dp"
-                    android:alpha="0.5"
-                    android:background="@color/accent" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+            <ImageView android:id="@+id/poster_6"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null"
+                tools:ignore="NestedWeights" />
+            <ImageView android:id="@+id/poster_7"
+                android:layout_width="0dp" android:layout_height="match_parent"
+                android:layout_weight="1" android:scaleType="centerCrop"
+                android:contentDescription="@null" />
+        </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_tagline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="@font/playfair_display"
-                    android:gravity="center"
-                    android:text="@string/login_tagline"
-                    android:textColor="@color/text_2"
-                    android:textSize="@dimen/text_meta"
-                    android:textStyle="italic" />
+    </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_subtitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:gravity="center"
-                    android:lineSpacingMultiplier="1.6"
-                    android:text="@string/login_subtitle"
-                    android:textColor="@color/text_3"
-                    android:textSize="@dimen/text_badge" />
+    <!-- Layer 3: bg_base at 60% opacity per spec §6.02 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#990B0F19" />
 
-            </LinearLayout>
+    <!-- Layer 4: content -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-            <!-- Auth buttons -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <!-- ADMIT ONE watermark -->
+            <TextView
+                android:id="@+id/tv_watermark"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:alpha="0.04"
+                android:fontFamily="@font/playfair_display_medium"
+                android:letterSpacing="0.25"
+                android:rotation="-90"
+                android:text="@string/memorabilia_admit_one"
+                android:textColor="@color/text_1"
+                android:textSize="@dimen/text_display_xl" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:minHeight="560dp"
+                android:orientation="vertical"
+                android:paddingTop="130dp"
+                android:paddingStart="22dp"
+                android:paddingEnd="22dp"
+                android:paddingBottom="24dp">
 
-                <Button
-                    android:id="@+id/btn_tmdb"
+                <!-- Hero / brand section -->
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_btn_primary"
-                    android:fontFamily="@font/inter_semibold"
-                    android:padding="11dp"
-                    android:text="@string/login_tmdb"
-                    android:textColor="@color/on_accent"
-                    android:textSize="@dimen/text_divider_label" />
-
-                <Button
-                    android:id="@+id/btn_google"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_btn_secondary"
-                    android:padding="11dp"
-                    android:text="@string/login_google"
-                    android:textColor="@color/text_1"
-                    android:textSize="@dimen/text_divider_label" />
-
-                <TextView
-                    android:id="@+id/tv_guest"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:gravity="center"
-                    android:padding="4dp"
-                    android:text="@string/login_guest"
-                    android:textColor="@color/text_3"
-                    android:textSize="@dimen/text_badge" />
+                    android:orientation="vertical"
+                    android:paddingTop="150dp">
 
-                <TextView
-                    android:id="@+id/tv_legal"
+                    <ImageView
+                        android:id="@+id/tv_brand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_logo_wordmark" />
+
+                    <!-- Gold divider line -->
+                    <View
+                        android:layout_width="38dp"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="13dp"
+                        android:layout_marginBottom="13dp"
+                        android:alpha="0.5"
+                        android:background="@color/accent" />
+
+                    <TextView
+                        android:id="@+id/tv_tagline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/playfair_display"
+                        android:gravity="center"
+                        android:text="@string/login_tagline"
+                        android:textColor="@color/text_2"
+                        android:textSize="@dimen/text_chip"
+                        android:textStyle="italic" />
+
+                    <TextView
+                        android:id="@+id/tv_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="7dp"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.6"
+                        android:text="@string/login_subtitle"
+                        android:textColor="@color/text_3"
+                        android:textSize="@dimen/text_chip" />
+                    <!-- Gold divider line -->
+                    <View
+                        android:layout_width="wrap_content"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="13dp"
+                        android:layout_marginBottom="13dp"
+                        android:alpha="0.5"
+                        android:background="@color/accent" />
+
+                </LinearLayout>
+
+                <!-- Auth buttons -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="14dp"
-                    android:gravity="center"
-                    android:lineSpacingMultiplier="1.6"
-                    android:text="@string/login_legal"
-                    android:textColor="@color/text_dim"
-                    android:textSize="@dimen/text_badge" />
+                    android:orientation="vertical">
+
+                    <!-- TMDB Login -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_tmdb"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginBottom="5dp"
+                        android:backgroundTint="@color/accent"
+                        android:text="@string/continue_with_tmdb"
+                        android:textColor="@color/on_accent"
+                        app:icon="@drawable/tmdb_logo"
+                        android:textSize="@dimen/text_body"
+                        android:fontFamily="sans-serif-medium"
+                        android:stateListAnimator="@null"
+                        app:cornerRadius="12dp"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconTint="@null" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"
+                        android:visibility="gone" />
+
+                    <!-- Google Sign-In -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_google"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginBottom="5dp"
+                        android:backgroundTint="@color/accent"
+                        android:fontFamily="sans-serif-medium"
+                        android:textSize="@dimen/text_body"
+                        android:textColor="@color/on_accent"
+                        android:stateListAnimator="@null"
+                        app:cornerRadius="12dp"
+                        android:text="@string/continue_with_google"
+                        app:icon="@drawable/ic_google"
+                        app:iconGravity="textStart"
+                        app:iconPadding="12dp"
+                        app:iconTint="@null" />
+
+                    <TextView
+                        android:id="@+id/tv_guest"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center"
+                        android:padding="4dp"
+                        android:text="@string/login_guest"
+                        android:textColor="@color/text_3"
+                        android:textSize="@dimen/text_meta" />
+
+                    <TextView
+                        android:id="@+id/tv_forgot_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center"
+                        android:padding="4dp"
+                        android:text="@string/login_forgot_password"
+                        android:textColor="@color/accent"
+                        android:textSize="@dimen/text_meta" />
+
+                    <TextView
+                        android:id="@+id/tv_legal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="14dp"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.6"
+                        android:text="@string/login_legal"
+                        android:textColor="@color/text_dim"
+                        android:textSize="@dimen/text_chip" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </FrameLayout>
 
-    </FrameLayout>
+    </ScrollView>
 
-</ScrollView>
+</FrameLayout>

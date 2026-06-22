@@ -42,10 +42,16 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
         notifyDataSetChanged();
     }
 
+    public void appendData(List<CreditItem> newItems) {
+        int insertStart = creditList.size();
+        creditList.addAll(newItems);
+        notifyItemRangeInserted(insertStart, newItems.size());
+    }
+
     @NonNull
     @Override
     public CreditViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.credit_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.movie_item, parent, false);
         return new CreditViewHolder(view);
     }
 
@@ -72,7 +78,7 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
 
         public CreditViewHolder(@NonNull View view) {
             super(view);
-            posterImage = view.findViewById(R.id.credit_poster);
+            posterImage = view.findViewById(R.id.header);
         }
     }
 }

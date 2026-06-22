@@ -16,7 +16,6 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
@@ -24,15 +23,14 @@ import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.tool.BadgeHelper;
 
-public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAdapter.ViewHolder> {
-
+public class WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAdapter.ViewHolder> {
     private final Context context;
     private final List<MovieModel> movieList;
     private final OnItemClickListener listener;
     private final int maxItems;
 
     public interface OnItemClickListener {
-        void onItemClick(MovieModel movie);
+        void onItemClick(MovieModel movie, View sharedElement);
     }
 
     public WhatsNewMovieAdapter(Context context, List<MovieModel> movieList, OnItemClickListener listener) {
@@ -53,56 +51,42 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
         return new ViewHolder(view);
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         MovieModel movie = movieList.get(position);
-        holder.tvTitle.setText(movie.getTitle());
-        
-        String releaseDateStr = movie.getReleaseDate();
-        String year = (releaseDateStr != null && releaseDateStr.length() >= 4)
-                ? releaseDateStr.substring(0, 4) : "";
-        String lang = movie.getOriginalLanguage() != null
-                ? movie.getOriginalLanguage().toUpperCase(Locale.ROOT) : "";
-        String rel = BadgeHelper.formatRelativeDate(releaseDateStr);
-        String meta = year + " · " + lang;
-        if (!rel.isEmpty()) meta += " · " + rel;
-        holder.tvMeta.setText(meta);
-
-        BadgeHelper.applyMovieBadge(holder.tvBadge, releaseDateStr);
 
         Glide.with(context)
-                .load(ImageUrl.POSTER + movie.getPosterPath())
+                .load(ImageUrl.of(ImageUrl.CARD, movie.getBackdropPath()))
                 .placeholder(R.drawable.bg_poster_placeholder)
                 .into(holder.ivThumb);
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(movie));
+        holder.tvTitle.setText(movie.getTitle());
+        holder.tvMeta.setText(movie.getReleaseDate());
+        BadgeHelper.applyMovieBadge(holder.tvBadge, movie.getReleaseDate());
+
+        holder.ivThumb.setTransitionName("poster_" + movie.getMovieId());
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(movie, holder.ivThumb));
     }
 
     @Override
     public int getItemCount() {
-        return movieList.size();
+        return Math.min(movieList.size(), maxItems);
     }
 
-    public void updateData(List<MovieModel> newList) {
-        List<MovieModel> capped = newList != null
-                ? new ArrayList<>(newList.subList(0, Math.min(newList.size(), maxItems)))
-                : new ArrayList<>();
-        List<MovieModel> oldList = new ArrayList<>(movieList);
+    public void updateData(List<MovieModel> newData) {
+        List<MovieModel> oldData = new ArrayList<>(movieList);
         DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return oldList.size(); }
-            @Override public int getNewListSize() { return capped.size(); }
+            @Override public int getOldListSize() { return oldData.size(); }
+            @Override public int getNewListSize() { return newData != null ? newData.size() : 0; }
             @Override public boolean areItemsTheSame(int o, int n) {
-                return oldList.get(o).getMovieId() == capped.get(n).getMovieId();
+                return oldData.get(o).getMovieId() == newData.get(n).getMovieId();
             }
             @Override public boolean areContentsTheSame(int o, int n) {
-                MovieModel a = oldList.get(o), b = capped.get(n);
-                return Objects.equals(a.getTitle(), b.getTitle())
-                        && Objects.equals(a.getPosterPath(), b.getPosterPath());
+                return Objects.equals(oldData.get(o).getTitle(), newData.get(n).getTitle());
             }
         });
         movieList.clear();
-        movieList.addAll(capped);
+        if (newData != null) movieList.addAll(newData);
         diff.dispatchUpdatesTo(this);
     }
 
@@ -112,10 +96,10 @@ public class  WhatsNewMovieAdapter extends RecyclerView.Adapter<WhatsNewMovieAda
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
-            ivThumb = itemView.findViewById(R.id.ivMovieThumb);
-            tvTitle = itemView.findViewById(R.id.tvMovieTitle);
-            tvMeta = itemView.findViewById(R.id.tvMovieMeta);
-            tvBadge = itemView.findViewById(R.id.tvMovieBadge);
+            ivThumb = itemView.findViewById(R.id.ivThumb);
+            tvTitle = itemView.findViewById(R.id.tvTitle);
+            tvMeta = itemView.findViewById(R.id.tvMeta);
+            tvBadge = itemView.findViewById(R.id.tvBadge);
         }
     }
 }

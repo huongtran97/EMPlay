@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    EMPlay · WORDMARK LOGO  (168×48dp display)
+    300×86 internal viewBox
+    Dark navy background · "EM" in gold · dashed vertical tear line with cutout notches · "PLAY" in white
+    Use as: header bar brand, splash screen, onboarding
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="168dp"
+    android:height="48dp"
+    android:viewportWidth="300"
+    android:viewportHeight="86">
+
+    <!-- Combined Background Fill & Outer Stroke with Clean Native Cutouts at X=123 -->
+    <path
+        android:fillColor="#0B0F19"
+        android:strokeColor="#2A3350"
+        android:strokeWidth="1.5"
+        android:pathData="
+            M14,0
+            L116,0
+            A7,7 0 0,0 130,0
+            L286,0
+            C293.732,0 300,6.268 300,14
+            L300,72
+            C300,79.732 293.732,86 286,86
+            L130,86
+            A7,7 0 0,0 116,86
+            L14,86
+            C6.268,86 0,79.732 0,70
+            L0,14
+            C0,6.268 6.268,0 14,0 Z" />
+
+    <!-- "EM" in gold — E first (left), M second (right) -->
+    <!-- E letterform -->
+    <path
+        android:fillColor="#E3B566"
+        android:pathData="
+        M20,22 L46,22 L46,32 L30,32 L30,38 L44,38 L44,48 L30,48 L30,54 L46,54 L46,64 L20,64 Z" />
+    <!-- M letterform -->
+    <path
+        android:fillColor="#E3B566"
+        android:pathData="
+        M50,22 L62,22 L76,50 L90,22 L102,22 L102,64 L92,64 L92,38 L80,62 L72,62 L60,38 L60,64 L50,64 Z" />
+
+    <!-- Vertical tear-line (dashed) — x=123, y1=14 to y2=72 -->
+    <!-- Rendered as short dash segments since VectorDrawable does not support dasharray -->
+    <path android:strokeColor="#E3B566" android:strokeWidth="2" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M123,14 L123,21" android:alpha="0.75"/>
+    <path android:strokeColor="#E3B566" android:strokeWidth="2" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M123,25 L123,32" android:alpha="0.75"/>
+    <path android:strokeColor="#E3B566" android:strokeWidth="2" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M123,36 L123,43" android:alpha="0.75"/>
+    <path android:strokeColor="#E3B566" android:strokeWidth="2" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M123,47 L123,54" android:alpha="0.75"/>
+    <path android:strokeColor="#E3B566" android:strokeWidth="2" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M123,58 L123,65" android:alpha="0.75"/>
+    <path android:strokeColor="#E3B566" android:strokeWidth="2" android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"
+        android:pathData="M123,69 L123,72" android:alpha="0.75"/>
+
+    <!-- "PLAY" in white — recentred for divider at x=123 -->
+    <!-- P letterform -->
+    <path
+        android:fillColor="#EDF0F7"
+        android:pathData="
+        M140,22 L140,64 L150,64 L150,50 L160,50
+        C168,50 174,45 174,36
+        C174,27 168,22 160,22 Z
+        M150,32 L160,32 C163,32 164,34 164,36
+        C164,38 163,40 160,40 L150,40 Z" />
+    <!-- L letterform -->
+    <path
+        android:fillColor="#EDF0F7"
+        android:pathData="M178,22 L188,22 L188,54 L202,54 L202,64 L178,64 Z" />
+    <!-- A letterform -->
+    <path
+        android:fillColor="#EDF0F7"
+        android:pathData="
+        M210,64 L222,22 L234,22 L246,64 L235,64 L233,56 L223,56 L221,64 Z
+        M225,47 L231,47 L228,34 Z" />
+    <!-- Y letterform -->
+    <path
+        android:fillColor="#EDF0F7"
+        android:pathData="
+        M248,22 L259,22 L266,38 L273,22 L284,22
+        L273,48 L273,64 L259,64 L259,48 Z" />
+
+</vector>

@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.ViewCompat;
 import androidx.palette.graphics.Palette;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,7 +43,7 @@ public abstract class BasePosterAdapter<T extends MediaItem>
     private OnPaletteColorListener paletteListener;
 
     public interface OnItemClickListener<T> {
-        void onItemClick(T item);
+        void onItemClick(T item, View view);
     }
 
     // Callback fired once per item when Palette finishes extracting the dominant dark color.
@@ -94,6 +95,13 @@ public abstract class BasePosterAdapter<T extends MediaItem>
         diff.dispatchUpdatesTo(this);
     }
 
+    public void appendData(List<T> newItems) {
+        if (newItems == null || newItems.isEmpty()) return;
+        int start = mData.size();
+        mData.addAll(newItems);
+        notifyItemRangeInserted(start, newItems.size());
+    }
+
     public void removeItem(int position) {
         if (position < 0 || position >= mData.size()) return;
         mData.remove(position);
@@ -139,8 +147,11 @@ public abstract class BasePosterAdapter<T extends MediaItem>
                     .into(holder.image);
         }
 
+        // Unique transitionName per item so shared-element transitions don't collide.
+        ViewCompat.setTransitionName(holder.image, "poster_" + item.getMediaId());
+
         bindBadge(holder, item);
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(item));
+        holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.image));
     }
 
     protected void bindBadge(PosterViewHolder holder, T item) {}

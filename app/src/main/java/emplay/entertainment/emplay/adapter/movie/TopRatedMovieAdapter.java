@@ -2,6 +2,9 @@ package emplay.entertainment.emplay.adapter.movie;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -58,7 +62,15 @@ public class TopRatedMovieAdapter extends RecyclerView.Adapter<TopRatedMovieAdap
 
         String year = (movie.getReleaseDate() != null && movie.getReleaseDate().length() >= 4)
                 ? movie.getReleaseDate().substring(0, 4) : "";
-        holder.tvMeta.setText(String.format(Locale.getDefault(), "%s · ★ %.1f", year, movie.getVoteAverage()));
+        String meta = String.format(Locale.getDefault(), "%s · ★ %.1f", year, movie.getVoteAverage());
+        int starIndex = meta.indexOf('★');
+        SpannableString spannable = new SpannableString(meta);
+        if (starIndex >= 0) {
+            spannable.setSpan(
+                    new ForegroundColorSpan(ContextCompat.getColor(context, R.color.accent)),
+                    starIndex, meta.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+        holder.tvMeta.setText(spannable);
 
         holder.ivPoster.setTransitionName("poster_" + movie.getMovieId());
         holder.itemView.setOnClickListener(v -> listener.onMovieClick(movie, holder.ivPoster));

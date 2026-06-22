@@ -14,8 +14,10 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
@@ -25,6 +27,7 @@ import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.movie.MovieResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
 import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.common.MediaItem;
@@ -39,7 +42,7 @@ public class TrendingSeeAllFragment extends BaseFragment {
     private static final String ARG_IS_TV = "is_tv";
     private boolean isTV;
     private RecyclerView recyclerView;
-    private TrendingSearchAdapter adapter;
+    private TrendingSearchAdapter<?> adapter;
     private final List<MediaItem> trendingList = new ArrayList<>();
     private MovieApiService apiService;
 
@@ -61,23 +64,28 @@ public class TrendingSeeAllFragment extends BaseFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.trending_see_all_view, container, false);
 
         ImageButton btnBack = view.findViewById(R.id.btnBack);
-        TextView tvTitle = view.findViewById(R.id.trendNow);
-        recyclerView = view.findViewById(R.id.rvTrendingFull);
+        TextView tvTitle    = view.findViewById(R.id.trendNow);
+        recyclerView        = view.findViewById(R.id.rvTrendingFull);
 
         btnBack.setOnClickListener(v -> {
-            if (getFragmentManager() != null) {
-                getFragmentManager().popBackStack();
-            }
+            if (getFragmentManager() != null) getFragmentManager().popBackStack();
         });
-        
+
         tvTitle.setText(isTV ? "Trending TV Shows" : "Trending Movies");
 
+        // Resolve Firebase user for My List inline actions
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = currentUser != null ? currentUser.getUid() : null;
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireContext());
+
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        adapter = new TrendingSearchAdapter(requireContext(), trendingList, this::onItemClick);
+        adapter = new TrendingSearchAdapter<>(requireContext(), trendingList, this::onItemClick,
+                dbHelper, userId);
         recyclerView.setAdapter(adapter);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
@@ -88,55 +96,55 @@ public class TrendingSeeAllFragment extends BaseFragment {
 
     private void fetchTrendingData() {
         if (isTV) {
-            safeEnqueue(apiService.getTrendingTVShows(TMDBpath.trendingTVShows()), new Callback<TVShowResponse>() {
-                @SuppressLint("NotifyDataSetChanged")
-                @Override
-                public void onResponse(@NonNull Call<TVShowResponse> call, @NonNull Response<TVShowResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        trendingList.clear();
-                        List<TVShowModel> results = response.body().getResults();
-                        if (results != null) {
-                            Collections.sort(results, (t1, t2) -> Double.compare(t2.getVoteAverage(), t1.getVoteAverage()));
-                            trendingList.addAll(results);
+            safeEnqueue(apiService.getTrendingTVShows(TMDBpath.trendingTVShows()),
+                    new Callback<TVShowResponse>() {
+                        @SuppressLint("NotifyDataSetChanged")
+                        @Override
+                        public void onResponse(@NonNull Call<TVShowResponse> call,
+                                               @NonNull Response<TVShowResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                trendingList.clear();
+                                List<TVShowModel> results = response.body().getResults();
+                                if (results != null) trendingList.addAll(results);
+                                adapter.notifyDataSetChanged();
+                            }
                         }
-                        adapter.notifyDataSetChanged();
-                    }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
-                    Toast.makeText(getContext(), "Failed to load trending TV shows", Toast.LENGTH_SHORT).show();
-                }
-            });
+                        @Override
+                        public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                            Toast.makeText(getContext(), "Failed to load trending TV shows",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         } else {
-            safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()), new Callback<MovieResponse>() {
-                @SuppressLint("NotifyDataSetChanged")
-                @Override
-                public void onResponse(@NonNull Call<MovieResponse> call, @NonNull Response<MovieResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        trendingList.clear();
-                        List<MovieModel> results = response.body().getResults();
-                        if (results != null) {
-                            Collections.sort(results, (m1, m2) -> Double.compare(m2.getVoteAverage(), m1.getVoteAverage()));
-                            trendingList.addAll(results);
+            safeEnqueue(apiService.getTrendingMovies(TMDBpath.trendingMovies()),
+                    new Callback<MovieResponse>() {
+                        @SuppressLint("NotifyDataSetChanged")
+                        @Override
+                        public void onResponse(@NonNull Call<MovieResponse> call,
+                                               @NonNull Response<MovieResponse> response) {
+                            if (response.isSuccessful() && response.body() != null) {
+                                trendingList.clear();
+                                List<MovieModel> results = response.body().getResults();
+                                if (results != null) trendingList.addAll(results);
+                                adapter.notifyDataSetChanged();
+                            }
                         }
-                        adapter.notifyDataSetChanged();
-                    }
-                }
 
-                @Override
-                public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                    Toast.makeText(getContext(), "Failed to load trending movies", Toast.LENGTH_SHORT).show();
-                }
-            });
+                        @Override
+                        public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                            Toast.makeText(getContext(), "Failed to load trending movies",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
     }
 
-    private void onItemClick(MediaItem item) {
+    private void onItemClick(MediaItem item, View sharedElement) {
         if (item instanceof MovieModel) {
-            navigateTo(MovieResultDetailsFragment.newInstance(item.getMediaId()));
+            navigateTo(MovieResultDetailsFragment.newInstance(item.getMediaId()), sharedElement, "poster_transition");
         } else if (item instanceof TVShowModel) {
-            navigateTo(TVShowResultDetailsFragment.newInstance(item.getMediaId()));
+            navigateTo(TVShowResultDetailsFragment.newInstance(item.getMediaId()), sharedElement, "poster_transition");
         }
     }
 }

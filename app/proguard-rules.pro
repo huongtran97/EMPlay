@@ -24,7 +24,20 @@
 
 # TMDB API response models and app models (Gson deserialization targets)
 -keep class emplay.entertainment.emplay.api.** { *; }
+-keep interface emplay.entertainment.emplay.api.** { *; }
 -keep class emplay.entertainment.emplay.models.** { *; }
+
+# Retrofit service interfaces — R8 must not strip or rename them
+-keep,allowobfuscation interface * {
+    @retrofit2.http.GET <methods>;
+    @retrofit2.http.POST <methods>;
+    @retrofit2.http.PUT <methods>;
+    @retrofit2.http.DELETE <methods>;
+}
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+    @com.google.gson.annotations.Expose <fields>;
+}
 
 # Firebase Auth
 -keep class com.google.firebase.** { *; }

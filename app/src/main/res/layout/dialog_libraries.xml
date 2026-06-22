@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_rounded_bg"
@@ -29,7 +30,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingEnd="12dp"
-            android:paddingBottom="8dp">
+            android:paddingBottom="8dp"
+            tools:ignore="RtlSymmetry">
 
             <!-- Retrofit -->
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="14dp">
@@ -100,9 +102,9 @@
         android:layout_width="match_parent"
         android:layout_height="54dp"
         android:layout_marginTop="20dp"
-        android:backgroundTint="#C82923"
+        android:backgroundTint="@color/accent"
         android:text="@string/close"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/on_accent"
         android:textSize="@dimen/text_chip"
         android:fontFamily="sans-serif-medium"
         app:cornerRadius="12dp" />

@@ -14,7 +14,7 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.common.OriginModel;
 
 public class OriginAdapter extends RecyclerView.Adapter<OriginAdapter.ViewHolder> {
-    private final List<OriginModel> origins;
+    private List<OriginModel> origins;
     private final OnOriginClickListener listener;
 
     public interface OnOriginClickListener {
@@ -40,6 +40,11 @@ public class OriginAdapter extends RecyclerView.Adapter<OriginAdapter.ViewHolder
         holder.tvName.setText(origin.getName());
         holder.tvGlyph.setText(origin.getGlyph());
         holder.itemView.setOnClickListener(v -> listener.onOriginClick(origin));
+    }
+
+    public void updateData(List<OriginModel> newOrigins) {
+        this.origins = newOrigins;
+        notifyDataSetChanged();
     }
 
     @Override

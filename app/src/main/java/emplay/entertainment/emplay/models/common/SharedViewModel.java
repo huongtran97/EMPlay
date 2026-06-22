@@ -4,59 +4,36 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import emplay.entertainment.emplay.models.tvshow.TVShowModel;
-import emplay.entertainment.emplay.models.movie.MovieModel;
+import emplay.entertainment.emplay.api.common.ApiClient;
+import emplay.entertainment.emplay.api.common.MovieApiService;
+import emplay.entertainment.emplay.api.common.MultiSearchResponse;
+import emplay.entertainment.emplay.api.common.TMDBpath;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
-/**
- * Shared state scoped to MainActivity — survives fragment transactions and config changes.
- *
- */
 public class SharedViewModel extends ViewModel {
-    private final MutableLiveData<List<MovieModel>> searchResults = new MutableLiveData<>(new ArrayList<>());
-    private final MutableLiveData<List<TVShowModel>> searchTVResults = new MutableLiveData<>(new ArrayList<>());
-    private final MutableLiveData<Boolean> isTVShowSearch = new MutableLiveData<>(false);
 
-    /**
-     * Remembers whether the user's last search was for TV shows, so the Search tab
-     * reopens to the right screen when you tap it again.
-     */
+    private final MovieApiService apiService = ApiClient.getClient().create(MovieApiService.class);
+
+    private final MutableLiveData<List<MultiSearchResult>> multiSearchResults = new MutableLiveData<>();
+
     private final MutableLiveData<Boolean> lastSearchWasTVShow = new MutableLiveData<>();
 
-    // Passed to MovieByGenresFragment / TVShowsByGenresFragment when a genre chip is tapped.
     private final MutableLiveData<Integer> selectedGenreId = new MutableLiveData<>();
 
-    public LiveData<List<MovieModel>> getSearchResults() {
-        return searchResults;
+    public LiveData<List<MultiSearchResult>> getMultiSearchResults() {
+        return multiSearchResults;
     }
 
-    public LiveData<List<TVShowModel>> getSearchTVResults() {
-        return searchTVResults;
-    }
-
-    public LiveData<Boolean> getIsTVShowSearch() {
-        return isTVShowSearch;
-    }
-
-    public void setSearchResults(List<MovieModel> results) {
-        searchResults.setValue(results);
-    }
-
-    public void setSearchTVResults(List<TVShowModel> results) {
-        searchTVResults.setValue(results);
-    }
-
-    public void setIsTVShowSearch(boolean isTVShowSearch) {
-        this.isTVShowSearch.setValue(isTVShowSearch);
-    }
     public LiveData<Boolean> getLastSearchWasTVShow() {
         return lastSearchWasTVShow;
     }
 
     public void setLastSearchWasTVShow(boolean wasTVShow) {
-        this.lastSearchWasTVShow.setValue(wasTVShow);
+        lastSearchWasTVShow.setValue(wasTVShow);
     }
 
     public LiveData<Integer> getSelectedGenreId() {
@@ -65,5 +42,16 @@ public class SharedViewModel extends ViewModel {
 
     public void setSelectedGenreId(int genreId) {
         selectedGenreId.setValue(genreId);
+    }
+
+    public void searchMulti(String query) {
+        apiService.searchMulti(TMDBpath.searchMulti(), query, "en-US").enqueue(new Callback<MultiSearchResponse>() {
+            @Override public void onResponse(Call<MultiSearchResponse> call, Response<MultiSearchResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    multiSearchResults.setValue(response.body().getResults());
+                }
+            }
+            @Override public void onFailure(Call<MultiSearchResponse> call, Throwable t) {}
+        });
     }
 }

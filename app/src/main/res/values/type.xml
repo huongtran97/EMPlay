@@ -2,11 +2,13 @@
 <resources>
     <!-- EMPlay Type Scale -->
 
+    <style name="TextAppearance.EMPlay" parent="TextAppearance.MaterialComponents.Body1" />
+
     <style name="TextAppearance.EMPlay.DisplayLg">
         <item name="android:fontFamily">@font/playfair_display</item>
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">@color/text_1</item>
-        <item name="android:textFontWeight">500</item>
+        <item name="android:textStyle">normal</item>
         <item name="lineHeight">28.8sp</item>
         <item name="android:letterSpacing">-0.01</item>
     </style>
@@ -15,7 +17,7 @@
         <item name="android:fontFamily">@font/playfair_display</item>
         <item name="android:textSize">22sp</item>
         <item name="android:textColor">@color/text_1</item>
-        <item name="android:textFontWeight">500</item>
+        <item name="android:textStyle">normal</item>
         <item name="lineHeight">26.4sp</item>
         <item name="android:letterSpacing">-0.01</item>
     </style>
@@ -24,7 +26,7 @@
         <item name="android:fontFamily">@font/playfair_display</item>
         <item name="android:textSize">17sp</item>
         <item name="android:textColor">@color/text_1</item>
-        <item name="android:textFontWeight">500</item>
+        <item name="android:textStyle">normal</item>
         <item name="lineHeight">21.25sp</item>
         <item name="android:letterSpacing">0</item>
     </style>
@@ -33,15 +35,27 @@
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:textSize">15sp</item>
         <item name="android:textColor">@color/text_1</item>
-        <item name="android:textFontWeight">600</item>
+        <item name="android:textStyle">bold</item>
         <item name="lineHeight">19.5sp</item>
+    </style>
+
+    <!-- §6.03 Overline — section labels: Inter 600, 10sp, ALL CAPS, text_3, 1.5px tracking -->
+    <style name="TextAppearance.EMPlay.Overline">
+        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/text_3</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontWeight">600</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.15</item>
+        <item name="lineHeight">13sp</item>
     </style>
 
     <style name="TextAppearance.EMPlay.Title">
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text_1</item>
-        <item name="android:textFontWeight">600</item>
+        <item name="android:textStyle">bold</item>
         <item name="lineHeight">18.9sp</item>
     </style>
 
@@ -49,7 +63,7 @@
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:textSize">13sp</item>
         <item name="android:textColor">@color/text_2</item>
-        <item name="android:textFontWeight">400</item>
+        <item name="android:textStyle">normal</item>
         <item name="lineHeight">20.8sp</item>
     </style>
 
@@ -57,7 +71,7 @@
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@color/text_2</item>
-        <item name="android:textFontWeight">600</item>
+        <item name="android:textStyle">bold</item>
         <item name="lineHeight">15.6sp</item>
     </style>
 
@@ -65,7 +79,7 @@
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:textSize">11sp</item>
         <item name="android:textColor">@color/text_3</item>
-        <item name="android:textFontWeight">400</item>
+        <item name="android:textStyle">normal</item>
         <item name="lineHeight">15.95sp</item>
     </style>
 
@@ -73,7 +87,7 @@
         <item name="android:fontFamily">@font/inter</item>
         <item name="android:textSize">10sp</item>
         <item name="android:textColor">@color/accent</item>
-        <item name="android:textFontWeight">600</item>
+        <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
         <item name="android:letterSpacing">0.25</item>
         <item name="lineHeight">13sp</item>

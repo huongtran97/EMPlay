@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/search_result_cast_item_container"
-    android:layout_width="60dp"
+    android:layout_width="80dp"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="8dp"
+    android:layout_marginEnd="10dp"
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:clickable="true"
@@ -13,8 +13,8 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/cast_poster_profile"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
         android:layout_marginTop="8dp"
         android:scaleType="centerCrop"
         android:background="@color/bg_surface"
@@ -29,7 +29,7 @@
         android:layout_marginTop="6dp"
         android:textAlignment="center"
         android:textColor="@color/text_1"
-        android:textSize="@dimen/text_badge"
+        android:textSize="@dimen/text_meta"
         android:textStyle="bold"
         android:maxLines="2"
         android:ellipsize="end" />
@@ -43,7 +43,7 @@
         android:layout_marginBottom="8dp"
         android:textAlignment="center"
         android:textColor="@color/text_3"
-        android:textSize="@dimen/text_badge"
+        android:textSize="@dimen/text_meta"
         android:maxLines="2"
         android:ellipsize="end" />
 

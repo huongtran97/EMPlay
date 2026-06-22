@@ -32,7 +32,7 @@ public class UiUtils {
 
         Glide.with(fragment)
                 .load(path)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .diskCacheStrategy(DiskCacheStrategy.DATA)
                 .transform(new MultiTransformation<>(new CenterCrop(), new BlurTransformation(5)))
                 .into(new CustomTarget<Drawable>() {
                     @Override

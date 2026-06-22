@@ -1,72 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/movie_card_view"
-    android:layout_width="120dp"
+<!--
+    EMPlay · Season tab chip item
+    item_season_tab.xml  →  used by SeasonTabAdapter / rvSeasonTabs
+    ──────────────────────────────────────────────────────
+    Adapter toggles background between:
+      selected  → @drawable/bg_tab_selected  (filled accent #E3B566, text on_accent)
+      default   → @drawable/bg_chip          (stroke border, text text_2)
+    ──────────────────────────────────────────────────────
+-->
+<TextView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tvSeasonTab"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginEnd="10dp"
-    android:clickable="true"
-    android:focusable="true"
-    app:cardBackgroundColor="@color/bg_surface"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="0dp"
-    app:strokeColor="@color/border"
-    app:strokeWidth="@dimen/hairline">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <!-- Poster area (2:3 ratio) -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="180dp">
-
-            <ImageView
-                android:id="@+id/header"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:contentDescription="@string/show_poster"
-                android:scaleType="centerCrop"
-                android:background="@drawable/bg_poster_placeholder" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:layout_gravity="bottom"
-                android:background="@drawable/gradient_bottom_overlay" />
-
-        </FrameLayout>
-
-        <!-- Footer -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="10dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="10dp">
-
-            <TextView
-                android:id="@+id/name"
-                style="@style/TextAppearance.EMPlay.Label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_1"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/episode"
-                style="@style/TextAppearance.EMPlay.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textColor="@color/text_3" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</com.google.android.material.card.MaterialCardView>
+    android:layout_marginEnd="6dp"
+    android:background="@drawable/bg_chip"
+    android:textColor="@color/text_2"
+    android:textSize="11sp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp"
+    tools:text="Season 1" />

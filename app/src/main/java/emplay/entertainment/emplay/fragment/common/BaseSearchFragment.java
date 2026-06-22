@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.GenresAdapter;
+import emplay.entertainment.emplay.tool.PaginationHelper;
 import emplay.entertainment.emplay.adapter.common.SearchMediaAdapter;
 import emplay.entertainment.emplay.adapter.common.SearchPersonAdapter;
 import emplay.entertainment.emplay.adapter.common.TrendingSearchAdapter;
@@ -78,6 +80,13 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     private RecyclerView rvDropdownResults;
     private View footerPeople;
 
+    // Pagination
+    private static final int SEARCH_PAGE_SIZE = 5;
+    private View paginationBar;
+    private TextView tvPageIndicator;
+    private ImageButton btnPrev, btnNext;
+    private PaginationHelper<MultiSearchResult> paginationHelper;
+
     private SearchMediaAdapter mediaAdapter;
     private SearchPersonAdapter personAdapter;
     private final List<MultiSearchResult> latestMediaList = new ArrayList<>();
@@ -109,6 +118,33 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         tabLayoutSearch = view.findViewById(R.id.tabLayoutSearch);
         rvDropdownResults = view.findViewById(R.id.rvDropdownResults);
         footerPeople = view.findViewById(R.id.footerPeople);
+
+        // Pagination bar
+        paginationBar = view.findViewById(R.id.paginationBar);
+        tvPageIndicator = view.findViewById(R.id.tvPageIndicator);
+        btnPrev = view.findViewById(R.id.btnPrev);
+        btnNext = view.findViewById(R.id.btnNext);
+
+        paginationHelper = new PaginationHelper<>(SEARCH_PAGE_SIZE, new ArrayList<>(),
+                new PaginationHelper.PaginationCallback<MultiSearchResult>() {
+                    @Override
+                    public void onPageUpdated(List<MultiSearchResult> pageItems) {
+                        int tab = tabLayoutSearch.getSelectedTabPosition();
+                        if (tab == 2) {
+                            personAdapter.submitList(new ArrayList<>(pageItems));
+                        } else {
+                            mediaAdapter.submitList(new ArrayList<>(pageItems));
+                        }
+                    }
+                    @Override
+                    public void onUiUpdate(int current, int total, boolean hasPrev, boolean hasNext) {
+                        PaginationHelper.updatePaginationBar(paginationBar, tvPageIndicator,
+                                btnPrev, btnNext, current, total, hasPrev, hasNext);
+                    }
+                });
+
+        btnPrev.setOnClickListener(v -> paginationHelper.prevPage());
+        btnNext.setOnClickListener(v -> paginationHelper.nextPage());
 
         // Restore last query
         if (savedInstanceState != null) {
@@ -187,20 +223,18 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         tabLayoutSearch.setVisibility(hasAny ? View.VISIBLE : View.GONE);
 
         int selectedTab = tabLayoutSearch.getSelectedTabPosition();
+        List<MultiSearchResult> filtered = new ArrayList<>();
         if (selectedTab == 2) {
-            // People tab
             rvDropdownResults.setAdapter(personAdapter);
-            personAdapter.submitList(new ArrayList<>(latestPersonList));
+            filtered.addAll(latestPersonList);
         } else {
-            // Movies (0) or TV Shows (1)
-            List<MultiSearchResult> filtered = new ArrayList<>();
+            rvDropdownResults.setAdapter(mediaAdapter);
             for (MultiSearchResult r : latestMediaList) {
                 if (selectedTab == 0 && "movie".equals(r.getMediaType())) filtered.add(r);
                 else if (selectedTab == 1 && "tv".equals(r.getMediaType())) filtered.add(r);
             }
-            rvDropdownResults.setAdapter(mediaAdapter);
-            mediaAdapter.submitList(filtered);
         }
+        paginationHelper.updateData(filtered);
     }
 
     private void showDropdown() {
@@ -211,6 +245,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     private void hideDropdown() {
         cardDropdown.setVisibility(View.GONE);
         svSearchDefault.setVisibility(View.VISIBLE);
+        paginationBar.setVisibility(View.GONE);
         latestMediaList.clear();
         latestPersonList.clear();
     }

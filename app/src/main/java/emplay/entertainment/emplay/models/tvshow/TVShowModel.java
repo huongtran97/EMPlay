@@ -41,6 +41,9 @@ public class TVShowModel implements Serializable, MediaItem {
     private String displaySeasonInfo;
     private boolean detailsFetched;
     private transient Boolean nextEpisodeExists; // null=unknown, true=still airing, false=ended/hiatus
+    private String onAirSeasonName;
+    private int onAirEpisodeNumber;
+    private String onAirEpisodeAirDate;
 
     public TVShowModel() {}
 
@@ -142,4 +145,13 @@ public class TVShowModel implements Serializable, MediaItem {
 
     public Boolean getNextEpisodeExists() { return nextEpisodeExists; }
     public void setNextEpisodeExists(Boolean nextEpisodeExists) { this.nextEpisodeExists = nextEpisodeExists; }
+
+    public String getOnAirSeasonName() { return onAirSeasonName; }
+    public void setOnAirSeasonName(String onAirSeasonName) { this.onAirSeasonName = onAirSeasonName; }
+
+    public int getOnAirEpisodeNumber() { return onAirEpisodeNumber; }
+    public void setOnAirEpisodeNumber(int onAirEpisodeNumber) { this.onAirEpisodeNumber = onAirEpisodeNumber; }
+
+    public String getOnAirEpisodeAirDate() { return onAirEpisodeAirDate; }
+    public void setOnAirEpisodeAirDate(String onAirEpisodeAirDate) { this.onAirEpisodeAirDate = onAirEpisodeAirDate; }
 }

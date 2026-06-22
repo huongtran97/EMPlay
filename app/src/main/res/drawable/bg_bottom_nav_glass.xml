@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Semi-transparent bg_surface (approx 62% opacity as per design blueprint) -->
-    <solid android:color="#9E171E31" />
+    <!-- bg_surface at 85% opacity per design spec §5.2 -->
+    <solid android:color="#D9171E31" />
     <corners android:radius="27dp" />
     <!-- Hairline border 0.5dp -->
     <stroke
