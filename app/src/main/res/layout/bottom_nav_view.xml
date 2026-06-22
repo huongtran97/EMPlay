@@ -18,21 +18,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/movie_bottom_navigation_view"
-        style="@style/Widget.EMPlay.BottomNavigationView"
+    <include
+        layout="@layout/component_bottom_nav"
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="50dp"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_bottom_nav_glass"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        app:elevation="0dp"
-        app:menu="@menu/movie_bottom_navigate_menu"
-        app:itemRippleColor="@null"
         app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,21 +44,21 @@ import emplay.entertainment.emplay.adapter.movie.MovieAdapter;
 import emplay.entertainment.emplay.adapter.movie.TopRatedMovieAdapter;
 import emplay.entertainment.emplay.adapter.movie.TrendingBannerAdapter;
 import emplay.entertainment.emplay.adapter.movie.UpcomingMovieAdapter;
-import emplay.entertainment.emplay.adapter.movie.WhatsNewMovieAdapter;
+import emplay.entertainment.emplay.adapter.tvshow.OnAirTVAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.TVShowAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.UpComingTVAdapter;
-import emplay.entertainment.emplay.adapter.tvshow.WhatsNewTVAdapter;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.api.movie.MovieReleaseDatesResponse;
 import emplay.entertainment.emplay.api.movie.MovieResponse;
 import emplay.entertainment.emplay.api.movie.UpComingMovieResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowDetailsResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
 import emplay.entertainment.emplay.api.tvshow.UpComingTVShowsResponse;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
-import emplay.entertainment.emplay.fragment.common.WhatsNewFragment;
+import emplay.entertainment.emplay.fragment.common.SeeAllFragment;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.common.RegionProvidersModel;
@@ -73,18 +72,11 @@ import retrofit2.Response;
 public class HomeFragment extends BaseFragment {
     private ViewPager2 vpTrendingBanner;
     private LinearLayout llHeroDots;
-    private RecyclerView rvWhatsNew;
-    private WhatsNewTVAdapter whatsNewTVAdapter;
-    private WhatsNewMovieAdapter whatsNewMovieAdapter;
     private UpcomingMovieAdapter upcomingMovieAdapter;
     private UpComingTVAdapter upComingTVAdapter;
     private MovieApiService apiService;
     private TrendingBannerAdapter trendingAdapter;
-    private MaterialButton btnWhatsNewTvShow, btnWhatsNewMovie;
     private View heroSection;
-    private boolean isWhatsNewShowingTV = true;
-    private final List<TVShowModel> cachedTVShows = new ArrayList<>();
-    private final List<MovieModel> cachedMovies = new ArrayList<>();
     private final List<MovieModel> nowPlayingPool = new ArrayList<>();
     private final List<MovieModel> heroBatch = new ArrayList<>();
     private final Set<Integer> nowPlayingMovieIds = new java.util.HashSet<>();
@@ -102,11 +94,27 @@ public class HomeFragment extends BaseFragment {
     private TopRatedMovieAdapter topRatedMovieAdapter;
     private MovieAdapter trendingMoviesAdapter;
     private TVShowAdapter trendingTVAdapter;
-    private TVShowAdapter onAirTVAdapter;
+    private OnAirTVAdapter onAirTVAdapter;
     private MaterialButton btnTrendingMovies, btnTrendingTV;
     private final List<MovieModel> allTrendingMovies = new ArrayList<>();
     private final List<TVShowModel> allTrendingTVShows = new ArrayList<>();
     private boolean isTrendingShowingTV = false;
+
+    private android.os.Handler autoAdvanceHandler;
+    private boolean isBannerDragging = false;
+    private static final long AUTO_ADVANCE_MS = 5_000L;
+
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerHero;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerTrending;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerOnAir;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerTopRated;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerUpcomingMovies;
+    private com.facebook.shimmer.ShimmerFrameLayout shimmerUpcomingTV;
+    private RecyclerView rvTrending;
+    private RecyclerView rvOnAir;
+    private RecyclerView rvTopRated;
+    private RecyclerView rvUpcomingMovies;
+    private RecyclerView rvUpcomingTvShows;
 
     @Nullable
     @Override
@@ -117,9 +125,20 @@ public class HomeFragment extends BaseFragment {
         heroSection = view.findViewById(R.id.heroSection);
         vpTrendingBanner = view.findViewById(R.id.vpTrendingBanner);
         llHeroDots = view.findViewById(R.id.llHeroDots);
-        
-        btnWhatsNewTvShow = view.findViewById(R.id.btnWhatsNewTvShow);
-        btnWhatsNewMovie  = view.findViewById(R.id.btnWhatsNewMovie);
+
+        shimmerHero = view.findViewById(R.id.shimmerHero);
+        shimmerTrending = view.findViewById(R.id.shimmerTrending);
+        shimmerOnAir = view.findViewById(R.id.shimmerOnAir);
+        shimmerTopRated = view.findViewById(R.id.shimmerTopRated);
+        shimmerUpcomingMovies = view.findViewById(R.id.shimmerUpcomingMovies);
+        shimmerUpcomingTV = view.findViewById(R.id.shimmerUpcomingTV);
+
+        if (shimmerHero != null) shimmerHero.startShimmer();
+        if (shimmerTrending != null) shimmerTrending.startShimmer();
+        if (shimmerOnAir != null) shimmerOnAir.startShimmer();
+        if (shimmerTopRated != null) shimmerTopRated.startShimmer();
+        if (shimmerUpcomingMovies != null) shimmerUpcomingMovies.startShimmer();
+        if (shimmerUpcomingTV != null) shimmerUpcomingTV.startShimmer();
 
         trendingAdapter = new TrendingBannerAdapter(
                 requireContext(),
@@ -144,55 +163,47 @@ public class HomeFragment extends BaseFragment {
             public void onPageSelected(int position) {
                 activateDot(position);
             }
-        });
 
-        TextView tvWhatsNewSeeAll = view.findViewById(R.id.tvWhatsNewSeeAll);
-        if (tvWhatsNewSeeAll != null) {
-            tvWhatsNewSeeAll.setPaintFlags(
-                    tvWhatsNewSeeAll.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            tvWhatsNewSeeAll.setOnClickListener(
-                    v -> navigateTo(WhatsNewFragment.newInstance(isWhatsNewShowingTV)));
-        }
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                if (state == ViewPager2.SCROLL_STATE_DRAGGING) {
+                    isBannerDragging = true;
+                    stopAutoAdvance();
+                } else if (state == ViewPager2.SCROLL_STATE_IDLE && isBannerDragging) {
+                    isBannerDragging = false;
+                    startAutoAdvance();
+                }
+            }
+        });
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        rvWhatsNew = view.findViewById(R.id.rvWhatsNew);
-        whatsNewTVAdapter    = new WhatsNewTVAdapter(requireContext(), new ArrayList<>(), apiService, this::onItemClicked, 4);
-        whatsNewMovieAdapter = new WhatsNewMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked, 4);
-        rvWhatsNew.setLayoutManager(new LinearLayoutManager(requireContext()));
-        rvWhatsNew.setNestedScrollingEnabled(false);
-        rvWhatsNew.setAdapter(isWhatsNewShowingTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
-
-        btnWhatsNewTvShow.setOnClickListener(v -> switchWhatsNew(true));
-        btnWhatsNewMovie.setOnClickListener(v -> switchWhatsNew(false));
-        applyWhatsNewButtonState(isWhatsNewShowingTV);
-
-        RecyclerView rvUpcomingMovies = view.findViewById(R.id.rvUpcomingMovies);
+        rvUpcomingMovies = view.findViewById(R.id.rvUpcomingMovies);
         upcomingMovieAdapter = new UpcomingMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvUpcomingMovies.setAdapter(upcomingMovieAdapter);
         rvUpcomingMovies.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        RecyclerView rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
+        rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
         upComingTVAdapter = new UpComingTVAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvUpcomingTvShows.setAdapter(upComingTVAdapter);
         rvUpcomingTvShows.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        RecyclerView rvTopRated = view.findViewById(R.id.rvTopRated);
+        rvTopRated = view.findViewById(R.id.rvTopRated);
         topRatedMovieAdapter = new TopRatedMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvTopRated.setAdapter(topRatedMovieAdapter);
         rvTopRated.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        RecyclerView rvTrending = view.findViewById(R.id.rvTrending);
-        trendingMoviesAdapter = new MovieAdapter(requireContext(), new ArrayList<>(), (movie, v) -> onItemClicked(movie, v));
-        trendingTVAdapter = new TVShowAdapter(requireContext(), new ArrayList<>(), (tv, v) -> onItemClicked(tv, v));
+        rvTrending = view.findViewById(R.id.rvTrending);
+        trendingMoviesAdapter = new MovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
+        trendingTVAdapter = new TVShowAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvTrending.setAdapter(trendingMoviesAdapter);
         rvTrending.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
-        RecyclerView rvOnAir = view.findViewById(R.id.rvOnAir);
-        onAirTVAdapter = new TVShowAdapter(requireContext(), new ArrayList<>(), (tv, v) -> onItemClicked(tv, v));
+        rvOnAir = view.findViewById(R.id.rvOnAir);
+        onAirTVAdapter = new OnAirTVAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         rvOnAir.setAdapter(onAirTVAdapter);
         rvOnAir.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -206,6 +217,7 @@ public class HomeFragment extends BaseFragment {
         }
         applyTrendingButtonState(false);
 
+
         ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(0, bars.top, 0, 0);
@@ -213,7 +225,7 @@ public class HomeFragment extends BaseFragment {
         });
 
         fetchTrendingMovies();
-        fetchWhatsNewTVShows();
+        fetchTrendingTVShows();
         fetchUpComingMovie();
         fetchTopRatedMovies();
         fetchOnAirTVShows();
@@ -245,8 +257,16 @@ public class HomeFragment extends BaseFragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        stopAutoAdvance();
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
+        stopAutoAdvance();
+        autoAdvanceHandler = null;
         if (providerCheckHandler != null) {
             providerCheckHandler.removeCallbacksAndMessages(null);
             providerCheckHandler = null;
@@ -259,22 +279,17 @@ public class HomeFragment extends BaseFragment {
         onAirTVIdsFetched = false;
         rawUpcomingTVShows = null;
         heroSection = null;
-    }
-
-    private void switchWhatsNew(boolean showTV) {
-        if (isWhatsNewShowingTV != showTV) {
-            isWhatsNewShowingTV = showTV;
-            rvWhatsNew.setAdapter(showTV ? whatsNewTVAdapter : whatsNewMovieAdapter);
-        }
-        applyWhatsNewButtonState(showTV);
-    }
-
-    private void applyWhatsNewButtonState(boolean showTV) {
-        btnWhatsNewTvShow.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFFE3B566 : 0xFF171E31));
-        btnWhatsNewTvShow.setTextColor(showTV ? 0xFF3A2A0C : 0xFFB9C0D4);
-
-        btnWhatsNewMovie.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFF171E31 : 0xFFE3B566));
-        btnWhatsNewMovie.setTextColor(showTV ? 0xFFB9C0D4 : 0xFF3A2A0C);
+        shimmerHero = null;
+        shimmerTrending = null;
+        shimmerOnAir = null;
+        shimmerTopRated = null;
+        shimmerUpcomingMovies = null;
+        shimmerUpcomingTV = null;
+        rvTrending = null;
+        rvOnAir = null;
+        rvTopRated = null;
+        rvUpcomingMovies = null;
+        rvUpcomingTvShows = null;
     }
 
     private void switchTrending(boolean showTV, RecyclerView rvTrending) {
@@ -522,9 +537,44 @@ public class HomeFragment extends BaseFragment {
         }
         if (heroBatch.isEmpty()) return;
 
+        hideShimmer(shimmerHero, vpTrendingBanner);
         trendingAdapter.updateData(new ArrayList<>(heroBatch));
         buildDots(heroBatch.size());
         vpTrendingBanner.setCurrentItem(0, false);
+        startAutoAdvance();
+    }
+
+    private void startAutoAdvance() {
+        stopAutoAdvance();
+        if (autoAdvanceHandler == null) {
+            autoAdvanceHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+        }
+        autoAdvanceHandler.postDelayed(this::doAutoAdvance, AUTO_ADVANCE_MS);
+    }
+
+    private void doAutoAdvance() {
+        if (vpTrendingBanner == null || !isAdded()) return;
+        int count = trendingAdapter.getItemCount();
+        if (count > 1) {
+            int next = (vpTrendingBanner.getCurrentItem() + 1) % count;
+            vpTrendingBanner.setCurrentItem(next, true);
+        }
+        if (autoAdvanceHandler != null) {
+            autoAdvanceHandler.postDelayed(this::doAutoAdvance, AUTO_ADVANCE_MS);
+        }
+    }
+
+    private void stopAutoAdvance() {
+        if (autoAdvanceHandler != null) {
+            autoAdvanceHandler.removeCallbacksAndMessages(null);
+        }
+    }
+
+    private void hideShimmer(com.facebook.shimmer.ShimmerFrameLayout shimmer, View content) {
+        if (shimmer == null) return;
+        shimmer.stopShimmer();
+        shimmer.setVisibility(View.GONE);
+        if (content != null) content.setVisibility(View.VISIBLE);
     }
 
     private List<MovieModel> pickHeroBatch() {
@@ -611,16 +661,12 @@ public class HomeFragment extends BaseFragment {
                             List<MovieModel> results = response.body().getResults();
                             if (results == null || results.isEmpty()) return;
                             allTrendingMovies.clear();
-                            cachedMovies.clear();
                             for (MovieModel movie : results) {
                                 if (movie.getPosterPath() == null) continue;
                                 allTrendingMovies.add(movie);
-                                if (BadgeHelper.isNotOlderThan(movie.getReleaseDate(), 30)) {
-                                    cachedMovies.add(movie);
-                                }
                             }
                             trendingMoviesAdapter.updateData(new ArrayList<>(allTrendingMovies));
-                            whatsNewMovieAdapter.updateData(new ArrayList<>(cachedMovies));
+                            hideShimmer(shimmerTrending, rvTrending);
                         }
                     }
                     @Override
@@ -630,7 +676,7 @@ public class HomeFragment extends BaseFragment {
                 });
     }
 
-    private void fetchWhatsNewTVShows() {
+    private void fetchTrendingTVShows() {
         safeEnqueue(apiService.getTrendingTVShows(TMDBpath.trendingTVShows()),
                 new Callback<TVShowResponse>() {
                     @Override
@@ -640,14 +686,11 @@ public class HomeFragment extends BaseFragment {
                             List<TVShowModel> results = response.body().getResults();
                             if (results == null) return;
                             allTrendingTVShows.clear();
-                            cachedTVShows.clear();
                             for (TVShowModel tv : results) {
                                 if (tv.getPosterPath() == null) continue;
                                 allTrendingTVShows.add(tv);
-                                cachedTVShows.add(tv);
                             }
                             trendingTVAdapter.updateData(new ArrayList<>(allTrendingTVShows));
-                            whatsNewTVAdapter.updateData(new ArrayList<>(cachedTVShows));
                         }
                     }
                     @Override
@@ -667,6 +710,7 @@ public class HomeFragment extends BaseFragment {
                             List<MovieModel> results = response.body().getResults();
                             if (results != null) {
                                 topRatedMovieAdapter.updateData(results.subList(0, Math.min(10, results.size())));
+                                hideShimmer(shimmerTopRated, rvTopRated);
                             }
                         }
                     }
@@ -678,9 +722,11 @@ public class HomeFragment extends BaseFragment {
     }
 
     private void fetchUpComingMovie() {
+        String region = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getString("pref_region", "CA");
         safeEnqueue(apiService.getUpcomingMovies(
                         TMDBpath.discoverMovies(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
-                        "popularity.desc", false, "en-US", 1),
+                        "popularity.desc", false, "en-US", 1, region),
                 new Callback<UpComingMovieResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<UpComingMovieResponse> call,
@@ -715,7 +761,15 @@ public class HomeFragment extends BaseFragment {
             }
             toUpcoming.add(m);
         }
-        upcomingMovieAdapter.updateData(toUpcoming);
+        List<MovieModel> upcomingPreview = toUpcoming.size() > 10
+                ? toUpcoming.subList(0, 10) : toUpcoming;
+        upcomingMovieAdapter.updateData(upcomingPreview);
+        if (toUpcoming.size() > 10) {
+            upcomingMovieAdapter.setShowMoreItem(true, () -> navigateTo(
+                    SeeAllFragment.newInstance(SeeAllFragment.TYPE_UPCOMING_MOVIES,
+                            getString(R.string.home_section_coming_soon))));
+        }
+        hideShimmer(shimmerUpcomingMovies, rvUpcomingMovies);
     }
 
     private void fetchOnAirTVShows() {
@@ -730,12 +784,23 @@ public class HomeFragment extends BaseFragment {
                                 && response.body().getResults() != null) {
                             for (TVShowModel tv : response.body().getResults()) {
                                 onAirTVIds.add(tv.getTVShowId());
-                                if (tv.getPosterPath() != null) onAirList.add(tv);
+                                if (tv.getBackdropPath() != null) onAirList.add(tv);
                             }
                         }
-                        if (onAirTVAdapter != null) onAirTVAdapter.updateData(onAirList);
+                        List<TVShowModel> onAirPreview = onAirList.size() > 10
+                                ? onAirList.subList(0, 10) : onAirList;
+                        if (onAirTVAdapter != null) {
+                            onAirTVAdapter.updateData(onAirPreview);
+                            if (onAirList.size() > 10) {
+                                onAirTVAdapter.setShowMoreItem(true, () -> navigateTo(
+                                        SeeAllFragment.newInstance(SeeAllFragment.TYPE_ON_AIR,
+                                                getString(R.string.home_section_on_air))));
+                            }
+                        }
+                        hideShimmer(shimmerOnAir, rvOnAir);
                         onAirTVIdsFetched = true;
                         applyUpcomingTVFilter();
+                        fetchOnAirDetails(onAirList);
                     }
                     @Override
                     public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
@@ -746,10 +811,47 @@ public class HomeFragment extends BaseFragment {
                 });
     }
 
+    private void fetchOnAirDetails(List<TVShowModel> onAirList) {
+        for (int i = 0; i < onAirList.size(); i++) {
+            final int idx = i;
+            final TVShowModel tv = onAirList.get(i);
+            safeEnqueue(apiService.getTVShowDetails(TMDBpath.tvShowDetails(tv.getTVShowId())),
+                    new Callback<TVShowDetailsResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<TVShowDetailsResponse> call,
+                                               @NonNull Response<TVShowDetailsResponse> response) {
+                            if (!response.isSuccessful() || response.body() == null) return;
+                            TVShowDetailsResponse d = response.body();
+                            TVShowDetailsResponse.LastEpisodeToAir ep = d.getLast_episode_to_air();
+                            if (ep != null) {
+                                tv.setOnAirEpisodeNumber(ep.getEpisode_number());
+                                tv.setOnAirEpisodeAirDate(ep.getAir_date());
+                                int sNum = ep.getSeason_number();
+                                if (d.getSeasons() != null) {
+                                    for (TVShowDetailsResponse.Season s : d.getSeasons()) {
+                                        if (s.getSeason_number() == sNum) {
+                                            tv.setOnAirSeasonName(s.getName());
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (onAirTVAdapter != null) onAirTVAdapter.notifyItemChanged(idx);
+                        }
+                        @Override
+                        public void onFailure(@NonNull Call<TVShowDetailsResponse> call, @NonNull Throwable t) {
+                            Log.e("HomeFragment", "Failed to fetch details for on-air TV show id=" + tv.getTVShowId(), t);
+                        }
+                    });
+        }
+    }
+
     private void fetchUpcomingTVShows() {
+        String region = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getString("pref_region", "CA");
         safeEnqueue(apiService.getUpcomingTVShows(
                         TMDBpath.discoverTVShows(), TMDBpath.todayDate(), TMDBpath.thirtyDaysFromNow(),
-                        "popularity.desc", false, "en-US", 1),
+                        "popularity.desc", false, "en-US", 1, region),
                 new Callback<UpComingTVShowsResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<UpComingTVShowsResponse> call,
@@ -785,7 +887,15 @@ public class HomeFragment extends BaseFragment {
             }
             filtered.add(tv);
         }
-        upComingTVAdapter.updateData(filtered);
+        List<TVShowModel> tvPreview = filtered.size() > 10 ? filtered.subList(0, 10) : filtered;
+        upComingTVAdapter.updateData(tvPreview);
+        if (filtered.size() > 10) {
+            upComingTVAdapter.setShowMoreItem(true, () -> {
+                if (isAdded()) navigateTo(SeeAllFragment.newInstance(
+                        SeeAllFragment.TYPE_UPCOMING_TV, getString(R.string.home_section_coming_soon)));
+            });
+        }
+        hideShimmer(shimmerUpcomingTV, rvUpcomingTvShows);
     }
 
     private void buildDots(int total) {
@@ -839,4 +949,5 @@ public class HomeFragment extends BaseFragment {
         }
         navigateTo(fragment, sharedElement, transitionName);
     }
+
 }
