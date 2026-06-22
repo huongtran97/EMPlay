@@ -69,7 +69,7 @@ public class ProfileFragment extends BaseFragment {
     private CircleImageView civAvatar;
     private TextView tvProfileName, tvProfileEmail, tvMemberSince;
     private TextView tvMoviesCount, tvTvShowsCount, tvTopGenre;
-    private LinearLayout llTasteProfile;
+    private LinearLayout llTasteProfile, guestBanner;
     private View llTasteProfileHeader;
     private final List<MediaItem> recentlySavedList = new ArrayList<>();
     private RecentlySavedAdapter recentlySavedAdapter;
@@ -106,6 +106,7 @@ public class ProfileFragment extends BaseFragment {
         tvTopGenre = view.findViewById(R.id.tvTopGenre);
         llTasteProfile = view.findViewById(R.id.llTasteProfile);
         llTasteProfileHeader = view.findViewById(R.id.llTasteProfileHeader);
+        guestBanner = view.findViewById(R.id.guestBanner);
 
         RecyclerView rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
         recentlySavedAdapter = new RecentlySavedAdapter(requireContext(), recentlySavedList, this::onItemClicked);
@@ -351,6 +352,9 @@ public class ProfileFragment extends BaseFragment {
         tvProfileName.setText("Hi there!");
         tvProfileEmail.setText("Do you want to login?");
         tvMemberSince.setText("");
+        guestBanner.setVisibility(View.VISIBLE);
+        guestBanner.findViewById(R.id.btnGuestSignIn).setOnClickListener(v ->
+                startActivity(new Intent(requireContext(), LoginActivity.class)));
     }
 
     //  Taste profile (Google only)
