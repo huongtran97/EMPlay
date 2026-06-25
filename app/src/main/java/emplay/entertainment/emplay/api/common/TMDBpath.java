@@ -13,6 +13,7 @@ import java.util.Locale;
  */
 public class TMDBpath {
     public static String trendingMovies() { return "3/trending/movie/week"; }
+    public static String trendingAll(String timeWindow) { return "3/trending/all/" + timeWindow; }
     public static String nowPlayingMovies() { return "3/movie/now_playing"; }
     public static String topRatedMovies() { return "3/movie/top_rated"; }
     public static String trendingTVShows() { return "3/trending/tv/week"; }
@@ -25,6 +26,7 @@ public class TMDBpath {
     public static String movieTrailer(int movieId) { return "3/movie/" + movieId + "/videos"; }
     public static String tvShowDetails(int tvId) { return "3/tv/" + tvId; }
     public static String tvShowCredits(int tvId) { return "3/tv/" + tvId + "/credits"; }
+    public static String tvShowAggregateCredits(int tvId) { return "3/tv/" + tvId + "/aggregate_credits"; }
     public static String tvShowSimilar(int tvId) { return "3/tv/" + tvId + "/similar"; }
     public static String tvShowTrailer(int tvId) { return "3/tv/" + tvId + "/videos"; }
     public static String searchMovies() { return "3/search/movie"; }

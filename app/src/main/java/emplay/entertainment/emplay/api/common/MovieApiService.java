@@ -42,6 +42,12 @@ public interface MovieApiService {
             @Query("path") String path);
 
     @GET("api/tmdb")
+    Call<MultiSearchResponse> getTrendingAll(
+            @Query("path") String path,
+            @Query("language") String language,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
     Call<MovieResponse> getPopularMovies(
             @Query("path") String path,
             @Query("page") int page);
@@ -94,6 +100,10 @@ public interface MovieApiService {
 
     @GET("api/tmdb")
     Call<TVShowCreditsResponses> getTVShowCredits(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<AggregateCreditsResponse> getTVAggregateCredits(
             @Query("path") String path);
 
     @GET("api/tmdb")

@@ -1,7 +1,6 @@
 package emplay.entertainment.emplay.fragment.details;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,6 +11,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
@@ -28,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import emplay.entertainment.emplay.R;
-import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.adapter.common.CastAdapter;
 import emplay.entertainment.emplay.adapter.common.ProviderAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.EpisodeAdapter;
@@ -149,7 +150,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
         binding.tvAllCast.setOnClickListener(v ->
                 navigateTo(SeeAllFragment.newInstance(SeeAllFragment.TYPE_CAST_TV, tvId,
-                        getString(R.string.detail_section_cast))));
+                        getString(R.string.detail_section_cast_crew))));
 
         // Suggestions
         suggestionTVAdapter = new SuggestionTVAdapter(new ArrayList<>(), requireContext(),
@@ -168,8 +169,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                                      boolean hasPrev, boolean hasNext) {}
                 });
 
-        binding.btnBack.setOnClickListener(v ->
-                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         binding.cardNextEpisode.setVisibility(View.GONE);
 
@@ -186,6 +185,24 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         }
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            int statusBarHeight = statusBars.top;
+
+            v.setPadding(0, 0, 0, 0);
+
+            ViewGroup.LayoutParams backdropParams = binding.backdropContainer.getLayoutParams();
+            backdropParams.height = dpToPx(210) + statusBarHeight;
+            binding.backdropContainer.setLayoutParams(backdropParams);
+
+
+            return insets;
+        });
     }
 
     @Override
@@ -357,8 +374,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                 newCast.add(new CastModel(c.getId(), c.getName(),
                                         c.getProfilePath(), c.getCharacter()));
                             }
-                            int previewCount = Math.min(10, newCast.size());
-                            castAdapter.updateData(newCast.subList(0, previewCount));
+                            castAdapter.updateData(newCast);
                         }
                     }
                     @Override public void onFailure(@NonNull Call<TVShowCreditsResponses> call,
@@ -410,14 +426,25 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
     private void wireTrailerButton() {
         binding.btnWatchTrailer.setOnClickListener(v -> {
-            if (trailers != null && !trailers.isEmpty()) {
-                Intent intent = new Intent(getContext(), TrailerActivity.class);
-                intent.putExtra("TRAILER_ID", trailers.get(0).getKey());
-                startActivity(intent);
+            TVShowsTrailerResponses.TrailerModel pick = pickOfficialTrailer();
+            if (pick != null) {
+                TrailerBottomSheetFragment.newInstance(pick.getKey(), pick.getName())
+                        .show(getChildFragmentManager(), "trailer");
             } else {
                 Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private TVShowsTrailerResponses.TrailerModel pickOfficialTrailer() {
+        if (trailers == null || trailers.isEmpty()) return null;
+        TVShowsTrailerResponses.TrailerModel fallback = null;
+        for (TVShowsTrailerResponses.TrailerModel t : trailers) {
+            if (!"YouTube".equals(t.getSite())) continue;
+            if (t.isOfficial() && "Trailer".equals(t.getType())) return t;
+            if (fallback == null) fallback = t;
+        }
+        return fallback != null ? fallback : trailers.get(0);
     }
 
     private void fetchTVCertification() {

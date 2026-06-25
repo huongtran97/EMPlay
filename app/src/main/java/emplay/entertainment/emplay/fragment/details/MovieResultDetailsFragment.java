@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.fragment.details;
 
-import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +10,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.transition.TransitionInflater;
 
@@ -27,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import emplay.entertainment.emplay.R;
-import emplay.entertainment.emplay.activity.TrailerActivity;
 import emplay.entertainment.emplay.adapter.common.CastAdapter;
 import emplay.entertainment.emplay.adapter.common.ProviderAdapter;
 import emplay.entertainment.emplay.adapter.movie.CollectionAdapter;
@@ -117,7 +118,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
         binding.tvAllCast.setOnClickListener(v ->
                 navigateTo(SeeAllFragment.newInstance(SeeAllFragment.TYPE_CAST_MOVIE, movieId,
-                        getString(R.string.detail_section_cast))));
+                        getString(R.string.detail_section_cast_crew))));
 
         alsoLikeAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(),
                 (movie, view) -> navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()),
@@ -133,8 +134,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
         binding.layoutCollectionHeader.setOnClickListener(v -> toggleCollectionDropdown());
 
-        binding.btnBack.setOnClickListener(v ->
-                requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
         if (getArguments() != null) {
             movieId = getArguments().getInt(ARG_MOVIE_ID, -1);
@@ -150,6 +149,24 @@ public class MovieResultDetailsFragment extends BaseFragment {
         }
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            Insets statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars());
+            int statusBarHeight = statusBars.top;
+
+            v.setPadding(0, 0, 0, 0);
+
+            ViewGroup.LayoutParams backdropParams = binding.backdropContainer.getLayoutParams();
+            backdropParams.height = dpToPx(200) + statusBarHeight;
+            binding.backdropContainer.setLayoutParams(backdropParams);
+
+
+            return insets;
+        });
     }
 
     @Override
@@ -427,7 +444,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                                 newCast.add(new CastModel(c.getId(), c.getCastName(),
                                         c.getProfilePath(), c.getCharacter()));
                             }
-                            castAdapter.updateData(newCast.subList(0, Math.min(10, newCast.size())));
+                            castAdapter.updateData(newCast);
                         }
                     }
                     @Override public void onFailure(@NonNull Call<MovieCreditsResponse> call,
@@ -476,14 +493,26 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private void updateTrailerButton() {
         if (binding == null) return;
         binding.btnWatchTrailer.setOnClickListener(v -> {
-            if (!trailers.isEmpty()) {
-                Intent intent = new Intent(getContext(), TrailerActivity.class);
-                intent.putExtra("TRAILER_ID", trailers.get(0).getKey());
-                startActivity(intent);
+            MoviesTrailerResponses.TrailerModel pick = pickOfficialTrailer();
+            if (pick != null) {
+                String title = binding.tvMovieTitle.getText().toString();
+                TrailerBottomSheetFragment.newInstance(pick.getKey(), pick.getName())
+                        .show(getChildFragmentManager(), "trailer");
             } else {
                 Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private MoviesTrailerResponses.TrailerModel pickOfficialTrailer() {
+        if (trailers == null || trailers.isEmpty()) return null;
+        MoviesTrailerResponses.TrailerModel fallback = null;
+        for (MoviesTrailerResponses.TrailerModel t : trailers) {
+            if (!"YouTube".equals(t.getSite())) continue;
+            if (t.isOfficial() && "Trailer".equals(t.getType())) return t;
+            if (fallback == null) fallback = t;
+        }
+        return fallback != null ? fallback : trailers.get(0);
     }
 
     private void fetchCertification() {
