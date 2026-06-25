@@ -4,10 +4,15 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import emplay.entertainment.emplay.behavior.HideOnScrollBehavior;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private android.app.Dialog welcomeDialog;
     private SharedViewModel viewModel;
 
-    // Store current active navigation ID to handle back-navigation routing
+    private static final String KEY_NAV_ID = "current_nav_id";
     private int currentNavId = R.id.nav_home;
 
     @SuppressLint("MissingInflatedId")
@@ -82,22 +87,34 @@ public class MainActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(SharedViewModel.class);
 
-        // Safe fragment stack check
         if (savedInstanceState == null) {
             navigateToFragment(new HomeFragment(), R.id.nav_home);
+        } else {
+            currentNavId = savedInstanceState.getInt(KEY_NAV_ID, R.id.nav_home);
+            updateTabVisuals(currentNavId);
         }
 
         // 2. Bind Direct Click Handlers to your custom XML Layout Views
-        findViewById(R.id.nav_home).setOnClickListener(v -> navigateToFragment(new HomeFragment(), R.id.nav_home));
+        findViewById(R.id.nav_home).setOnClickListener(v -> {
+            if (handleSameTabClick(R.id.nav_home)) return;
+            navigateToFragment(new HomeFragment(), R.id.nav_home);
+        });
         findViewById(R.id.nav_search).setOnClickListener(v -> {
+            if (handleSameTabClick(R.id.nav_search)) return;
             Boolean wasTVShowSearch = viewModel.getLastSearchWasTVShow().getValue();
             Fragment searchFragment = (wasTVShowSearch != null && wasTVShowSearch)
                     ? new SearchTVShowsFragment()
                     : new SearchMoviesFragment();
             navigateToFragment(searchFragment, R.id.nav_search);
         });
-        findViewById(R.id.nav_mylist).setOnClickListener(v -> navigateToFragment(new WatchlistFragment(), R.id.nav_mylist));
-        findViewById(R.id.nav_profile).setOnClickListener(v -> navigateToFragment(new ProfileFragment(), R.id.nav_profile));
+        findViewById(R.id.nav_mylist).setOnClickListener(v -> {
+            if (handleSameTabClick(R.id.nav_mylist)) return;
+            navigateToFragment(new WatchlistFragment(), R.id.nav_mylist);
+        });
+        findViewById(R.id.nav_profile).setOnClickListener(v -> {
+            if (handleSameTabClick(R.id.nav_profile)) return;
+            navigateToFragment(new ProfileFragment(), R.id.nav_profile);
+        });
 
         // 3. Re-mapped Back Press Controller for custom layout tracking
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
@@ -105,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
             public void handleOnBackPressed() {
                 if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
                     getSupportFragmentManager().popBackStack();
+                    resetNavBarVisibility();
                 } else if (currentNavId != R.id.nav_home) {
-                    // If not on Home, force back to Home smoothly
                     navigateToFragment(new HomeFragment(), R.id.nav_home);
                 } else {
                     setEnabled(false);
@@ -147,9 +164,26 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_NAV_ID, currentNavId);
+    }
+
     /**
-     * Replaces the fragment frame layout container and tracking state references.
+     * Returns true if the tapped tab is already the active one and handles the case internally
+     * (pops to root if in a detail screen, otherwise does nothing).
      */
+    private boolean handleSameTabClick(int viewId) {
+        if (currentNavId != viewId) return false;
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            resetNavBarVisibility();
+        }
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
     private void navigateToFragment(Fragment fragment, int viewId) {
         currentNavId = viewId;
         getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
@@ -158,17 +192,29 @@ public class MainActivity extends AppCompatActivity {
                 .commit();
 
         updateTabVisuals(viewId);
+        resetNavBarVisibility();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private void resetNavBarVisibility() {
+        View navBar = findViewById(R.id.movie_bottom_navigation_container);
+        if (navBar == null) return;
+        ViewGroup.LayoutParams lp = navBar.getLayoutParams();
+        if (lp instanceof CoordinatorLayout.LayoutParams clp) {
+            CoordinatorLayout.Behavior behavior = clp.getBehavior();
+            if (behavior instanceof HideOnScrollBehavior) {
+                ((HideOnScrollBehavior) behavior).show(navBar);
+            }
+        }
     }
 
     /**
      * Highlights the active icon by swapping color tints programmatically.
      */
     private void updateTabVisuals(int activeId) {
-        // Direct conversion of classic Amber tint (#FFBF00)
-        int colorActive = android.graphics.Color.parseColor("#8590AB");
-        int colorInactive = getColor(R.color.text_dim); // Dark background contrast color
+        int colorActive = getColor(R.color.accent);
+        int colorInactive = getColor(R.color.text_3);
 
-        // Target active highlights safely using your helper method
         setImageViewTint(R.id.nav_home, activeId == R.id.nav_home ? colorActive : colorInactive);
         setImageViewTint(R.id.nav_search, activeId == R.id.nav_search ? colorActive : colorInactive);
         setImageViewTint(R.id.nav_mylist, activeId == R.id.nav_mylist ? colorActive : colorInactive);
