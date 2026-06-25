@@ -15,9 +15,11 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,18 +40,33 @@ public class SearchByOriginFragment extends BaseFragment {
 
     private static final String ARG_DEFAULT_TV = "DEFAULT_TV";
 
-    private static final String[] ORIGIN_CODES = {
-        "KR", "JP", "CN", "FR", "GB", "US", "IN", "ES", "TH", "TR", "IT", "DE", "MX"
-    };
-
     private static final Map<String, String> ORIGIN_GLYPHS = new HashMap<String, String>() {{
         put("KR", "한"); put("JP", "日"); put("CN", "中");
         put("IN", "भ"); put("TH", "ไ"); put("DE", "De"); put("MX", "Mx");
     }};
 
+    private static final List<OriginModel> FALLBACK_ORIGINS = Arrays.asList(
+        new OriginModel("KR", "South Korea",   "한"),
+        new OriginModel("JP", "Japan",          "日"),
+        new OriginModel("JP", "Anime",          "ア"),
+        new OriginModel("CN", "China",          "中"),
+        new OriginModel("US", "United States",  "Us"),
+        new OriginModel("GB", "United Kingdom", "Gb"),
+        new OriginModel("FR", "France",         "Fr"),
+        new OriginModel("IN", "India",          "भ"),
+        new OriginModel("TH", "Thailand",       "ไ"),
+        new OriginModel("TR", "Turkey",         "Tr"),
+        new OriginModel("ES", "Spain",          "Es"),
+        new OriginModel("IT", "Italy",          "It"),
+        new OriginModel("DE", "Germany",        "De"),
+        new OriginModel("MX", "Mexico",         "Mx")
+    );
+
     private OriginGridAdapter adapter;
     private final List<OriginModel> allOrigins = new ArrayList<>();
     private boolean defaultTV;
+    private ShimmerFrameLayout shimmer;
+    private RecyclerView rv;
 
     public static SearchByOriginFragment newInstance(boolean defaultTV) {
         SearchByOriginFragment f = new SearchByOriginFragment();
@@ -67,17 +84,15 @@ public class SearchByOriginFragment extends BaseFragment {
 
         defaultTV = getArguments() != null && getArguments().getBoolean(ARG_DEFAULT_TV, false);
 
-        RecyclerView rv = view.findViewById(R.id.rvOriginGrid);
+        shimmer = view.findViewById(R.id.shimmerOrigin);
+        rv = view.findViewById(R.id.rvOriginGrid);
         TextInputEditText etSearch = view.findViewById(R.id.etOriginSearch);
         ImageView btnClear = view.findViewById(R.id.btnClearSearch);
         TextView tvNoResults = view.findViewById(R.id.tvNoResults);
 
-        view.findViewById(R.id.btnBack).setOnClickListener(v -> getParentFragmentManager().popBackStack());
+        shimmer.startShimmer();
 
-        List<OriginModel> fallback = buildOriginList();
-        allOrigins.addAll(fallback);
-
-        adapter = new OriginGridAdapter(new ArrayList<>(fallback), origin -> {
+        adapter = new OriginGridAdapter(allOrigins, origin -> {
             boolean isAnime = "Anime".equals(origin.getName());
             String code = isAnime ? "JP" : origin.getCountryCode();
             navigateTo(OriginResultsFragment.newInstance(
@@ -110,34 +125,38 @@ public class SearchByOriginFragment extends BaseFragment {
             @Override
             public void onResponse(@NonNull Call<List<CountryModel>> call,
                                    @NonNull Response<List<CountryModel>> response) {
-                if (!response.isSuccessful() || response.body() == null) return;
-                List<OriginModel> resolved = new ArrayList<>();
-                for (CountryModel c : response.body()) {
-                    if (c.getIso31661() == null || c.getEnglishName() == null) continue;
-                    String code = c.getIso31661();
-                    String glyph = ORIGIN_GLYPHS.containsKey(code) ? ORIGIN_GLYPHS.get(code) : code.substring(0, 1);
-                    resolved.add(new OriginModel(code, c.getEnglishName(), glyph));
-                    if ("JP".equals(code)) resolved.add(new OriginModel("JP", "Anime", "ア"));
+                List<OriginModel> resolved = null;
+                if (response.isSuccessful() && response.body() != null) {
+                    resolved = new ArrayList<>();
+                    for (CountryModel c : response.body()) {
+                        if (c.getIso31661() == null || c.getEnglishName() == null) continue;
+                        String code = c.getIso31661();
+                        String glyph = ORIGIN_GLYPHS.containsKey(code)
+                                ? ORIGIN_GLYPHS.get(code)
+                                : code.substring(0, 1).toUpperCase();
+                        resolved.add(new OriginModel(code, c.getEnglishName(), glyph));
+                        if ("JP".equals(code)) resolved.add(new OriginModel("JP", "Anime", "ア"));
+                    }
                 }
-                allOrigins.clear();
-                allOrigins.addAll(resolved);
-                if (adapter != null) adapter.updateAll(resolved);
+                showOrigins(resolved);
             }
 
             @Override
             public void onFailure(@NonNull Call<List<CountryModel>> call, @NonNull Throwable t) {
                 Log.e("SearchByOriginFragment", "Failed to fetch country list", t);
+                showOrigins(null);
             }
         });
     }
 
-    private List<OriginModel> buildOriginList() {
-        List<OriginModel> list = new ArrayList<>();
-        for (String code : ORIGIN_CODES) {
-            String glyph = ORIGIN_GLYPHS.containsKey(code) ? ORIGIN_GLYPHS.get(code) : code.substring(0, 1);
-            list.add(new OriginModel(code, code, glyph));
-            if ("JP".equals(code)) list.add(new OriginModel("JP", "Anime", "ア"));
+    private void showOrigins(List<OriginModel> origins) {
+        allOrigins.clear();
+        allOrigins.addAll(origins != null && !origins.isEmpty() ? origins : FALLBACK_ORIGINS);
+        if (adapter != null) adapter.updateAll(allOrigins);
+        if (shimmer != null) {
+            shimmer.stopShimmer();
+            shimmer.setVisibility(View.GONE);
         }
-        return list;
+        if (rv != null) rv.setVisibility(View.VISIBLE);
     }
 }

@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.adapter.common;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ public class OriginGridAdapter extends RecyclerView.Adapter<OriginGridAdapter.VH
         this.listener = listener;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateAll(List<OriginModel> newOrigins) {
         all.clear();
         all.addAll(newOrigins);
@@ -38,6 +40,7 @@ public class OriginGridAdapter extends RecyclerView.Adapter<OriginGridAdapter.VH
         notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void filter(String query) {
         if (query == null || query.trim().isEmpty()) {
             filtered = new ArrayList<>(all);
