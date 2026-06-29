@@ -5,6 +5,7 @@ import emplay.entertainment.emplay.models.movie.MovieModel;
 
 public class MovieSimilarResponse {
     private List<MovieModel> results;
+    private int total_pages;
 
     public List<MovieModel> getResults() {
         return results;
@@ -14,5 +15,7 @@ public class MovieSimilarResponse {
         this.results = results;
     }
 
-
+    public int getTotal_pages() {
+        return total_pages;
+    }
 }

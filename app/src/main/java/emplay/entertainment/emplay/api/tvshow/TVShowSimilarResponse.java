@@ -6,6 +6,7 @@ import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 
 public class TVShowSimilarResponse {
     private List<TVShowModel> results;
+    private int total_pages;
 
     public List<TVShowModel> getResults() {
         return results;
@@ -13,5 +14,9 @@ public class TVShowSimilarResponse {
 
     public void setResults(List<TVShowModel> results) {
         this.results = results;
+    }
+
+    public int getTotal_pages() {
+        return total_pages;
     }
 }

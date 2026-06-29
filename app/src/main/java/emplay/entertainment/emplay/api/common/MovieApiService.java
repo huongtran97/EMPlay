@@ -91,6 +91,11 @@ public interface MovieApiService {
             @Query("path") String path);
 
     @GET("api/tmdb")
+    Call<MovieSimilarResponse> getMovieSimilarPaged(
+            @Query("path") String path,
+            @Query("page") int page);
+
+    @GET("api/tmdb")
     Call<TVShowResponse> getTrendingTVShows(
             @Query("path") String path);
 
@@ -109,6 +114,11 @@ public interface MovieApiService {
     @GET("api/tmdb")
     Call<TVShowSimilarResponse> getTVShowSimilar(
             @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<TVShowSimilarResponse> getTVShowSimilarPaged(
+            @Query("path") String path,
+            @Query("page") int page);
 
     @GET("api/tmdb")
     Call<UpComingMovieResponse> getUpcomingMovies(

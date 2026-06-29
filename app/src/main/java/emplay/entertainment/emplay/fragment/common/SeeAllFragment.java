@@ -1,10 +1,12 @@
 package emplay.entertainment.emplay.fragment.common;
 
+import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import emplay.entertainment.emplay.databinding.ActivitySeeAllBinding;
@@ -81,8 +83,16 @@ public class SeeAllFragment extends BaseFragment {
     private MovieByGenreAdapter moviePosterAdapter;
     private TVShowByGenreAdapter tvPosterAdapter;
     private RecyclerView.Adapter<RecyclerView.ViewHolder> castGridAdapter;
-    private final List<MediaItem> mediaList = new ArrayList<>();
-    private final List<CastModel> castList = new ArrayList<>();
+    private RecyclerView.Adapter<RecyclerView.ViewHolder> crewGridAdapter;
+    private final List<CastModel> castOnlyList = new ArrayList<>();
+    private final List<CastModel> crewList = new ArrayList<>();
+    private boolean castExpanded = false;
+    private boolean crewExpanded = false;
+
+    // Similar pagination state
+    private int similarNextPage = 1;
+    private int similarTotalPages = 1;
+    private boolean similarIsLoading = false;
 
     // Coming Soon pagination state (shared for UPCOMING_MOVIES and UPCOMING_TV)
     private final List<MediaItem> comingSoonBuffer = new ArrayList<>();
@@ -125,26 +135,132 @@ public class SeeAllFragment extends BaseFragment {
         if (getArguments() != null) {
             binding.tvSectionTitle.setText(getArguments().getString(ARG_TITLE, ""));
         }
-//        bindEyebrow(binding.tvEyebrow);
         binding.tvSubtitle.setVisibility(View.GONE);
         binding.tvLoadingMore.setVisibility(View.GONE);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        setupRecyclerView(binding.rvAllItems);
-        fetchData(binding.tvSubtitle);
-
-        binding.rvAllItems.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                binding.fabScrollTop.setVisibility(
-                        recyclerView.canScrollVertically(-1) ? View.VISIBLE : View.GONE);
-            }
-        });
-        binding.fabScrollTop.setOnClickListener(v ->
-                binding.rvAllItems.smoothScrollToPosition(0));
+        boolean isCastType = TYPE_CAST_MOVIE.equals(type) || TYPE_CAST_TV.equals(type);
+        if (isCastType) {
+            binding.rvAllItems.setVisibility(View.GONE);
+            binding.nsvCastCrew.setVisibility(View.VISIBLE);
+            setupCastCrewAccordion();
+            fetchData(binding.tvSubtitle);
+            binding.nsvCastCrew.setOnScrollChangeListener(
+                    (androidx.core.widget.NestedScrollView.OnScrollChangeListener)
+                            (v, scrollX, scrollY, oldScrollX, oldScrollY) ->
+                                    binding.fabScrollTop.setVisibility(scrollY > 0 ? View.VISIBLE : View.GONE));
+            binding.fabScrollTop.setOnClickListener(v -> binding.nsvCastCrew.smoothScrollTo(0, 0));
+        } else {
+            binding.nsvCastCrew.setVisibility(View.GONE);
+            setupRecyclerView(binding.rvAllItems);
+            fetchData(binding.tvSubtitle);
+            binding.rvAllItems.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    binding.fabScrollTop.setVisibility(
+                            recyclerView.canScrollVertically(-1) ? View.VISIBLE : View.GONE);
+                }
+            });
+            binding.fabScrollTop.setOnClickListener(v ->
+                    binding.rvAllItems.smoothScrollToPosition(0));
+        }
 
         return binding.getRoot();
+    }
+
+    private void setupCastCrewAccordion() {
+        castGridAdapter = buildCastGridAdapter(castOnlyList);
+        binding.rvCastSection.setLayoutManager(new GridLayoutManager(requireContext(), 4));
+        binding.rvCastSection.setAdapter(castGridAdapter);
+
+        crewGridAdapter = buildCrewGridAdapter(crewList);
+        binding.rvCrewSection.setLayoutManager(new GridLayoutManager(requireContext(), 4));
+        binding.rvCrewSection.setAdapter(crewGridAdapter);
+
+        binding.rowCastToggle.setOnClickListener(v -> {
+            castExpanded = !castExpanded;
+            toggleSection(binding.rvCastSection, binding.icCastChevron, castExpanded);
+        });
+        binding.rowCrewToggle.setOnClickListener(v -> {
+            crewExpanded = !crewExpanded;
+            toggleSection(binding.rvCrewSection, binding.icCrewChevron, crewExpanded);
+        });
+    }
+
+    private void toggleSection(RecyclerView rv, ImageView chevron, boolean expanded) {
+        rv.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        ObjectAnimator.ofFloat(chevron, "rotation", expanded ? 0f : 90f, expanded ? 90f : 0f)
+                .setDuration(200)
+                .start();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private RecyclerView.Adapter<RecyclerView.ViewHolder> buildCastGridAdapter(List<CastModel> list) {
+        return new RecyclerView.Adapter<>() {
+            static class VH extends RecyclerView.ViewHolder {
+                final SearchResultCastItemBinding b;
+                VH(SearchResultCastItemBinding b) { super(b.getRoot()); this.b = b; }
+            }
+            @NonNull
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new VH(SearchResultCastItemBinding.inflate(
+                        LayoutInflater.from(parent.getContext()), parent, false));
+            }
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+                CastModel cast = list.get(position);
+                SearchResultCastItemBinding b = ((VH) holder).b;
+                b.castNameProfile.setText(cast.getName());
+                b.castCharacterProfile.setText(cast.getCharacter());
+                String path = cast.getProfilePath();
+                Glide.with(b.getRoot().getContext())
+                        .load(path != null && !path.isEmpty() ? ImageUrl.of(ImageUrl.PROFILE, path) : null)
+                        .placeholder(R.drawable.avatar)
+                        .error(R.drawable.avatar)
+                        .circleCrop()
+                        .into(b.castPosterProfile);
+                b.getRoot().setOnClickListener(v ->
+                        navigateTo(CastDetailFragment.newInstance(cast.getId())));
+            }
+            @Override
+            public int getItemCount() { return list.size(); }
+        };
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private RecyclerView.Adapter<RecyclerView.ViewHolder> buildCrewGridAdapter(List<CastModel> list) {
+        return new RecyclerView.Adapter<>() {
+            static class VH extends RecyclerView.ViewHolder {
+                final SearchResultCastItemBinding b;
+                VH(SearchResultCastItemBinding b) { super(b.getRoot()); this.b = b; }
+            }
+            @NonNull
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new VH(SearchResultCastItemBinding.inflate(
+                        LayoutInflater.from(parent.getContext()), parent, false));
+            }
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+                CastModel crew = list.get(position);
+                SearchResultCastItemBinding b = ((VH) holder).b;
+                b.castNameProfile.setText(crew.getName());
+                b.castCharacterProfile.setText(crew.getCharacter());
+                String path = crew.getProfilePath();
+                Glide.with(b.getRoot().getContext())
+                        .load(path != null && !path.isEmpty() ? ImageUrl.of(ImageUrl.PROFILE, path) : null)
+                        .placeholder(R.drawable.avatar)
+                        .error(R.drawable.avatar)
+                        .circleCrop()
+                        .into(b.castPosterProfile);
+                b.getRoot().setOnClickListener(v ->
+                        navigateTo(CastDetailFragment.newInstance(crew.getId())));
+            }
+            @Override
+            public int getItemCount() { return list.size(); }
+        };
     }
 
     @Override
@@ -152,81 +268,59 @@ public class SeeAllFragment extends BaseFragment {
         super.onDestroyView();
         binding = null;
         comingSoonRv = null;
+        onAirRv = null;
         comingSoonBuffer.clear();
+        castOnlyList.clear();
+        crewList.clear();
     }
 
     private void setupRecyclerView(RecyclerView rv) {
         switch (type) {
-            case TYPE_CAST_MOVIE:
-            case TYPE_CAST_TV: {
-                int pad = dpToPx(16);
-                rv.setPaddingRelative(pad, 0, pad, rv.getPaddingBottom());
-                castGridAdapter = new RecyclerView.Adapter<>() {
-                    static class CastViewHolder extends RecyclerView.ViewHolder {
-                        final SearchResultCastItemBinding b;
-                        CastViewHolder(SearchResultCastItemBinding b) {
-                            super(b.getRoot());
-                            this.b = b;
-                        }
-                    }
-                    @NonNull
-                    @Override
-                    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                        return new CastViewHolder(SearchResultCastItemBinding.inflate(
-                                LayoutInflater.from(parent.getContext()), parent, false));
-                    }
-                    @Override
-                    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-                        CastModel cast = castList.get(position);
-                        SearchResultCastItemBinding b = ((CastViewHolder) holder).b;
-
-                        b.castNameProfile.setText(cast.getName());
-                        b.castCharacterProfile.setText(cast.getCharacter());
-
-                        String profilePath = cast.getProfilePath();
-                        if (profilePath != null && !profilePath.isEmpty()) {
-                            Glide.with(b.getRoot().getContext())
-                                    .load(ImageUrl.of(ImageUrl.PROFILE, profilePath))
-                                    .placeholder(R.drawable.avatar)
-                                    .circleCrop()
-                                    .into(b.castPosterProfile);
-                        } else {
-                            Glide.with(b.getRoot().getContext())
-                                    .load(R.drawable.avatar)
-                                    .circleCrop()
-                                    .into(b.castPosterProfile);
-                        }
-
-                        b.getRoot().setOnClickListener(v ->
-                                navigateTo(CastDetailFragment.newInstance(cast.getId())));
-                    }
-                    @Override
-                    public int getItemCount() { return castList.size(); }
-                };
-                rv.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-                rv.setAdapter(castGridAdapter);
-                break;
-            }
-
-            case TYPE_SIMILAR_MOVIE:
-                // genre_item layout (movie_by_genre_item), 3-column grid
+            case TYPE_SIMILAR_MOVIE: {
                 moviePosterAdapter = new MovieByGenreAdapter(requireContext(), new ArrayList<>(),
                         (movie, v) -> navigateTo(
                                 MovieResultDetailsFragment.newInstance(movie.getMovieId()),
                                 v, "poster_transition"));
-                rv.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+                GridLayoutManager movieLm = new GridLayoutManager(requireContext(), 3);
+                rv.setLayoutManager(movieLm);
                 rv.setAdapter(moviePosterAdapter);
+                rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        if (dy <= 0) return;
+                        int total = movieLm.getItemCount();
+                        int last = movieLm.findLastVisibleItemPosition();
+                        if (!similarIsLoading && similarNextPage <= similarTotalPages
+                                && last >= total - 10) {
+                            fetchSimilarMovies(binding.tvSubtitle);
+                        }
+                    }
+                });
                 break;
+            }
 
-            case TYPE_SIMILAR_TV:
-                // genre_item layout (tv_by_genre_item), 3-column grid
+            case TYPE_SIMILAR_TV: {
                 tvPosterAdapter = new TVShowByGenreAdapter(requireContext(), new ArrayList<>(),
                         (tv, v) -> navigateTo(
                                 TVShowResultDetailsFragment.newInstance(tv.getTVShowId()),
                                 v, "poster_transition"));
-                rv.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+                GridLayoutManager tvLm = new GridLayoutManager(requireContext(), 3);
+                rv.setLayoutManager(tvLm);
                 rv.setAdapter(tvPosterAdapter);
+                rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        if (dy <= 0) return;
+                        int total = tvLm.getItemCount();
+                        int last = tvLm.findLastVisibleItemPosition();
+                        if (!similarIsLoading && similarNextPage <= similarTotalPages
+                                && last >= total - 10) {
+                            fetchSimilarTV(binding.tvSubtitle);
+                        }
+                    }
+                });
                 break;
+            }
 
             case TYPE_ON_AIR: {
                 FirebaseUser onAirUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -318,23 +412,25 @@ public class SeeAllFragment extends BaseFragment {
                     public void onResponse(@NonNull Call<MovieCreditsResponse> call,
                                            @NonNull Response<MovieCreditsResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            castList.clear();
+                            castOnlyList.clear();
+                            crewList.clear();
                             List<MovieCreditsResponse.Cast> cast = response.body().getCast();
                             if (cast != null) {
                                 for (MovieCreditsResponse.Cast c : cast) {
-                                    castList.add(new CastModel(c.getId(), c.getCastName(),
+                                    castOnlyList.add(new CastModel(c.getId(), c.getCastName(),
                                             c.getProfilePath(), c.getCharacter()));
                                 }
                             }
                             List<MovieCreditsResponse.Crew> crew = response.body().getCrew();
                             if (crew != null) {
                                 for (MovieCreditsResponse.Crew c : crew) {
-                                    castList.add(new CastModel(c.getId(), c.getName(),
+                                    crewList.add(new CastModel(c.getId(), c.getName(),
                                             c.getProfilePath(), c.getJob()));
                                 }
                             }
                             if (castGridAdapter != null) castGridAdapter.notifyDataSetChanged();
-                            showSubtitle(tvSubtitle, castList.size() + " members");
+                            if (crewGridAdapter != null) crewGridAdapter.notifyDataSetChanged();
+                            updateCastCrewCounts(tvSubtitle);
                         }
                     }
                     @Override
@@ -352,23 +448,25 @@ public class SeeAllFragment extends BaseFragment {
                     public void onResponse(@NonNull Call<AggregateCreditsResponse> call,
                                            @NonNull Response<AggregateCreditsResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            castList.clear();
+                            castOnlyList.clear();
+                            crewList.clear();
                             List<AggregateCreditsResponse.Cast> cast = response.body().getCast();
                             if (cast != null) {
                                 for (AggregateCreditsResponse.Cast c : cast) {
-                                    castList.add(new CastModel(c.getId(), c.getName(),
+                                    castOnlyList.add(new CastModel(c.getId(), c.getName(),
                                             c.getProfilePath(), c.getCharacter()));
                                 }
                             }
                             List<AggregateCreditsResponse.Crew> crew = response.body().getCrew();
                             if (crew != null) {
                                 for (AggregateCreditsResponse.Crew c : crew) {
-                                    castList.add(new CastModel(c.getId(), c.getName(),
+                                    crewList.add(new CastModel(c.getId(), c.getName(),
                                             c.getProfilePath(), c.getJob()));
                                 }
                             }
                             if (castGridAdapter != null) castGridAdapter.notifyDataSetChanged();
-                            showSubtitle(tvSubtitle, castList.size() + " members");
+                            if (crewGridAdapter != null) crewGridAdapter.notifyDataSetChanged();
+                            updateCastCrewCounts(tvSubtitle);
                         }
                     }
                     @Override
@@ -379,42 +477,68 @@ public class SeeAllFragment extends BaseFragment {
     }
 
     private void fetchSimilarMovies(TextView tvSubtitle) {
-        safeEnqueue(apiService.getMovieSimilar(TMDBpath.movieSimilar(mediaId)),
+        if (similarIsLoading) return;
+        if (similarNextPage > similarTotalPages) return;
+        similarIsLoading = true;
+        int pageToFetch = similarNextPage;
+        safeEnqueue(apiService.getMovieSimilarPaged(TMDBpath.movieSimilar(mediaId), pageToFetch),
                 new Callback<MovieSimilarResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<MovieSimilarResponse> call,
                                            @NonNull Response<MovieSimilarResponse> response) {
+                        similarIsLoading = false;
                         if (response.isSuccessful() && response.body() != null) {
+                            similarTotalPages = response.body().getTotal_pages();
                             List<MovieModel> results = response.body().getResults();
                             if (results == null) results = new ArrayList<>();
-                            // Pass results directly — updateData clears mData then adds from newData;
-                            // passing the same list reference would result in adding from an empty list.
-                            if (moviePosterAdapter != null) moviePosterAdapter.updateData(results);
-                            showSubtitle(tvSubtitle, results.size() + " titles");
+                            if (moviePosterAdapter != null) {
+                                if (pageToFetch == 1) {
+                                    moviePosterAdapter.updateData(results);
+                                } else {
+                                    moviePosterAdapter.appendData(results);
+                                }
+                            }
+                            similarNextPage = pageToFetch + 1;
+                            if (pageToFetch == 1) showSubtitle(tvSubtitle, "You May Also Like");
                         }
                     }
                     @Override
                     public void onFailure(@NonNull Call<MovieSimilarResponse> call, @NonNull Throwable t) {
+                        similarIsLoading = false;
                         Toast.makeText(getContext(), "Failed to load similar movies", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
     private void fetchSimilarTV(TextView tvSubtitle) {
-        safeEnqueue(apiService.getTVShowSimilar(TMDBpath.tvShowSimilar(mediaId)),
+        if (similarIsLoading) return;
+        if (similarNextPage > similarTotalPages) return;
+        similarIsLoading = true;
+        int pageToFetch = similarNextPage;
+        safeEnqueue(apiService.getTVShowSimilarPaged(TMDBpath.tvShowSimilar(mediaId), pageToFetch),
                 new Callback<TVShowSimilarResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<TVShowSimilarResponse> call,
                                            @NonNull Response<TVShowSimilarResponse> response) {
+                        similarIsLoading = false;
                         if (response.isSuccessful() && response.body() != null) {
+                            similarTotalPages = response.body().getTotal_pages();
                             List<TVShowModel> results = response.body().getResults();
                             if (results == null) results = new ArrayList<>();
-                            if (tvPosterAdapter != null) tvPosterAdapter.updateData(results);
-                            showSubtitle(tvSubtitle, results.size() + " titles");
+                            if (tvPosterAdapter != null) {
+                                if (pageToFetch == 1) {
+                                    tvPosterAdapter.updateData(results);
+                                } else {
+                                    tvPosterAdapter.appendData(results);
+                                }
+                            }
+                            similarNextPage = pageToFetch + 1;
+                            if (pageToFetch == 1) showSubtitle(tvSubtitle, "You May Also Like");
                         }
                     }
                     @Override
                     public void onFailure(@NonNull Call<TVShowSimilarResponse> call, @NonNull Throwable t) {
+                        similarIsLoading = false;
                         Toast.makeText(getContext(), "Failed to load similar TV shows", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -700,6 +824,20 @@ public class SeeAllFragment extends BaseFragment {
         if (tv == null) return;
         tv.setText(text);
         tv.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateCastCrewCounts(TextView tvSubtitle) {
+        if (binding == null) return;
+        int castCount = castOnlyList.size();
+        int crewCount = crewList.size();
+
+        binding.tvCastCount.setText(castCount + " people");
+        binding.tvCastCount.setVisibility(View.VISIBLE);
+        binding.tvCrewCount.setText(crewCount + " people");
+        binding.tvCrewCount.setVisibility(View.VISIBLE);
+
+        showSubtitle(tvSubtitle, castCount + " cast  •  " + crewCount + " crew");
     }
 
     private void onMediaClick(MediaItem item, View sharedElement) {
