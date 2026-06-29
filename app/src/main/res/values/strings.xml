@@ -198,6 +198,8 @@
     <string name="log_out">@string/action_sign_out</string>
     <string name="delete_account">Delete Account</string>
     <string name="close">Close</string>
+    <string name="fullscreen">Fullscreen</string>
+    <string name="exit_fullscreen">Exit fullscreen</string>
     <string name="policy">Policy</string>
     <string name="welcome">Welcome</string>
     <string name="message_welcomer">Welcome to EMPlay!</string>

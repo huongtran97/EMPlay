@@ -105,6 +105,11 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <style name="TrailerTopSheetAnimation" parent="">
+        <item name="android:windowEnterAnimation">@anim/slide_in_top</item>
+        <item name="android:windowExitAnimation">@anim/slide_out_top</item>
+    </style>
+
     <!-- Meta chip used in detail screens (transparent + border) -->
     <style name="Widget.EMPlay.Chip" parent="">
         <item name="android:layout_width">wrap_content</item>

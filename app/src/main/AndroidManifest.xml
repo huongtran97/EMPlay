@@ -36,6 +36,8 @@
         <activity
             android:name=".activity.MainActivity"
             android:exported="false"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:theme="@style/HiddenTitleTheme" />
         <activity
             android:name=".activity.LoginActivity"
