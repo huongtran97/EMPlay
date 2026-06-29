@@ -84,6 +84,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private boolean isNowPlaying = false;
     private boolean userHasSelectedRegion = false;
     private android.os.Handler fetchHandler;
+    private final ArrayList<String> movieGenreNames = new ArrayList<>();
 
     public static MovieResultDetailsFragment newInstance(int movieId) {
         MovieResultDetailsFragment fragment = new MovieResultDetailsFragment();
@@ -123,9 +124,9 @@ public class MovieResultDetailsFragment extends BaseFragment {
         alsoLikeAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(),
                 (movie, view) -> navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()),
                         view, "poster_transition"));
-        binding.rvAlsoLike.setLayoutManager(
+        binding.searchResultSuggestionRecyclerview.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.rvAlsoLike.setAdapter(alsoLikeAdapter);
+        binding.searchResultSuggestionRecyclerview.setAdapter(alsoLikeAdapter);
 
         collectionAdapter = new CollectionAdapter(new ArrayList<>(), requireContext(),
                 id -> navigateTo(MovieResultDetailsFragment.newInstance(id)));
@@ -244,9 +245,11 @@ public class MovieResultDetailsFragment extends BaseFragment {
         ReadHelper.setup(binding.tvOverview, binding.readMoreText, false, expanded -> {});
 
         List<MovieDetailsResponse.Genre> genres = d.getGenres();
+        movieGenreNames.clear();
         if (genres != null && !genres.isEmpty()) {
             binding.chipGenre.setText(genres.get(0).getName());
             binding.chipGenre.setVisibility(View.VISIBLE);
+            for (MovieDetailsResponse.Genre g : genres) movieGenreNames.add(g.getName());
         } else {
             binding.chipGenre.setVisibility(View.GONE);
         }
@@ -465,7 +468,8 @@ public class MovieResultDetailsFragment extends BaseFragment {
                                 alsoLikeAdapter.setShowMoreItem(true,
                                         () -> navigateTo(SeeAllFragment.newInstance(
                                                 SeeAllFragment.TYPE_SIMILAR_MOVIE, movieId,
-                                                getString(R.string.detail_section_also_like))));
+                                                getString(R.string.detail_section_also_like),
+                                                movieGenreNames)));
                             }
                         }
                     }

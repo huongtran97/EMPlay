@@ -26,6 +26,9 @@ import com.google.firebase.auth.FirebaseUser;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.android.flexbox.FlexboxLayout;
+import androidx.core.content.ContextCompat;
+
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.TrendingSearchAdapter;
 import emplay.entertainment.emplay.api.common.ImageUrl;
@@ -67,6 +70,7 @@ public class SeeAllFragment extends BaseFragment {
     private static final String ARG_TYPE = "type";
     private static final String ARG_MEDIA_ID = "media_id";
     private static final String ARG_TITLE = "title";
+    private static final String ARG_GENRES = "genres";
     private ActivitySeeAllBinding binding;
     private String type;
     private int mediaId;
@@ -108,11 +112,17 @@ public class SeeAllFragment extends BaseFragment {
     }
 
     public static SeeAllFragment newInstance(String type, int mediaId, String title) {
+        return newInstance(type, mediaId, title, null);
+    }
+
+    public static SeeAllFragment newInstance(String type, int mediaId, String title,
+                                             ArrayList<String> genres) {
         SeeAllFragment fragment = new SeeAllFragment();
         Bundle args = new Bundle();
         args.putString(ARG_TYPE, type);
         args.putInt(ARG_MEDIA_ID, mediaId);
         args.putString(ARG_TITLE, title);
+        if (genres != null && !genres.isEmpty()) args.putStringArrayList(ARG_GENRES, genres);
         fragment.setArguments(args);
         return fragment;
     }
@@ -137,6 +147,13 @@ public class SeeAllFragment extends BaseFragment {
         }
         binding.tvSubtitle.setVisibility(View.GONE);
         binding.tvLoadingMore.setVisibility(View.GONE);
+
+        if (getArguments() != null && (TYPE_SIMILAR_MOVIE.equals(type) || TYPE_SIMILAR_TV.equals(type))) {
+            ArrayList<String> genres = getArguments().getStringArrayList(ARG_GENRES);
+            if (genres != null && !genres.isEmpty()) {
+                populateGenreChips(genres);
+            }
+        }
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
@@ -499,7 +516,6 @@ public class SeeAllFragment extends BaseFragment {
                                 }
                             }
                             similarNextPage = pageToFetch + 1;
-                            if (pageToFetch == 1) showSubtitle(tvSubtitle, "You May Also Like");
                         }
                     }
                     @Override
@@ -533,7 +549,6 @@ public class SeeAllFragment extends BaseFragment {
                                 }
                             }
                             similarNextPage = pageToFetch + 1;
-                            if (pageToFetch == 1) showSubtitle(tvSubtitle, "You May Also Like");
                         }
                     }
                     @Override
@@ -818,6 +833,32 @@ public class SeeAllFragment extends BaseFragment {
                         }
                     });
         }
+    }
+
+    private void populateGenreChips(List<String> genres) {
+        if (binding == null) return;
+        FlexboxLayout container = binding.genreChips;
+        container.removeAllViews();
+        float density = getResources().getDisplayMetrics().density;
+        int hPad = Math.round(10 * density);
+        int vPad = Math.round(3 * density);
+        int endMargin = Math.round(5 * density);
+        int botMargin = Math.round(5 * density);
+        for (String name : genres) {
+            TextView chip = new TextView(requireContext());
+            chip.setText(name);
+            chip.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11);
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_2));
+            chip.setBackground(ContextCompat.getDrawable(requireContext(), R.drawable.bg_chip));
+            chip.setPadding(hPad, vPad, hPad, vPad);
+            FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lp.setMarginEnd(endMargin);
+            lp.bottomMargin = botMargin;
+            chip.setLayoutParams(lp);
+            container.addView(chip);
+        }
+        container.setVisibility(View.VISIBLE);
     }
 
     private void showSubtitle(TextView tv, String text) {

@@ -2,6 +2,8 @@
 <!-- EMPlay · SEE ALL VIEW
      Eyebrow "FROM HOME", title, subtitle (count), 3-column ranked poster grid + loading footer -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/bg_base">
@@ -14,7 +16,7 @@
         android:layout_gravity="top|end"
         android:alpha="0.045"
         android:fontFamily="@font/playfair_display_medium"
-        android:text="★"
+        android:text="@string/glyph_star"
         android:textColor="@color/text_1"
         android:textSize="@dimen/text_hero_xl" />
 
@@ -23,40 +25,14 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/btn_back"
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_margin="12dp"
-                android:background="@drawable/bg_back_button"
-                android:contentDescription="@string/cd_back"
-                android:src="@drawable/ic_chevron_left" />
-
-        </FrameLayout>
-
         <!-- Header block -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingStart="50dp"
+            android:paddingStart="13dp"
             android:paddingEnd="13dp"
             android:paddingBottom="14dp">
-
-            <TextView
-                android:id="@+id/tv_eyebrow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:fontFamily="@font/inter_semibold"
-                android:letterSpacing="0.18"
-                android:text="@string/eyebrow_from_home"
-                android:textColor="@color/accent"
-                android:textSize="@dimen/text_caption" />
 
             <TextView
                 android:id="@+id/tv_section_title"
@@ -64,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@font/playfair_display"
                 android:text="@string/home_section_top_rated"
-                android:textColor="@color/text_1"
+                android:textColor="@color/accent"
                 android:textSize="@dimen/text_headline" />
 
             <TextView
@@ -72,13 +48,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Movies · 250 titles"
+                android:text="@string/movie_number_item"
                 android:textColor="@color/text_3"
                 android:textSize="@dimen/text_badge" />
 
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/genre_chips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"
+                app:flexWrap="wrap"
+                app:alignItems="center"
+                app:justifyContent="flex_start" />
+
         </LinearLayout>
 
-        <!-- Scrollable 3-column grid -->
+        <!-- Scrollable 3-column grid (all non-cast types) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_all_items"
             android:layout_width="match_parent"
@@ -86,7 +72,141 @@
             android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingStart="13dp"
-            android:paddingEnd="13dp" />
+            android:paddingEnd="13dp"
+            android:paddingBottom="72dp" />
+
+        <!-- Cast & Crew accordion (TYPE_CAST_MOVIE / TYPE_CAST_TV only) -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nsv_cast_crew"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:paddingBottom="72dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- ── Cast toggle row ── -->
+                <LinearLayout
+                    android:id="@+id/row_cast_toggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackground">
+
+                    <TextView
+                        android:id="@+id/tv_cast_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/cast"
+                        android:textColor="@color/text_1"
+                        android:textSize="@dimen/text_body"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_cast_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="@color/text_3"
+                        android:textSize="@dimen/text_meta"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/ic_cast_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right"
+                        android:contentDescription="@null"
+                        app:tint="@color/text_3" />
+
+                </LinearLayout>
+
+                <!-- Cast grid (collapsed by default) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_cast_section"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:clipToPadding="false"
+                    android:paddingBottom="8dp"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone"/>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginStart="13dp"
+                    android:layout_marginEnd="13dp"
+                    android:background="@color/text_3"
+                    android:alpha="0.3" />
+
+                <!-- ── Crew toggle row ── -->
+                <LinearLayout
+                    android:id="@+id/row_crew_toggle"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?android:attr/selectableItemBackground">
+
+                    <TextView
+                        android:id="@+id/tv_crew_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/crew"
+                        android:textColor="@color/text_1"
+                        android:textSize="@dimen/text_body"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_crew_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="@color/text_3"
+                        android:textSize="@dimen/text_meta"
+                        android:visibility="gone" />
+
+                    <ImageView
+                        android:id="@+id/ic_crew_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_right"
+                        android:contentDescription="@null"
+                        app:tint="@color/text_3" />
+
+                </LinearLayout>
+
+                <!-- Crew grid (collapsed by default) -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_crew_section"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:clipToPadding="false"
+                    android:paddingBottom="8dp"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
 
         <!-- Loading more footer -->
         <TextView
@@ -101,5 +221,20 @@
             android:visibility="visible" />
 
     </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_scroll_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="20dp"
+        android:contentDescription="@string/cd_back_to_top"
+        android:visibility="gone"
+        app:backgroundTint="@color/accent"
+        app:elevation="4dp"
+        app:fabSize="mini"
+        app:srcCompat="@drawable/ic_arrow_up"
+        app:tint="@color/on_accent" />
 
 </FrameLayout>

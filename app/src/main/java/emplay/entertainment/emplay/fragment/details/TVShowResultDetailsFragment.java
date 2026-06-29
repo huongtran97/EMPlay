@@ -94,6 +94,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private boolean tmdbTVInWatchlist = false;
     private boolean isAiring = false;
     private boolean userHasSelectedRegion = false;
+    private final ArrayList<String> tvGenreNames = new ArrayList<>();
 
     public static TVShowResultDetailsFragment newInstance(int tvId) {
         TVShowResultDetailsFragment fragment = new TVShowResultDetailsFragment();
@@ -144,9 +145,9 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         // Cast
         castAdapter = new CastAdapter(castList, requireContext(), cast ->
                 navigateTo(CastDetailFragment.newInstance(cast.getId())));
-        binding.searchResultCastRecyclerview.setLayoutManager(
+        binding.rvCast.setLayoutManager(
                 new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.searchResultCastRecyclerview.setAdapter(castAdapter);
+        binding.rvCast.setAdapter(castAdapter);
 
         binding.tvAllCast.setOnClickListener(v ->
                 navigateTo(SeeAllFragment.newInstance(SeeAllFragment.TYPE_CAST_TV, tvId,
@@ -242,9 +243,11 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         binding.chipSeasons.setText(String.format(java.util.Locale.getDefault(),
                 "%d seasons", tv.getNumber_of_seasons()));
 
+        tvGenreNames.clear();
         if (tv.getGenres() != null && !tv.getGenres().isEmpty()) {
             binding.chipGenre.setText(tv.getGenres().get(0).getName());
             binding.chipGenre.setVisibility(View.VISIBLE);
+            for (TVShowDetailsResponse.Genre g : tv.getGenres()) tvGenreNames.add(g.getName());
         } else {
             binding.chipGenre.setVisibility(View.GONE);
         }
@@ -398,7 +401,8 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                 suggestionTVAdapter.setShowMoreItem(true,
                                         () -> navigateTo(SeeAllFragment.newInstance(
                                                 SeeAllFragment.TYPE_SIMILAR_TV, tvId,
-                                                getString(R.string.detail_section_also_like))));
+                                                getString(R.string.detail_section_also_like),
+                                                tvGenreNames)));
                             }
                         }
                     }
