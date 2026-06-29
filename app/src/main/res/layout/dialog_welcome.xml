@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/welcome"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/text_1"
         android:textSize="@dimen/text_subtitle"
         android:textStyle="bold"
         android:fontFamily="sans-serif-medium"
@@ -31,12 +31,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/message_welcomer"
-        android:textColor="#BBBBBB"
+        android:textColor="@color/text_2"
         android:textSize="@dimen/text_chip"
         android:gravity="center"
         android:lineSpacingExtra="4dp"
         android:layout_marginBottom="24dp"
-        android:paddingHorizontal="8dp"/>
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"/>
 
     <!-- Login Button -->
     <Button
@@ -56,9 +57,9 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:text="@string/guest"
-        android:textColor="#BBBBBB"
+        android:textColor="@color/text_2"
         android:textSize="@dimen/text_poster_rating"
-        android:backgroundTint="#2A2A2A"
+        android:backgroundTint="@color/bg_surface"
         android:stateListAnimator="@null"/>
 
 </LinearLayout>

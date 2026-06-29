@@ -2,6 +2,7 @@ package emplay.entertainment.emplay.fragment.genre;
 
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import androidx.core.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,14 +38,12 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class OriginResultsFragment extends BaseFragment {
-
     private static final String ARG_COUNTRY_CODE = "COUNTRY_CODE";
     private static final String ARG_ORIGIN_NAME  = "ORIGIN_NAME";
     private static final String ARG_GLYPH        = "GLYPH";
     private static final String ARG_IS_ANIME     = "IS_ANIME";
     private static final String ARG_DEFAULT_TV   = "DEFAULT_TV";
     private static final int ANIME_GENRE_ID = 16;
-
     private RecyclerView resultsRecyclerView;
     private MovieByGenreAdapter movieAdapter;
     private TVShowByGenreAdapter tvAdapter;
@@ -52,7 +51,6 @@ public class OriginResultsFragment extends BaseFragment {
     private MaterialButton btnMovies, btnTV;
     private TextView chipPopularity, chipRating, chipNewest;
     private MovieApiService apiService;
-
     private String countryCode;
     private boolean isAnime;
     private boolean showingTV;
@@ -112,7 +110,6 @@ public class OriginResultsFragment extends BaseFragment {
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        view.findViewById(R.id.btn_back).setOnClickListener(v -> getParentFragmentManager().popBackStack());
         view.findViewById(R.id.btnFilter).setOnClickListener(v -> openFilterSheet());
 
         updateChipSelectionUi();
@@ -174,11 +171,15 @@ public class OriginResultsFragment extends BaseFragment {
 
     private void applyToggleState() {
         if (btnMovies == null || btnTV == null) return;
-        btnMovies.setBackgroundTintList(ColorStateList.valueOf(showingTV ? 0xFF171E31 : 0xFFE3B566));
-        btnMovies.setTextColor(showingTV ? 0xFFB9C0D4 : 0xFF3A2A0C);
+        int accent = ContextCompat.getColor(requireContext(), R.color.accent);
+        int surface = ContextCompat.getColor(requireContext(), R.color.bg_surface);
+        int onAccent = ContextCompat.getColor(requireContext(), R.color.on_accent);
+        int text2 = ContextCompat.getColor(requireContext(), R.color.text_2);
+        btnMovies.setBackgroundTintList(ColorStateList.valueOf(showingTV ? surface : accent));
+        btnMovies.setTextColor(showingTV ? text2 : onAccent);
         btnMovies.setStrokeWidth(showingTV ? dpToPx(1) : 0);
-        btnTV.setBackgroundTintList(ColorStateList.valueOf(showingTV ? 0xFFE3B566 : 0xFF171E31));
-        btnTV.setTextColor(showingTV ? 0xFF3A2A0C : 0xFFB9C0D4);
+        btnTV.setBackgroundTintList(ColorStateList.valueOf(showingTV ? accent : surface));
+        btnTV.setTextColor(showingTV ? onAccent : text2);
         btnTV.setStrokeWidth(showingTV ? 0 : dpToPx(1));
         resultsRecyclerView.setAdapter(showingTV ? tvAdapter : movieAdapter);
     }
@@ -194,8 +195,8 @@ public class OriginResultsFragment extends BaseFragment {
         loadingIndicator.setVisibility(View.VISIBLE);
 
         String sortBy = MovieByGenresFragment.resolveApiSort(sortToken, showingTV);
-        String gteField = showingTV ? filterYearFrom + "-01-01" : filterYearFrom + "-01-01";
-        String lteField = showingTV ? filterYearTo + "-12-31" : filterYearTo + "-12-31";
+        String gteField = filterYearFrom + "-01-01";
+        String lteField = filterYearTo + "-12-31";
         String gteYear = filterYearFrom > 1940 ? gteField : null;
         String lteYear = filterYearTo < Calendar.getInstance().get(Calendar.YEAR) ? lteField : null;
 

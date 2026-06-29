@@ -14,7 +14,8 @@
         android:layout_height="wrap_content"
         android:baselineAligned="false"
         android:orientation="horizontal"
-        android:paddingHorizontal="4dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
         android:gravity="center_vertical">
 
         <!-- Thumbnail (landscape 16:9) -->
@@ -40,7 +41,7 @@
                 android:layout_height="20dp"
                 android:layout_margin="5dp"
                 android:background="@drawable/bg_circle_dark"
-                app:backgroundTint="#D10B0F19"
+                app:backgroundTint="@color/bg_rank_tint"
                 android:gravity="center"
                 android:textColor="@color/text_1"
                 android:textSize="@dimen/text_badge"

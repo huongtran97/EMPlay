@@ -16,4 +16,8 @@
 
         <item name="bottomNavigationStyle">@style/Widget.EMPlay.BottomNavigationView</item>
     </style>
+
+    <style name="Widget.EMPlay.BottomNavIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">#29E3B566</item>
+    </style>
 </resources>

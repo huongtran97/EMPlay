@@ -8,12 +8,35 @@ public class TVShowCreditsResponses {
     @SerializedName("cast")
     private List<Cast> cast;
 
+    @SerializedName("crew")
+    private List<Crew> crew;
+
     public List<Cast> getCast() {
         return cast;
     }
 
     public void setCast(List<Cast> cast) {
         this.cast = cast;
+    }
+
+    public List<Crew> getCrew() {
+        return crew;
+    }
+
+    public static class Crew {
+        @SerializedName("id")
+        private int id;
+        @SerializedName("name")
+        private String name;
+        @SerializedName("profile_path")
+        private String profilePath;
+        @SerializedName("job")
+        private String job;
+
+        public int getId() { return id; }
+        public String getName() { return name; }
+        public String getProfilePath() { return profilePath; }
+        public String getJob() { return job; }
     }
 
     public static class Cast {

@@ -6,8 +6,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingHorizontal="11dp"
-    android:paddingVertical="8dp">
+    android:paddingStart="11dp"
+    android:paddingEnd="11dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <!-- TICKET CARD -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -35,9 +37,8 @@
             <!-- Poster image -->
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/ivHeroPoster"
-                android:layout_width="297dp"
+                android:layout_width="0dp"
                 android:layout_height="143dp"
-                android:background="#1E2A45"
                 android:contentDescription="@string/show_poster"
                 android:scaleType="centerCrop"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -55,13 +56,15 @@
                 style="@style/TextAppearance.EMPlay.DisplaySm"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:lineSpacingMultiplier="1.15"
                 app:layout_constraintTop_toBottomOf="@id/ivHeroPoster"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                android:fontFamily="@font/playfair_display_medium"
+                app:fontFamily="@font/playfair_display_medium"
                 tools:text="Tittle" />
 
             <!-- Genre · cert — sits at bottom of left section -->
@@ -77,11 +80,6 @@
                 tools:text="Meta data" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- ── SEPARATOR (punch holes + dashed line) ──
-             Grouped in a barrier-free vertical chain.
-             clipChildren=false on ticketContainer lets the
-             circles overflow the card edge cleanly.         -->
 
         <!-- Top punch hole — straddles the top card edge -->
         <View

@@ -10,8 +10,9 @@
     <!-- Search Input -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginHorizontal="13dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="13dp"
+        android:layout_marginEnd="13dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="14dp"
         app:cardBackgroundColor="@color/bg_surface"
@@ -25,7 +26,8 @@
             android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingHorizontal="12dp">
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
 
             <ImageView
                 android:layout_width="14dp"
@@ -41,6 +43,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
+                android:minHeight="48dp"
                 android:background="@android:color/transparent"
                 android:hint="@string/search_hint"
                 android:imeOptions="actionSearch"
@@ -88,7 +91,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="14dp"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
                     android:visibility="gone">
 
                     <com.google.android.flexbox.FlexboxLayout
@@ -103,6 +107,8 @@
                         style="@style/TextAppearance.EMPlay.Caption"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:gravity="center_vertical"
                         android:layout_marginBottom="20dp"
                         android:clickable="true"
                         android:focusable="true"
@@ -116,8 +122,11 @@
                     android:id="@+id/sectionSearchByOrigin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="13dp"
-                    android:paddingVertical="10dp"
+                    android:minHeight="48dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
                     android:layout_marginBottom="4dp"
                     android:clickable="true"
                     android:focusable="true"
@@ -128,13 +137,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/search_section_origin"
+                        android:textSize="@dimen/text_body"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
                     <ImageView
-                        android:layout_width="14dp"
-                        android:layout_height="14dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:src="@drawable/ic_chevron_right"
                         app:tint="@color/text_3"
                         android:contentDescription="@null"
@@ -148,7 +158,8 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="13dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     android:layout_marginBottom="10dp">
 
                     <TextView
@@ -156,9 +167,54 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/search_section_genres"
+                        android:textSize="@dimen/text_body"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
+
+                    <TextView
+                        android:id="@+id/btnGenreTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minWidth="48dp"
+                        android:minHeight="48dp"
+                        android:gravity="center"
+                        android:text="@string/label_tv"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:fontFamily="@font/inter"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="true"
+                        android:background="@drawable/bg_tab_chip_selector"
+                        android:textColor="@color/genre_tab_text"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <TextView
+                        android:id="@+id/btnGenreMovie"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:gravity="center"
+                        android:text="@string/label_movies"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:fontFamily="@font/inter"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textAllCaps="true"
+                        android:background="@drawable/bg_tab_chip_selector"
+                        android:textColor="@color/genre_tab_text"
+                        android:clickable="true"
+                        android:focusable="true"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/btnGenreTV"
+                        android:layout_marginEnd="6dp" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -168,7 +224,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:nestedScrollingEnabled="false"
-                    android:paddingHorizontal="13dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     app:spanCount="3"
                     tools:listitem="@layout/genres_item" />
@@ -177,7 +234,8 @@
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="13dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     android:layout_marginBottom="10dp">
 
                     <TextView
@@ -185,6 +243,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/search_section_popular"
+                        android:id="@+id/sectionPopularHeader"
+                        android:textSize="@dimen/text_body"
                         app:layout_constraintTop_toTopOf="parent"
                         app:layout_constraintStart_toStartOf="parent" />
 
@@ -196,7 +256,49 @@
                     android:layout_height="wrap_content"
                     android:nestedScrollingEnabled="false"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    tools:listitem="@layout/item_search_trending" />
+                    tools:listitem="@layout/item_search_popular" />
+
+                <!-- Popular Right Now pagination bar -->
+                <LinearLayout
+                    android:id="@+id/popularPaginationBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:visibility="gone">
+
+                    <ImageButton
+                        android:id="@+id/btnPopularPrev"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@null"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_chevron_left"
+                        app:tint="@color/text_2" />
+
+                    <TextView
+                        android:id="@+id/tvPopularPageIndicator"
+                        style="@style/TextAppearance.EMPlay.Caption"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:textColor="@color/text_3" />
+
+                    <ImageButton
+                        android:id="@+id/btnPopularNext"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="@null"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/text_2" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -208,7 +310,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:layout_marginHorizontal="4dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
             android:visibility="gone"
             app:cardBackgroundColor="@color/bg_surface"
             app:cardCornerRadius="12dp"
@@ -224,17 +327,18 @@
                 <com.google.android.material.tabs.TabLayout
                     android:id="@+id/tabLayoutSearch"
                     android:layout_width="match_parent"
-                    android:layout_height="36dp"
+                    android:layout_height="52dp"
                     android:background="@color/bg_surface"
-                    android:paddingHorizontal="4dp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp"
                     android:visibility="gone"
                     app:tabGravity="start"
                     app:tabIndicatorColor="@color/accent"
-                    app:tabIndicatorHeight="2dp"
+                    app:tabIndicatorHeight="3dp"
                     app:tabMinWidth="0dp"
                     app:tabMode="scrollable"
-                    app:tabPaddingEnd="12dp"
-                    app:tabPaddingStart="9dp"
+                    app:tabPaddingEnd="16dp"
+                    app:tabPaddingStart="16dp"
                     app:tabRippleColor="@color/ripple_accent"
                     app:tabSelectedTextColor="@color/accent"
                     app:tabTextAppearance="@style/TextAppearance.EMPlay.SearchTab"
@@ -259,8 +363,8 @@
                     android:layout_height="40dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="8dp"
-                    android:visibility="gone">
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
 
                     <View
                         android:layout_width="match_parent"
@@ -303,11 +407,12 @@
                 <LinearLayout
                     android:id="@+id/footerPeople"
                     android:layout_width="match_parent"
-                    android:layout_height="36dp"
+                    android:layout_height="52dp"
                     android:background="@color/bg_surface"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="13dp"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     android:visibility="gone">
 
                     <View
@@ -336,7 +441,8 @@
                         android:paddingStart="8dp"
                         android:text="@string/search_see_people"
                         android:textColor="@color/accent"
-                        android:textSize="11sp" />
+                        android:textSize="11sp"
+                        tools:ignore="RtlSymmetry" />
 
                 </LinearLayout>
 

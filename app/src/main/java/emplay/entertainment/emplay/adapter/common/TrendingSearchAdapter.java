@@ -13,7 +13,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.button.MaterialButton;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,10 +25,14 @@ import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
 import emplay.entertainment.emplay.models.common.MediaItem;
+import emplay.entertainment.emplay.models.common.MultiSearchResult;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 
-public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Adapter<TrendingSearchAdapter.ViewHolder> {
+public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int VIEW_TYPE_ITEM   = 0;
+    private static final int VIEW_TYPE_FOOTER = 1;
 
     public interface OnItemClickListener {
         void onItemClick(MediaItem item, View sharedElement);
@@ -36,6 +43,7 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
     private final OnItemClickListener listener;
     private final DatabaseHelper dbHelper;
     private final String userId;
+    private boolean showFooter = false;
 
     public TrendingSearchAdapter(Context context, List<? extends MediaItem> items,
                                   OnItemClickListener listener) {
@@ -58,71 +66,131 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
         notifyDataSetChanged();
     }
 
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_search_trending, parent, false);
-        return new ViewHolder(view);
+    public void appendItems(List<? extends MediaItem> newItems) {
+        if (newItems == null || newItems.isEmpty()) return;
+        int start = items.size();
+        items.addAll(newItems);
+        notifyItemRangeInserted(start, newItems.size());
+    }
+
+    public int getDataItemCount() {
+        return items.size();
+    }
+
+    public void setLoading(boolean loading) {
+        boolean changed = showFooter != loading;
+        showFooter = loading;
+        if (changed) {
+            if (loading) notifyItemInserted(items.size());
+            else notifyItemRemoved(items.size());
+        }
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+    public int getItemViewType(int position) {
+        return position < items.size() ? VIEW_TYPE_ITEM : VIEW_TYPE_FOOTER;
+    }
+
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        if (viewType == VIEW_TYPE_FOOTER) {
+            return new FooterViewHolder(inflater.inflate(R.layout.item_on_air_footer, parent, false));
+        }
+        return new ViewHolder(inflater.inflate(R.layout.item_search_popular, parent, false));
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (getItemViewType(position) == VIEW_TYPE_FOOTER) return;
+        ViewHolder h = (ViewHolder) holder;
         MediaItem item = items.get(position);
-        holder.tvTitle.setText(item.getTitle());
-        holder.tvRating.setText(String.format(Locale.getDefault(), "★ %.1f", item.getVoteAverage()));
+        h.tvTitle.setText(item.getTitle());
+        h.tvRating.setText(String.format(Locale.getDefault(), "★ %.1f", item.getVoteAverage()));
 
         Glide.with(context)
                 .load(ImageUrl.of(ImageUrl.THUMBNAIL, item.getPosterPath()))
                 .placeholder(R.drawable.bg_poster_placeholder)
-                .into(holder.ivPoster);
+                .into(h.ivPoster);
 
-        holder.ivPoster.setTransitionName("poster_" + item.getMediaId());
+        h.ivPoster.setTransitionName("poster_" + item.getMediaId());
 
-        // Type chip + year + runtime
+        // Type chip + year + runtime/countdown
         if (item instanceof MovieModel) {
             MovieModel movie = (MovieModel) item;
-            holder.tvTypeChip.setText("Movie");
-            holder.tvYear.setText(extractYear(movie.getReleaseDate()));
-            int runtime = movie.getRuntime();
-            if (runtime > 0) {
-                holder.tvRuntime.setVisibility(View.VISIBLE);
-                holder.tvRuntime.setText(formatRuntime(runtime));
+            h.tvTypeChip.setText("Movie");
+            h.tvYear.setText(extractYear(movie.getReleaseDate()));
+            String countdown = formatCountdown(movie.getReleaseDate());
+            if (countdown != null && h.tvCountdown != null) {
+                h.tvRuntime.setVisibility(View.GONE);
+                h.tvCountdown.setText(countdown);
+                h.tvCountdown.setVisibility(View.VISIBLE);
             } else {
-                holder.tvRuntime.setVisibility(View.GONE);
+                if (h.tvCountdown != null) h.tvCountdown.setVisibility(View.GONE);
+                int runtime = movie.getRuntime();
+                if (runtime > 0) {
+                    h.tvRuntime.setVisibility(View.VISIBLE);
+                    h.tvRuntime.setText(formatRuntime(runtime));
+                } else {
+                    h.tvRuntime.setVisibility(View.GONE);
+                }
             }
         } else if (item instanceof TVShowModel) {
             TVShowModel tv = (TVShowModel) item;
-            holder.tvTypeChip.setText("TV");
-            holder.tvYear.setText(extractYear(tv.getFirstAirDate()));
-            holder.tvRuntime.setVisibility(View.GONE);
+            h.tvTypeChip.setText("TV");
+            h.tvYear.setText(extractYear(tv.getFirstAirDate()));
+            String countdown = formatCountdown(tv.getFirstAirDate());
+            if (h.tvCountdown != null) {
+                if (countdown != null) {
+                    h.tvCountdown.setText(countdown);
+                    h.tvCountdown.setVisibility(View.VISIBLE);
+                } else {
+                    h.tvCountdown.setVisibility(View.GONE);
+                }
+            }
+            h.tvRuntime.setVisibility(View.GONE);
+        } else if (item instanceof MultiSearchResult) {
+            MultiSearchResult multi = (MultiSearchResult) item;
+            if ("movie".equals(multi.getMediaType())) {
+                h.tvTypeChip.setText("Movie");
+            } else if ("tv".equals(multi.getMediaType())) {
+                h.tvTypeChip.setText("TV");
+            } else {
+                h.tvTypeChip.setText("");
+            }
+            h.tvYear.setText(multi.getDisplayYear());
+            h.tvRuntime.setVisibility(View.GONE);
+            if (h.tvCountdown != null) h.tvCountdown.setVisibility(View.GONE);
         } else {
-            holder.tvTypeChip.setText("");
-            holder.tvYear.setText("");
-            holder.tvRuntime.setVisibility(View.GONE);
+            h.tvTypeChip.setText("");
+            h.tvYear.setText("");
+            h.tvRuntime.setVisibility(View.GONE);
+            if (h.tvCountdown != null) h.tvCountdown.setVisibility(View.GONE);
         }
 
         // My List button
         boolean canSave = dbHelper != null && userId != null && !userId.isEmpty();
         if (canSave) {
             boolean saved = isSaved(item);
-            applyMyListState(holder.btnMyList, saved);
-            holder.btnMyList.setOnClickListener(v -> {
+            applyMyListState(h.btnMyList, saved);
+            h.btnMyList.setOnClickListener(v -> {
                 boolean nowSaved = isSaved(item);
                 if (nowSaved) {
                     removeFromList(item);
-                    applyMyListState(holder.btnMyList, false);
+                    applyMyListState(h.btnMyList, false);
                 } else {
                     addToList(item);
-                    applyMyListState(holder.btnMyList, true);
+                    applyMyListState(h.btnMyList, true);
                 }
             });
-            holder.btnMyList.setVisibility(View.VISIBLE);
+            h.btnMyList.setVisibility(View.VISIBLE);
         } else {
-            holder.btnMyList.setVisibility(View.GONE);
+            h.btnMyList.setVisibility(View.GONE);
         }
 
-        holder.itemView.setOnClickListener(v -> listener.onItemClick(item, holder.ivPoster));
-        holder.divider.setVisibility(position == getItemCount() - 1 ? View.GONE : View.VISIBLE);
+        h.itemView.setOnClickListener(v -> listener.onItemClick(item, h.ivPoster));
+        h.divider.setVisibility(position == items.size() - 1 ? View.GONE : View.VISIBLE);
     }
 
     private boolean isSaved(MediaItem item) {
@@ -130,6 +198,13 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
             return WatchlistHelper.isMovieSaved(dbHelper, userId, item.getMediaId());
         } else if (item instanceof TVShowModel) {
             return WatchlistHelper.isTVShowSaved(dbHelper, userId, item.getMediaId());
+        } else if (item instanceof MultiSearchResult) {
+            MultiSearchResult multi = (MultiSearchResult) item;
+            if ("movie".equals(multi.getMediaType())) {
+                return WatchlistHelper.isMovieSaved(dbHelper, userId, multi.getMediaId());
+            } else if ("tv".equals(multi.getMediaType())) {
+                return WatchlistHelper.isTVShowSaved(dbHelper, userId, multi.getMediaId());
+            }
         }
         return false;
     }
@@ -143,6 +218,15 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
             TVShowModel t = (TVShowModel) item;
             WatchlistHelper.saveTVShow(dbHelper, userId, t.getTVShowId(),
                     t.getTitle(), t.getPosterPath(), "", t.getVoteAverage());
+        } else if (item instanceof MultiSearchResult) {
+            MultiSearchResult multi = (MultiSearchResult) item;
+            if ("movie".equals(multi.getMediaType())) {
+                WatchlistHelper.saveMovie(dbHelper, userId, multi.getMediaId(),
+                        multi.getTitle(), multi.getPosterPath(), "", multi.getVoteAverage());
+            } else if ("tv".equals(multi.getMediaType())) {
+                WatchlistHelper.saveTVShow(dbHelper, userId, multi.getMediaId(),
+                        multi.getTitle(), multi.getPosterPath(), "", multi.getVoteAverage());
+            }
         }
     }
 
@@ -151,6 +235,13 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
             WatchlistHelper.removeMovie(dbHelper, userId, item.getMediaId());
         } else if (item instanceof TVShowModel) {
             WatchlistHelper.removeTVShow(dbHelper, userId, item.getMediaId());
+        } else if (item instanceof MultiSearchResult) {
+            MultiSearchResult multi = (MultiSearchResult) item;
+            if ("movie".equals(multi.getMediaType())) {
+                WatchlistHelper.removeMovie(dbHelper, userId, multi.getMediaId());
+            } else if ("tv".equals(multi.getMediaType())) {
+                WatchlistHelper.removeTVShow(dbHelper, userId, multi.getMediaId());
+            }
         }
     }
 
@@ -173,6 +264,24 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
         return date.substring(0, 4);
     }
 
+    private static String formatCountdown(String dateStr) {
+        if (dateStr == null || dateStr.isEmpty()) return null;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            Date date = sdf.parse(dateStr);
+            if (date == null) return null;
+            long diffMs = date.getTime() - new Date().getTime();
+            if (diffMs <= 0) return null;
+            long days = (long) Math.ceil((double) diffMs / (1000L * 60 * 60 * 24));
+            if (days == 1) return "· Tomorrow";
+            if (days <= 30) return "· in " + days + " days";
+            long months = Math.max(1, days / 30);
+            return "· in " + months + (months == 1 ? " month" : " months");
+        } catch (ParseException ignored) {
+            return null;
+        }
+    }
+
     private static String formatRuntime(int minutes) {
         if (minutes <= 0) return "";
         int h = minutes / 60;
@@ -181,11 +290,15 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
     }
 
     @Override
-    public int getItemCount() { return items.size(); }
+    public int getItemCount() { return items.size() + (showFooter ? 1 : 0); }
+
+    static class FooterViewHolder extends RecyclerView.ViewHolder {
+        FooterViewHolder(@NonNull View itemView) { super(itemView); }
+    }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         android.widget.ImageView ivPoster;
-        TextView tvTitle, tvTypeChip, tvYear, tvRuntime, tvRating;
+        TextView tvTitle, tvTypeChip, tvYear, tvRuntime, tvCountdown, tvRating;
         MaterialButton btnMyList;
         View divider;
 
@@ -196,6 +309,7 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
             tvTypeChip  = itemView.findViewById(R.id.tvTypeChip);
             tvYear      = itemView.findViewById(R.id.tvYear);
             tvRuntime   = itemView.findViewById(R.id.tvRuntime);
+            tvCountdown = itemView.findViewById(R.id.tvCountdown);
             tvRating    = itemView.findViewById(R.id.meta);
             btnMyList   = itemView.findViewById(R.id.btnMyList);
             divider     = itemView.findViewById(R.id.divider);

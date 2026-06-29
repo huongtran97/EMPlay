@@ -8,14 +8,16 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="6dp">
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp">
 
     <TextView
         android:id="@+id/tvPillText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/text_1"
         android:textSize="@dimen/text_meta" />
 
 </LinearLayout>

@@ -15,7 +15,7 @@
         android:layout_gravity="center"
         android:fontFamily="@font/playfair_display"
         android:text="@string/policy"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/text_1"
         android:textSize="@dimen/text_title" />
 
     <androidx.core.widget.NestedScrollView
@@ -30,7 +30,7 @@
             android:id="@+id/dialog_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#BBBBBB"
+            android:textColor="@color/text_2"
             android:textSize="@dimen/text_chip"
             android:lineSpacingExtra="4sp"
             android:paddingStart="4dp"

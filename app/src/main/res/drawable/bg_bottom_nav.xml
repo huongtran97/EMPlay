@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#D9171E31" />
+    <solid android:color="@color/nav_pill_bg" />
     <corners android:radius="27dp" />
-    <stroke android:width="0.5dp" android:color="#26EDF0F7" />
+    <stroke android:width="0.5dp" android:color="@color/nav_pill_stroke" />
 </shape>

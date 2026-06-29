@@ -83,18 +83,6 @@
 
                 </LinearLayout>
 
-                <!-- Back button overlay -->
-                <ImageButton
-                    android:id="@+id/btn_back"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_margin="12dp"
-                    android:background="@drawable/bg_circle_dark"
-                    app:backgroundTint="#B30B0F19"
-                    android:src="@drawable/ic_chevron_left"
-                    app:tint="@color/text_1"
-                    android:scaleType="centerInside"
-                    android:contentDescription="@string/cd_back" />
 
             </FrameLayout>
 
@@ -103,7 +91,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="13dp"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp">
 
@@ -145,7 +134,8 @@
                 android:id="@+id/season_detail_episodes_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="13dp"
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false" />
 

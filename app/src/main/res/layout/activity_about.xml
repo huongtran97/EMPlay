@@ -56,7 +56,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textColor="#777777"
+                    android:textColor="@color/text_3"
                     android:src="@drawable/ic_arrow_forward"
                     android:fontFamily="sans-serif" />
 
@@ -69,7 +69,7 @@
                 android:layout_marginStart="20dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/app_info"
-                android:textColor="#777777"
+                android:textColor="@color/text_3"
                 android:textSize="@dimen/text_chip"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium" />
@@ -80,7 +80,7 @@
                 android:orientation="vertical"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
-                android:background="#111111"
+                android:background="@color/bg_surface"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:paddingTop="14dp"
@@ -100,14 +100,16 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
-                    android:background="#1E1E1E" />
+                    android:background="@color/hairline_row" />
 
                 <ImageView
                     android:id="@+id/tmdb_logo"
                     android:layout_width="85dp"
-                    android:layout_height="10dp"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
                     android:layout_marginTop="6dp"
                     android:adjustViewBounds="true"
+                    android:scaleType="centerInside"
                     android:contentDescription="@string/the_movie_database"
                     android:src="@drawable/tmdb_logo1"
                     android:clickable="true"
@@ -134,7 +136,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/privacy_policy"
-                android:textColor="#777777"
+                android:textColor="@color/text_3"
                 android:textSize="@dimen/text_chip"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium" />
@@ -143,11 +145,12 @@
                 android:id="@+id/privacy_policy_row"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="48dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
-                android:background="#111111"
+                android:background="@color/bg_surface"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:paddingTop="14dp"
@@ -160,7 +163,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/policy_title"
-                    android:textColor="#CCCCCC"
+                    android:textColor="@color/text_1"
                     android:textSize="@dimen/text_chip"
                     android:fontFamily="sans-serif" />
 
@@ -169,7 +172,7 @@
                     android:layout_height="wrap_content"
                     android:contentDescription="@string/show_icon"
                     android:src="@drawable/ic_chevron_right"
-                    android:textColor="#555555"
+                    android:textColor="@color/text_3"
                     android:textSize="@dimen/text_section_header" />
 
             </LinearLayout>
@@ -182,7 +185,7 @@
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="8dp"
                 android:text="@string/credits"
-                android:textColor="#777777"
+                android:textColor="@color/text_3"
                 android:textSize="@dimen/text_chip"
                 android:letterSpacing="0.15"
                 android:fontFamily="sans-serif-medium" />
@@ -193,7 +196,7 @@
                 android:orientation="vertical"
                 android:layout_marginStart="20dp"
                 android:layout_marginEnd="20dp"
-                android:background="#111111"
+                android:background="@color/bg_surface"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:paddingTop="14dp"
@@ -211,7 +214,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/developer"
-                        android:textColor="#777777"
+                        android:textColor="@color/text_3"
                         android:textSize="@dimen/text_chip"
                         android:fontFamily="sans-serif" />
 
@@ -219,7 +222,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/author"
-                        android:textColor="#CCCCCC"
+                        android:textColor="@color/text_1"
                         android:textSize="@dimen/text_chip"
                         android:fontFamily="sans-serif-medium" />
 
@@ -230,13 +233,14 @@
                     android:layout_height="1dp"
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp"
-                    android:background="#1E1E1E" />
+                    android:background="@color/hairline_row" />
 
                 <!-- Libraries -->
                 <LinearLayout
                     android:id="@+id/libraries_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:minHeight="48dp"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:clickable="true"
@@ -247,7 +251,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/libraries"
-                        android:textColor="#CCCCCC"
+                        android:textColor="@color/text_1"
                         android:textSize="@dimen/text_chip"
                         android:fontFamily="sans-serif" />
 
@@ -256,7 +260,7 @@
                         android:layout_height="wrap_content"
                         android:contentDescription="@string/show_icon"
                         android:src="@drawable/ic_chevron_right"
-                        android:textColor="#555555"
+                        android:textColor="@color/text_3"
                         android:textSize="@dimen/text_section_header" />
 
                 </LinearLayout>

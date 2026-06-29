@@ -27,7 +27,9 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 
 import java.util.List;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
+import androidx.credentials.exceptions.NoCredentialException;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -135,7 +137,35 @@ public class LoginActivity extends AppCompatActivity {
                 .addCredentialOption(googleIdOption)
                 .build();
 
-        // Use the new CredentialManager to show the sign-in bottom sheet
+        credentialManager.getCredentialAsync(this, request, null, ContextCompat.getMainExecutor(this),
+                new androidx.credentials.CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(@NonNull GetCredentialResponse result) {
+                        handleSignInResult(result.getCredential());
+                    }
+
+                    @Override
+                    public void onError(@NonNull GetCredentialException e) {
+                        if (e instanceof NoCredentialException) {
+                            startGoogleSignInFallback();
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                            Log.e("LoginActivity", "Credential Manager Error: " + e.getMessage());
+                            Toast.makeText(LoginActivity.this, "Sign-in failed", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void startGoogleSignInFallback() {
+        GetSignInWithGoogleOption signInWithGoogleOption = new GetSignInWithGoogleOption
+                .Builder(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                .build();
+
+        GetCredentialRequest request = new GetCredentialRequest.Builder()
+                .addCredentialOption(signInWithGoogleOption)
+                .build();
+
         credentialManager.getCredentialAsync(this, request, null, ContextCompat.getMainExecutor(this),
                 new androidx.credentials.CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
                     @Override
@@ -146,7 +176,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onError(@NonNull GetCredentialException e) {
                         progressBar.setVisibility(View.GONE);
-                        Log.e("LoginActivity", "Credential Manager Error: " + e.getMessage());
+                        Log.e("LoginActivity", "Google Sign-In Error: " + e.getMessage());
                         Toast.makeText(LoginActivity.this, "Sign-in failed", Toast.LENGTH_SHORT).show();
                     }
                 });

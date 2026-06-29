@@ -10,5 +10,9 @@ public class MultiSearchResponse {
     @SerializedName("results")
     private List<MultiSearchResult> results;
 
+    @SerializedName("total_pages")
+    private int totalPages;
+
     public List<MultiSearchResult> getResults() { return results; }
+    public int getTotalPages() { return totalPages; }
 }

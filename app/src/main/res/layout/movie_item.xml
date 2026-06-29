@@ -28,8 +28,10 @@
             android:layout_gravity="top|end"
             android:layout_margin="5dp"
             android:background="@drawable/bg_type_badge"
-            android:paddingHorizontal="5dp"
-            android:paddingVertical="2dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
             android:textSize="@dimen/text_badge"
             android:textStyle="bold"
             android:visibility="gone" />

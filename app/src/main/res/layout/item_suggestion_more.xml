@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:cardview="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:clickable="true"
     android:layout_width="107dp"
     android:layout_height="160dp"
     android:layout_margin="5dp"
     android:focusable="true"
-    cardview:cardBackgroundColor="@color/surface_high"
-    cardview:cardCornerRadius="8dp">
+    app:cardBackgroundColor="@color/surface_high"
+    app:cardCornerRadius="8dp"
+    tools:ignore="NamespaceTypo">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Invisible anchor so PosterViewHolder.image is never null -->
         <ImageView
             android:id="@+id/header"
             android:layout_width="1dp"
@@ -25,11 +26,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:gravity="center"
             android:text="@string/see_more"
             android:textColor="@color/white"
-            android:textSize="@dimen/text_body"
-            android:textStyle="bold"
-            android:gravity="center" />
+            android:textSize="@dimen/text_title"
+            android:fontFamily="@font/playfair_display_medium"
+            app:fontFamily="@font/playfair_display_medium" />
 
     </FrameLayout>
 

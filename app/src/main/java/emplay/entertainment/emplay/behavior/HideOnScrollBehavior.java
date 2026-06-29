@@ -66,4 +66,10 @@ public class HideOnScrollBehavior<V extends View> extends CoordinatorLayout.Beha
                 .setDuration(SHOW_DURATION_MS)
                 .start();
     }
+
+    public void show(V child) {
+        if (!shown) {
+            slideUp(child);
+        }
+    }
 }

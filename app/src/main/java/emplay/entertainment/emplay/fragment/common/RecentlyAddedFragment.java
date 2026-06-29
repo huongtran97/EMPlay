@@ -45,8 +45,6 @@ public class RecentlyAddedFragment extends BaseFragment {
         tvSortLabel = view.findViewById(R.id.tvSortLabel);
         dbHelper = DatabaseHelper.getInstance(requireContext());
 
-        view.findViewById(R.id.ivBack).setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-
         view.findViewById(R.id.llSortBtn).setOnClickListener(v -> toggleSort());
 
         AuthManager auth = AuthManager.getInstance(requireContext());

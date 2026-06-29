@@ -44,6 +44,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
+            android:fontFamily="@font/playfair_display_medium"
+            app:fontFamily="@font/playfair_display_medium"
             android:text="@string/login_tagline"
             android:textColor="@color/text_3" />
 
@@ -85,17 +87,19 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:fontFamily="@font/playfair_display_medium"
+                app:fontFamily="@font/playfair_display_medium"
                 android:text="@string/splash_countdown_3"
-                android:textSize="@dimen/text_countdown_large"
-                android:fontFamily="@font/playfair_display"
-                android:textColor="@color/text_3" />
+                android:textColor="@color/text_3"
+                android:textSize="@dimen/text_countdown_large" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/block2"
             android:layout_width="72dp"
             android:layout_height="84dp"
-            android:layout_marginHorizontal="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
             android:background="@drawable/bg_countdown_block"
             android:alpha="0.4">
 
@@ -104,10 +108,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:fontFamily="@font/playfair_display_medium"
+                app:fontFamily="@font/playfair_display_medium"
                 android:text="@string/splash_countdown_2"
-                android:textSize="@dimen/text_countdown_large"
-                android:fontFamily="@font/playfair_display"
-                android:textColor="@color/text_3" />
+                android:textColor="@color/text_3"
+                android:textSize="@dimen/text_countdown_large" />
         </FrameLayout>
 
         <FrameLayout
@@ -124,7 +129,8 @@
                 android:layout_gravity="center"
                 android:text="@string/splash_countdown_1"
                 android:textSize="@dimen/text_countdown_large"
-                android:fontFamily="@font/playfair_display"
+                android:fontFamily="@font/playfair_display_medium"
+                app:fontFamily="@font/playfair_display_medium"
                 android:textColor="@color/text_3" />
         </FrameLayout>
 

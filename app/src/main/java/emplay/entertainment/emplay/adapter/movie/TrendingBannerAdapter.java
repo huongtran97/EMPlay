@@ -12,8 +12,8 @@ import android.view.ViewGroup;
 
 import androidx.core.view.ViewCompat;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
+import com.google.android.material.imageview.ShapeableImageView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
@@ -22,8 +22,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
@@ -31,6 +33,29 @@ import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 
 public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAdapter.ViewHolder> {
+    private static final Map<Integer, String> GENRE_NAMES = new HashMap<>();
+    static {
+        GENRE_NAMES.put(28,    "Action");
+        GENRE_NAMES.put(12,    "Adventure");
+        GENRE_NAMES.put(16,    "Animation");
+        GENRE_NAMES.put(35,    "Comedy");
+        GENRE_NAMES.put(80,    "Crime");
+        GENRE_NAMES.put(99,    "Documentary");
+        GENRE_NAMES.put(18,    "Drama");
+        GENRE_NAMES.put(10751, "Family");
+        GENRE_NAMES.put(14,    "Fantasy");
+        GENRE_NAMES.put(36,    "History");
+        GENRE_NAMES.put(27,    "Horror");
+        GENRE_NAMES.put(10402, "Music");
+        GENRE_NAMES.put(9648,  "Mystery");
+        GENRE_NAMES.put(10749, "Romance");
+        GENRE_NAMES.put(878,   "Sci-Fi");
+        GENRE_NAMES.put(10770, "TV Movie");
+        GENRE_NAMES.put(53,    "Thriller");
+        GENRE_NAMES.put(10752, "War");
+        GENRE_NAMES.put(37,    "Western");
+    }
+
     private final Context context;
     private final List<MovieModel> movies;
     private final CardGestureListener gestureListener;
@@ -71,8 +96,7 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         holder.tvHeroTitle.setText(movie.getTitle());
 
         // Meta (Genres · Certification)
-        String genreStr = (movie.getGenres() != null && !movie.getGenres().isEmpty()) 
-                ? movie.getGenres().get(0) : "Movie";
+        String genreStr = resolveGenres(movie);
         String cert = movie.getCertification();
         if (cert != null && !cert.isEmpty()) {
             genreStr += " · " + cert;
@@ -89,6 +113,30 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     @Override
     public int getItemCount() {
         return movies.size();
+    }
+
+    private static String resolveGenres(MovieModel movie) {
+        List<String> names = movie.getGenres();
+        if (names != null && !names.isEmpty()) {
+            StringBuilder sb = new StringBuilder(names.get(0));
+            if (names.size() > 1) sb.append(" · ").append(names.get(1));
+            return sb.toString();
+        }
+        List<Integer> ids = movie.getGenreIds();
+        if (ids != null && !ids.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            int added = 0;
+            for (int id : ids) {
+                String name = GENRE_NAMES.get(id);
+                if (name != null) {
+                    if (added > 0) sb.append(" · ");
+                    sb.append(name);
+                    if (++added == 2) break;
+                }
+            }
+            if (sb.length() > 0) return sb.toString();
+        }
+        return "Movie";
     }
 
     public void updateData(List<MovieModel> newMovies) {
@@ -111,7 +159,7 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivHeroPoster;
+        ShapeableImageView ivHeroPoster;
         TextView tvHeroTitle;
         TextView tvHeroMeta;
         TextView tvHeroRating;

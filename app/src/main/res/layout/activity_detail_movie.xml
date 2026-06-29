@@ -15,6 +15,7 @@
 
         <!-- BACKDROP + BACK BUTTON -->
         <FrameLayout
+            android:id="@+id/backdropContainer"
             android:layout_width="match_parent"
             android:layout_height="200dp">
 
@@ -30,20 +31,7 @@
                 android:layout_height="match_parent"
                 android:background="@drawable/bg_poster_gradient" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:background="@drawable/scrim_top" />
 
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="12dp"
-                android:background="@drawable/bg_circle_scrim"
-                android:src="@drawable/ic_chevron_left"
-                android:contentDescription="@string/cd_back"
-                android:padding="8dp" />
 
         </FrameLayout>
 
@@ -83,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="7dp"
                     android:text="@string/now_in_theaters"
-                    android:textColor="#E53935"
+                    android:textColor="@color/error"
                     android:textSize="@dimen/text_badge"
                     android:textStyle="bold"
                     android:letterSpacing="0.05"
@@ -101,6 +89,7 @@
                     android:layout_marginBottom="6dp"
                     android:textSize="@dimen/text_headline"
                     android:fontFamily="@font/playfair_display_medium"
+                    app:fontFamily="@font/playfair_display_medium"
                     android:textColor="@color/text_1"
                     android:lineSpacingMultiplier="1.15"
                     tools:text="Dune: Part Three" />
@@ -259,8 +248,6 @@
 
         </LinearLayout>
 
-
-
         <!-- WHERE TO WATCH -->
         <include
             android:id="@+id/wtw_released"
@@ -297,16 +284,18 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/detail_section_cast"
-                    android:textSize="13sp"
+                    android:textSize="@dimen/text_section_header"
                     android:textStyle="bold"
-                    android:textColor="@color/text_1" />
+                    android:textColor="@color/accent" />
 
                 <TextView
                     android:id="@+id/tvAllCast"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"
                     android:text="@string/detail_all_cast"
-                    android:textSize="@dimen/text_body"
+                    android:textSize="@dimen/text_divider_label"
                     android:textColor="@color/text_3"
                     android:clickable="true"
                     android:focusable="true" />
@@ -317,8 +306,9 @@
                 android:id="@+id/rvCast"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:layout_gravity="center"
                 android:clipToPadding="false"
                 android:nestedScrollingEnabled="false"
                 android:scrollbars="none" />
@@ -383,6 +373,7 @@
                                 android:layout_marginTop="3dp"
                                 android:textSize="13sp"
                                 android:fontFamily="@font/playfair_display_medium"
+                                app:fontFamily="@font/playfair_display_medium"
                                 android:textColor="@color/text_1"
                                 tools:text="The Dune Collection" />
 
@@ -438,19 +429,16 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="9dp"
                 android:text="@string/detail_section_also_like"
-                android:textSize="13sp"
+                android:textSize="@dimen/text_section_header"
                 android:textStyle="bold"
-                android:textColor="@color/text_1" />
+                android:textColor="@color/accent" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvAlsoLike"
+                android:id="@+id/search_result_suggestion_recyclerview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:nestedScrollingEnabled="false"
-                android:overScrollMode="never"
-                android:clipToPadding="false"
-                tools:listitem="@layout/movie_item"
-                tools:itemCount="4" />
+                android:layout_marginBottom="@dimen/text_body" />
 
         </LinearLayout>
 

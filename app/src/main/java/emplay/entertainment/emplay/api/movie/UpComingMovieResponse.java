@@ -11,6 +11,8 @@ public class UpComingMovieResponse {
     private Dates dates;
     @SerializedName("page")
     private int page;
+    @SerializedName("total_pages")
+    private int total_pages;
     @SerializedName("results")
 
     private List<MovieModel> results;
@@ -38,6 +40,14 @@ public class UpComingMovieResponse {
 
     public void setPage(int page) {
         this.page = page;
+    }
+
+    public int getTotal_pages() {
+        return total_pages;
+    }
+
+    public void setTotal_pages(int total_pages) {
+        this.total_pages = total_pages;
     }
 
 

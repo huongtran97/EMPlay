@@ -66,8 +66,7 @@ public class KnownForSeeAllFragment extends BaseFragment {
                              @Nullable Bundle savedInstanceState) {
         binding = ActivitySeeAllBinding.inflate(inflater, container, false);
 
-        binding.btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-        binding.tvEyebrow.setText("KNOWN FOR");
+//        binding.tvEyebrow.setText("KNOWN FOR");
         binding.tvSectionTitle.setText(personName);
         binding.tvSubtitle.setVisibility(View.GONE);
         binding.tvLoadingMore.setVisibility(View.VISIBLE);

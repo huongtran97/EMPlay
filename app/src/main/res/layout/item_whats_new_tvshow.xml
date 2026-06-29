@@ -4,7 +4,8 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingVertical="9dp">
+    android:paddingTop="9dp"
+    android:paddingBottom="9dp">
 
     <androidx.cardview.widget.CardView
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -55,8 +56,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/bg_type_badge"
-        android:paddingHorizontal="7dp"
-        android:paddingVertical="2dp"
+        android:paddingStart="7dp"
+        android:paddingEnd="7dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         android:textSize="@dimen/text_divider_label"
         android:textStyle="bold" />
 

@@ -92,7 +92,7 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#990B0F19" />
+        android:background="@color/scrim_60" />
 
     <!-- Layer 4: content -->
     <ScrollView
@@ -250,6 +250,7 @@
                         android:id="@+id/tv_forgot_password"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:minHeight="48dp"
                         android:layout_marginTop="2dp"
                         android:clickable="true"
                         android:focusable="true"

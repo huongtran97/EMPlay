@@ -19,6 +19,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -167,6 +169,40 @@ public class ProfileFragment extends BaseFragment {
                 if (tvRecentlySavedSeeAll != null) tvRecentlySavedSeeAll.setVisibility(View.GONE);
                 break;
         }
+
+        setupThemePicker(view);
+    }
+
+    private void setupThemePicker(View view) {
+        TextView tvThemeValue = view.findViewById(R.id.tv_theme_value);
+        int currentMode = PreferenceManager.getDefaultSharedPreferences(requireContext())
+                .getInt(emplay.entertainment.emplay.EMPlayApplication.PREF_NIGHT_MODE,
+                        AppCompatDelegate.MODE_NIGHT_YES);
+        tvThemeValue.setText(currentMode == AppCompatDelegate.MODE_NIGHT_NO
+                ? R.string.theme_parchment : R.string.theme_deep_blue);
+
+        view.findViewById(R.id.llTheme).setOnClickListener(v -> {
+            String[] options = {
+                    getString(R.string.theme_deep_blue),
+                    getString(R.string.theme_parchment)
+            };
+            int checkedItem = currentMode == AppCompatDelegate.MODE_NIGHT_NO ? 1 : 0;
+            new AlertDialog.Builder(requireContext())
+                    .setTitle(R.string.settings_theme)
+                    .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                        int mode = (which == 1)
+                                ? AppCompatDelegate.MODE_NIGHT_NO
+                                : AppCompatDelegate.MODE_NIGHT_YES;
+                        PreferenceManager.getDefaultSharedPreferences(requireContext())
+                                .edit()
+                                .putInt(emplay.entertainment.emplay.EMPlayApplication.PREF_NIGHT_MODE, mode)
+                                .apply();
+                        AppCompatDelegate.setDefaultNightMode(mode);
+                        dialog.dismiss();
+                        requireActivity().recreate();
+                    })
+                    .show();
+        });
     }
 
     // Google user
@@ -353,8 +389,6 @@ public class ProfileFragment extends BaseFragment {
         tvProfileEmail.setText("Do you want to login?");
         tvMemberSince.setText("");
         guestBanner.setVisibility(View.VISIBLE);
-        guestBanner.findViewById(R.id.btnGuestSignIn).setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), LoginActivity.class)));
     }
 
     //  Taste profile (Google only)

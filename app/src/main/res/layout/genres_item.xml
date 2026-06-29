@@ -24,6 +24,8 @@
             android:alpha="0.05"
             android:textColor="@color/text_1"
             android:textSize="@dimen/text_hero_s"
+            android:fontFamily="@font/playfair_display_medium"
+            app:fontFamily="@font/playfair_display_medium"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="A" />
@@ -35,6 +37,8 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="13dp"
             android:textColor="@color/text_1"
+            android:fontFamily="@font/playfair_display_medium"
+            app:fontFamily="@font/playfair_display_medium"
             android:gravity="center"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

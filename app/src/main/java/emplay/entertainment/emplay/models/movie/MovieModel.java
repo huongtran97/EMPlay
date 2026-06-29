@@ -36,6 +36,9 @@ public class MovieModel implements Serializable, MediaItem {
     
     @SerializedName("genres")
     private List<String> genres;
+
+    @SerializedName("genre_ids")
+    private List<Integer> genreIds;
     
     @SerializedName("cast")
     private List<String> cast;
@@ -108,6 +111,9 @@ public class MovieModel implements Serializable, MediaItem {
 
     public List<String> getGenres() { return genres; }
     public void setGenres(List<String> genres) { this.genres = genres; }
+
+    public List<Integer> getGenreIds() { return genreIds; }
+    public void setGenreIds(List<Integer> genreIds) { this.genreIds = genreIds; }
 
     public List<String> getCast() { return cast; }
     public void setCast(List<String> cast) { this.cast = cast; }

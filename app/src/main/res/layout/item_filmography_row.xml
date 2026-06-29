@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingStart="10dp"
@@ -14,7 +15,8 @@
         android:id="@+id/tv_year"
         android:layout_width="34dp"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/playfair_display"
+        android:fontFamily="@font/playfair_display_medium"
+        app:fontFamily="@font/playfair_display_medium"
         android:text="@string/label_year_range"
         android:textColor="@color/accent"
         android:textSize="@dimen/text_divider_label" />

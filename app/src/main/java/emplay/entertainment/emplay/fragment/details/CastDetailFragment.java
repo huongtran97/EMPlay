@@ -89,7 +89,6 @@ public class CastDetailFragment extends BaseFragment {
             sv.smoothScrollTo(0, 0);
         });
 
-        view.findViewById(R.id.btn_back).setOnClickListener(v -> getParentFragmentManager().popBackStack());
         btnKnownForSeeAll.setOnClickListener(v ->
                 navigateTo(KnownForSeeAllFragment.newInstance(personId, personName)));
 

@@ -1,32 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- EMPlay Cinema Memorabilia Palette -->
-    <color name="bg_base">#0B0F19</color>
-    <color name="bg_surface">#171E31</color>
-    <color name="surface_high">#1F2740</color>
-    <color name="filmstrip">#070A12</color>
+    <!-- EMPlay Cinema Memorabilia Palette — Parchment (Light Theme) -->
+    <color name="bg_base">#EDE6D8</color>
+    <color name="bg_surface">#E0D8C8</color>
+    <color name="surface_high">#D2C8B4</color>
+    <color name="filmstrip">#C4B89E</color>
 
-    <color name="accent">#E3B566</color>
+    <!-- Accent deepened further for contrast on darker parchment base -->
+    <color name="accent">#B8892A</color>
     <color name="on_accent">#3A2A0C</color>
 
-    <color name="text_1">#EDF0F7</color>
-    <color name="text_2">#B9C0D4</color>
-    <color name="text_3">#8590AB</color>
+    <color name="text_1">#1C1510</color>
+    <color name="text_2">#6B5F4E</color>
+    <color name="text_3">#9A8E7C</color>
 
-    <color name="border">#2A3450</color>
-    <color name="hairline_row">#151B2C</color>
-    <color name="airing">#7FBF9A</color>
-    <color name="error">#D45A5A</color>
+    <color name="border">#B0A48E</color>
+    <color name="hairline_row">#C4B89E</color>
+    <color name="airing">#4E9668</color>
+    <color name="error">#B84040</color>
 
     <!-- Generic mappings for stability during transition -->
-    <color name="white">@color/text_1</color>
+    <color name="white">#EDE6D8</color>
     <color name="black">#000000</color>
     <color name="text_primary">@color/text_1</color>
     <color name="text_secondary">@color/text_2</color>
     <color name="text_tertiary">@color/text_3</color>
 
-    <!-- Genre tiles use surface_high per spec R10 — no per-genre accent colours -->
     <color name="genre_default">@color/surface_high</color>
+
+    <!-- Per-genre text accent colours (warm parchment palette) — movie + TV -->
+    <color name="genre_action">#C04848</color>
+    <color name="genre_adventure">#B8892A</color>
+    <color name="genre_animation">#2E8A62</color>
+    <color name="genre_comedy">#C4682A</color>
+    <color name="genre_crime">#7A4A8C</color>
+    <color name="genre_documentary">#3A6A9C</color>
+    <color name="genre_drama">#8C3040</color>
+    <color name="genre_family">#3A7A50</color>
+    <color name="genre_fantasy">#5A4A9C</color>
+    <color name="genre_history">#8C4E1A</color>
+    <color name="genre_horror">#4A3A36</color>
+    <color name="genre_music">#1A7A9C</color>
+    <color name="genre_mystery">#5C3A7C</color>
+    <color name="genre_romance">#B83060</color>
+    <color name="genre_scifi">#2A5A9C</color>
+    <color name="genre_tv_movie">#5A7A4A</color>
+    <color name="genre_thriller">#5C3A22</color>
+    <color name="genre_war">#5A5A2A</color>
+    <color name="genre_western">#8C4A22</color>
+    <!-- TV-only genre IDs -->
+    <color name="genre_action_adventure">#C05030</color>
+    <color name="genre_kids">#2E8A8A</color>
+    <color name="genre_news">#4A5A6A</color>
+    <color name="genre_reality">#9C3060</color>
+    <color name="genre_scifi_fantasy">#3A4A9C</color>
+    <color name="genre_soap">#9C4A6A</color>
+    <color name="genre_talk">#8C6030</color>
+    <color name="genre_war_politics">#4A5A30</color>
     <color name="text_overview">@color/text_2</color>
     <color name="text_hint">@color/text_3</color>
     <color name="bottom_nav_background">@color/bg_surface</color>
@@ -37,14 +67,39 @@
     <color name="toggle_bg">@color/bg_surface</color>
 
     <!-- Placeholder fill tints for backdrop / poster areas -->
-    <color name="text_dim">#4E5872</color>
-    <color name="bg_dark">#1F2740</color>
-    <color name="bg_dark_purple">#2A2030</color>
-    <color name="bg_dark_teal">#1C3036</color>
+    <color name="text_dim">#8A7E6C</color>
+    <color name="bg_dark">#D2C8B4</color>
+    <color name="bg_dark_purple">#D8CECC</color>
+    <color name="bg_dark_teal">#C8D4CC</color>
 
     <!-- Search dropdown tokens -->
-    <color name="ripple_accent">#33E3B566</color>
-    <color name="badge_tv_bg">#267FBF9A</color>
-    <color name="badge_accent_bg">#26E3B566</color>
+    <color name="ripple_accent">#33B8892A</color>
+    <color name="badge_tv_bg">#264E9668</color>
+    <color name="badge_accent_bg">#26B8892A</color>
+
+    <!-- Poster card stroke (18% opacity) -->
+    <color name="poster_card_stroke">#2E1C1510</color>
+    <!-- Login screen overlay (60% opacity) -->
+    <color name="scrim_60">#99EDE6D8</color>
+    <!-- Brand colors — same in both themes -->
+    <color name="rating_imdb">#F5C518</color>
+    <color name="tmdb_blue">#01B4E4</color>
+
+    <!-- Back/share button circle tint (70% opacity) -->
+    <color name="bg_back_tint">#B3C4B89E</color>
+    <!-- Rank badge circle tint on poster (82% opacity) -->
+    <color name="bg_rank_tint">#D1C4B89E</color>
+    <!-- Airing badge background (35% opacity airing green) -->
+    <color name="badge_airing_muted">#594E9668</color>
+
+    <!-- Bottom nav pill tokens (light) -->
+    <color name="nav_pill_bg">#D9E0D8C8</color>
+    <color name="nav_pill_stroke">#261C1510</color>
+    <color name="nav_indicator_fill">#29B8892A</color>
+    <color name="bottom_nav_indicator">#29B8892A</color>
+    <color name="bottom_nav_icon_active">@color/accent</color>
+    <color name="bottom_nav_icon_inactive">@color/text_3</color>
+    <color name="bottom_nav_label_active">@color/accent</color>
+    <color name="bottom_nav_label_inactive">@color/text_3</color>
 
 </resources>

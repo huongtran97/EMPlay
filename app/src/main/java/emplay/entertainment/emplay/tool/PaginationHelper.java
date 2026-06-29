@@ -32,6 +32,16 @@ public class PaginationHelper<T> {
         showPage();
     }
 
+    public void appendData(List<T> newData) {
+        allItems.addAll(newData);
+    }
+
+    public boolean isAtLastLocalPage() {
+        if (allItems.isEmpty()) return true;
+        int totalPages = (int) Math.ceil((double) allItems.size() / pageSize);
+        return currentPage >= totalPages;
+    }
+
     public void nextPage() {
         if (hasNext()) {
             currentPage++;

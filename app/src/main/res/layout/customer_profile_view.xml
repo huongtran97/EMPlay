@@ -19,7 +19,8 @@
             android:id="@+id/memberCard"
             android:layout_width="match_parent"
             android:layout_height="233dp"
-            android:layout_marginHorizontal="13dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="13dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/bg_member_card"
             android:padding="13dp">
@@ -99,7 +100,7 @@
                 android:id="@+id/tvBrandName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="30dp"
                 android:contentDescription="@string/brand_name"
                 android:src="@drawable/ic_logo_wordmark"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -124,17 +125,6 @@
                     android:textColor="@color/text_2"
                     android:textSize="@dimen/text_meta" />
 
-                <Button
-                    android:id="@+id/btnGuestSignIn"
-                    style="@style/Widget.MaterialComponents.Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginTop="10dp"
-                    android:backgroundTint="@color/accent"
-                    android:paddingHorizontal="16dp"
-                    android:text="@string/guest_create_account"
-                    android:textColor="@color/on_accent"
-                    android:textSize="@dimen/text_divider_label" />
 
             </LinearLayout>
 
@@ -144,7 +134,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="13dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="13dp"
             android:layout_marginTop="11dp"
             android:background="@drawable/bg_stats_row"
             android:orientation="horizontal">
@@ -155,7 +146,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingVertical="10dp">
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
                 <TextView
                     android:id="@+id/tvMoviesCount"
                     style="@style/TextAppearance.EMPlay.DisplaySm"
@@ -185,7 +177,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingVertical="10dp">
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
                 <TextView
                     android:id="@+id/tvTvShowsCount"
                     style="@style/TextAppearance.EMPlay.DisplaySm"
@@ -215,7 +208,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingVertical="10dp">
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
                 <TextView
                     android:id="@+id/tvTopGenre"
                     style="@style/TextAppearance.EMPlay.DisplaySm"
@@ -255,7 +249,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="14dp"
-            android:paddingHorizontal="13dp">
+            android:paddingStart="13dp"
+            android:paddingEnd="13dp">
 
             <TextView
                 style="@style/TextAppearance.EMPlay.Micro"
@@ -290,7 +285,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="13dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="13dp"
             android:layout_marginTop="8dp"
             android:orientation="vertical">
 
@@ -300,8 +296,10 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="1dp"
-                android:paddingVertical="11dp">
+                android:paddingStart="1dp"
+                android:paddingEnd="1dp"
+                android:paddingTop="11dp"
+                android:paddingBottom="11dp">
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
@@ -318,10 +316,10 @@
                     android:textColor="@color/text_2"
                     android:textSize="@dimen/text_body" />
                 <TextView
+                    android:id="@+id/tv_theme_value"
                     style="@style/TextAppearance.EMPlay.Caption"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/theme_deep_blue"
                     android:textColor="@color/text_3"
                     android:textSize="@dimen/text_meta" />
             </LinearLayout>
@@ -337,14 +335,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="1dp">
+                android:paddingStart="1dp"
+                android:paddingEnd="1dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="11dp">
+                    android:paddingTop="11dp"
+                    android:paddingBottom="11dp">
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
@@ -382,8 +382,10 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="1dp"
-                android:paddingVertical="11dp"
+                android:paddingStart="1dp"
+                android:paddingEnd="1dp"
+                android:paddingTop="11dp"
+                android:paddingBottom="11dp"
                 tools:ignore="UseCompoundDrawables">
                 <ImageView
                     android:layout_width="24dp"
@@ -414,8 +416,11 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="1dp"
-                android:paddingVertical="11dp">
+                android:paddingStart="1dp"
+                android:paddingEnd="1dp"
+                android:paddingTop="11dp"
+                android:paddingBottom="11dp"
+                tools:ignore="UseCompoundDrawables">
 
                 <ImageView
                     android:layout_width="24dp"

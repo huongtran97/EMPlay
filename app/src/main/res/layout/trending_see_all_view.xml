@@ -13,23 +13,12 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
-        <ImageButton
-            android:id="@+id/btnBack"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/back"
-            android:src="@drawable/ic_chevron_right"
-            android:rotation="180"
-            app:tint="#FFFFFF" />
-
         <TextView
             android:id="@+id/trendNow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:text="@string/trending_now"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/text_1"
             android:textSize="@dimen/text_section_header"
             android:textStyle="bold" />
 
@@ -39,7 +28,8 @@
         android:id="@+id/rvTrendingFull"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingHorizontal="14dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
         android:clipToPadding="false" />
 
 </LinearLayout>

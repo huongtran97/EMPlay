@@ -42,6 +42,7 @@
     <string name="cd_actor_photo">Actor photo</string>
     <string name="cd_provider_logo">Streaming provider logo</string>
     <string name="cd_star_rating">Rating</string>
+    <string name="cd_back_to_top">Back to top</string>
 
     <!-- ════════ Login View ════════ -->
     <string name="login_tagline">Every film is a ticket.</string>
@@ -74,6 +75,7 @@
     <string name="detail_saved">ADMIT ONE · SAVED</string>
     <string name="detail_section_where_to_watch">Where to watch</string>
     <string name="detail_section_cast">Cast</string>
+    <string name="detail_section_cast_crew">Cast &amp; Crew</string>
     <string name="detail_all_cast">All cast ›</string>
     <string name="detail_part_of">PART OF</string>
     <string name="detail_collection_count">%1$d movies ›</string>
@@ -93,8 +95,8 @@
     <string name="search_see_people">See people ›</string>
     <string name="cd_clear_search">Clear search</string>
     <string name="label_people">People</string>
-    <string name="search_section_genres">BROWSE BY GENRE</string>
-    <string name="search_section_origin">SEARCH BY ORIGIN</string>
+    <string name="search_section_genres">BY GENRE</string>
+    <string name="search_section_origin">BY ORIGIN</string>
     <string name="search_section_popular">POPULAR RIGHT NOW</string>
     <string name="search_all_genres">All %1$d genres ›</string>
     <!-- Origin cards · ghost glyphs (한 日 ア 中 É B) ship in the data model, not here.
@@ -108,6 +110,8 @@
 
     <!-- ════════ Results Views (Genre / Origin / See all) ════════ -->
     <string name="eyebrow_genre">GENRE</string>
+    <string name="eyebrow_browse">BROWSE</string>
+    <string name="title_all_genres">All Genres</string>
     <string name="eyebrow_origin">ORIGIN</string>
     <string name="eyebrow_from_home">FROM HOME</string>
 
@@ -130,6 +134,7 @@
     <string name="stat_rated">Rated</string>
     <string name="settings_theme">Theme</string>
     <string name="theme_deep_blue">Deep Blue</string>
+    <string name="theme_parchment">Parchment</string>
     <string name="action_sign_out">Sign out</string>
     <string name="sign_out_confirm_title">Sign out?</string>
     <string name="sign_out_confirm_message">You\'ll need to sign in again to save titles.</string>
@@ -309,8 +314,15 @@
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="profile">Profile</string>
-    <string name="see_more">See more</string>
+    <string name="see_more">More >></string>
     <string name="see_less">See less</string>
     <string name="back_to_top">↑ Back to top</string>
+    <string name="ghost_glyph">S</string>
+    <string name="cast_info">Cast infor</string>
+    <string name="cast_bio">Bio</string>
+    <string name="origin">origin</string>
+    <string name="glyph_star">★</string>
+    <string name="movie_number_item">Movies · 250 titles</string>
+    <string name="crew">Crew</string>
 
 </resources>

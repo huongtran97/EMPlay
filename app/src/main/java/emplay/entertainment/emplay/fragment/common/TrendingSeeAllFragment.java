@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,13 +67,8 @@ public class TrendingSeeAllFragment extends BaseFragment {
                              @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.trending_see_all_view, container, false);
 
-        ImageButton btnBack = view.findViewById(R.id.btnBack);
-        TextView tvTitle    = view.findViewById(R.id.trendNow);
-        recyclerView        = view.findViewById(R.id.rvTrendingFull);
-
-        btnBack.setOnClickListener(v -> {
-            if (getFragmentManager() != null) getFragmentManager().popBackStack();
-        });
+        TextView tvTitle = view.findViewById(R.id.trendNow);
+        recyclerView     = view.findViewById(R.id.rvTrendingFull);
 
         tvTitle.setText(isTV ? "Trending TV Shows" : "Trending Movies");
 

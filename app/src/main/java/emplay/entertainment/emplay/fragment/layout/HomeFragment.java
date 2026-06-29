@@ -3,7 +3,6 @@ package emplay.entertainment.emplay.fragment.layout;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +25,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.android.material.button.MaterialButton;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -95,7 +93,7 @@ public class HomeFragment extends BaseFragment {
     private MovieAdapter trendingMoviesAdapter;
     private TVShowAdapter trendingTVAdapter;
     private OnAirTVAdapter onAirTVAdapter;
-    private MaterialButton btnTrendingMovies, btnTrendingTV;
+    private TextView btnTrendingMovies, btnTrendingTV;
     private final List<MovieModel> allTrendingMovies = new ArrayList<>();
     private final List<TVShowModel> allTrendingTVShows = new ArrayList<>();
     private boolean isTrendingShowingTV = false;
@@ -300,12 +298,8 @@ public class HomeFragment extends BaseFragment {
 
     private void applyTrendingButtonState(boolean showTV) {
         if (btnTrendingMovies == null || btnTrendingTV == null) return;
-        btnTrendingMovies.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFF171E31 : 0xFFE3B566));
-        btnTrendingMovies.setTextColor(showTV ? 0xFFB9C0D4 : 0xFF3A2A0C);
-        btnTrendingMovies.setStrokeWidth(showTV ? 1 : 0);
-        btnTrendingTV.setBackgroundTintList(ColorStateList.valueOf(showTV ? 0xFFE3B566 : 0xFF171E31));
-        btnTrendingTV.setTextColor(showTV ? 0xFF3A2A0C : 0xFFB9C0D4);
-        btnTrendingTV.setStrokeWidth(showTV ? 0 : 1);
+        btnTrendingMovies.setSelected(!showTV);
+        btnTrendingTV.setSelected(showTV);
     }
 
     private void fetchNowPlayingMovies() {

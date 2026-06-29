@@ -3,6 +3,7 @@ package emplay.entertainment.emplay;
 import android.app.Application;
 
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.preference.PreferenceManager;
 
 import com.bumptech.glide.Glide;
 
@@ -11,10 +12,15 @@ import okhttp3.Request;
 import emplay.entertainment.emplay.api.common.ApiClient;
 
 public class EMPlayApplication extends Application {
+
+    public static final String PREF_NIGHT_MODE = "pref_night_mode";
+
     @Override
     public void onCreate() {
         super.onCreate();
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        int savedMode = PreferenceManager.getDefaultSharedPreferences(this)
+                .getInt(PREF_NIGHT_MODE, AppCompatDelegate.MODE_NIGHT_YES);
+        AppCompatDelegate.setDefaultNightMode(savedMode);
         ApiClient.init(getCacheDir(), DeviceIdHelper.getDeviceId(getApplicationContext()));
         clearGlideDiskCache();
         warmUpProxy();

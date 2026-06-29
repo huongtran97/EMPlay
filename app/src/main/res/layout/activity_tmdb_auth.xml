@@ -3,13 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@color/black">
 
     <ProgressBar
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
-        android:indeterminateTint="#01B4E4" />
+        android:indeterminateTint="@color/tmdb_blue" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -17,7 +17,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="80dp"
         android:text="@string/signing_in_tmdb"
-        android:textColor="#AAAAAA"
+        android:textColor="@color/text_3"
         android:textSize="@dimen/text_chip" />
 
 </FrameLayout>

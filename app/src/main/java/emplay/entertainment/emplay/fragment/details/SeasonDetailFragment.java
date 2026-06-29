@@ -82,11 +82,6 @@ public class SeasonDetailFragment extends BaseFragment {
         episodesRecyclerView.setAdapter(episodeAdapter);
         episodesRecyclerView.setNestedScrollingEnabled(false);
 
-        android.widget.ImageButton btnBack = view.findViewById(R.id.btn_back);
-        if (btnBack != null) {
-            btnBack.setOnClickListener(v -> requireActivity().getOnBackPressedDispatcher().onBackPressed());
-        }
-
         // Read More / Less
         ReadHelper.setup(overview, readMoreText, isExpanded, expanded -> isExpanded = expanded);
 

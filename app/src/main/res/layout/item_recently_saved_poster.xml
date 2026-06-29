@@ -6,6 +6,7 @@
     android:layout_marginEnd="10dp"
     android:background="@drawable/bg_poster_placeholder"
     android:clipToOutline="true"
+    android:layout_marginStart="@dimen/spacing_5"
     tools:targetApi="s">
 
     <ImageView
@@ -26,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:padding="5dp"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/text_1"
         android:textSize="@dimen/text_badge"
         android:textStyle="bold"
         android:maxLines="2"

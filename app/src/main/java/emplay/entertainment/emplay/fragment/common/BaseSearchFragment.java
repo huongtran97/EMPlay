@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -29,6 +30,7 @@ import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.GenresAdapter;
@@ -36,11 +38,18 @@ import emplay.entertainment.emplay.tool.PaginationHelper;
 import emplay.entertainment.emplay.adapter.common.SearchMediaAdapter;
 import emplay.entertainment.emplay.adapter.common.SearchPersonAdapter;
 import emplay.entertainment.emplay.adapter.common.TrendingSearchAdapter;
+import android.util.Log;
+
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.GenresResponse;
 import emplay.entertainment.emplay.api.common.MovieApiService;
+import emplay.entertainment.emplay.api.common.MultiSearchResponse;
 import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.api.movie.MovieResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
 import emplay.entertainment.emplay.database.DatabaseHelper;
+import emplay.entertainment.emplay.models.movie.MovieModel;
+import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import emplay.entertainment.emplay.fragment.details.CastDetailFragment;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
@@ -63,6 +72,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     protected List<GenresModel> genresList = new ArrayList<>();
     private final List<GenresModel> fullGenresList = new ArrayList<>();
     protected RecyclerView rvGenres, rvPopularSearches;
+    private boolean genreShowingTV;
     protected MovieApiService apiService;
     protected TextInputEditText etSearch;
     protected SharedViewModel viewModel;
@@ -80,12 +90,23 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     private RecyclerView rvDropdownResults;
     private View footerPeople;
 
-    // Pagination
+    // Dropdown pagination
     private static final int SEARCH_PAGE_SIZE = 5;
     private View paginationBar;
     private TextView tvPageIndicator;
     private ImageButton btnPrev, btnNext;
     private PaginationHelper<MultiSearchResult> paginationHelper;
+
+    // Popular Right Now pagination
+    private static final int POPULAR_PAGE_SIZE = 6;
+    private View popularPaginationBar;
+    private View sectionPopularHeader;
+    private TextView tvPopularPageIndicator;
+    private ImageButton btnPopularPrev, btnPopularNext;
+    private PaginationHelper<MediaItem> popularPaginationHelper;
+    private int popularApiPage = 1;
+    private int popularTotalApiPages = 1;
+    private boolean popularFetching = false;
 
     private SearchMediaAdapter mediaAdapter;
     private SearchPersonAdapter personAdapter;
@@ -106,6 +127,28 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
 
         rvGenres = view.findViewById(R.id.rvGenres);
         rvPopularSearches = view.findViewById(R.id.rvPopularSearches);
+
+        genreShowingTV = isTVTab();
+        TextView btnGenreMovie = view.findViewById(R.id.btnGenreMovie);
+        TextView btnGenreTV = view.findViewById(R.id.btnGenreTV);
+        btnGenreMovie.setSelected(!genreShowingTV);
+        btnGenreTV.setSelected(genreShowingTV);
+        btnGenreMovie.setOnClickListener(v -> {
+            if (genreShowingTV) {
+                genreShowingTV = false;
+                btnGenreMovie.setSelected(true);
+                btnGenreTV.setSelected(false);
+                fetchGenres();
+            }
+        });
+        btnGenreTV.setOnClickListener(v -> {
+            if (!genreShowingTV) {
+                genreShowingTV = true;
+                btnGenreMovie.setSelected(false);
+                btnGenreTV.setSelected(true);
+                loadGenres(apiService.getGenresTVShows(TMDBpath.genresTVShows()));
+            }
+        });
         etSearch = view.findViewById(R.id.etSearch);
         svSearchDefault = view.findViewById(R.id.svSearchDefault);
         pillsContainer = view.findViewById(R.id.pillsContainer);
@@ -145,6 +188,43 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
 
         btnPrev.setOnClickListener(v -> paginationHelper.prevPage());
         btnNext.setOnClickListener(v -> paginationHelper.nextPage());
+
+        // Popular Right Now pagination
+        sectionPopularHeader = view.findViewById(R.id.sectionPopularHeader);
+        popularPaginationBar = view.findViewById(R.id.popularPaginationBar);
+        tvPopularPageIndicator = view.findViewById(R.id.tvPopularPageIndicator);
+        btnPopularPrev = view.findViewById(R.id.btnPopularPrev);
+        btnPopularNext = view.findViewById(R.id.btnPopularNext);
+
+        popularPaginationHelper = new PaginationHelper<>(POPULAR_PAGE_SIZE, new ArrayList<>(),
+                new PaginationHelper.PaginationCallback<MediaItem>() {
+                    @Override
+                    public void onPageUpdated(List<MediaItem> pageItems) {
+                        trendingAdapter.updateData(pageItems);
+                    }
+                    @Override
+                    public void onUiUpdate(int current, int total, boolean hasPrev, boolean hasNext) {
+                        PaginationHelper.updatePaginationBar(popularPaginationBar, tvPopularPageIndicator,
+                                btnPopularPrev, btnPopularNext, current, total, hasPrev, hasNext);
+                        if (!hasNext && popularApiPage < popularTotalApiPages) {
+                            btnPopularNext.setEnabled(true);
+                        }
+                    }
+                });
+
+        btnPopularPrev.setOnClickListener(v -> {
+            popularPaginationHelper.prevPage();
+            scrollToPopularSection();
+        });
+        btnPopularNext.setOnClickListener(v -> {
+            if (popularPaginationHelper.isAtLastLocalPage() && popularApiPage < popularTotalApiPages) {
+                popularApiPage++;
+                fetchPopularPage(popularApiPage);
+            } else {
+                popularPaginationHelper.nextPage();
+                scrollToPopularSection();
+            }
+        });
 
         // Restore last query
         if (savedInstanceState != null) {
@@ -200,7 +280,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         setupSearchInput();
         loadRecentSearches();
 
-        if (isTVTab()) {
+        if (genreShowingTV) {
             loadGenres(apiService.getGenresTVShows(TMDBpath.genresTVShows()));
         } else {
             fetchGenres();
@@ -251,15 +331,93 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     }
 
     protected abstract void fetchGenres();
-    protected abstract void fetchTrending();
     protected abstract void onTrendingSelected(MediaItem item);
+
+    protected void fetchTrending() {
+        popularApiPage = 1;
+        popularTotalApiPages = 1;
+        popularFetching = false;
+        fetchPopularPage(1);
+    }
+
+    private void fetchPopularPage(int page) {
+        if (popularFetching) return;
+        popularFetching = true;
+
+        final List<MovieModel> movieResults = new ArrayList<>();
+        final List<TVShowModel> tvResults = new ArrayList<>();
+        final AtomicInteger pending = new AtomicInteger(2);
+
+        safeEnqueue(apiService.getPopularMovies(TMDBpath.poppularMovies(), page),
+                new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<MovieResponse> call,
+                                   @NonNull Response<MovieResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    int tp = response.body().getTotal_pages();
+                    if (tp > 0) popularTotalApiPages = tp;
+                    List<MovieModel> movies = response.body().getResults();
+                    if (movies != null) movieResults.addAll(movies);
+                }
+                if (pending.decrementAndGet() == 0) finishPopularPage(page, movieResults, tvResults);
+            }
+            @Override
+            public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
+                Log.e("BaseSearchFragment", "Failed to fetch popular movies", t);
+                if (pending.decrementAndGet() == 0) finishPopularPage(page, movieResults, tvResults);
+            }
+        });
+
+        safeEnqueue(apiService.getPopularTVShows(TMDBpath.poppularTVShows(), page),
+                new Callback<TVShowResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<TVShowResponse> call,
+                                   @NonNull Response<TVShowResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    List<TVShowModel> shows = response.body().getResults();
+                    if (shows != null) tvResults.addAll(shows);
+                }
+                if (pending.decrementAndGet() == 0) finishPopularPage(page, movieResults, tvResults);
+            }
+            @Override
+            public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
+                Log.e("BaseSearchFragment", "Failed to fetch popular TV", t);
+                if (pending.decrementAndGet() == 0) finishPopularPage(page, movieResults, tvResults);
+            }
+        });
+    }
+
+    private void finishPopularPage(int page, List<MovieModel> movies, List<TVShowModel> tvShows) {
+        popularFetching = false;
+        List<MediaItem> interleaved = new ArrayList<>();
+        int max = Math.max(movies.size(), tvShows.size());
+        for (int i = 0; i < max; i++) {
+            if (i < movies.size()) interleaved.add(movies.get(i));
+            if (i < tvShows.size()) interleaved.add(tvShows.get(i));
+        }
+        if (page == 1) {
+            popularPaginationHelper.updateData(interleaved);
+        } else {
+            popularPaginationHelper.appendData(interleaved);
+            popularPaginationHelper.nextPage();
+            scrollToPopularSection();
+        }
+    }
+
+    private void scrollToPopularSection() {
+        if (svSearchDefault instanceof NestedScrollView) {
+            NestedScrollView sv = (NestedScrollView) svSearchDefault;
+            sv.post(() -> sv.smoothScrollTo(0,
+                    ((View) sectionPopularHeader.getParent()).getTop() + sectionPopularHeader.getTop()));
+        }
+    }
 
     protected void onGenreSelected(GenresModel genresModel) {
         if (genresModel.getId() == -1) {
-            navigateTo(AllGenresFragment.newInstance(fullGenresList, isTVTab()));
+            navigateTo(AllGenresFragment.newInstance(fullGenresList, genreShowingTV));
             return;
         }
-        Fragment target = isTVTab()
+        Fragment target = genreShowingTV
                 ? TVShowsByGenresFragment.newInstance(genresModel.getId(), genresModel.getName())
                 : MovieByGenresFragment.newInstance(genresModel.getId(), genresModel.getName());
         navigateTo(target);

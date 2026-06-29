@@ -116,29 +116,41 @@ public abstract class BasePosterAdapter<T extends MediaItem>
     }
 
     @Override
+    public void onViewRecycled(@NonNull PosterViewHolder holder) {
+        super.onViewRecycled(holder);
+        if (holder.pendingTarget != null) {
+            Glide.with(mContext).clear(holder.pendingTarget);
+            holder.pendingTarget = null;
+        }
+        Glide.with(mContext).clear(holder.image);
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull PosterViewHolder holder, @SuppressLint("RecyclerView") int position) {
         T item = mData.get(position);
         String url = getImageUrl(item);
 
         if (paletteListener != null) {
             // Load as Bitmap so Palette can sample it; also set the image on the ImageView.
+            CustomTarget<Bitmap> target = new CustomTarget<Bitmap>() {
+                @Override
+                public void onResourceReady(@NonNull Bitmap bitmap,
+                                            @Nullable Transition<? super Bitmap> transition) {
+                    holder.image.setImageBitmap(bitmap);
+                    extractPaletteColor(bitmap, position);
+                }
+
+                @Override
+                public void onLoadCleared(@Nullable Drawable placeholder) {
+                    holder.image.setImageDrawable(placeholder);
+                }
+            };
+            holder.pendingTarget = target;
             Glide.with(mContext)
                     .asBitmap()
                     .load(url != null ? url : R.drawable.placeholder_image)
                     .placeholder(R.drawable.placeholder_image)
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap bitmap,
-                                                    @Nullable Transition<? super Bitmap> transition) {
-                            holder.image.setImageBitmap(bitmap);
-                            extractPaletteColor(bitmap, position);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                            holder.image.setImageDrawable(placeholder);
-                        }
-                    });
+                    .into(target);
         } else {
             // Default path — unchanged from original, no Palette overhead.
             Glide.with(mContext)
@@ -182,6 +194,8 @@ public abstract class BasePosterAdapter<T extends MediaItem>
     public static class PosterViewHolder extends RecyclerView.ViewHolder {
         final ImageView image;
         @Nullable public final TextView badge;
+        @Nullable CustomTarget<Bitmap> pendingTarget;
+
         public PosterViewHolder(@NonNull View itemView, int imageViewId) {
             super(itemView);
             image = itemView.findViewById(imageViewId);
