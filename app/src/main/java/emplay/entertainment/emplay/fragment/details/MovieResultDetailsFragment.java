@@ -510,13 +510,29 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
     private MoviesTrailerResponses.TrailerModel pickOfficialTrailer() {
         if (trailers == null || trailers.isEmpty()) return null;
-        MoviesTrailerResponses.TrailerModel fallback = null;
+        MoviesTrailerResponses.TrailerModel officialTrailer = null;
+        MoviesTrailerResponses.TrailerModel finalTrailer = null;
+        MoviesTrailerResponses.TrailerModel anyTrailer = null;
+        MoviesTrailerResponses.TrailerModel anyTeaser = null;
         for (MoviesTrailerResponses.TrailerModel t : trailers) {
             if (!"YouTube".equals(t.getSite())) continue;
-            if (t.isOfficial() && "Trailer".equals(t.getType())) return t;
-            if (fallback == null) fallback = t;
+            String name = t.getName() != null ? t.getName().toLowerCase() : "";
+            String type = t.getType();
+            if ("Trailer".equals(type)) {
+                if (t.isOfficial() && name.contains("official") && officialTrailer == null)
+                    officialTrailer = t;
+                else if (t.isOfficial() && name.contains("final") && finalTrailer == null)
+                    finalTrailer = t;
+                else if (anyTrailer == null)
+                    anyTrailer = t;
+            } else if ("Teaser".equals(type) && anyTeaser == null) {
+                anyTeaser = t;
+            }
         }
-        return fallback != null ? fallback : trailers.get(0);
+        if (officialTrailer != null) return officialTrailer;
+        if (finalTrailer != null) return finalTrailer;
+        if (anyTrailer != null) return anyTrailer;
+        return anyTeaser;
     }
 
     private void fetchCertification() {
