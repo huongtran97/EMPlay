@@ -18,7 +18,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.DialogFragment;
 
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants;
@@ -144,16 +146,25 @@ public class TrailerBottomSheetFragment extends DialogFragment {
 
         window.addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
 
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(window, window.getDecorView());
+
         if (isMaximized) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            // Extend window to draw behind system bars so no backdrop gap appears (fixes Samsung)
+            WindowCompat.setDecorFitsSystemWindows(window, false);
             window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
                     WindowManager.LayoutParams.MATCH_PARENT);
             window.setGravity(Gravity.CENTER);
             WindowManager.LayoutParams params = window.getAttributes();
             params.y = 0;
             window.setAttributes(params);
+            // Hide both status bar and navigation bar; swipe to peek temporarily
+            controller.hide(WindowInsetsCompat.Type.systemBars());
+            controller.setSystemBarsBehavior(
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         } else {
-            window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            WindowCompat.setDecorFitsSystemWindows(window, true);
+            controller.show(WindowInsetsCompat.Type.systemBars());
             int screenWidth = getResources().getDisplayMetrics().widthPixels;
             int videoHeight = (int) (screenWidth * 9.0 / 16.0);
             int titleBarHeight = (int) (56 * getResources().getDisplayMetrics().density);
