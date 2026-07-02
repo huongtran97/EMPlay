@@ -147,7 +147,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 fetchHandler.postDelayed(this::fetchSuggestionList, 300);
                 fetchHandler.postDelayed(this::fetchTrailers,       450);
                 fetchHandler.postDelayed(this::fetchCertification,  600);
-                fetchHandler.postDelayed(this::fetchMovieProviders, 750);
+                fetchHandler.postDelayed(this::setupWtwTapToLoad,   750);
             }
         }
 
@@ -589,26 +589,90 @@ public class MovieResultDetailsFragment extends BaseFragment {
         return null;
     }
 
-    private void fetchMovieProviders() {
-        safeEnqueue(apiService.getMovieProviders(TMDBpath.movieProvider(movieId)),
-                new Callback<TVShowProviderResponse>() {
+    private void setupWtwTapToLoad() {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.tabLayoutWtw.setVisibility(View.GONE);
+        wtw.rvProviders.setVisibility(View.GONE);
+        wtw.layoutWtwEmpty.setVisibility(View.GONE);
+        wtw.layoutWtwLoad.setVisibility(View.VISIBLE);
+        wtw.layoutWtwLoad.setOnClickListener(v -> loadMotnProviders());
+    }
+
+    private void loadMotnProviders() {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.layoutWtwLoad.setVisibility(View.GONE);
+        wtw.progressMotn.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            String cached = databaseHelper.getMotnCache(movieId, emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_MOVIE,
+                    emplay.entertainment.emplay.tool.MotnHelper.CACHE_TTL_MS);
+            if (cached != null) {
+                emplay.entertainment.emplay.api.motn.MotnShowResponse response =
+                        emplay.entertainment.emplay.tool.MotnHelper.fromJson(cached);
+                if (response != null) {
+                    Map<String, RegionProvidersModel> results =
+                            emplay.entertainment.emplay.tool.MotnHelper.toProviderMap(response);
+                    safeRunOnUiThread(() -> onMotnProvidersReady(results));
+                    return;
+                }
+            }
+            safeRunOnUiThread(() -> fetchMotnFromNetwork());
+        }).start();
+    }
+
+    private void fetchMotnFromNetwork() {
+        safeEnqueue(apiService.getStreamingAvailability(movieId, emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_MOVIE),
+                new Callback<emplay.entertainment.emplay.api.motn.MotnShowResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<TVShowProviderResponse> call,
-                                           @NonNull Response<TVShowProviderResponse> response) {
-                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
-                        watchProviderResults = response.body().getResults();
-                        String region = WatchProviderHelper.defaultRegion();
-                        bindMovieProviders(region);
-                        binding.wtwReleased.btnRegion.setOnClickListener(v ->
-                                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
-                                        selectedRegion -> {
-                                            userHasSelectedRegion = true;
-                                            bindMovieProviders(selectedRegion);
-                                        }));
+                    public void onResponse(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                                           @NonNull Response<emplay.entertainment.emplay.api.motn.MotnShowResponse> response) {
+                        if (binding == null) return;
+                        if (!response.isSuccessful() || response.body() == null) {
+                            showMotnError();
+                            return;
+                        }
+                        emplay.entertainment.emplay.api.motn.MotnShowResponse body = response.body();
+                        new Thread(() -> {
+                            databaseHelper.saveMotnCache(movieId,
+                                    emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_MOVIE,
+                                    emplay.entertainment.emplay.tool.MotnHelper.toJson(body));
+                            Map<String, RegionProvidersModel> results =
+                                    emplay.entertainment.emplay.tool.MotnHelper.toProviderMap(body);
+                            safeRunOnUiThread(() -> onMotnProvidersReady(results));
+                        }).start();
                     }
-                    @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
-                                                    @NonNull Throwable t) {}
+
+                    @Override
+                    public void onFailure(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                                          @NonNull Throwable t) {
+                        showMotnError();
+                    }
                 });
+    }
+
+    private void onMotnProvidersReady(Map<String, RegionProvidersModel> results) {
+        if (binding == null || !isAdded()) return;
+        watchProviderResults = results;
+        binding.wtwReleased.progressMotn.setVisibility(View.GONE);
+        String region = WatchProviderHelper.defaultRegion();
+        bindMovieProviders(region);
+        binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
+                        selectedRegion -> {
+                            userHasSelectedRegion = true;
+                            bindMovieProviders(selectedRegion);
+                        }));
+    }
+
+    private void showMotnError() {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.progressMotn.setVisibility(View.GONE);
+        wtw.layoutWtwLoad.setVisibility(View.VISIBLE);
+        wtw.tvWtwLoad.setText(R.string.wtw_load_error);
+        wtw.layoutWtwLoad.setOnClickListener(v -> loadMotnProviders());
     }
 
     private void bindMovieProviders(String region) {

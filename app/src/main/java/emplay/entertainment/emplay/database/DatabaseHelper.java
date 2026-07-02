@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "emplay.db";
-    private static final int DATABASE_VERSION = 14;
+    private static final int DATABASE_VERSION = 15;
     static final long CACHE_TTL_MS = 24 * 60 * 60 * 1000L;
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_SHOWS = "tvshows";
@@ -117,6 +117,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_META_KEY + " TEXT PRIMARY KEY, " +
                     COLUMN_LAST_FETCHED_MS + " INTEGER NOT NULL)";
 
+    static final String TABLE_MOTN_CACHE = "motn_cache";
+    private static final String CREATE_TABLE_MOTN_CACHE =
+            "CREATE TABLE " + TABLE_MOTN_CACHE + " (" +
+                    "tmdb_id INTEGER NOT NULL, " +
+                    "show_type TEXT NOT NULL, " +
+                    "json_data TEXT NOT NULL, " +
+                    "cached_at INTEGER NOT NULL, " +
+                    "PRIMARY KEY (tmdb_id, show_type))";
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("PRAGMA foreign_keys = ON;");
@@ -127,11 +136,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_USER_SHOWS);
         db.execSQL(CREATE_TABLE_RECENT_SEARCHES);
         db.execSQL(CREATE_TABLE_CATALOG_META);
+        db.execSQL(CREATE_TABLE_MOTN_CACHE);
         Log.d("DatabaseHelper", "All tables created successfully");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOTN_CACHE);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATALOG_META);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENT_SEARCHES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_SHOWS);
@@ -175,6 +186,40 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (rowsAffected == 0) {
             db.insert(TABLE_USER_PROFILE, null, values);
         }
+    }
+
+    // ── Movie of the Night cache ──────────────────────────────────────────────
+
+    /** Returns cached JSON if it exists and is less than ttlMs old, otherwise null. */
+    public String getMotnCache(int tmdbId, String showType, long ttlMs) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        android.database.Cursor cursor = db.query(
+                TABLE_MOTN_CACHE,
+                new String[]{"json_data", "cached_at"},
+                "tmdb_id = ? AND show_type = ?",
+                new String[]{String.valueOf(tmdbId), showType},
+                null, null, null);
+        try {
+            if (cursor.moveToFirst()) {
+                long cachedAt = cursor.getLong(1);
+                if (System.currentTimeMillis() - cachedAt < ttlMs) {
+                    return cursor.getString(0);
+                }
+            }
+        } finally {
+            cursor.close();
+        }
+        return null;
+    }
+
+    public void saveMotnCache(int tmdbId, String showType, String json) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("tmdb_id", tmdbId);
+        values.put("show_type", showType);
+        values.put("json_data", json);
+        values.put("cached_at", System.currentTimeMillis());
+        db.insertWithOnConflict(TABLE_MOTN_CACHE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     public void addRecentSearch(String query) {

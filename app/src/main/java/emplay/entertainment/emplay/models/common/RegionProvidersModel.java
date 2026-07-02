@@ -13,6 +13,10 @@ public class RegionProvidersModel {
     private List<ProviderModel> buy;
 
     public List<ProviderModel> getFlatrate() { return flatrate; }
-    public List<ProviderModel> getRent() { return rent; }
-    public List<ProviderModel> getBuy() { return buy; }
+    public List<ProviderModel> getRent()     { return rent; }
+    public List<ProviderModel> getBuy()      { return buy; }
+
+    public void setFlatrate(List<ProviderModel> flatrate) { this.flatrate = flatrate; }
+    public void setRent(List<ProviderModel> rent)         { this.rent = rent; }
+    public void setBuy(List<ProviderModel> buy)           { this.buy = buy; }
 }

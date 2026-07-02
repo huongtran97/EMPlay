@@ -181,7 +181,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 fetchTVSuggestionList();
                 fetchTrailers();
                 fetchTVCertification();
-                fetchTVProviders();
+                setupWtwTapToLoad();
             }
         }
 
@@ -308,7 +308,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                 if (binding == null) return;
                                 binding.wtwUnreleased.getRoot().setVisibility(View.GONE);
                                 binding.wtwReleased.getRoot().setVisibility(View.VISIBLE);
-                                fetchTVProviders();
+                                setupWtwTapToLoad();
                             });
                 }
         );
@@ -499,25 +499,92 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         return ca != null ? ca : us;
     }
 
-    private void fetchTVProviders() {
-        safeEnqueue(apiService.getTVShowProviders(TMDBpath.tvProvider(tvId)),
-                new Callback<TVShowProviderResponse>() {
+    private void setupWtwTapToLoad() {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.tabLayoutWtw.setVisibility(View.GONE);
+        wtw.rvProviders.setVisibility(View.GONE);
+        wtw.layoutWtwEmpty.setVisibility(View.GONE);
+        wtw.layoutWtwLoad.setVisibility(View.VISIBLE);
+        wtw.layoutWtwLoad.setOnClickListener(v -> loadMotnProviders());
+    }
+
+    private void loadMotnProviders() {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.layoutWtwLoad.setVisibility(View.GONE);
+        wtw.progressMotn.setVisibility(View.VISIBLE);
+
+        new Thread(() -> {
+            String cached = databaseHelper.getMotnCache(tvId,
+                    emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_SERIES,
+                    emplay.entertainment.emplay.tool.MotnHelper.CACHE_TTL_MS);
+            if (cached != null) {
+                emplay.entertainment.emplay.api.motn.MotnShowResponse response =
+                        emplay.entertainment.emplay.tool.MotnHelper.fromJson(cached);
+                if (response != null) {
+                    Map<String, RegionProvidersModel> results =
+                            emplay.entertainment.emplay.tool.MotnHelper.toProviderMap(response);
+                    safeRunOnUiThread(() -> onMotnProvidersReady(results));
+                    return;
+                }
+            }
+            safeRunOnUiThread(() -> fetchMotnFromNetwork());
+        }).start();
+    }
+
+    private void fetchMotnFromNetwork() {
+        safeEnqueue(apiService.getStreamingAvailability(tvId,
+                emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_SERIES),
+                new Callback<emplay.entertainment.emplay.api.motn.MotnShowResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<TVShowProviderResponse> call,
-                                           @NonNull Response<TVShowProviderResponse> response) {
-                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
-                        watchProviderResults = response.body().getResults();
-                        bindTVProviders(WatchProviderHelper.defaultRegion());
-                        binding.wtwReleased.btnRegion.setOnClickListener(v ->
-                                WatchProviderHelper.showRegionPicker(requireContext(),
-                                        watchProviderResults, region -> {
-                                            userHasSelectedRegion = true;
-                                            bindTVProviders(region);
-                                        }));
+                    public void onResponse(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                                           @NonNull Response<emplay.entertainment.emplay.api.motn.MotnShowResponse> response) {
+                        if (binding == null) return;
+                        if (!response.isSuccessful() || response.body() == null) {
+                            showMotnError();
+                            return;
+                        }
+                        emplay.entertainment.emplay.api.motn.MotnShowResponse body = response.body();
+                        new Thread(() -> {
+                            databaseHelper.saveMotnCache(tvId,
+                                    emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_SERIES,
+                                    emplay.entertainment.emplay.tool.MotnHelper.toJson(body));
+                            Map<String, RegionProvidersModel> results =
+                                    emplay.entertainment.emplay.tool.MotnHelper.toProviderMap(body);
+                            safeRunOnUiThread(() -> onMotnProvidersReady(results));
+                        }).start();
                     }
-                    @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
-                                                    @NonNull Throwable t) {}
+
+                    @Override
+                    public void onFailure(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                                          @NonNull Throwable t) {
+                        showMotnError();
+                    }
                 });
+    }
+
+    private void onMotnProvidersReady(Map<String, RegionProvidersModel> results) {
+        if (binding == null || !isAdded()) return;
+        watchProviderResults = results;
+        binding.wtwReleased.progressMotn.setVisibility(View.GONE);
+        String region = WatchProviderHelper.defaultRegion();
+        bindTVProviders(region);
+        binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
+                        selectedRegion -> {
+                            userHasSelectedRegion = true;
+                            bindTVProviders(selectedRegion);
+                        }));
+    }
+
+    private void showMotnError() {
+        if (binding == null || !isAdded()) return;
+        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        wtw.progressMotn.setVisibility(View.GONE);
+        wtw.layoutWtwLoad.setVisibility(View.VISIBLE);
+        wtw.tvWtwLoad.setText(R.string.wtw_load_error);
+        wtw.layoutWtwLoad.setOnClickListener(v -> loadMotnProviders());
     }
 
     private void bindTVProviders(String region) {

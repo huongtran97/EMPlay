@@ -92,11 +92,11 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         void bind(ProviderModel provider) {
             tvProviderName.setText(provider.getProviderName());
-            String logoPath = provider.getLogoPath();
-            if (logoPath != null && !logoPath.isEmpty()) {
+            String imageUrl = resolveLogoUrl(provider);
+            if (imageUrl != null) {
                 imgProviderLogo.setVisibility(View.VISIBLE);
                 Glide.with(itemView.getContext())
-                        .load(ImageUrl.of(ImageUrl.ORIGINAL, logoPath))
+                        .load(imageUrl)
                         .transform(new RoundedCorners(4))
                         .into(imgProviderLogo);
             } else {
@@ -121,16 +121,13 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void bind(ProviderModel provider) {
             tvName.setText(provider.getProviderName());
             Glide.with(itemView.getContext())
-                    .load(ImageUrl.of(ImageUrl.ORIGINAL, provider.getLogoPath()))
+                    .load(resolveLogoUrl(provider))
                     .placeholder(R.drawable.bg_provider_fallback)
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);
         }
     }
 
-    /**
-     * Rent/Buy ViewHolder
-     */
     static class RentBuyViewHolder extends RecyclerView.ViewHolder {
         ImageView ivLogo;
         TextView tvName, tvQuality;
@@ -145,12 +142,22 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         void bind(ProviderModel provider) {
             tvName.setText(provider.getProviderName());
             Glide.with(itemView.getContext())
-                    .load(ImageUrl.of(ImageUrl.ORIGINAL, provider.getLogoPath()))
+                    .load(resolveLogoUrl(provider))
                     .placeholder(R.drawable.bg_provider_fallback)
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);
 
             tvQuality.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * Returns a Glide-loadable URL: full URL for MOTN providers, TMDB URL otherwise.
+     */
+    static String resolveLogoUrl(ProviderModel provider) {
+        if (provider.getLogoUrl() != null && !provider.getLogoUrl().isEmpty()) {
+            return provider.getLogoUrl();
+        }
+        return ImageUrl.of(ImageUrl.ORIGINAL, provider.getLogoPath());
     }
 }

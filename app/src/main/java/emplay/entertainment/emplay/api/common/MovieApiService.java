@@ -241,4 +241,10 @@ public interface MovieApiService {
     @GET("api/tmdb")
     Call<CollectionResponse> getCollectionDetails(
             @Query("path") String path);
+
+    /** Movie of the Night streaming availability — routed through the Railway proxy. */
+    @GET("api/motn")
+    Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> getStreamingAvailability(
+            @Query("tmdb_id") int tmdbId,
+            @Query("show_type") String showType);
 }

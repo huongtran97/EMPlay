@@ -136,6 +136,52 @@
         app:layout_constraintTop_toBottomOf="@+id/tab_layout_wtw"
         tools:listitem="@layout/item_provider_fallback" />
 
+    <!-- Tap-to-load placeholder — visible before user requests streaming info -->
+    <LinearLayout
+        android:id="@+id/layout_wtw_load"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="14dp"
+        android:paddingBottom="6dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/now_in_theaters_badge">
+
+        <TextView
+            android:id="@+id/tv_wtw_load"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/wtw_tap_to_load"
+            android:textColor="@color/accent"
+            android:textSize="@dimen/text_body"
+            android:fontFamily="sans-serif-medium" />
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="@null"
+            app:tint="@color/accent" />
+
+    </LinearLayout>
+
+    <!-- Spinner shown while fetching from Movie of the Night -->
+    <ProgressBar
+        android:id="@+id/progress_motn"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        android:indeterminateTint="@color/accent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/now_in_theaters_badge" />
+
     <LinearLayout
         android:id="@+id/layout_wtw_empty"
         android:layout_width="0dp"

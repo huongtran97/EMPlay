@@ -245,6 +245,8 @@
     <string name="rent">Rent</string>
     <string name="buy">Buy</string>
     <string name="unavailable_country">Unavailable in your country</string>
+    <string name="wtw_tap_to_load">Tap to see streaming options</string>
+    <string name="wtw_load_error">Couldn\'t load streaming info. Tap to retry.</string>
     <string name="d">D</string>
     <string name="h">H</string>
     <string name="m">M</string>
