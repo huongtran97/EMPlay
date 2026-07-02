@@ -1,5 +1,7 @@
 package emplay.entertainment.emplay.fragment.details;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -168,6 +170,13 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
             return insets;
         });
+
+        binding.btnFindTheaters.setOnClickListener(v -> {
+            String title = binding.tvMovieTitle.getText().toString();
+            String query = Uri.encode("theaters showing " + title);
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("https://www.google.com/search?q=" + query)));
+        });
     }
 
     @Override
@@ -275,6 +284,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 long daysOut = java.time.temporal.ChronoUnit.DAYS.between(releaseDate, LocalDate.now());
                 isNowPlaying = !isUnreleased && daysOut <= 45;
                 binding.tvNowInTheatersBadge.setVisibility(isNowPlaying ? View.VISIBLE : View.GONE);
+                binding.btnFindTheaters.setVisibility(isNowPlaying ? View.VISIBLE : View.GONE);
                 binding.wtwReleased.getRoot().setVisibility((!isUnreleased && !isNowPlaying) ? View.VISIBLE : View.GONE);
                 binding.wtwUnreleased.getRoot().setVisibility(isUnreleased ? View.VISIBLE : View.GONE);
                 if (isUnreleased) {

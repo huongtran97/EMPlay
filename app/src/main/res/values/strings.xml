@@ -206,6 +206,7 @@
 
     <string name="login_register">Login / Register</string>
     <string name="now_in_theaters">● NOW IN THEATERS</string>
+    <string name="find_theaters_nearby">Find Theaters Nearby</string>
     <string name="now_airing">Now Airing</string>
     <string name="whats_new">What\'s New</string>
     <string name="tv_show">TV Show</string>
