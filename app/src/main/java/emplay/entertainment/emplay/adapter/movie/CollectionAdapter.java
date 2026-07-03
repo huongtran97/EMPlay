@@ -66,9 +66,30 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
             holder.tagRating.setVisibility(View.GONE);
         }
 
-        holder.tagStatus.setVisibility(View.GONE);
         holder.btnOverflow.setVisibility(View.GONE);
 
+        String releaseDate = part.getReleaseDate();
+        if (releaseDate != null && !releaseDate.isEmpty()
+                && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            try {
+                java.time.LocalDate rd = java.time.LocalDate.parse(releaseDate);
+                java.time.LocalDate today = java.time.LocalDate.now();
+                long daysOut = java.time.temporal.ChronoUnit.DAYS.between(rd, today);
+                if (rd.isAfter(today)) {
+                    holder.tagStatus.setText(R.string.upcoming);
+                    holder.tagStatus.setVisibility(View.VISIBLE);
+                } else if (daysOut <= 45) {
+                    holder.tagStatus.setText(R.string.tag_in_theaters);
+                    holder.tagStatus.setVisibility(View.VISIBLE);
+                } else {
+                    holder.tagStatus.setVisibility(View.GONE);
+                }
+            } catch (Exception e) {
+                holder.tagStatus.setVisibility(View.GONE);
+            }
+        } else {
+            holder.tagStatus.setVisibility(View.GONE);
+        }
         Glide.with(context)
                 .load(ImageUrl.of(ImageUrl.THUMBNAIL, part.getPosterPath()))
                 .placeholder(R.drawable.bg_poster_placeholder)
@@ -97,6 +118,7 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
             tagRating = itemView.findViewById(R.id.tag_rating);
             tagStatus = itemView.findViewById(R.id.tag_status);
             btnOverflow = itemView.findViewById(R.id.btn_overflow);
+            imgThumb.setClipToOutline(true);
         }
     }
 }

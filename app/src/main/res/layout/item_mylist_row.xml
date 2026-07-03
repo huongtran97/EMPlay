@@ -23,7 +23,7 @@
             android:id="@+id/img_thumb"
             android:layout_width="48dp"
             android:layout_height="68dp"
-            android:background="@color/bg_dark"
+            android:background="@drawable/bg_poster_small"
             android:contentDescription="@null"
             android:scaleType="centerCrop" />
 
