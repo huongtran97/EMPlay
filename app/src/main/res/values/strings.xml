@@ -206,7 +206,7 @@
 
     <string name="login_register">Login / Register</string>
     <string name="now_in_theaters">● NOW IN THEATERS</string>
-    <string name="find_theaters_nearby">Find Theaters Nearby</string>
+    <string name="theaters_nearby">Theaters Nearby</string>
     <string name="now_airing">Now Airing</string>
     <string name="whats_new">What\'s New</string>
     <string name="tv_show">TV Show</string>
@@ -240,6 +240,11 @@
     <string name="watch_list">@string/nav_mylist</string>
     <string name="a_z">A-Z</string>
     <string name="wtw">Where to Watch</string>
+    <string name="wtw_title">Where to Watch</string>
+    <string name="wtw_location_placeholder">--</string>
+    <string name="wtw_tab_stream">Stream</string>
+    <string name="wtw_tab_rent">Rent</string>
+    <string name="wtw_tab_buy">Buy</string>
     <string name="region">Region</string>
     <string name="stream">Stream</string>
     <string name="rent">Rent</string>

@@ -210,41 +210,34 @@
                 android:insetBottom="0dp"
                 app:cornerRadius="8dp" />
 
-            <com.google.android.material.card.MaterialCardView
+            <LinearLayout
                 android:id="@+id/btnMyList"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
                 android:layout_weight="1"
                 android:background="@drawable/ticket_tear_line"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="0dp">
+                android:layerType="software"
+                android:orientation="vertical"
+                android:gravity="center">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="center">
+                <TextView
+                    android:id="@+id/tvMyList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/detail_btn_mylist"
+                    android:textSize="@dimen/text_chip"
+                    android:textColor="@color/text_1" />
 
-                    <TextView
-                        android:id="@+id/tvMyList"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/detail_btn_mylist"
-                        android:textSize="@dimen/text_chip"
-                        android:textColor="@color/text_1" />
+                <TextView
+                    android:id="@+id/tvAdmitOne"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/memorabilia_admit_one"
+                    android:textSize="@dimen/text_chip"
+                    android:letterSpacing="0.08"
+                    android:textColor="@color/text_3" />
 
-                    <TextView
-                        android:id="@+id/tvAdmitOne"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/memorabilia_admit_one"
-                        android:textSize="@dimen/text_chip"
-                        android:letterSpacing="0.08"
-                        android:textColor="@color/text_3" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -256,14 +249,18 @@
             android:layout_marginStart="13dp"
             android:layout_marginEnd="13dp"
             android:layout_marginBottom="@dimen/spacing_3"
-            android:text="@string/find_theaters_nearby"
+            android:text="@string/theaters_nearby"
             android:textSize="@dimen/text_body"
             android:textStyle="bold"
             android:textColor="@color/accent"
             android:backgroundTint="@color/bg_surface"
             android:insetTop="0dp"
             android:insetBottom="0dp"
-            app:strokeColor="@color/accent"
+            app:icon="@drawable/ic_map_pin"
+            app:iconTint="@color/accent"
+            app:iconGravity="textStart"
+            app:iconPadding="6dp"
+            app:strokeColor="@color/accent_red"
             app:strokeWidth="1dp"
             app:cornerRadius="8dp"
             android:visibility="gone"
@@ -274,13 +271,17 @@
             android:id="@+id/wtw_released"
             layout="@layout/wtw_released_view"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="13dp" />
 
         <include
             android:id="@+id/wtw_unreleased"
             layout="@layout/wtw_unreleased_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="13dp"
+            android:layout_marginEnd="13dp"
             android:visibility="gone" />
 
         <!-- CAST -->

@@ -21,7 +21,6 @@ import com.google.android.flexbox.FlexboxLayoutManager;
 import androidx.transition.TransitionInflater;
 
 import com.bumptech.glide.Glide;
-import com.google.android.material.tabs.TabLayout;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -516,7 +515,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                     databaseHelper.getCachedMotnJson(tvId, MotnHelper.SHOW_TYPE_TV));
                             if (getActivity() != null) getActivity().runOnUiThread(() -> {
                                 bindTVProviders(region);
-                                binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                                binding.wtwReleased.chipLocation.setOnClickListener(v ->
                                         WatchProviderHelper.showRegionPicker(requireContext(),
                                                 watchProviderResults, selectedRegion -> {
                                                     userHasSelectedRegion = true;
@@ -534,8 +533,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         if (binding == null || !isAdded()) return;
         currentWtwRegion = region;
         WtwReleasedViewBinding wtw = binding.wtwReleased;
-        wtw.tvRegion.setText(region);
-        wtw.nowInTheatersBadge.setVisibility(View.GONE);
+        wtw.textRegion.setText(region);
 
         RegionProvidersModel regionData = watchProviderResults != null
                 ? watchProviderResults.get(region) : null;
@@ -556,64 +554,66 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         streamAdapter.setOnProviderClick(provider -> handleProviderClick(provider, MotnHelper.SHOW_TYPE_TV));
         rentBuyAdapter.setOnProviderClick(provider -> handleProviderClick(provider, MotnHelper.SHOW_TYPE_TV));
 
-        wtw.layoutWtwEmpty.setVisibility(View.GONE);
-        wtw.tabLayoutWtw.setVisibility(View.VISIBLE);
+        wtw.textEmptyState.setVisibility(View.GONE);
+        wtw.tabContainer.setVisibility(View.VISIBLE);
         FlexboxLayoutManager flexLm = new FlexboxLayoutManager(requireContext());
         flexLm.setFlexDirection(FlexDirection.ROW);
         flexLm.setFlexWrap(FlexWrap.WRAP);
-        wtw.rvProviders.setLayoutManager(flexLm);
-        wtw.rvProviders.setAdapter(streamAdapter);
+        wtw.recyclerProviders.setLayoutManager(flexLm);
+        wtw.recyclerProviders.setAdapter(streamAdapter);
         streamAdapter.submitList(stream);
         applyWtwEmptyState(wtw, stream.isEmpty());
 
-        wtw.tabLayoutWtw.clearOnTabSelectedListeners();
-        wtw.tabLayoutWtw.selectTab(wtw.tabLayoutWtw.getTabAt(0));
-        wtw.tabLayoutWtw.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getPosition()) {
-                    case 1:
-                        rentBuyAdapter.submitList(rent);
-                        wtw.rvProviders.setAdapter(rentBuyAdapter);
-                        applyWtwEmptyState(wtw, rent.isEmpty());
-                        break;
-                    case 2:
-                        rentBuyAdapter.submitList(buy);
-                        wtw.rvProviders.setAdapter(rentBuyAdapter);
-                        applyWtwEmptyState(wtw, buy.isEmpty());
-                        break;
-                    default:
-                        wtw.rvProviders.setAdapter(streamAdapter);
-                        applyWtwEmptyState(wtw, stream.isEmpty());
-                        break;
-                }
-            }
-            @Override public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override public void onTabReselected(TabLayout.Tab tab) {}
+        wtw.tabStream.setSelected(true);
+        wtw.tabRent.setSelected(false);
+        wtw.tabBuy.setSelected(false);
+        wtw.tabStream.setOnClickListener(v -> {
+            wtw.tabStream.setSelected(true);
+            wtw.tabRent.setSelected(false);
+            wtw.tabBuy.setSelected(false);
+            wtw.recyclerProviders.setAdapter(streamAdapter);
+            applyWtwEmptyState(wtw, stream.isEmpty());
+        });
+        wtw.tabRent.setOnClickListener(v -> {
+            wtw.tabStream.setSelected(false);
+            wtw.tabRent.setSelected(true);
+            wtw.tabBuy.setSelected(false);
+            rentBuyAdapter.submitList(rent);
+            wtw.recyclerProviders.setAdapter(rentBuyAdapter);
+            applyWtwEmptyState(wtw, rent.isEmpty());
+        });
+        wtw.tabBuy.setOnClickListener(v -> {
+            wtw.tabStream.setSelected(false);
+            wtw.tabRent.setSelected(false);
+            wtw.tabBuy.setSelected(true);
+            rentBuyAdapter.submitList(buy);
+            wtw.recyclerProviders.setAdapter(rentBuyAdapter);
+            applyWtwEmptyState(wtw, buy.isEmpty());
         });
     }
 
     private void handleNoWatchProviders() {
         if (binding == null) return;
         WtwReleasedViewBinding wtw = binding.wtwReleased;
-        wtw.rvProviders.setVisibility(View.GONE);
-        wtw.tabLayoutWtw.setVisibility(View.GONE);
+        wtw.recyclerProviders.setVisibility(View.GONE);
+        wtw.tabContainer.setVisibility(View.GONE);
 
         if (isAiring && !userHasSelectedRegion) {
-            wtw.layoutWtwEmpty.setVisibility(View.GONE);
-            wtw.nowInTheatersBadge.setVisibility(View.VISIBLE);
-            wtw.nowInTheatersBadge.setText(getString(R.string.now_airing));
-            wtw.nowInTheatersBadge.setTextColor(
+            wtw.textEmptyState.setVisibility(View.VISIBLE);
+            wtw.textEmptyState.setText(getString(R.string.now_airing));
+            wtw.textEmptyState.setTextColor(
                     ContextCompat.getColor(requireContext(), R.color.airing));
-            wtw.nowInTheatersBadge.setBackgroundResource(R.drawable.bg_badge_airing);
         } else {
-            wtw.nowInTheatersBadge.setVisibility(View.GONE);
-            wtw.layoutWtwEmpty.setVisibility(View.VISIBLE);
+            wtw.textEmptyState.setVisibility(View.VISIBLE);
+            wtw.textEmptyState.setText(getString(R.string.unavailable_country));
+            wtw.textEmptyState.setTextColor(
+                    ContextCompat.getColor(requireContext(), R.color.text_disabled));
         }
     }
 
     private void applyWtwEmptyState(WtwReleasedViewBinding wtw, boolean isEmpty) {
-        wtw.rvProviders.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
-        wtw.layoutWtwEmpty.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        wtw.recyclerProviders.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        wtw.textEmptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
     }
 
     private List<ProviderModel> craveFirst(List<ProviderModel> providers) {

@@ -4,160 +4,121 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingStart="18dp"
+    android:paddingEnd="18dp"
     android:background="@drawable/bg_button_outline"
-    android:paddingStart="14dp"
-    android:paddingEnd="14dp"
     android:paddingTop="12dp"
     android:paddingBottom="14dp">
 
+    <!-- Header: TV icon + title on the left, location chip on the right -->
     <ImageView
-        android:id="@+id/ic_wtw"
+        android:id="@+id/imageTvIcon"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:src="@drawable/ic_tv"
         android:contentDescription="@null"
-        app:tint="@color/red_primary"
+        android:src="@drawable/ic_device_tv"
+        app:tint="@color/accent_red"
+        app:layout_constraintBottom_toBottomOf="@id/textTitle"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@+id/tv_wtw_title" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tv_wtw_title"
-        android:layout_width="0dp"
+        android:id="@+id/textTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="6dp"
-        android:text="@string/wtw"
-        android:textColor="@color/text_tertiary"
-        android:textSize="@dimen/text_body"
-        android:textStyle="bold"
-        android:letterSpacing="0.08"
+        android:layout_marginStart="8dp"
         android:fontFamily="sans-serif-medium"
-        app:layout_constraintStart_toEndOf="@+id/ic_wtw"
-        app:layout_constraintEnd_toStartOf="@+id/btn_region"
+        android:text="@string/wtw_title"
+        android:textColor="@color/wtw_text_primary"
+        android:textSize="17sp"
+        app:layout_constraintStart_toEndOf="@id/imageTvIcon"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
-        android:id="@+id/btn_region"
+        android:id="@+id/chipLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:background="@drawable/bg_tab_container"
         android:gravity="center_vertical"
-        android:background="@drawable/bg_provider"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="5dp"
+        app:layout_constraintBottom_toBottomOf="@id/textTitle"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="@id/textTitle">
 
         <ImageView
-            android:layout_width="15dp"
-            android:layout_height="15dp"
-            android:src="@drawable/ic_map_pin"
-            android:layout_marginEnd="3dp"
+            android:layout_width="13dp"
+            android:layout_height="13dp"
             android:contentDescription="@null"
-            app:tint="@color/text_3" />
+            android:src="@drawable/ic_map_pin"
+            app:tint="@color/wtw_text_secondary" />
 
         <TextView
-            android:id="@+id/tv_region"
+            android:id="@+id/textRegion"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/region"
-            android:textColor="@color/text_disabled"
-            android:textSize="@dimen/text_body"
-            android:fontFamily="sans-serif" />
+            android:layout_marginStart="4dp"
+            android:text="@string/wtw_location_placeholder"
+            android:textColor="@color/wtw_text_secondary"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
-    <!-- Now in Theaters badge — visible when movie is currently playing in theaters -->
-    <TextView
-        android:id="@+id/now_in_theaters_badge"
-        android:layout_width="wrap_content"
+    <!-- Segmented tab control: Stream / Rent / Buy -->
+    <LinearLayout
+        android:id="@+id/tabContainer"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:text="@string/now_in_theaters"
-        android:textColor="@color/error"
-        android:textSize="@dimen/text_badge"
-        android:textStyle="bold"
-        android:letterSpacing="0.05"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:background="@drawable/bg_badge_theaters"
-        android:visibility="gone"
+        android:layout_marginTop="18dp"
+        android:orientation="horizontal"
+        android:background="@drawable/bg_tab_container"
+        android:padding="3dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_wtw_title" />
+        app:layout_constraintTop_toBottomOf="@id/textTitle">
 
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout_wtw"
-        android:layout_width="wrap_content"
-        android:layout_height="36dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_provider"
-        app:tabMode="scrollable"
-        app:tabGravity="start"
-        app:tabSelectedTextColor="@color/text_primary"
-        app:tabTextColor="@color/text_tertiary"
-        app:tabIndicatorHeight="0dp"
-        app:tabBackground="@drawable/selector_wtw_tab"
-        app:tabPaddingStart="12dp"
-        app:tabPaddingEnd="12dp"
-        app:tabTextAppearance="@style/TabTextAppearance"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/now_in_theaters_badge">
+        <TextView
+            android:id="@+id/tabStream"
+            style="@style/WtwTabItem"
+            android:text="@string/wtw_tab_stream" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/stream" />
+        <TextView
+            android:id="@+id/tabRent"
+            style="@style/WtwTabItem"
+            android:text="@string/wtw_tab_rent" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/rent" />
+        <TextView
+            android:id="@+id/tabBuy"
+            style="@style/WtwTabItem"
+            android:text="@string/wtw_tab_buy" />
 
-        <com.google.android.material.tabs.TabItem
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/buy" />
-
-    </com.google.android.material.tabs.TabLayout>
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_providers"
-        android:layout_width="0dp"
+        android:id="@+id/recyclerProviders"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:nestedScrollingEnabled="false"
+        android:layout_marginTop="16dp"
         android:clipToPadding="false"
+        android:nestedScrollingEnabled="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tab_layout_wtw"
+        app:layout_constraintTop_toBottomOf="@id/tabContainer"
         tools:listitem="@layout/item_provider_fallback" />
 
-    <LinearLayout
-        android:id="@+id/layout_wtw_empty"
-        android:layout_width="0dp"
+    <TextView
+        android:id="@+id/textEmptyState"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:layout_marginTop="12dp"
         android:gravity="center"
-        android:paddingTop="12dp"
-        android:paddingBottom="4dp"
+        android:text="@string/unavailable_country"
+        android:textColor="@color/text_disabled"
+        android:textSize="13sp"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tab_layout_wtw">
-
-        <TextView
-            android:id="@+id/tv_wtw_empty_msg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/unavailable_country"
-            android:textColor="@color/text_disabled"
-            android:textSize="@dimen/text_body"
-            android:fontFamily="sans-serif" />
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@id/tabContainer" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
