@@ -43,6 +43,7 @@ import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.api.motn.MotnShowResponse;
 import emplay.entertainment.emplay.api.tvshow.SeasonDetailResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowContentRatingsResponse;
@@ -81,6 +82,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private final List<TVShowModel> allSuggestions = new ArrayList<>();
     private List<TVShowsTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private Map<String, RegionProvidersModel> watchProviderResults;
+    private MotnShowResponse cachedMotn;
 
     private ActivityDetailTvBinding binding;
     private SeasonsTVAdapter seasonTabAdapter;
@@ -215,7 +217,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     }
 
     // Fetch data
-
     private void fetchTVDetails() {
         safeEnqueue(apiService.getTVShowDetails(TMDBpath.tvShowDetails(tvId)),
                 new Callback<TVShowDetailsResponse>() {
@@ -509,13 +510,20 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                            @NonNull Response<TVShowProviderResponse> response) {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
                         watchProviderResults = response.body().getResults();
-                        bindTVProviders(WatchProviderHelper.defaultRegion());
-                        binding.wtwReleased.btnRegion.setOnClickListener(v ->
-                                WatchProviderHelper.showRegionPicker(requireContext(),
-                                        watchProviderResults, region -> {
-                                            userHasSelectedRegion = true;
-                                            bindTVProviders(region);
-                                        }));
+                        String region = WatchProviderHelper.defaultRegion();
+                        new Thread(() -> {
+                            cachedMotn = MotnHelper.fromJson(
+                                    databaseHelper.getCachedMotnJson(tvId, MotnHelper.SHOW_TYPE_TV));
+                            if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                                bindTVProviders(region);
+                                binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                                        WatchProviderHelper.showRegionPicker(requireContext(),
+                                                watchProviderResults, selectedRegion -> {
+                                                    userHasSelectedRegion = true;
+                                                    bindTVProviders(selectedRegion);
+                                                }));
+                            });
+                        }).start();
                     }
                     @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
                                                     @NonNull Throwable t) {}
@@ -536,12 +544,12 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             return;
         }
 
-        List<ProviderModel> stream = craveFirst(regionData.getFlatrate() != null
-                ? regionData.getFlatrate() : new ArrayList<>());
-        List<ProviderModel> rent = craveFirst(regionData.getRent() != null
-                ? regionData.getRent() : new ArrayList<>());
-        List<ProviderModel> buy = craveFirst(regionData.getBuy() != null
-                ? regionData.getBuy() : new ArrayList<>());
+        List<ProviderModel> stream = MotnHelper.filterByMotn(craveFirst(regionData.getFlatrate() != null
+                ? regionData.getFlatrate() : new ArrayList<>()), cachedMotn, region);
+        List<ProviderModel> rent   = MotnHelper.filterByMotn(craveFirst(regionData.getRent() != null
+                ? regionData.getRent()     : new ArrayList<>()), cachedMotn, region);
+        List<ProviderModel> buy    = MotnHelper.filterByMotn(craveFirst(regionData.getBuy() != null
+                ? regionData.getBuy()      : new ArrayList<>()), cachedMotn, region);
 
         ProviderAdapter streamAdapter  = new ProviderAdapter(ProviderAdapter.TYPE_STREAM);
         ProviderAdapter rentBuyAdapter = new ProviderAdapter(ProviderAdapter.TYPE_RENT_BUY);
@@ -624,38 +632,39 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         new Thread(() -> {
             String cached = databaseHelper.getCachedMotnJson(tvId, showType);
             if (cached != null) {
-                emplay.entertainment.emplay.api.motn.MotnShowResponse motn = MotnHelper.fromJson(cached);
+                MotnShowResponse motn = MotnHelper.fromJson(cached);
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> openMotnLink(motn, provider.getProviderName()));
+                    getActivity().runOnUiThread(() -> openMotnLink(motn, provider.getProviderName(), provider.getProviderId()));
                 }
                 return;
             }
             if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> fetchAndOpenMotnLink(tvId, showType, provider.getProviderName()));
+                getActivity().runOnUiThread(() -> fetchAndOpenMotnLink(tvId, showType, provider.getProviderName(), provider.getProviderId()));
             }
         }).start();
     }
 
-    private void fetchAndOpenMotnLink(int tmdbId, String showType, String providerName) {
+    private void fetchAndOpenMotnLink(int tmdbId, String showType, String providerName, int tmdbProviderId) {
         safeEnqueue(apiService.getStreamingAvailability(tmdbId, showType),
-                new Callback<emplay.entertainment.emplay.api.motn.MotnShowResponse>() {
+                new Callback<MotnShowResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
-                                           @NonNull Response<emplay.entertainment.emplay.api.motn.MotnShowResponse> response) {
+                    public void onResponse(@NonNull Call<MotnShowResponse> call,
+                                           @NonNull Response<MotnShowResponse> response) {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
-                        emplay.entertainment.emplay.api.motn.MotnShowResponse motn = response.body();
+                        MotnShowResponse motn = response.body();
+                        cachedMotn = motn;
                         new Thread(() -> databaseHelper.cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
-                        openMotnLink(motn, providerName);
+                        openMotnLink(motn, providerName, tmdbProviderId);
                     }
-                    @Override public void onFailure(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                    @Override public void onFailure(@NonNull Call<MotnShowResponse> call,
                                                     @NonNull Throwable t) {}
                 });
     }
 
-    private void openMotnLink(emplay.entertainment.emplay.api.motn.MotnShowResponse motn, String providerName) {
+    private void openMotnLink(MotnShowResponse motn, String providerName, int tmdbProviderId) {
         if (!isAdded() || binding == null) return;
-        String link = MotnHelper.findLink(motn, currentWtwRegion, providerName);
-        if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName);
+        String link = MotnHelper.findLink(motn, currentWtwRegion, providerName, tmdbProviderId);
+        if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName, tmdbProviderId);
         if (link == null) {
             Toast.makeText(requireContext(), R.string.motn_link_unavailable, Toast.LENGTH_SHORT).show();
             return;

@@ -121,13 +121,15 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
      * Stream ViewHolder
      */
     static class StreamViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivLogo;
-        TextView tvName;
+        ImageView ivLogo, ivChevron;
+        TextView tvName, tvLinkUnavailable;
 
         StreamViewHolder(View itemView) {
             super(itemView);
-            ivLogo = itemView.findViewById(R.id.iv_provider_logo);
-            tvName = itemView.findViewById(R.id.tv_provider_name);
+            ivLogo           = itemView.findViewById(R.id.iv_provider_logo);
+            tvName           = itemView.findViewById(R.id.tv_provider_name);
+            ivChevron        = itemView.findViewById(R.id.iv_chevron);
+            tvLinkUnavailable = itemView.findViewById(R.id.tv_link_unavailable);
         }
 
         void bind(ProviderModel provider) {
@@ -137,18 +139,28 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     .placeholder(R.drawable.bg_provider_fallback)
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);
+
+            if (provider.hasDeepLink()) {
+                ivChevron.setVisibility(View.VISIBLE);
+                tvLinkUnavailable.setVisibility(View.GONE);
+            } else {
+                ivChevron.setVisibility(View.GONE);
+                tvLinkUnavailable.setVisibility(View.VISIBLE);
+            }
         }
     }
 
     static class RentBuyViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivLogo;
-        TextView tvName, tvQuality;
+        ImageView ivLogo, ivChevron;
+        TextView tvName, tvQuality, tvLinkUnavailable;
 
         RentBuyViewHolder(View itemView) {
             super(itemView);
-            ivLogo    = itemView.findViewById(R.id.iv_provider_logo);
-            tvName    = itemView.findViewById(R.id.tv_provider_name);
-            tvQuality = itemView.findViewById(R.id.tv_quality);
+            ivLogo            = itemView.findViewById(R.id.iv_provider_logo);
+            tvName            = itemView.findViewById(R.id.tv_provider_name);
+            tvQuality         = itemView.findViewById(R.id.tv_quality);
+            ivChevron         = itemView.findViewById(R.id.iv_chevron);
+            tvLinkUnavailable = itemView.findViewById(R.id.tv_link_unavailable);
         }
 
         void bind(ProviderModel provider) {
@@ -160,6 +172,14 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     .into(ivLogo);
 
             tvQuality.setVisibility(View.GONE);
+
+            if (provider.hasDeepLink()) {
+                ivChevron.setVisibility(View.VISIBLE);
+                tvLinkUnavailable.setVisibility(View.GONE);
+            } else {
+                ivChevron.setVisibility(View.GONE);
+                tvLinkUnavailable.setVisibility(View.VISIBLE);
+            }
         }
     }
 

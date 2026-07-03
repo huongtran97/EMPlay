@@ -47,4 +47,27 @@
 
     </LinearLayout>
 
+    <!-- Shown when provider has a confirmed MOTN deep link -->
+    <ImageView
+        android:id="@+id/iv_chevron"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_chevron_right"
+        android:alpha="0.5"
+        android:visibility="visible"
+        android:contentDescription="@null" />
+
+    <!-- Shown when provider has no confirmed deep link -->
+    <TextView
+        android:id="@+id/tv_link_unavailable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="@string/link_unavailable"
+        android:textColor="@color/text_hint"
+        android:textSize="@dimen/text_chip"
+        android:textStyle="italic"
+        android:visibility="gone" />
+
 </LinearLayout>

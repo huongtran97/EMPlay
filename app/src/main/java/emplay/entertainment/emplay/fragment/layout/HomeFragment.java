@@ -355,7 +355,7 @@ public class HomeFragment extends BaseFragment {
 
     private void filterByTheatricalRelease(List<MovieModel> candidates) {
         SharedPreferences regionPrefs = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        String region = regionPrefs.getString("pref_region", "US");
+        String region = regionPrefs.getString("pref_region", "CA");
         SharedPreferences rdCache = requireContext()
                 .getSharedPreferences(PROVIDER_CACHE_PREFS, android.content.Context.MODE_PRIVATE);
         long now = System.currentTimeMillis();

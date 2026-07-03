@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
@@ -25,11 +24,35 @@
     <!-- Provider name -->
     <TextView
         android:id="@+id/tv_provider_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:layout_marginStart="7dp"
         android:textColor="@color/text_overview"
         android:textSize="@dimen/text_chip"
         android:maxLines="1" />
+
+    <!-- Shown when provider has a confirmed MOTN deep link -->
+    <ImageView
+        android:id="@+id/iv_chevron"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="4dp"
+        android:src="@drawable/ic_chevron_right"
+        android:alpha="0.5"
+        android:visibility="visible"
+        android:contentDescription="@null" />
+
+    <!-- Shown when provider has no confirmed deep link -->
+    <TextView
+        android:id="@+id/tv_link_unavailable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="@string/link_unavailable"
+        android:textColor="@color/text_hint"
+        android:textSize="@dimen/text_chip"
+        android:textStyle="italic"
+        android:visibility="gone" />
 
 </LinearLayout>

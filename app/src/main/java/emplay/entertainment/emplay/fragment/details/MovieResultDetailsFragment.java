@@ -43,6 +43,7 @@ import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
+import emplay.entertainment.emplay.api.motn.MotnShowResponse;
 import emplay.entertainment.emplay.api.movie.CollectionResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.movie.MovieCreditsResponse;
@@ -79,6 +80,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private CollectionAdapter collectionAdapter;
     private boolean isCollectionExpanded = false;
     private Map<String, RegionProvidersModel> watchProviderResults;
+    private MotnShowResponse cachedMotn;
     private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private MovieApiService apiService;
     private TMDBWatchlistApiService watchlistApiService;
@@ -600,13 +602,19 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
                         watchProviderResults = response.body().getResults();
                         String region = WatchProviderHelper.defaultRegion();
-                        bindMovieProviders(region);
-                        binding.wtwReleased.btnRegion.setOnClickListener(v ->
-                                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
-                                        selectedRegion -> {
-                                            userHasSelectedRegion = true;
-                                            bindMovieProviders(selectedRegion);
-                                        }));
+                        new Thread(() -> {
+                            cachedMotn = MotnHelper.fromJson(
+                                    databaseHelper.getCachedMotnJson(movieId, MotnHelper.SHOW_TYPE_MOVIE));
+                            if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                                bindMovieProviders(region);
+                                binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                                        WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
+                                                selectedRegion -> {
+                                                    userHasSelectedRegion = true;
+                                                    bindMovieProviders(selectedRegion);
+                                                }));
+                            });
+                        }).start();
                     }
                     @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
                                                     @NonNull Throwable t) {}
@@ -626,12 +634,12 @@ public class MovieResultDetailsFragment extends BaseFragment {
             return;
         }
 
-        List<ProviderModel> stream = craveFirst(regionData.getFlatrate() != null
-                ? regionData.getFlatrate() : new ArrayList<>());
-        List<ProviderModel> rent   = craveFirst(regionData.getRent() != null
-                ? regionData.getRent()     : new ArrayList<>());
-        List<ProviderModel> buy    = craveFirst(regionData.getBuy() != null
-                ? regionData.getBuy()      : new ArrayList<>());
+        List<ProviderModel> stream = MotnHelper.filterByMotn(craveFirst(regionData.getFlatrate() != null
+                ? regionData.getFlatrate() : new ArrayList<>()), cachedMotn, region);
+        List<ProviderModel> rent   = MotnHelper.filterByMotn(craveFirst(regionData.getRent() != null
+                ? regionData.getRent()     : new ArrayList<>()), cachedMotn, region);
+        List<ProviderModel> buy    = MotnHelper.filterByMotn(craveFirst(regionData.getBuy() != null
+                ? regionData.getBuy()      : new ArrayList<>()), cachedMotn, region);
 
         ProviderAdapter streamAdapter  = new ProviderAdapter(ProviderAdapter.TYPE_STREAM);
         ProviderAdapter rentBuyAdapter = new ProviderAdapter(ProviderAdapter.TYPE_RENT_BUY);
@@ -711,38 +719,39 @@ public class MovieResultDetailsFragment extends BaseFragment {
         new Thread(() -> {
             String cached = databaseHelper.getCachedMotnJson(movieId, showType);
             if (cached != null) {
-                emplay.entertainment.emplay.api.motn.MotnShowResponse motn = MotnHelper.fromJson(cached);
+                MotnShowResponse motn = MotnHelper.fromJson(cached);
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> openMotnLink(motn, provider.getProviderName()));
+                    getActivity().runOnUiThread(() -> openMotnLink(motn, provider.getProviderName(), provider.getProviderId()));
                 }
                 return;
             }
             if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> fetchAndOpenMotnLink(movieId, showType, provider.getProviderName()));
+                getActivity().runOnUiThread(() -> fetchAndOpenMotnLink(movieId, showType, provider.getProviderName(), provider.getProviderId()));
             }
         }).start();
     }
 
-    private void fetchAndOpenMotnLink(int tmdbId, String showType, String providerName) {
+    private void fetchAndOpenMotnLink(int tmdbId, String showType, String providerName, int tmdbProviderId) {
         safeEnqueue(apiService.getStreamingAvailability(tmdbId, showType),
-                new Callback<emplay.entertainment.emplay.api.motn.MotnShowResponse>() {
+                new Callback<MotnShowResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
-                                           @NonNull Response<emplay.entertainment.emplay.api.motn.MotnShowResponse> response) {
+                    public void onResponse(@NonNull Call<MotnShowResponse> call,
+                                           @NonNull Response<MotnShowResponse> response) {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
-                        emplay.entertainment.emplay.api.motn.MotnShowResponse motn = response.body();
+                        MotnShowResponse motn = response.body();
+                        cachedMotn = motn;
                         new Thread(() -> databaseHelper.cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
-                        openMotnLink(motn, providerName);
+                        openMotnLink(motn, providerName, tmdbProviderId);
                     }
-                    @Override public void onFailure(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                    @Override public void onFailure(@NonNull Call<MotnShowResponse> call,
                                                     @NonNull Throwable t) {}
                 });
     }
 
-    private void openMotnLink(emplay.entertainment.emplay.api.motn.MotnShowResponse motn, String providerName) {
+    private void openMotnLink(MotnShowResponse motn, String providerName, int tmdbProviderId) {
         if (!isAdded() || binding == null) return;
-        String link = MotnHelper.findLink(motn, currentWtwRegion, providerName);
-        if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName);
+        String link = MotnHelper.findLink(motn, currentWtwRegion, providerName, tmdbProviderId);
+        if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName, tmdbProviderId);
         if (link == null) {
             Toast.makeText(requireContext(), R.string.motn_link_unavailable, Toast.LENGTH_SHORT).show();
             return;

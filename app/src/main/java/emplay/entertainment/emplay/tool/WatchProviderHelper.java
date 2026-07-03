@@ -21,8 +21,7 @@ public class WatchProviderHelper {
     }
 
     public static String defaultRegion() {
-        String country = Locale.getDefault().getCountry();
-        return (country != null && !country.isEmpty()) ? country.toUpperCase(Locale.ROOT) : "US";
+        return "CA";
     }
 
     public static void showRegionPicker(Context context, Map<String, RegionProvidersModel> providerResults, RegionSelectedListener listener) {

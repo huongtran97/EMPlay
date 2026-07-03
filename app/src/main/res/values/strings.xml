@@ -328,5 +328,6 @@
     <string name="glyph_star">★</string>
     <string name="movie_number_item">Movies · 250 titles</string>
     <string name="crew">Crew</string>
+    <string name="link_unavailable">Link unavailable</string>
 
 </resources>
