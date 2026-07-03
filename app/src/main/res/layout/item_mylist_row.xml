@@ -86,15 +86,6 @@
 
         </LinearLayout>
 
-        <!-- Overflow menu -->
-        <ImageButton
-            android:id="@+id/btn_overflow"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/cd_more_options"
-            android:src="@drawable/ic_dots_vertical"
-            app:tint="@color/text_3" />
 
     </LinearLayout>
 

@@ -65,10 +65,10 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     inflater.inflate(R.layout.item_provider, parent, false));
         } else if (type == TYPE_STREAM) {
             return new StreamViewHolder(
-                    inflater.inflate(R.layout.item_provider_fallback, parent, false));
+                    inflater.inflate(R.layout.item_provider, parent, false));
         } else {
             return new RentBuyViewHolder(
-                    inflater.inflate(R.layout.item_provider_rent_buy, parent, false));
+                    inflater.inflate(R.layout.item_provider, parent, false));
         }
     }
 
@@ -98,8 +98,9 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         SimpleViewHolder(View itemView) {
             super(itemView);
-            imgProviderLogo = itemView.findViewById(R.id.imgProviderLogo);
-            tvProviderName = itemView.findViewById(R.id.tvProviderName);
+            imgProviderLogo = itemView.findViewById(R.id.imageProviderLogo);
+            tvProviderName = itemView.findViewById(R.id.textProviderName);
+            itemView.findViewById(R.id.iv_chevron).setVisibility(View.GONE);
         }
 
         void bind(ProviderModel provider) {
@@ -126,9 +127,9 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         StreamViewHolder(View itemView) {
             super(itemView);
-            ivLogo           = itemView.findViewById(R.id.iv_provider_logo);
-            tvName           = itemView.findViewById(R.id.tv_provider_name);
-            ivChevron        = itemView.findViewById(R.id.iv_chevron);
+            ivLogo            = itemView.findViewById(R.id.imageProviderLogo);
+            tvName            = itemView.findViewById(R.id.textProviderName);
+            ivChevron         = itemView.findViewById(R.id.iv_chevron);
             tvLinkUnavailable = itemView.findViewById(R.id.tv_link_unavailable);
         }
 
@@ -152,13 +153,12 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     static class RentBuyViewHolder extends RecyclerView.ViewHolder {
         ImageView ivLogo, ivChevron;
-        TextView tvName, tvQuality, tvLinkUnavailable;
+        TextView tvName, tvLinkUnavailable;
 
         RentBuyViewHolder(View itemView) {
             super(itemView);
-            ivLogo            = itemView.findViewById(R.id.iv_provider_logo);
-            tvName            = itemView.findViewById(R.id.tv_provider_name);
-            tvQuality         = itemView.findViewById(R.id.tv_quality);
+            ivLogo            = itemView.findViewById(R.id.imageProviderLogo);
+            tvName            = itemView.findViewById(R.id.textProviderName);
             ivChevron         = itemView.findViewById(R.id.iv_chevron);
             tvLinkUnavailable = itemView.findViewById(R.id.tv_link_unavailable);
         }
@@ -170,8 +170,6 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     .placeholder(R.drawable.bg_provider_fallback)
                     .transform(new RoundedCorners(12))
                     .into(ivLogo);
-
-            tvQuality.setVisibility(View.GONE);
 
             if (provider.hasDeepLink()) {
                 ivChevron.setVisibility(View.VISIBLE);

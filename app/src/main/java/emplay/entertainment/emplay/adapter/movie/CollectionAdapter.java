@@ -66,7 +66,6 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
             holder.tagRating.setVisibility(View.GONE);
         }
 
-        holder.btnOverflow.setVisibility(View.GONE);
 
         String releaseDate = part.getReleaseDate();
         if (releaseDate != null && !releaseDate.isEmpty()
@@ -108,7 +107,6 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgThumb;
         TextView tvTitle, tvMeta, tagRating, tagStatus;
-        ImageButton btnOverflow;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -117,7 +115,6 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
             tvMeta = itemView.findViewById(R.id.tv_item_meta);
             tagRating = itemView.findViewById(R.id.tag_rating);
             tagStatus = itemView.findViewById(R.id.tag_status);
-            btnOverflow = itemView.findViewById(R.id.btn_overflow);
             imgThumb.setClipToOutline(true);
         }
     }
