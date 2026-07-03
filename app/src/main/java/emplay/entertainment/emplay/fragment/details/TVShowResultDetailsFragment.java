@@ -44,9 +44,9 @@ import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.api.tvshow.SeasonDetailResponse;
+import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowContentRatingsResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowDetailsResponse;
-import emplay.entertainment.emplay.api.tvshow.TVShowProviderResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowSimilarResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowCreditsResponses;
 import emplay.entertainment.emplay.api.tvshow.TVShowsTrailerResponses;
@@ -62,6 +62,7 @@ import emplay.entertainment.emplay.models.common.ProviderModel;
 import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 import emplay.entertainment.emplay.models.tvshow.SeasonsModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
+import emplay.entertainment.emplay.tool.MotnHelper;
 import emplay.entertainment.emplay.tool.PaginationHelper;
 import emplay.entertainment.emplay.tool.ReadHelper;
 import emplay.entertainment.emplay.tool.WatchProviderHelper;
@@ -94,6 +95,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private boolean tmdbTVInWatchlist = false;
     private boolean isAiring = false;
     private boolean userHasSelectedRegion = false;
+    private String currentWtwRegion = WatchProviderHelper.defaultRegion();
     private final ArrayList<String> tvGenreNames = new ArrayList<>();
 
     public static TVShowResultDetailsFragment newInstance(int tvId) {
@@ -181,7 +183,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 fetchTVSuggestionList();
                 fetchTrailers();
                 fetchTVCertification();
-                setupWtwTapToLoad();
+                fetchTVProviders();
             }
         }
 
@@ -308,7 +310,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                 if (binding == null) return;
                                 binding.wtwUnreleased.getRoot().setVisibility(View.GONE);
                                 binding.wtwReleased.getRoot().setVisibility(View.VISIBLE);
-                                setupWtwTapToLoad();
+                                fetchTVProviders();
                             });
                 }
         );
@@ -499,96 +501,30 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         return ca != null ? ca : us;
     }
 
-    private void setupWtwTapToLoad() {
-        if (binding == null || !isAdded()) return;
-        WtwReleasedViewBinding wtw = binding.wtwReleased;
-        wtw.tabLayoutWtw.setVisibility(View.GONE);
-        wtw.rvProviders.setVisibility(View.GONE);
-        wtw.layoutWtwEmpty.setVisibility(View.GONE);
-        wtw.layoutWtwLoad.setVisibility(View.VISIBLE);
-        wtw.layoutWtwLoad.setOnClickListener(v -> loadMotnProviders());
-    }
-
-    private void loadMotnProviders() {
-        if (binding == null || !isAdded()) return;
-        WtwReleasedViewBinding wtw = binding.wtwReleased;
-        wtw.layoutWtwLoad.setVisibility(View.GONE);
-        wtw.progressMotn.setVisibility(View.VISIBLE);
-
-        new Thread(() -> {
-            String cached = databaseHelper.getMotnCache(tvId,
-                    emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_SERIES,
-                    emplay.entertainment.emplay.tool.MotnHelper.CACHE_TTL_MS);
-            if (cached != null) {
-                emplay.entertainment.emplay.api.motn.MotnShowResponse response =
-                        emplay.entertainment.emplay.tool.MotnHelper.fromJson(cached);
-                if (response != null) {
-                    Map<String, RegionProvidersModel> results =
-                            emplay.entertainment.emplay.tool.MotnHelper.toProviderMap(response);
-                    safeRunOnUiThread(() -> onMotnProvidersReady(results));
-                    return;
-                }
-            }
-            safeRunOnUiThread(() -> fetchMotnFromNetwork());
-        }).start();
-    }
-
-    private void fetchMotnFromNetwork() {
-        safeEnqueue(apiService.getStreamingAvailability(tvId,
-                emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_SERIES),
-                new Callback<emplay.entertainment.emplay.api.motn.MotnShowResponse>() {
+    private void fetchTVProviders() {
+        safeEnqueue(apiService.getTVShowProviders(TMDBpath.tvProvider(tvId)),
+                new Callback<TVShowProviderResponse>() {
                     @Override
-                    public void onResponse(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
-                                           @NonNull Response<emplay.entertainment.emplay.api.motn.MotnShowResponse> response) {
-                        if (binding == null) return;
-                        if (!response.isSuccessful() || response.body() == null) {
-                            showMotnError();
-                            return;
-                        }
-                        emplay.entertainment.emplay.api.motn.MotnShowResponse body = response.body();
-                        new Thread(() -> {
-                            databaseHelper.saveMotnCache(tvId,
-                                    emplay.entertainment.emplay.tool.MotnHelper.SHOW_TYPE_SERIES,
-                                    emplay.entertainment.emplay.tool.MotnHelper.toJson(body));
-                            Map<String, RegionProvidersModel> results =
-                                    emplay.entertainment.emplay.tool.MotnHelper.toProviderMap(body);
-                            safeRunOnUiThread(() -> onMotnProvidersReady(results));
-                        }).start();
+                    public void onResponse(@NonNull Call<TVShowProviderResponse> call,
+                                           @NonNull Response<TVShowProviderResponse> response) {
+                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
+                        watchProviderResults = response.body().getResults();
+                        bindTVProviders(WatchProviderHelper.defaultRegion());
+                        binding.wtwReleased.btnRegion.setOnClickListener(v ->
+                                WatchProviderHelper.showRegionPicker(requireContext(),
+                                        watchProviderResults, region -> {
+                                            userHasSelectedRegion = true;
+                                            bindTVProviders(region);
+                                        }));
                     }
-
-                    @Override
-                    public void onFailure(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
-                                          @NonNull Throwable t) {
-                        showMotnError();
-                    }
+                    @Override public void onFailure(@NonNull Call<TVShowProviderResponse> call,
+                                                    @NonNull Throwable t) {}
                 });
-    }
-
-    private void onMotnProvidersReady(Map<String, RegionProvidersModel> results) {
-        if (binding == null || !isAdded()) return;
-        watchProviderResults = results;
-        binding.wtwReleased.progressMotn.setVisibility(View.GONE);
-        String region = WatchProviderHelper.defaultRegion();
-        bindTVProviders(region);
-        binding.wtwReleased.btnRegion.setOnClickListener(v ->
-                WatchProviderHelper.showRegionPicker(requireContext(), watchProviderResults,
-                        selectedRegion -> {
-                            userHasSelectedRegion = true;
-                            bindTVProviders(selectedRegion);
-                        }));
-    }
-
-    private void showMotnError() {
-        if (binding == null || !isAdded()) return;
-        WtwReleasedViewBinding wtw = binding.wtwReleased;
-        wtw.progressMotn.setVisibility(View.GONE);
-        wtw.layoutWtwLoad.setVisibility(View.VISIBLE);
-        wtw.tvWtwLoad.setText(R.string.wtw_load_error);
-        wtw.layoutWtwLoad.setOnClickListener(v -> loadMotnProviders());
     }
 
     private void bindTVProviders(String region) {
         if (binding == null || !isAdded()) return;
+        currentWtwRegion = region;
         WtwReleasedViewBinding wtw = binding.wtwReleased;
         wtw.tvRegion.setText(region);
         wtw.nowInTheatersBadge.setVisibility(View.GONE);
@@ -609,6 +545,8 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
         ProviderAdapter streamAdapter  = new ProviderAdapter(ProviderAdapter.TYPE_STREAM);
         ProviderAdapter rentBuyAdapter = new ProviderAdapter(ProviderAdapter.TYPE_RENT_BUY);
+        streamAdapter.setOnProviderClick(provider -> handleProviderClick(provider, MotnHelper.SHOW_TYPE_TV));
+        rentBuyAdapter.setOnProviderClick(provider -> handleProviderClick(provider, MotnHelper.SHOW_TYPE_TV));
 
         wtw.layoutWtwEmpty.setVisibility(View.GONE);
         wtw.tabLayoutWtw.setVisibility(View.VISIBLE);
@@ -680,6 +618,49 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             return ac == bc ? 0 : (ac ? -1 : 1);
         });
         return sorted;
+    }
+
+    private void handleProviderClick(ProviderModel provider, String showType) {
+        new Thread(() -> {
+            String cached = databaseHelper.getCachedMotnJson(tvId, showType);
+            if (cached != null) {
+                emplay.entertainment.emplay.api.motn.MotnShowResponse motn = MotnHelper.fromJson(cached);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> openMotnLink(motn, provider.getProviderName()));
+                }
+                return;
+            }
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> fetchAndOpenMotnLink(tvId, showType, provider.getProviderName()));
+            }
+        }).start();
+    }
+
+    private void fetchAndOpenMotnLink(int tmdbId, String showType, String providerName) {
+        safeEnqueue(apiService.getStreamingAvailability(tmdbId, showType),
+                new Callback<emplay.entertainment.emplay.api.motn.MotnShowResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                                           @NonNull Response<emplay.entertainment.emplay.api.motn.MotnShowResponse> response) {
+                        if (binding == null || !response.isSuccessful() || response.body() == null) return;
+                        emplay.entertainment.emplay.api.motn.MotnShowResponse motn = response.body();
+                        new Thread(() -> databaseHelper.cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
+                        openMotnLink(motn, providerName);
+                    }
+                    @Override public void onFailure(@NonNull Call<emplay.entertainment.emplay.api.motn.MotnShowResponse> call,
+                                                    @NonNull Throwable t) {}
+                });
+    }
+
+    private void openMotnLink(emplay.entertainment.emplay.api.motn.MotnShowResponse motn, String providerName) {
+        if (!isAdded() || binding == null) return;
+        String link = MotnHelper.findLink(motn, currentWtwRegion, providerName);
+        if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName);
+        if (link == null) {
+            Toast.makeText(requireContext(), R.string.motn_link_unavailable, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link)));
     }
 
     // ── Watchlist ─────────────────────────────────────────────────────────────

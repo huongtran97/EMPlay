@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "emplay.db";
-    private static final int DATABASE_VERSION = 15;
+    private static final int DATABASE_VERSION = 18;
     static final long CACHE_TTL_MS = 24 * 60 * 60 * 1000L;
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_SHOWS = "tvshows";
@@ -48,6 +48,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_CATALOG_META = "catalog_meta";
     private static final String COLUMN_META_KEY = "meta_key";
     private static final String COLUMN_LAST_FETCHED_MS = "last_fetched_ms";
+    private static final String TABLE_MOTN_CACHE = "motn_cache";
+    private static final String COLUMN_MOTN_TMDB_ID = "tmdb_id";
+    private static final String COLUMN_MOTN_SHOW_TYPE = "show_type";
+    private static final String COLUMN_MOTN_JSON = "response_json";
+    private static final String COLUMN_MOTN_FETCHED_AT = "fetched_at";
 
     // Singleton — 1 DB connection shared across the app to avoid "database locked" issues.
     private static DatabaseHelper instance;
@@ -117,14 +122,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_META_KEY + " TEXT PRIMARY KEY, " +
                     COLUMN_LAST_FETCHED_MS + " INTEGER NOT NULL)";
 
-    static final String TABLE_MOTN_CACHE = "motn_cache";
     private static final String CREATE_TABLE_MOTN_CACHE =
-            "CREATE TABLE " + TABLE_MOTN_CACHE + " (" +
-                    "tmdb_id INTEGER NOT NULL, " +
-                    "show_type TEXT NOT NULL, " +
-                    "json_data TEXT NOT NULL, " +
-                    "cached_at INTEGER NOT NULL, " +
-                    "PRIMARY KEY (tmdb_id, show_type))";
+            "CREATE TABLE IF NOT EXISTS " + TABLE_MOTN_CACHE + " (" +
+                    COLUMN_MOTN_TMDB_ID + " INTEGER NOT NULL, " +
+                    COLUMN_MOTN_SHOW_TYPE + " TEXT NOT NULL, " +
+                    COLUMN_MOTN_JSON + " TEXT NOT NULL, " +
+                    COLUMN_MOTN_FETCHED_AT + " INTEGER NOT NULL, " +
+                    "PRIMARY KEY (" + COLUMN_MOTN_TMDB_ID + ", " + COLUMN_MOTN_SHOW_TYPE + "))";
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -142,15 +146,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOTN_CACHE);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATALOG_META);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_RECENT_SEARCHES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_SHOWS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_MOVIES);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_PROFILE);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_SHOWS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOVIES);
-        onCreate(db);
+        if (oldVersion < 17) {
+            // Drop motn_cache regardless of its previous schema — v15 used json_data/cached_at,
+            // v16 may have left the old schema intact due to CREATE IF NOT EXISTS being a no-op.
+            db.execSQL("DROP TABLE IF EXISTS " + TABLE_MOTN_CACHE);
+            db.execSQL(CREATE_TABLE_MOTN_CACHE);
+        }
+        if (oldVersion < 18) {
+            // Repopulate motn_cache: cached JSON was written without addon field, so addon-gated
+            // provider name matching would always fail on cache hits.
+            db.execSQL("DELETE FROM " + TABLE_MOTN_CACHE);
+        }
     }
 
     public void deleteMovie(int itemId, String userId) {
@@ -186,40 +192,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (rowsAffected == 0) {
             db.insert(TABLE_USER_PROFILE, null, values);
         }
-    }
-
-    // ── Movie of the Night cache ──────────────────────────────────────────────
-
-    /** Returns cached JSON if it exists and is less than ttlMs old, otherwise null. */
-    public String getMotnCache(int tmdbId, String showType, long ttlMs) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        android.database.Cursor cursor = db.query(
-                TABLE_MOTN_CACHE,
-                new String[]{"json_data", "cached_at"},
-                "tmdb_id = ? AND show_type = ?",
-                new String[]{String.valueOf(tmdbId), showType},
-                null, null, null);
-        try {
-            if (cursor.moveToFirst()) {
-                long cachedAt = cursor.getLong(1);
-                if (System.currentTimeMillis() - cachedAt < ttlMs) {
-                    return cursor.getString(0);
-                }
-            }
-        } finally {
-            cursor.close();
-        }
-        return null;
-    }
-
-    public void saveMotnCache(int tmdbId, String showType, String json) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("tmdb_id", tmdbId);
-        values.put("show_type", showType);
-        values.put("json_data", json);
-        values.put("cached_at", System.currentTimeMillis());
-        db.insertWithOnConflict(TABLE_MOTN_CACHE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     public void addRecentSearch(String query) {
@@ -319,6 +291,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             cursor.close();
         }
+    }
+
+    /** Returns cached MOTN JSON for the given TMDB ID + show type, or null if expired/missing. */
+    public String getCachedMotnJson(int tmdbId, String showType) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        android.database.Cursor cursor = db.query(TABLE_MOTN_CACHE,
+                new String[]{COLUMN_MOTN_JSON, COLUMN_MOTN_FETCHED_AT},
+                COLUMN_MOTN_TMDB_ID + " = ? AND " + COLUMN_MOTN_SHOW_TYPE + " = ?",
+                new String[]{String.valueOf(tmdbId), showType},
+                null, null, null);
+        try {
+            if (!cursor.moveToFirst()) return null;
+            long fetchedAt = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_MOTN_FETCHED_AT));
+            if (System.currentTimeMillis() - fetchedAt > emplay.entertainment.emplay.tool.MotnHelper.CACHE_TTL_MS) return null;
+            return cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_MOTN_JSON));
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /** Upsert MOTN JSON for the given TMDB ID + show type. */
+    public void cacheMotnJson(int tmdbId, String showType, String json) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_MOTN_TMDB_ID, tmdbId);
+        values.put(COLUMN_MOTN_SHOW_TYPE, showType);
+        values.put(COLUMN_MOTN_JSON, json);
+        values.put(COLUMN_MOTN_FETCHED_AT, System.currentTimeMillis());
+        db.insertWithOnConflict(TABLE_MOTN_CACHE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
     public List<TVShowModel> getSavedTVShows(String userId) {

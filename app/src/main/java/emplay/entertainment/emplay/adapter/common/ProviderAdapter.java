@@ -26,11 +26,20 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public static final int TYPE_RENT_BUY = 1;
     public static final int TYPE_SIMPLE = 2;
 
+    public interface OnProviderClick {
+        void onClick(ProviderModel provider);
+    }
+
     private List<ProviderModel> providers = new ArrayList<>();
     private final int viewType;
+    private OnProviderClick clickListener;
 
     public ProviderAdapter(int viewType) {
         this.viewType = viewType;
+    }
+
+    public void setOnProviderClick(OnProviderClick listener) {
+        this.clickListener = listener;
     }
 
     /**
@@ -73,6 +82,9 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else {
             ((RentBuyViewHolder) holder).bind(provider);
         }
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) clickListener.onClick(provider);
+        });
     }
 
     @Override

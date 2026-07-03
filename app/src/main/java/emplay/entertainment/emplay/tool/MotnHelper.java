@@ -1,87 +1,87 @@
 package emplay.entertainment.emplay.tool;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import emplay.entertainment.emplay.api.motn.MotnServiceInfo;
 import emplay.entertainment.emplay.api.motn.MotnShowResponse;
 import emplay.entertainment.emplay.api.motn.MotnStreamingOption;
-import emplay.entertainment.emplay.models.common.ProviderModel;
-import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 
 public class MotnHelper {
 
     private static final Gson GSON = new Gson();
 
-    public static final String SHOW_TYPE_MOVIE  = "movie";
-    public static final String SHOW_TYPE_SERIES = "series";
+    public static final String SHOW_TYPE_MOVIE = "movie";
+    public static final String SHOW_TYPE_TV    = "tv";
 
-    /** 7 days in milliseconds */
+    /** 7 days — stays well within the 500 req/month limit. */
     public static final long CACHE_TTL_MS = 7L * 24 * 60 * 60 * 1000;
 
     /**
-     * Convert a MotnShowResponse into the same Map<region, RegionProvidersModel> shape
-     * that TMDB watch/providers returns so the existing WTW UI works unchanged.
+     * Find the direct deep-link for a specific provider in the given region.
      *
-     * MOTN uses lowercase country codes ("us", "ca") — we uppercase them for consistency
-     * with WatchProviderHelper.defaultRegion().
+     * MOTN uses lowercase country codes ("us", "ca") while the app uses uppercase ("US", "CA"),
+     * so we lowercase the region before lookup. Name matching is fuzzy — we normalize both
+     * sides to lowercase alphanumeric so "Disney Plus" matches "Disney+" and vice versa.
      */
-    public static Map<String, RegionProvidersModel> toProviderMap(MotnShowResponse response) {
-        Map<String, RegionProvidersModel> result = new HashMap<>();
-        if (response == null || response.getStreamingInfo() == null) return result;
+    public static String findLink(MotnShowResponse response, String region, String providerName) {
+        if (response == null || response.getStreamingOptions() == null) return null;
+        String target = normalize(providerName);
 
-        for (Map.Entry<String, List<MotnStreamingOption>> entry : response.getStreamingInfo().entrySet()) {
-            String region = entry.getKey().toUpperCase(Locale.ROOT);
-            List<MotnStreamingOption> options = entry.getValue();
+        // Try the user's region first, then fall back to any region that has a matching provider.
+        // Streaming deep-links (Netflix, Prime Video, etc.) are usable regardless of which
+        // country entry they came from.
+        Map<String, List<MotnStreamingOption>> all = response.getStreamingOptions();
+        String primaryKey = region.toLowerCase(Locale.ROOT);
 
-            List<ProviderModel> flatrate = new ArrayList<>();
-            List<ProviderModel> rent     = new ArrayList<>();
-            List<ProviderModel> buy      = new ArrayList<>();
+        String link = findLinkInList(all.get(primaryKey), target);
+        if (link != null) return link;
 
-            for (MotnStreamingOption opt : options) {
-                ProviderModel pm = toProviderModel(opt);
-                if (pm == null) continue;
-                switch (opt.getType()) {
-                    case "subscription":
-                    case "free":
-                    case "addon":
-                        flatrate.add(pm);
-                        break;
-                    case "rent":
-                        rent.add(pm);
-                        break;
-                    case "buy":
-                        buy.add(pm);
-                        break;
-                }
-            }
-
-            RegionProvidersModel rpm = new RegionProvidersModel();
-            rpm.setFlatrate(flatrate);
-            rpm.setRent(rent);
-            rpm.setBuy(buy);
-            result.put(region, rpm);
+        for (Map.Entry<String, List<MotnStreamingOption>> entry : all.entrySet()) {
+            if (entry.getKey().equals(primaryKey)) continue;
+            link = findLinkInList(entry.getValue(), target);
+            if (link != null) return link;
         }
-        return result;
+        return null;
     }
 
-    private static ProviderModel toProviderModel(MotnStreamingOption opt) {
-        if (opt.getService() == null) return null;
-        String name = opt.getService().getName();
-        String logoUrl = null;
-        if (opt.getService().getImageSet() != null) {
-            logoUrl = opt.getService().getImageSet().getDarkThemeImage();
-            if (logoUrl == null || logoUrl.isEmpty()) {
-                logoUrl = opt.getService().getImageSet().getLightThemeImage();
+    /**
+     * When no movie-specific deep link exists, return the matching service's homepage
+     * (e.g. "https://www.netflix.com") so the user lands on the right app/site.
+     */
+    public static String findServiceHomePage(MotnShowResponse response, String providerName) {
+        if (response == null || response.getStreamingOptions() == null) return null;
+        String target = normalize(providerName);
+        for (List<MotnStreamingOption> options : response.getStreamingOptions().values()) {
+            if (options == null) continue;
+            for (MotnStreamingOption opt : options) {
+                if (matches(opt.getService(), target) && opt.getService().getHomePage() != null)
+                    return opt.getService().getHomePage();
+                if (matches(opt.getAddon(), target) && opt.getAddon().getHomePage() != null)
+                    return opt.getAddon().getHomePage();
             }
         }
-        return ProviderModel.fromMotn(name, logoUrl);
+        return null;
+    }
+
+    private static String findLinkInList(List<MotnStreamingOption> options, String target) {
+        if (options == null) return null;
+        for (MotnStreamingOption opt : options) {
+            if (opt.getLink() == null) continue;
+            if (matches(opt.getService(), target)) return opt.getLink();
+            if (matches(opt.getAddon(), target))   return opt.getLink();
+        }
+        return null;
+    }
+
+    private static boolean matches(MotnServiceInfo info, String target) {
+        if (info == null || info.getName() == null) return false;
+        String candidate = normalize(info.getName());
+        return candidate.contains(target) || target.contains(candidate);
     }
 
     public static String toJson(MotnShowResponse response) {
@@ -95,5 +95,26 @@ public class MotnHelper {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    // TMDB and MOTN use different names for the same service.
+    // Key = normalized TMDB provider name, value = normalized MOTN service name.
+    private static final Map<String, String> ALIASES = new HashMap<>();
+    static {
+        // Amazon: TMDB uses "Amazon Video" (rent/buy, ID 10) or "Amazon Prime Video" (sub, ID 9)
+        // MOTN always uses "Prime Video"
+        ALIASES.put("amazonvideo",      "primevideo");
+        ALIASES.put("amazonprimevideo", "primevideo");
+
+        // Apple: TMDB renamed provider ID 2 from "Apple iTunes" to "Apple TV Store";
+        // MOTN calls the same service "Apple TV"
+        ALIASES.put("appleitunes",      "appletv");
+        ALIASES.put("appletvstore",     "appletv");
+    }
+
+    private static String normalize(String name) {
+        if (name == null) return "";
+        String n = name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        return ALIASES.getOrDefault(n, n);
     }
 }
