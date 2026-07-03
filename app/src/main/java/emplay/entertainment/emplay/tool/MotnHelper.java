@@ -196,6 +196,7 @@ public class MotnHelper {
         TMDB_TO_MOTN_SLUG.put(257,  "fubo");         // FuboTV
         TMDB_TO_MOTN_SLUG.put(426,  "philo");
         TMDB_TO_MOTN_SLUG.put(538,  "plex");
+        TMDB_TO_MOTN_SLUG.put(230,  "crave");         // Crave (Bell Media, Canada)
         // Google Play Movies (3), YouTube TV (~227), and Spectrum On Demand (486) are not
         // tracked by MOTN: Google Play is purchase-only, the other two are cable/live-TV services.
     }
