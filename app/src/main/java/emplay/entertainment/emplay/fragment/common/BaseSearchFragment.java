@@ -66,7 +66,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragment {
-
     protected GenresAdapter genresAdapter;
     protected TrendingSearchAdapter trendingAdapter;
     protected List<GenresModel> genresList = new ArrayList<>();
@@ -88,14 +87,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     private View cardDropdown;
     private TabLayout tabLayoutSearch;
     private RecyclerView rvDropdownResults;
-    private View footerPeople;
-
-    // Dropdown pagination
-    private static final int SEARCH_PAGE_SIZE = 5;
-    private View paginationBar;
-    private TextView tvPageIndicator;
-    private ImageButton btnPrev, btnNext;
-    private PaginationHelper<MultiSearchResult> paginationHelper;
+    private View searchLoadingIndicator;
 
     // Popular Right Now pagination
     private static final int POPULAR_PAGE_SIZE = 6;
@@ -110,8 +102,13 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
 
     private SearchMediaAdapter mediaAdapter;
     private SearchPersonAdapter personAdapter;
-    private final List<MultiSearchResult> latestMediaList = new ArrayList<>();
-    private final List<MultiSearchResult> latestPersonList = new ArrayList<>();
+
+    // Search buffer + pagination state
+    private final List<MultiSearchResult> searchBuffer = new ArrayList<>();
+    private int searchApiPage = 0;
+    private int searchTotalApiPages = 1;
+    private boolean searchFetching = false;
+    private int searchToken = 0;
 
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable pendingSearch;
@@ -160,34 +157,8 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         cardDropdown = view.findViewById(R.id.cardDropdown);
         tabLayoutSearch = view.findViewById(R.id.tabLayoutSearch);
         rvDropdownResults = view.findViewById(R.id.rvDropdownResults);
-        footerPeople = view.findViewById(R.id.footerPeople);
-
-        // Pagination bar
-        paginationBar = view.findViewById(R.id.paginationBar);
-        tvPageIndicator = view.findViewById(R.id.tvPageIndicator);
-        btnPrev = view.findViewById(R.id.btnPrev);
-        btnNext = view.findViewById(R.id.btnNext);
-
-        paginationHelper = new PaginationHelper<>(SEARCH_PAGE_SIZE, new ArrayList<>(),
-                new PaginationHelper.PaginationCallback<MultiSearchResult>() {
-                    @Override
-                    public void onPageUpdated(List<MultiSearchResult> pageItems) {
-                        int tab = tabLayoutSearch.getSelectedTabPosition();
-                        if (tab == 2) {
-                            personAdapter.submitList(new ArrayList<>(pageItems));
-                        } else {
-                            mediaAdapter.submitList(new ArrayList<>(pageItems));
-                        }
-                    }
-                    @Override
-                    public void onUiUpdate(int current, int total, boolean hasPrev, boolean hasNext) {
-                        PaginationHelper.updatePaginationBar(paginationBar, tvPageIndicator,
-                                btnPrev, btnNext, current, total, hasPrev, hasNext);
-                    }
-                });
-
-        btnPrev.setOnClickListener(v -> paginationHelper.prevPage());
-        btnNext.setOnClickListener(v -> paginationHelper.nextPage());
+        View footerPeople = view.findViewById(R.id.footerPeople);
+        searchLoadingIndicator = view.findViewById(R.id.searchLoadingIndicator);
 
         // Popular Right Now pagination
         sectionPopularHeader = view.findViewById(R.id.sectionPopularHeader);
@@ -252,26 +223,20 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         }
 
         tabLayoutSearch.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override public void onTabSelected(TabLayout.Tab tab) { applyDropdownState(); }
+            @Override public void onTabSelected(TabLayout.Tab tab) { applyBufferToTab(); }
             @Override public void onTabUnselected(TabLayout.Tab tab) {}
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
 
         footerPeople.setVisibility(View.GONE);
 
-        viewModel.getMultiSearchResults().observe(getViewLifecycleOwner(), results -> {
-            latestMediaList.clear();
-            latestPersonList.clear();
-            if (results != null) {
-                for (MultiSearchResult r : results) {
-                    if ("person".equals(r.getMediaType())) {
-                        latestPersonList.add(r);
-                    } else {
-                        latestMediaList.add(r);
-                    }
+        rvDropdownResults.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                if (dy > 0 && !rv.canScrollVertically(1)) {
+                    loadMoreSearch();
                 }
             }
-            applyDropdownState();
         });
 
         view.findViewById(R.id.sectionSearchByOrigin).setOnClickListener(v ->
@@ -291,30 +256,82 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
 
         if (!lastQuery.isEmpty()) {
             etSearch.setText(lastQuery);
-            viewModel.searchMulti(lastQuery);
+            startSearch(lastQuery);
             showDropdown();
         }
 
         return view;
     }
 
-    private void applyDropdownState() {
-        boolean hasAny = !latestMediaList.isEmpty() || !latestPersonList.isEmpty();
-        tabLayoutSearch.setVisibility(hasAny ? View.VISIBLE : View.GONE);
+    private void startSearch(String query) {
+        searchToken++;
+        searchBuffer.clear();
+        searchApiPage = 0;
+        searchTotalApiPages = 1;
+        searchFetching = false;
+        fetchSearchPage(query, 1);
+    }
 
-        int selectedTab = tabLayoutSearch.getSelectedTabPosition();
+    private void fetchSearchPage(String query, int page) {
+        if (searchFetching) return;
+        searchFetching = true;
+        searchLoadingIndicator.setVisibility(View.VISIBLE);
+        final int token = searchToken;
+        safeEnqueue(apiService.searchMulti(TMDBpath.searchMulti(), query, "en-US", page),
+                new Callback<MultiSearchResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<MultiSearchResponse> call,
+                                           @NonNull Response<MultiSearchResponse> response) {
+                        if (token != searchToken) return;
+                        searchFetching = false;
+                        searchLoadingIndicator.setVisibility(View.GONE);
+                        if (response.isSuccessful() && response.body() != null) {
+                            searchApiPage = page;
+                            int total = response.body().getTotalPages();
+                            if (total > 0) searchTotalApiPages = total;
+                            List<MultiSearchResult> results = response.body().getResults();
+                            if (results != null) {
+                                for (MultiSearchResult r : results) {
+                                    if (r != null) searchBuffer.add(r);
+                                }
+                            }
+                        }
+                        applyBufferToTab();
+                    }
+                    @Override
+                    public void onFailure(@NonNull Call<MultiSearchResponse> call,
+                                         @NonNull Throwable t) {
+                        if (token != searchToken) return;
+                        searchFetching = false;
+                        searchLoadingIndicator.setVisibility(View.GONE);
+                        applyBufferToTab();
+                    }
+                });
+    }
+
+    private void applyBufferToTab() {
+        tabLayoutSearch.setVisibility(searchBuffer.isEmpty() ? View.GONE : View.VISIBLE);
+        int tab = tabLayoutSearch.getSelectedTabPosition();
         List<MultiSearchResult> filtered = new ArrayList<>();
-        if (selectedTab == 2) {
+        for (MultiSearchResult r : searchBuffer) {
+            if (tab == 2 && "person".equals(r.getMediaType())) filtered.add(r);
+            else if (tab == 0 && "movie".equals(r.getMediaType())) filtered.add(r);
+            else if (tab == 1 && "tv".equals(r.getMediaType())) filtered.add(r);
+        }
+        if (tab == 2) {
             rvDropdownResults.setAdapter(personAdapter);
-            filtered.addAll(latestPersonList);
+            personAdapter.submitList(new ArrayList<>(filtered));
         } else {
             rvDropdownResults.setAdapter(mediaAdapter);
-            for (MultiSearchResult r : latestMediaList) {
-                if (selectedTab == 0 && "movie".equals(r.getMediaType())) filtered.add(r);
-                else if (selectedTab == 1 && "tv".equals(r.getMediaType())) filtered.add(r);
-            }
+            mediaAdapter.submitList(new ArrayList<>(filtered));
         }
-        paginationHelper.updateData(filtered);
+    }
+
+    private void loadMoreSearch() {
+        if (searchFetching || lastQuery.isEmpty()) return;
+        if (searchApiPage < searchTotalApiPages) {
+            fetchSearchPage(lastQuery, searchApiPage + 1);
+        }
     }
 
     private void showDropdown() {
@@ -325,9 +342,11 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     private void hideDropdown() {
         cardDropdown.setVisibility(View.GONE);
         svSearchDefault.setVisibility(View.VISIBLE);
-        paginationBar.setVisibility(View.GONE);
-        latestMediaList.clear();
-        latestPersonList.clear();
+        searchToken++;
+        searchBuffer.clear();
+        searchApiPage = 0;
+        searchFetching = false;
+        searchLoadingIndicator.setVisibility(View.GONE);
     }
 
     protected abstract void fetchGenres();
@@ -405,8 +424,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     }
 
     private void scrollToPopularSection() {
-        if (svSearchDefault instanceof NestedScrollView) {
-            NestedScrollView sv = (NestedScrollView) svSearchDefault;
+        if (svSearchDefault instanceof NestedScrollView sv) {
             sv.post(() -> sv.smoothScrollTo(0,
                     ((View) sectionPopularHeader.getParent()).getTop() + sectionPopularHeader.getTop()));
         }
@@ -469,7 +487,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
                     hideDropdown();
                 } else {
                     showDropdown();
-                    pendingSearch = () -> viewModel.searchMulti(lastQuery);
+                    pendingSearch = () -> startSearch(lastQuery);
                     searchHandler.postDelayed(pendingSearch, 400);
                 }
             }
@@ -518,7 +536,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         if (!q.isEmpty()) {
             dbHelper.addRecentSearch(q);
             hideKeyboard();
-            viewModel.searchMulti(q);
+            startSearch(q);
             showDropdown();
         }
     }

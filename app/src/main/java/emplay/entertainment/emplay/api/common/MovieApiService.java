@@ -80,7 +80,8 @@ public interface MovieApiService {
     Call<MultiSearchResponse> searchMulti(
             @Query("path") String path,
             @Query("query") String query,
-            @Query("language") String language);
+            @Query("language") String language,
+            @Query("page") int page);
 
     @GET("api/tmdb")
     Call<MovieCreditsResponse> getMovieCredits(

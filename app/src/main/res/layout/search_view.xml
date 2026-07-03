@@ -308,7 +308,7 @@
         <androidx.cardview.widget.CardView
             android:id="@+id/cardDropdown"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="top"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
@@ -320,7 +320,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <!-- Tab row (Movies / TV Shows) — GONE in PEOPLE-only state -->
@@ -349,59 +349,22 @@
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvDropdownResults"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:maxHeight="320dp"
-                    android:nestedScrollingEnabled="false"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
                     android:overScrollMode="never"
                     android:clipToPadding="false"
+                    android:paddingStart="13dp"
+                    android:paddingEnd="13dp"
                     android:paddingBottom="4dp" />
 
-                <!-- Pagination bar -->
-                <LinearLayout
-                    android:id="@+id/paginationBar"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="8dp"
-                    android:paddingEnd="8dp">
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="0.5dp"
-                        android:layout_gravity="top"
-                        android:background="@color/hairline_row" />
-
-                    <ImageButton
-                        android:id="@+id/btnPrev"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@null"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_chevron_left"
-                        app:tint="@color/text_2" />
-
-                    <TextView
-                        android:id="@+id/tvPageIndicator"
-                        style="@style/TextAppearance.EMPlay.Caption"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:textColor="@color/text_3" />
-
-                    <ImageButton
-                        android:id="@+id/btnNext"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@null"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/text_2" />
-
-                </LinearLayout>
+                <!-- Loading indicator for load-more -->
+                <ProgressBar
+                    android:id="@+id/searchLoadingIndicator"
+                    style="?android:attr/progressBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center_horizontal"
+                    android:visibility="gone" />
 
                 <!-- People footer (VISIBLE when mixed results) -->
                 <LinearLayout
