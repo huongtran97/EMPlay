@@ -147,10 +147,6 @@ public class HomeFragment extends BaseFragment {
                         onItemClicked(movie, null);
                     }
 
-                    @Override
-                    public void onTrailerClick(MovieModel movie) {
-                        // Open trailer logic
-                    }
                 }
         );
         vpTrendingBanner.setAdapter(trendingAdapter);

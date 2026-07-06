@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.core.view.ViewCompat;
-import android.widget.Button;
 import android.widget.TextView;
 import com.google.android.material.imageview.ShapeableImageView;
 
@@ -62,7 +61,6 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
 
     public interface CardGestureListener {
         void onSingleTap(MovieModel movie);
-        void onTrailerClick(MovieModel movie);
     }
 
     public TrendingBannerAdapter(Context context, List<MovieModel> movies,
@@ -106,8 +104,6 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         // Rating
         holder.tvHeroRating.setText(String.format(Locale.getDefault(), "%.1f", movie.getVoteAverage()));
 
-        // Trailer button
-        holder.btnHeroTrailer.setOnClickListener(v -> gestureListener.onTrailerClick(movie));
     }
 
     @Override
@@ -163,7 +159,6 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
         TextView tvHeroTitle;
         TextView tvHeroMeta;
         TextView tvHeroRating;
-        View btnHeroTrailer;
         MovieModel boundMovie;
         final GestureDetector gestureDetector;
 
@@ -175,7 +170,6 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
             tvHeroTitle    = itemView.findViewById(R.id.tvHeroTitle);
             tvHeroMeta     = itemView.findViewById(R.id.tvHeroMeta);
             tvHeroRating   = itemView.findViewById(R.id.tvHeroRating);
-            btnHeroTrailer = itemView.findViewById(R.id.btnHeroTrailer);
 
             gestureDetector = new GestureDetector(context,
                     new GestureDetector.SimpleOnGestureListener() {
