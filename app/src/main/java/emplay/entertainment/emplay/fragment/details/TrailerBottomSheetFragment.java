@@ -11,13 +11,13 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -96,6 +96,7 @@ public class TrailerBottomSheetFragment extends DialogFragment {
         String title    = args.getString(ARG_TITLE, "");
 
         bindHeaderViews(view, title);
+        initDragDismiss(view);
         initPlayer(view, videoKey);
     }
 
@@ -134,9 +135,26 @@ public class TrailerBottomSheetFragment extends DialogFragment {
     private void bindHeaderViews(View root, String title) {
         TextView tvTitle = root.findViewById(R.id.tv_trailer_title);
         tvTitle.setText(title);
+    }
 
-        ImageButton btnClose = root.findViewById(R.id.btn_close_trailer);
-        btnClose.setOnClickListener(v -> dismiss());
+    private void initDragDismiss(View root) {
+        View bottomChrome = root.findViewById(R.id.bottom_chrome);
+        float threshold = 60 * getResources().getDisplayMetrics().density;
+        float[] startY = {0f};
+
+        bottomChrome.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startY[0] = event.getRawY();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    if (event.getRawY() - startY[0] < -threshold) dismiss();
+                    return true;
+            }
+            return false;
+        });
     }
 
     private void initPlayer(View root, String videoKey) {
@@ -275,20 +293,25 @@ public class TrailerBottomSheetFragment extends DialogFragment {
         dialogWindow.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         activityWindow.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
 
+        int bgSurface = requireContext().getColor(R.color.bg_surface);
+        activityWindow.setStatusBarColor(bgSurface);
+        activityController.setAppearanceLightStatusBars(true);
+
         dialogWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         activityWindow.setBackgroundDrawableResource(R.color.bg_base);
 
         dialogWindow.clearFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
 
-        WindowCompat.setDecorFitsSystemWindows(dialogWindow, true);
+        WindowCompat.setDecorFitsSystemWindows(dialogWindow, false);
         WindowCompat.setDecorFitsSystemWindows(activityWindow, true);
         activityController.show(WindowInsetsCompat.Type.systemBars());
 
         // Allow touches outside the trailer to reach the detail fragment beneath.
-        dialogWindow.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+        dialogWindow.addFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
 
         dialogWindow.setLayout(WindowManager.LayoutParams.MATCH_PARENT, normalDialogHeight());
         dialogWindow.setGravity(Gravity.TOP);
@@ -297,9 +320,9 @@ public class TrailerBottomSheetFragment extends DialogFragment {
 
     private int normalDialogHeight() {
         DisplayMetrics dm = getResources().getDisplayMetrics();
-        int videoHeight    = (int) (dm.widthPixels * 9.0 / 16.0);
-        int titleBarHeight = (int) (56 * dm.density);
-        return videoHeight + titleBarHeight;
+        int videoHeight  = (int) (dm.widthPixels * 9.0 / 16.0);
+        int chromeHeight = (int) (64 * dm.density); // title row (40dp) + drag handle (24dp)
+        return videoHeight + chromeHeight;
     }
 
     private void offsetDialogBelowStatusBar(Window window) {
@@ -348,10 +371,13 @@ public class TrailerBottomSheetFragment extends DialogFragment {
         Window activityWindow = getActivity().getWindow();
         //noinspection deprecation
         activityWindow.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        activityWindow.setStatusBarColor(Color.TRANSPARENT);
         activityWindow.setBackgroundDrawableResource(R.color.bg_base);
         WindowCompat.setDecorFitsSystemWindows(activityWindow, true);
-        WindowCompat.getInsetsController(activityWindow, activityWindow.getDecorView())
-                .show(WindowInsetsCompat.Type.systemBars());
+        WindowInsetsControllerCompat controller =
+                WindowCompat.getInsetsController(activityWindow, activityWindow.getDecorView());
+        controller.setAppearanceLightStatusBars(false);
+        controller.show(WindowInsetsCompat.Type.systemBars());
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
 
