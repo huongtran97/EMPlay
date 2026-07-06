@@ -335,4 +335,12 @@
     <string name="crew">Crew</string>
     <string name="link_unavailable">Link unavailable</string>
 
+    <string name="release_alerts_title">Release Alerts</string>
+    <string name="release_alerts_dismiss_all">Clear released</string>
+    <string name="release_alerts_empty">No release alerts yet.\nWatch an upcoming title to get notified.</string>
+    <string name="release_alerts_badge_released">Released</string>
+    <string name="release_alert_set">Alert set — we\'ll remind you when it\'s out</string>
+    <string name="release_alert_removed">Alert removed</string>
+    <string name="release_alert_watching">Watching for release</string>
+
 </resources>

@@ -25,7 +25,7 @@ import java.util.List;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "emplay.db";
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 19;
     static final long CACHE_TTL_MS = 24 * 60 * 60 * 1000L;
     public static final String TABLE_MOVIES = "movies";
     public static final String TABLE_SHOWS = "tvshows";
@@ -33,6 +33,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String TABLE_USER_MOVIES = "user_movies";
     public static final String TABLE_USER_SHOWS = "user_tvshows";
     public static final String TABLE_RECENT_SEARCHES = "recent_searches";
+    public static final String TABLE_RELEASE_ALERTS = "release_alerts";
+    public static final String COLUMN_MEDIA_TYPE = "media_type";
+    public static final String COLUMN_RELEASE_DATE = "release_date";
+    public static final String COLUMN_DISMISSED = "dismissed";
     public static final String COLUMN_ID = "id";
     public static final String COLUMN_TITLE = "title";
     public static final String COLUMN_POSTER_PATH = "poster_path";
@@ -122,6 +126,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COLUMN_META_KEY + " TEXT PRIMARY KEY, " +
                     COLUMN_LAST_FETCHED_MS + " INTEGER NOT NULL)";
 
+    private static final String CREATE_TABLE_RELEASE_ALERTS =
+            "CREATE TABLE IF NOT EXISTS " + TABLE_RELEASE_ALERTS + " (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_USER_ID + " TEXT NOT NULL, " +
+                    "media_id INTEGER NOT NULL, " +
+                    COLUMN_MEDIA_TYPE + " TEXT NOT NULL, " +
+                    COLUMN_TITLE + " TEXT, " +
+                    COLUMN_POSTER_PATH + " TEXT, " +
+                    COLUMN_RELEASE_DATE + " TEXT, " +
+                    COLUMN_DISMISSED + " INTEGER NOT NULL DEFAULT 0, " +
+                    "UNIQUE (" + COLUMN_USER_ID + ", media_id, " + COLUMN_MEDIA_TYPE + "))";
+
     private static final String CREATE_TABLE_MOTN_CACHE =
             "CREATE TABLE IF NOT EXISTS " + TABLE_MOTN_CACHE + " (" +
                     COLUMN_MOTN_TMDB_ID + " INTEGER NOT NULL, " +
@@ -141,6 +157,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_RECENT_SEARCHES);
         db.execSQL(CREATE_TABLE_CATALOG_META);
         db.execSQL(CREATE_TABLE_MOTN_CACHE);
+        db.execSQL(CREATE_TABLE_RELEASE_ALERTS);
         Log.d("DatabaseHelper", "All tables created successfully");
     }
 
@@ -156,6 +173,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             // Repopulate motn_cache: cached JSON was written without addon field, so addon-gated
             // provider name matching would always fail on cache hits.
             db.execSQL("DELETE FROM " + TABLE_MOTN_CACHE);
+        }
+        if (oldVersion < 19) {
+            db.execSQL(CREATE_TABLE_RELEASE_ALERTS);
         }
     }
 
@@ -320,6 +340,75 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_MOTN_JSON, json);
         values.put(COLUMN_MOTN_FETCHED_AT, System.currentTimeMillis());
         db.insertWithOnConflict(TABLE_MOTN_CACHE, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public boolean addReleaseAlert(String userId, int mediaId, String mediaType,
+                                    String title, String posterPath, String releaseDate) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put(COLUMN_USER_ID, userId);
+        v.put("media_id", mediaId);
+        v.put(COLUMN_MEDIA_TYPE, mediaType);
+        v.put(COLUMN_TITLE, title);
+        v.put(COLUMN_POSTER_PATH, posterPath);
+        v.put(COLUMN_RELEASE_DATE, releaseDate);
+        v.put(COLUMN_DISMISSED, 0);
+        return db.insertWithOnConflict(TABLE_RELEASE_ALERTS, null, v, SQLiteDatabase.CONFLICT_IGNORE) != -1;
+    }
+
+    public void removeReleaseAlert(String userId, int mediaId, String mediaType) {
+        SQLiteDatabase db = getWritableDatabase();
+        db.delete(TABLE_RELEASE_ALERTS,
+                COLUMN_USER_ID + "=? AND media_id=? AND " + COLUMN_MEDIA_TYPE + "=?",
+                new String[]{userId, String.valueOf(mediaId), mediaType});
+    }
+
+    public boolean isReleaseAlertSet(String userId, int mediaId, String mediaType) {
+        SQLiteDatabase db = getReadableDatabase();
+        android.database.Cursor c = db.rawQuery(
+                "SELECT COUNT(*) FROM " + TABLE_RELEASE_ALERTS +
+                " WHERE " + COLUMN_USER_ID + "=? AND media_id=? AND " + COLUMN_MEDIA_TYPE + "=? AND " + COLUMN_DISMISSED + "=0",
+                new String[]{userId, String.valueOf(mediaId), mediaType});
+        try { return c.moveToFirst() && c.getInt(0) > 0; } finally { c.close(); }
+    }
+
+    public int getUnreadReleasedCount(String userId) {
+        SQLiteDatabase db = getReadableDatabase();
+        android.database.Cursor c = db.rawQuery(
+                "SELECT COUNT(*) FROM " + TABLE_RELEASE_ALERTS +
+                " WHERE " + COLUMN_USER_ID + "=? AND " + COLUMN_DISMISSED + "=0" +
+                " AND " + COLUMN_RELEASE_DATE + " <= date('now')",
+                new String[]{userId});
+        try { return c.moveToFirst() ? c.getInt(0) : 0; } finally { c.close(); }
+    }
+
+    public List<emplay.entertainment.emplay.models.common.ReleaseAlertItem> getAllActiveAlerts(String userId) {
+        SQLiteDatabase db = getReadableDatabase();
+        android.database.Cursor c = db.rawQuery(
+                "SELECT media_id, " + COLUMN_MEDIA_TYPE + ", " + COLUMN_TITLE + ", " +
+                COLUMN_POSTER_PATH + ", " + COLUMN_RELEASE_DATE +
+                " FROM " + TABLE_RELEASE_ALERTS +
+                " WHERE " + COLUMN_USER_ID + "=? AND " + COLUMN_DISMISSED + "=0" +
+                " ORDER BY CASE WHEN " + COLUMN_RELEASE_DATE + " <= date('now') THEN 0 ELSE 1 END, " +
+                COLUMN_RELEASE_DATE + " ASC",
+                new String[]{userId});
+        List<emplay.entertainment.emplay.models.common.ReleaseAlertItem> result = new ArrayList<>();
+        try {
+            while (c.moveToNext()) {
+                result.add(new emplay.entertainment.emplay.models.common.ReleaseAlertItem(
+                        c.getInt(0), c.getString(1), c.getString(2), c.getString(3), c.getString(4)));
+            }
+        } finally { c.close(); }
+        return result;
+    }
+
+    public void dismissReleasedAlerts(String userId) {
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues v = new ContentValues();
+        v.put(COLUMN_DISMISSED, 1);
+        db.update(TABLE_RELEASE_ALERTS, v,
+                COLUMN_USER_ID + "=? AND " + COLUMN_DISMISSED + "=0 AND " + COLUMN_RELEASE_DATE + " <= date('now')",
+                new String[]{userId});
     }
 
     public List<TVShowModel> getSavedTVShows(String userId) {

@@ -38,6 +38,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.auth.AuthManager;
+import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.adapter.movie.MovieAdapter;
 import emplay.entertainment.emplay.adapter.movie.TopRatedMovieAdapter;
 import emplay.entertainment.emplay.adapter.movie.TrendingBannerAdapter;
@@ -101,6 +103,10 @@ public class HomeFragment extends BaseFragment {
     private android.os.Handler autoAdvanceHandler;
     private boolean isBannerDragging = false;
     private static final long AUTO_ADVANCE_MS = 5_000L;
+
+    private View btnBell;
+    private TextView tvBellBadge;
+    private DatabaseHelper dbHelper;
 
     private com.facebook.shimmer.ShimmerFrameLayout shimmerHero;
     private com.facebook.shimmer.ShimmerFrameLayout shimmerTrending;
@@ -171,6 +177,28 @@ public class HomeFragment extends BaseFragment {
         });
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
+
+        dbHelper = DatabaseHelper.getInstance(requireContext());
+        btnBell = view.findViewById(R.id.btnBell);
+        tvBellBadge = view.findViewById(R.id.tvBellBadge);
+        if (btnBell != null) {
+            btnBell.setOnClickListener(v -> {
+                AuthManager auth = AuthManager.getInstance(requireContext());
+                if (!auth.isLoggedIn()) return;
+                ReleaseAlertsBottomSheet sheet = new ReleaseAlertsBottomSheet();
+                sheet.setOnAlertsChangedListener(new ReleaseAlertsBottomSheet.OnAlertsChangedListener() {
+                    @Override
+                    public void onAlertsChanged() {
+                        refreshBellBadge();
+                    }
+                    @Override
+                    public void onNavigateTo(androidx.fragment.app.Fragment fragment) {
+                        navigateTo(fragment);
+                    }
+                });
+                sheet.show(getChildFragmentManager(), "release_alerts");
+            });
+        }
 
         rvUpcomingMovies = view.findViewById(R.id.rvUpcomingMovies);
         upcomingMovieAdapter = new UpcomingMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
@@ -248,6 +276,7 @@ public class HomeFragment extends BaseFragment {
                 applyUpcomingTVFilter();
             }
         }
+        refreshBellBadge();
     }
 
     @Override
@@ -273,6 +302,8 @@ public class HomeFragment extends BaseFragment {
         onAirTVIdsFetched = false;
         rawUpcomingTVShows = null;
         heroSection = null;
+        btnBell = null;
+        tvBellBadge = null;
         shimmerHero = null;
         shimmerTrending = null;
         shimmerOnAir = null;
@@ -923,6 +954,23 @@ public class HomeFragment extends BaseFragment {
             animator.start();
             dot.setBackground(ContextCompat.getDrawable(requireContext(), targetBg));
         }
+    }
+
+    private void refreshBellBadge() {
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        if (!auth.isLoggedIn() || tvBellBadge == null) return;
+        new Thread(() -> {
+            int count = dbHelper.getUnreadReleasedCount(auth.getUserId());
+            safeRunOnUiThread(() -> {
+                if (tvBellBadge == null) return;
+                if (count > 0) {
+                    tvBellBadge.setText(count > 9 ? "9+" : String.valueOf(count));
+                    tvBellBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvBellBadge.setVisibility(View.GONE);
+                }
+            });
+        }).start();
     }
 
     public void onItemClicked(Object item, @Nullable View sharedElement) {

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -62,6 +63,8 @@ import emplay.entertainment.emplay.models.common.ProviderModel;
 import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 import emplay.entertainment.emplay.models.tvshow.SeasonsModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
+import emplay.entertainment.emplay.models.common.ReleaseAlertItem;
+import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.tool.MotnHelper;
 import emplay.entertainment.emplay.tool.PaginationHelper;
 import emplay.entertainment.emplay.tool.ReadHelper;
@@ -315,7 +318,58 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 }
         );
 
+        setupTVNotifyButton(tv);
         updateWatchlistButton(tv);
+    }
+
+    private void setupTVNotifyButton(TVShowDetailsResponse tv) {
+        if (binding == null) return;
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        if (!auth.isLoggedIn() || !BadgeHelper.isFutureDate(tv.getFirst_air_date())) {
+            binding.wtwUnreleased.btnNotify.setVisibility(View.GONE);
+            return;
+        }
+        String userId = auth.getUserId();
+        int mediaId = tv.getId();
+        String title = tv.getName();
+        String posterPath = tv.getPoster_path();
+        String releaseDate = tv.getFirst_air_date();
+
+        new Thread(() -> {
+            boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_TV);
+            safeRunOnUiThread(() -> applyTVNotifyState(isSet));
+        }).start();
+
+        binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
+            new Thread(() -> {
+                boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_TV);
+                if (isSet) {
+                    databaseHelper.removeReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV);
+                    safeRunOnUiThread(() -> {
+                        applyTVNotifyState(false);
+                        if (getContext() != null)
+                            Toast.makeText(getContext(), R.string.release_alert_removed, Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    databaseHelper.addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV,
+                            title, posterPath, releaseDate);
+                    safeRunOnUiThread(() -> {
+                        applyTVNotifyState(true);
+                        if (getContext() != null)
+                            Toast.makeText(getContext(), R.string.release_alert_set, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        });
+    }
+
+    private void applyTVNotifyState(boolean isSet) {
+        if (binding == null || !isAdded()) return;
+        ViewGroup btnNotify = (ViewGroup) binding.wtwUnreleased.btnNotify;
+        if (btnNotify.getChildCount() >= 2 && btnNotify.getChildAt(1) instanceof TextView) {
+            ((TextView) btnNotify.getChildAt(1)).setText(
+                    isSet ? R.string.release_alert_watching : R.string.release_notify);
+        }
     }
 
     private void bindNextEpisode(TVShowDetailsResponse.LastEpisodeToAir next) {

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -57,6 +58,7 @@ import emplay.entertainment.emplay.databinding.ActivityDetailMovieBinding;
 import emplay.entertainment.emplay.databinding.WtwReleasedViewBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.common.SeeAllFragment;
+import emplay.entertainment.emplay.models.common.ReleaseAlertItem;
 import emplay.entertainment.emplay.tool.MotnHelper;
 import emplay.entertainment.emplay.tool.ReadHelper;
 import emplay.entertainment.emplay.tool.WatchProviderHelper;
@@ -307,7 +309,58 @@ public class MovieResultDetailsFragment extends BaseFragment {
             fetchCollectionCount(collection.getId());
         }
 
+        setupNotifyButton(d);
         updateWatchlistButton(d);
+    }
+
+    private void setupNotifyButton(MovieDetailsResponse d) {
+        if (binding == null) return;
+        AuthManager auth = AuthManager.getInstance(requireContext());
+        if (!auth.isLoggedIn()) {
+            binding.wtwUnreleased.btnNotify.setVisibility(View.GONE);
+            return;
+        }
+        String userId = auth.getUserId();
+        String releaseDate = d.getReleaseDate();
+        int mediaId = d.getId();
+        String title = d.getTitle();
+        String posterPath = d.getPosterPath();
+
+        new Thread(() -> {
+            boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
+            safeRunOnUiThread(() -> applyNotifyState(isSet));
+        }).start();
+
+        binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
+            new Thread(() -> {
+                boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
+                if (isSet) {
+                    databaseHelper.removeReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
+                    safeRunOnUiThread(() -> {
+                        applyNotifyState(false);
+                        if (getContext() != null)
+                            Toast.makeText(getContext(), R.string.release_alert_removed, Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    databaseHelper.addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE,
+                            title, posterPath, releaseDate);
+                    safeRunOnUiThread(() -> {
+                        applyNotifyState(true);
+                        if (getContext() != null)
+                            Toast.makeText(getContext(), R.string.release_alert_set, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).start();
+        });
+    }
+
+    private void applyNotifyState(boolean isSet) {
+        if (binding == null || !isAdded()) return;
+        ViewGroup btnNotify = (ViewGroup) binding.wtwUnreleased.btnNotify;
+        if (btnNotify.getChildCount() >= 2 && btnNotify.getChildAt(1) instanceof TextView) {
+            ((TextView) btnNotify.getChildAt(1)).setText(
+                    isSet ? R.string.release_alert_watching : R.string.release_notify);
+        }
     }
 
     private void updateWatchlistButton(MovieDetailsResponse movieDetails) {

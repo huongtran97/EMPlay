@@ -42,9 +42,6 @@
         <activity
             android:name=".activity.LoginActivity"
             android:theme="@style/HiddenTitleTheme" />
-        <activity android:name=".activity.TrailerActivity"
-            android:theme="@style/HiddenTitleTheme">
-        </activity>
         <activity android:name=".activity.AboutActivity"
             android:theme="@style/HiddenTitleTheme"/>
 
