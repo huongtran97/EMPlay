@@ -38,7 +38,7 @@ public class RecentlyAddedFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.recently_added_view, container, false);
+        View view = inflater.inflate(R.layout.layout_recently_added, container, false);
 
         RecyclerView rvRecentlyAdded = view.findViewById(R.id.rvRecentlyAdded);
         tvItemCount = view.findViewById(R.id.tvItemCount);

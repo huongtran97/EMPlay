@@ -18,7 +18,7 @@ public class TVShowByGenreAdapter extends BasePosterAdapter<TVShowModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.tv_by_genre_item; }
+    protected int getLayoutRes() { return R.layout.item_tv_by_genre; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

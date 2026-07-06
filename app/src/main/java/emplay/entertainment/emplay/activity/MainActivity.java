@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-        setContentView(R.layout.bottom_nav_view);
+        setContentView(R.layout.layout_bottom_nav);
 
         // Target the root layout of your included component bar
         LinearLayout customNavBar = findViewById(R.id.movie_bottom_navigation_container);

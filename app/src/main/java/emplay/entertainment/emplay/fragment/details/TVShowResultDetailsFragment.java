@@ -55,7 +55,7 @@ import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
 import emplay.entertainment.emplay.databinding.ActivityDetailTvBinding;
-import emplay.entertainment.emplay.databinding.WtwReleasedViewBinding;
+import emplay.entertainment.emplay.databinding.ActivityWtwReleasedBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.common.SeeAllFragment;
 import emplay.entertainment.emplay.models.common.CastModel;
@@ -586,7 +586,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private void bindTVProviders(String region) {
         if (binding == null || !isAdded()) return;
         currentWtwRegion = region;
-        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        ActivityWtwReleasedBinding wtw = binding.wtwReleased;
         wtw.textRegion.setText(region);
 
         RegionProvidersModel regionData = watchProviderResults != null
@@ -648,7 +648,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
     private void handleNoWatchProviders() {
         if (binding == null) return;
-        WtwReleasedViewBinding wtw = binding.wtwReleased;
+        ActivityWtwReleasedBinding wtw = binding.wtwReleased;
         wtw.recyclerProviders.setVisibility(View.GONE);
         wtw.tabContainer.setVisibility(View.GONE);
 
@@ -665,7 +665,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         }
     }
 
-    private void applyWtwEmptyState(WtwReleasedViewBinding wtw, boolean isEmpty) {
+    private void applyWtwEmptyState(ActivityWtwReleasedBinding wtw, boolean isEmpty) {
         wtw.recyclerProviders.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         wtw.textEmptyState.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
     }

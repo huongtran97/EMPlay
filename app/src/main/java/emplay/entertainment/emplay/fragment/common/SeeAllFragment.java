@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import emplay.entertainment.emplay.databinding.ActivitySeeAllBinding;
-import emplay.entertainment.emplay.databinding.SearchResultCastItemBinding;
+import emplay.entertainment.emplay.databinding.ItemSearchResultCastBinding;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -216,19 +216,19 @@ public class SeeAllFragment extends BaseFragment {
     private RecyclerView.Adapter<RecyclerView.ViewHolder> buildCastGridAdapter(List<CastModel> list) {
         return new RecyclerView.Adapter<>() {
             static class VH extends RecyclerView.ViewHolder {
-                final SearchResultCastItemBinding b;
-                VH(SearchResultCastItemBinding b) { super(b.getRoot()); this.b = b; }
+                final ItemSearchResultCastBinding b;
+                VH(ItemSearchResultCastBinding b) { super(b.getRoot()); this.b = b; }
             }
             @NonNull
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new VH(SearchResultCastItemBinding.inflate(
+                return new VH(ItemSearchResultCastBinding.inflate(
                         LayoutInflater.from(parent.getContext()), parent, false));
             }
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
                 CastModel cast = list.get(position);
-                SearchResultCastItemBinding b = ((VH) holder).b;
+                ItemSearchResultCastBinding b = ((VH) holder).b;
                 b.castNameProfile.setText(cast.getName());
                 b.castCharacterProfile.setText(cast.getCharacter());
                 String path = cast.getProfilePath();
@@ -250,19 +250,19 @@ public class SeeAllFragment extends BaseFragment {
     private RecyclerView.Adapter<RecyclerView.ViewHolder> buildCrewGridAdapter(List<CastModel> list) {
         return new RecyclerView.Adapter<>() {
             static class VH extends RecyclerView.ViewHolder {
-                final SearchResultCastItemBinding b;
-                VH(SearchResultCastItemBinding b) { super(b.getRoot()); this.b = b; }
+                final ItemSearchResultCastBinding b;
+                VH(ItemSearchResultCastBinding b) { super(b.getRoot()); this.b = b; }
             }
             @NonNull
             @Override
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                return new VH(SearchResultCastItemBinding.inflate(
+                return new VH(ItemSearchResultCastBinding.inflate(
                         LayoutInflater.from(parent.getContext()), parent, false));
             }
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
                 CastModel crew = list.get(position);
-                SearchResultCastItemBinding b = ((VH) holder).b;
+                ItemSearchResultCastBinding b = ((VH) holder).b;
                 b.castNameProfile.setText(crew.getName());
                 b.castCharacterProfile.setText(crew.getCharacter());
                 String path = crew.getProfilePath();

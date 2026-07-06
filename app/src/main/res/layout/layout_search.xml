@@ -228,7 +228,7 @@
                     android:paddingEnd="13dp"
                     app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     app:spanCount="3"
-                    tools:listitem="@layout/genres_item" />
+                    tools:listitem="@layout/item_genres" />
 
                 <!-- POPULAR RIGHT NOW -->
                 <androidx.constraintlayout.widget.ConstraintLayout

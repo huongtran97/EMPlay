@@ -31,7 +31,7 @@ import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.database.DatabaseHelper;
-import emplay.entertainment.emplay.databinding.WatchlistViewBinding;
+import emplay.entertainment.emplay.databinding.LayoutWatchlistBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
@@ -52,7 +52,7 @@ public class WatchlistFragment extends BaseFragment {
     private static final int FILTER_MOVIES = 1;
     private static final int FILTER_TV = 2;
 
-    private WatchlistViewBinding binding;
+    private LayoutWatchlistBinding binding;
     private WatchlistGridAdapter adapter;
     private DatabaseHelper dbHelper;
     private TMDBWatchlistApiService watchlistApiService;
@@ -64,7 +64,7 @@ public class WatchlistFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = WatchlistViewBinding.inflate(inflater, container, false);
+        binding = LayoutWatchlistBinding.inflate(inflater, container, false);
         dbHelper = DatabaseHelper.getInstance(requireContext());
         watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
 

@@ -60,7 +60,7 @@ public class OriginGridAdapter extends RecyclerView.Adapter<OriginGridAdapter.VH
     @Override
     public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.genres_item, parent, false);
+                .inflate(R.layout.item_genres, parent, false);
         return new VH(v);
     }
 

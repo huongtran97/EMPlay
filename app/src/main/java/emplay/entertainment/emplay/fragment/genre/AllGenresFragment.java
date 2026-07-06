@@ -44,7 +44,7 @@ public class AllGenresFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_all_genres, container, false);
+        View view = inflater.inflate(R.layout.layout_all_genres, container, false);
 
         Bundle args = requireArguments();
         int[] ids = args.getIntArray(ARG_GENRE_IDS);

@@ -18,7 +18,7 @@ public class MovieAdapter extends BasePosterAdapter<MovieModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.movie_item; }
+    protected int getLayoutRes() { return R.layout.item_movie; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

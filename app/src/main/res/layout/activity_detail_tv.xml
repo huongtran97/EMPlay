@@ -292,7 +292,7 @@
         <!-- WHERE TO WATCH -->
         <include
             android:id="@+id/wtw_released"
-            layout="@layout/wtw_released_view"
+            layout="@layout/activity_wtw_released"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="13dp"
@@ -300,7 +300,7 @@
 
         <include
             android:id="@+id/wtw_unreleased"
-            layout="@layout/wtw_unreleased_view"
+            layout="@layout/activity_wtw_unreleased"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="13dp"
@@ -337,7 +337,7 @@
                 android:nestedScrollingEnabled="false"
                 android:overScrollMode="never"
                 android:clipToPadding="false"
-                tools:listitem="@layout/part_of_movie_movie"
+                tools:listitem="@layout/item_part_of_movie"
                 tools:itemCount="4" />
 
             <TextView

@@ -66,7 +66,7 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
     @Override
     public SeasonTabViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context)
-                .inflate(R.layout.search_result_tv_season_item, parent, false);
+                .inflate(R.layout.item_search_result_tv_season, parent, false);
         return new SeasonTabViewHolder(view);
     }
 

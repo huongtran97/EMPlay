@@ -65,7 +65,7 @@ public class SuggestionTVAdapter extends BasePosterAdapter<TVShowModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.tvshow_popular_item; }
+    protected int getLayoutRes() { return R.layout.item_tvshow_popular; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

@@ -116,7 +116,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.search_view, container, false);
+        View view = inflater.inflate(R.layout.layout_search, container, false);
 
         viewModel = new ViewModelProvider(requireActivity()).get(SharedViewModel.class);
         apiService = ApiClient.getClient().create(MovieApiService.class);
@@ -514,7 +514,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         recentSearch.setVisibility(history.isEmpty() ? View.GONE : View.VISIBLE);
         pillsContainer.removeAllViews();
         for (String q : history) {
-            View pill = LayoutInflater.from(requireContext()).inflate(R.layout.search_pill_item, pillsContainer, false);
+            View pill = LayoutInflater.from(requireContext()).inflate(R.layout.item_search_pill, pillsContainer, false);
             TextView tv = pill.findViewById(R.id.tvPillText);
             tv.setText(q);
             pill.setOnClickListener(v -> {

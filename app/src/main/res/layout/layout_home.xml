@@ -247,7 +247,7 @@
                 android:visibility="gone"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/movie_item" />
+                tools:listitem="@layout/item_movie" />
 
         </LinearLayout>
 

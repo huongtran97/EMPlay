@@ -1,9 +1,7 @@
 package emplay.entertainment.emplay.fragment.layout;
 
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -64,7 +62,6 @@ import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 import emplay.entertainment.emplay.models.movie.MovieModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
-import emplay.entertainment.emplay.tool.BadgeHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -124,7 +121,7 @@ public class HomeFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.home_view, container, false);
+        View view = inflater.inflate(R.layout.layout_home, container, false);
 
         heroSection = view.findViewById(R.id.heroSection);
         vpTrendingBanner = view.findViewById(R.id.vpTrendingBanner);

@@ -65,7 +65,7 @@ public class TrendingSeeAllFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.trending_see_all_view, container, false);
+        View view = inflater.inflate(R.layout.layout_trending_see_all, container, false);
 
         TextView tvTitle = view.findViewById(R.id.trendNow);
         recyclerView     = view.findViewById(R.id.rvTrendingFull);

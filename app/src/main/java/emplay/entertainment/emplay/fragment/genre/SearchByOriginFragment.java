@@ -80,7 +80,7 @@ public class SearchByOriginFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_search_by_origin, container, false);
+        View view = inflater.inflate(R.layout.layout_search_by_origin, container, false);
 
         defaultTV = getArguments() != null && getArguments().getBoolean(ARG_DEFAULT_TV, false);
 

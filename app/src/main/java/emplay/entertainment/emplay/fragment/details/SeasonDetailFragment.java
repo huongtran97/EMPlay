@@ -16,8 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 
-import java.util.List;
-
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.tvshow.EpisodeAdapter;
 import emplay.entertainment.emplay.api.common.ApiClient;
@@ -67,7 +65,7 @@ public class SeasonDetailFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.season_details_view, container, false);
+        View view = inflater.inflate(R.layout.layout_season_details, container, false);
 
         posterImage = view.findViewById(R.id.season_detail_poster);
         seasonName = view.findViewById(R.id.season_detail_name);

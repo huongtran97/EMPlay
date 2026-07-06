@@ -84,7 +84,7 @@ public class TrailerBottomSheetFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_trailer_bottom_sheet, container, false);
+        return inflater.inflate(R.layout.activity_trailer_bottom_sheet, container, false);
     }
 
     @Override

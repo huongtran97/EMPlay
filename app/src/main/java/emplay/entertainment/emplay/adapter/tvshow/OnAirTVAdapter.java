@@ -56,7 +56,7 @@ public class OnAirTVAdapter extends BasePosterAdapter<TVShowModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.tvshow_backdrop_item; }
+    protected int getLayoutRes() { return R.layout.item_tvshow_backdrop; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

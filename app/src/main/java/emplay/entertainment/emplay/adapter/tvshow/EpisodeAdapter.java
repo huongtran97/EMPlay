@@ -70,7 +70,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
     @NonNull
     @Override
     public EpisodeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.episode_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_episode, parent, false);
         return new EpisodeViewHolder(view);
     }
 

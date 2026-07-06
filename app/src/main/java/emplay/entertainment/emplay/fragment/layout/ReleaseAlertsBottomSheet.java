@@ -45,7 +45,7 @@ public class ReleaseAlertsBottomSheet extends BottomSheetDialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_release_alerts_sheet, container, false);
+        View view = inflater.inflate(R.layout.activity_release_alerts_sheet, container, false);
         db = DatabaseHelper.getInstance(requireContext());
         userId = AuthManager.getInstance(requireContext()).getUserId();
 

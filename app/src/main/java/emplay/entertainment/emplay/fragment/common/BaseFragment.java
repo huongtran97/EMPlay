@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
-import emplay.entertainment.emplay.databinding.WtwUnreleasedViewBinding;
+import emplay.entertainment.emplay.databinding.ActivityWtwUnreleasedBinding;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -206,7 +206,7 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void startCountdown(LocalDate releaseDate,
-                                  WtwUnreleasedViewBinding unreleasedBinding,
+                                  ActivityWtwUnreleasedBinding unreleasedBinding,
                                   Runnable onFinish) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
 

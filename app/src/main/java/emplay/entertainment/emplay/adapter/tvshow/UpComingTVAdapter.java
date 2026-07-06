@@ -66,7 +66,7 @@ public class UpComingTVAdapter extends BasePosterAdapter<TVShowModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.up_coming_tv_item; }
+    protected int getLayoutRes() { return R.layout.item_up_coming_tv; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

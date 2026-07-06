@@ -61,7 +61,7 @@ public class TVShowsByGenresFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.tv_by_genre_view, container, false);
+        View view = inflater.inflate(R.layout.layout_tv_by_genre, container, false);
 
         recyclerView     = view.findViewById(R.id.tv_by_genre_recyclerview);
         loadingIndicator = view.findViewById(R.id.loadingIndicator);

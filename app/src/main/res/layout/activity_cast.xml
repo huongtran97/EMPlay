@@ -157,7 +157,7 @@
                 android:paddingStart="13dp"
                 android:paddingEnd="13dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/movie_item" />
+                tools:listitem="@layout/item_movie" />
 
             <!-- FILMOGRAPHY header -->
             <LinearLayout

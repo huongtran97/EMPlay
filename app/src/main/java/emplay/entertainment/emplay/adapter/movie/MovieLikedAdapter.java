@@ -18,7 +18,7 @@ public class MovieLikedAdapter extends BasePosterAdapter<MovieModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.liked_movie_item; }
+    protected int getLayoutRes() { return R.layout.item_liked_movie; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

@@ -59,7 +59,7 @@ public class WhatsNewFragment extends BaseFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.whats_new_view, container, false);
+        View view = inflater.inflate(R.layout.activity_whats_new, container, false);
 
         recyclerView = view.findViewById(R.id.rvWhatsNewFull);
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));

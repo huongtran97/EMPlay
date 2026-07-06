@@ -51,7 +51,7 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
     @NonNull
     @Override
     public CreditViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.movie_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_movie, parent, false);
         return new CreditViewHolder(view);
     }
 

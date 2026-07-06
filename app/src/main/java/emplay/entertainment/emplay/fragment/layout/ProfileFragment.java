@@ -97,7 +97,7 @@ public class ProfileFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.customer_profile_view, container, false);
+        View view = inflater.inflate(R.layout.activity_profile_view, container, false);
 
         civAvatar = view.findViewById(R.id.civAvatar);
         tvProfileName = view.findViewById(R.id.tvProfileName);

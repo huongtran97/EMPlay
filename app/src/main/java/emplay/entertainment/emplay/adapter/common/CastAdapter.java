@@ -1,6 +1,5 @@
 package emplay.entertainment.emplay.adapter.common;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -70,7 +69,7 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     @NonNull
     @Override
     public CastViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.search_result_cast_item, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_search_result_cast, parent, false);
         return new CastViewHolder(view);
     }
 

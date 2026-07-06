@@ -244,7 +244,8 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:clickable="true"
-                    android:focusable="true">
+                    android:focusable="true"
+                    tools:ignore="UseCompoundDrawables">
 
                     <TextView
                         android:layout_width="0dp"

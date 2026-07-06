@@ -18,7 +18,7 @@ public class TVLikedAdapter extends BasePosterAdapter<TVShowModel> {
     }
 
     @Override
-    protected int getLayoutRes() { return R.layout.liked_tv_item; }
+    protected int getLayoutRes() { return R.layout.item_liked_tv; }
 
     @Override
     protected int getImageViewId() { return R.id.header; }

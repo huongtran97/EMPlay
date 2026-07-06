@@ -33,7 +33,7 @@ public class TVShowAdapter extends BasePosterAdapter<TVShowModel> {
 
     @Override
     protected int getLayoutRes() {
-        return useBackdrop ? R.layout.tvshow_backdrop_item : R.layout.tvshow_popular_item;
+        return useBackdrop ? R.layout.item_tvshow_backdrop : R.layout.item_tvshow_popular;
     }
 
     @Override
