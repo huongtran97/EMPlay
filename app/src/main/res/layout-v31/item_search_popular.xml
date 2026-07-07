@@ -71,7 +71,7 @@
                     android:paddingVertical="2dp"
                     android:textSize="11sp"
                     android:textColor="@color/text_2"
-                    android:background="@drawable/bg_chip_dark"
+                    android:background="@drawable/bg_chip_cinematic"
                     tools:text="Movie" />
 
                 <TextView

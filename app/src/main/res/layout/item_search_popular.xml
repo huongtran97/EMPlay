@@ -76,6 +76,7 @@
                     android:paddingTop="2dp"
                     android:paddingBottom="2dp"
                     android:textSize="11sp"
+                    android:background="@drawable/bg_chip_cinematic"
                     android:textColor="@color/text_2"
                     tools:text="Movie" />
 
