@@ -8,27 +8,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.common.CastModel;
+import emplay.entertainment.emplay.tool.GlideImageLoader;
 
 /**
- *  Horizontal cast row shown on both movie and TV detail screens.
- *  Tapping a cast member opens CastDetailFragment via the OnCastClickListener callback.
+ * Horizontal cast row shown on both movie and TV detail screens.
+ * Tapping a cast member opens CastDetailFragment via the OnCastClickListener callback.
  */
-public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder> {
+public class CastAdapter extends BaseDiffUtilAdapter<CastModel, CastAdapter.CastViewHolder> {
 
-    private final ArrayList<CastModel> castList;
     private final Context context;
     private OnCastClickListener onCastClickListener;
 
@@ -37,33 +32,25 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
     }
 
     public CastAdapter(List<CastModel> castList, Context context) {
-        this.castList = (ArrayList<CastModel>) castList;
         this.context = context;
+        if (castList != null) mData.addAll(castList);
     }
 
     public CastAdapter(List<CastModel> castList, Context context, OnCastClickListener listener) {
-        this.castList = (ArrayList<CastModel>) castList;
         this.context = context;
         this.onCastClickListener = listener;
+        if (castList != null) mData.addAll(castList);
     }
 
-    public void updateData(List<CastModel> newCastList) {
-        List<CastModel> oldList = new ArrayList<>(castList);
-        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return oldList.size(); }
-            @Override public int getNewListSize() { return newCastList != null ? newCastList.size() : 0; }
-            @Override public boolean areItemsTheSame(int o, int n) {
-                return oldList.get(o).getId() == newCastList.get(n).getId();
-            }
-            @Override public boolean areContentsTheSame(int o, int n) {
-                CastModel a = oldList.get(o), b = newCastList.get(n);
-                return Objects.equals(a.getName(), b.getName())
-                        && Objects.equals(a.getProfilePath(), b.getProfilePath());
-            }
-        });
-        castList.clear();
-        if (newCastList != null) castList.addAll(newCastList);
-        diff.dispatchUpdatesTo(this);
+    @Override
+    protected boolean areItemsTheSame(@NonNull CastModel oldItem, @NonNull CastModel newItem) {
+        return oldItem.getId() == newItem.getId();
+    }
+
+    @Override
+    protected boolean areContentsTheSame(@NonNull CastModel oldItem, @NonNull CastModel newItem) {
+        return Objects.equals(oldItem.getName(), newItem.getName())
+                && Objects.equals(oldItem.getProfilePath(), newItem.getProfilePath());
     }
 
     @NonNull
@@ -75,26 +62,14 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CastViewHolder holder, int position) {
-        CastModel castModel = castList.get(position);
+        CastModel castModel = mData.get(position);
         if (castModel != null) {
             holder.nameTextView.setText(castModel.getName());
             holder.characterTextView.setText(castModel.getCharacter());
 
-            RequestOptions options = new RequestOptions().circleCrop();
-            String profilePath = castModel.getProfilePath();
-
-            if (profilePath != null && !profilePath.isEmpty()) {
-                Glide.with(context)
-                        .load(ImageUrl.POSTER + profilePath)
-                        .apply(options)
-                        .placeholder(R.drawable.avatar)
-                        .into(holder.profileImageView);
-            } else {
-                Glide.with(context)
-                        .load(R.drawable.avatar)
-                        .apply(options)
-                        .into(holder.profileImageView);
-            }
+            GlideImageLoader.loadCircle(context,
+                    ImageUrl.of(ImageUrl.POSTER, castModel.getProfilePath()),
+                    holder.profileImageView, R.drawable.avatar);
 
             holder.itemView.setOnClickListener(v -> {
                 if (onCastClickListener != null) {
@@ -102,11 +77,6 @@ public class CastAdapter extends RecyclerView.Adapter<CastAdapter.CastViewHolder
                 }
             });
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return castList.size();
     }
 
     public static class CastViewHolder extends RecyclerView.ViewHolder {

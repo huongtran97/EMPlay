@@ -59,8 +59,8 @@ import emplay.entertainment.emplay.api.movie.MovieReleaseDatesResponse;
 import emplay.entertainment.emplay.api.movie.MovieSimilarResponse;
 import emplay.entertainment.emplay.api.movie.MoviesTrailerResponses;
 import emplay.entertainment.emplay.auth.AuthManager;
-import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
+import emplay.entertainment.emplay.tool.StaggeredFetchHelper;
 import emplay.entertainment.emplay.databinding.ActivityDetailMovieBinding;
 import emplay.entertainment.emplay.databinding.ActivityWtwReleasedBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
@@ -93,12 +93,11 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private List<MoviesTrailerResponses.TrailerModel> trailers = new ArrayList<>();
     private MovieApiService apiService;
     private TMDBWatchlistApiService watchlistApiService;
-    private DatabaseHelper databaseHelper;
     private boolean tmdbMovieInWatchlist = false;
     private boolean isNowPlaying = false;
     private boolean userHasSelectedRegion = false;
     private String currentWtwRegion = WatchProviderHelper.defaultRegion();
-    private android.os.Handler fetchHandler;
+    private StaggeredFetchHelper fetchHelper;
     private final ArrayList<String> movieGenreNames = new ArrayList<>();
     private List<ReviewModel> cachedReviews = null;
 
@@ -125,7 +124,6 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
         watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
-        databaseHelper = DatabaseHelper.getInstance(requireContext());
 
         castAdapter = new CastAdapter(castList, requireContext(),
                 cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
@@ -157,12 +155,12 @@ public class MovieResultDetailsFragment extends BaseFragment {
             movieId = getArguments().getInt(ARG_MOVIE_ID, -1);
             if (movieId != -1) {
                 fetchMovieDetails();
-                fetchHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-                fetchHandler.postDelayed(this::fetchCastList,       150);
-                fetchHandler.postDelayed(this::fetchSuggestionList, 300);
-                fetchHandler.postDelayed(this::fetchTrailers,       450);
-                fetchHandler.postDelayed(this::fetchCertification,  600);
-                fetchHandler.postDelayed(this::fetchMovieProviders, 750);
+                fetchHelper = new StaggeredFetchHelper()
+                        .add(150, this::fetchCastList)
+                        .add(300, this::fetchSuggestionList)
+                        .add(450, this::fetchTrailers)
+                        .add(600, this::fetchCertification)
+                        .add(750, this::fetchMovieProviders);
             }
         }
 
@@ -197,9 +195,9 @@ public class MovieResultDetailsFragment extends BaseFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (fetchHandler != null) {
-            fetchHandler.removeCallbacksAndMessages(null);
-            fetchHandler = null;
+        if (fetchHelper != null) {
+            fetchHelper.cancel();
+            fetchHelper = null;
         }
         binding = null;
     }
@@ -340,22 +338,22 @@ public class MovieResultDetailsFragment extends BaseFragment {
         String posterPath = d.getPosterPath();
 
         new Thread(() -> {
-            boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
+            boolean isSet = getDbHelper().isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
             safeRunOnUiThread(() -> applyNotifyState(isSet));
         }).start();
 
         binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
             new Thread(() -> {
-                boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
+                boolean isSet = getDbHelper().isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
                 if (isSet) {
-                    databaseHelper.removeReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
+                    getDbHelper().removeReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE);
                     safeRunOnUiThread(() -> {
                         applyNotifyState(false);
                         if (getContext() != null)
                             Toast.makeText(getContext(), R.string.release_alert_removed, Toast.LENGTH_SHORT).show();
                     });
                 } else {
-                    databaseHelper.addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE,
+                    getDbHelper().addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE,
                             title, posterPath, releaseDate);
                     safeRunOnUiThread(() -> {
                         applyNotifyState(true);
@@ -390,9 +388,9 @@ public class MovieResultDetailsFragment extends BaseFragment {
     private void setupGoogleMovieWatchlistButton(String userId, MovieDetailsResponse movieDetails) {
         updateSaveBtnState(userId, movieDetails.getId());
         binding.btnMyList.setOnClickListener(v -> new Thread(() -> {
-            boolean wasSaved = WatchlistHelper.isMovieSaved(databaseHelper, userId, movieDetails.getId());
+            boolean wasSaved = WatchlistHelper.isMovieSaved(getDbHelper(), userId, movieDetails.getId());
             if (wasSaved) {
-                WatchlistHelper.removeMovie(databaseHelper, userId, movieDetails.getId());
+                WatchlistHelper.removeMovie(getDbHelper(), userId, movieDetails.getId());
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
                     applyMyListState(false);
@@ -400,7 +398,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 });
             } else {
                 String genresString = buildGenresString(movieDetails.getGenres());
-                boolean saved = WatchlistHelper.saveMovie(databaseHelper, userId,
+                boolean saved = WatchlistHelper.saveMovie(getDbHelper(), userId,
                         movieDetails.getId(), movieDetails.getTitle(),
                         movieDetails.getPosterPath(), genresString,
                         movieDetails.getVoteAverage()) != -1;
@@ -503,7 +501,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
     private void updateSaveBtnState(String userId, int id) {
         new Thread(() -> {
-            boolean saved = WatchlistHelper.isMovieSaved(databaseHelper, userId, id);
+            boolean saved = WatchlistHelper.isMovieSaved(getDbHelper(), userId, id);
             safeRunOnUiThread(() -> {
                 if (binding == null) return;
                 applyMyListState(saved);
@@ -677,7 +675,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         String region = WatchProviderHelper.defaultRegion();
                         new Thread(() -> {
                             cachedMotn = MotnHelper.fromJson(
-                                    databaseHelper.getCachedMotnJson(movieId, MotnHelper.SHOW_TYPE_MOVIE));
+                                    getDbHelper().getCachedMotnJson(movieId, MotnHelper.SHOW_TYPE_MOVIE));
                             if (getActivity() != null) getActivity().runOnUiThread(() -> {
                                 bindMovieProviders(region);
                                 binding.wtwReleased.chipLocation.setOnClickListener(v ->
@@ -791,7 +789,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
     private void handleProviderClick(ProviderModel provider, String showType) {
         new Thread(() -> {
-            String cached = databaseHelper.getCachedMotnJson(movieId, showType);
+            String cached = getDbHelper().getCachedMotnJson(movieId, showType);
             if (cached != null) {
                 MotnShowResponse motn = MotnHelper.fromJson(cached);
                 if (getActivity() != null) {
@@ -814,7 +812,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
                         MotnShowResponse motn = response.body();
                         cachedMotn = motn;
-                        new Thread(() -> databaseHelper.cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
+                        new Thread(() -> getDbHelper().cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
                         openMotnLink(motn, providerName, tmdbProviderId);
                     }
                     @Override public void onFailure(@NonNull Call<MotnShowResponse> call,

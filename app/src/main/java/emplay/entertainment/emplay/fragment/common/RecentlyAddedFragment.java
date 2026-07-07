@@ -20,7 +20,6 @@ import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.RecentlyAddedAdapter;
 import emplay.entertainment.emplay.auth.AuthManager;
 import emplay.entertainment.emplay.tool.SwipeToDeleteCallback;
-import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.common.MediaItem;
@@ -32,7 +31,6 @@ public class RecentlyAddedFragment extends BaseFragment {
     private RecentlyAddedAdapter adapter;
     private final List<MediaItem> allItems = new ArrayList<>();
     private TextView tvItemCount, tvSortLabel;
-    private DatabaseHelper dbHelper;
     private boolean isSortedAZ = false;
 
     @Nullable
@@ -43,14 +41,12 @@ public class RecentlyAddedFragment extends BaseFragment {
         RecyclerView rvRecentlyAdded = view.findViewById(R.id.rvRecentlyAdded);
         tvItemCount = view.findViewById(R.id.tvItemCount);
         tvSortLabel = view.findViewById(R.id.tvSortLabel);
-        dbHelper = DatabaseHelper.getInstance(requireContext());
-
         view.findViewById(R.id.llSortBtn).setOnClickListener(v -> toggleSort());
 
         AuthManager auth = AuthManager.getInstance(requireContext());
         String userId = auth.getAuthType() == AuthManager.AuthType.GOOGLE ? auth.getUserId() : null;
 
-        adapter = new RecentlyAddedAdapter(requireContext(), allItems, this::onItemClick, dbHelper, userId);
+        adapter = new RecentlyAddedAdapter(requireContext(), allItems, this::onItemClick, getDbHelper(), userId);
         adapter.setOnItemRemovedListener(count ->
                 tvItemCount.setText(getResources().getQuantityString(R.plurals.items_count, count, count)));
         rvRecentlyAdded.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -69,8 +65,8 @@ public class RecentlyAddedFragment extends BaseFragment {
         String userId = auth.getUserId();
 
         new Thread(() -> {
-            List<MovieModel> movies = dbHelper.getAllMoviesFromDatabase(userId);
-            List<TVShowModel> shows = dbHelper.getSavedTVShows(userId);
+            List<MovieModel> movies = getDbHelper().getAllMoviesFromDatabase(userId);
+            List<TVShowModel> shows = getDbHelper().getSavedTVShows(userId);
 
             List<MediaItem> loaded = new ArrayList<>();
             loaded.addAll(movies);

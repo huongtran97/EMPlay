@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.auth.AuthManager;
-import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.adapter.movie.MovieAdapter;
 import emplay.entertainment.emplay.adapter.movie.TopRatedMovieAdapter;
 import emplay.entertainment.emplay.adapter.movie.TrendingBannerAdapter;
@@ -103,7 +102,6 @@ public class HomeFragment extends BaseFragment {
 
     private View btnBell;
     private TextView tvBellBadge;
-    private DatabaseHelper dbHelper;
 
     private com.facebook.shimmer.ShimmerFrameLayout shimmerHero;
     private com.facebook.shimmer.ShimmerFrameLayout shimmerTrending;
@@ -175,7 +173,6 @@ public class HomeFragment extends BaseFragment {
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
 
-        dbHelper = DatabaseHelper.getInstance(requireContext());
         btnBell = view.findViewById(R.id.btnBell);
         tvBellBadge = view.findViewById(R.id.tvBellBadge);
         if (btnBell != null) {
@@ -958,7 +955,7 @@ public class HomeFragment extends BaseFragment {
         AuthManager auth = AuthManager.getInstance(requireContext());
         if (!auth.isLoggedIn() || tvBellBadge == null) return;
         new Thread(() -> {
-            int count = dbHelper.getUnreadReleasedCount(auth.getUserId());
+            int count = getDbHelper().getUnreadReleasedCount(auth.getUserId());
             safeRunOnUiThread(() -> {
                 if (tvBellBadge == null) return;
                 if (count > 0) {

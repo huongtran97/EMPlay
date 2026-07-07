@@ -10,25 +10,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.adapter.common.BaseDiffUtilAdapter;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.tvshow.SeasonDetailResponse;
+import emplay.entertainment.emplay.tool.GlideImageLoader;
 
-public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeViewHolder> {
+public class EpisodeAdapter extends BaseDiffUtilAdapter<SeasonDetailResponse.Episode, EpisodeAdapter.EpisodeViewHolder> {
 
     private static final int MAX_VISIBLE = 4;
 
-    private final List<SeasonDetailResponse.Episode> episodeList = new ArrayList<>();
     private final Context context;
     private boolean expanded = false;
 
@@ -36,31 +33,36 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
         this.context = context;
     }
 
+    @Override
+    protected boolean areItemsTheSame(@NonNull SeasonDetailResponse.Episode oldItem,
+                                      @NonNull SeasonDetailResponse.Episode newItem) {
+        return oldItem.getId() == newItem.getId();
+    }
+
+    @Override
+    protected boolean areContentsTheSame(@NonNull SeasonDetailResponse.Episode oldItem,
+                                         @NonNull SeasonDetailResponse.Episode newItem) {
+        return oldItem.getEpisodeNumber() == newItem.getEpisodeNumber()
+                && Objects.equals(oldItem.getName(), newItem.getName())
+                && Objects.equals(oldItem.getStillPath(), newItem.getStillPath());
+    }
+
+    @Override
     public void updateData(List<SeasonDetailResponse.Episode> newEpisodes) {
         expanded = false;
-        List<SeasonDetailResponse.Episode> old = new ArrayList<>(episodeList);
-        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return old.size(); }
-            @Override public int getNewListSize() { return newEpisodes != null ? newEpisodes.size() : 0; }
-            @Override public boolean areItemsTheSame(int o, int n) {
-                return old.get(o).getId() == newEpisodes.get(n).getId();
-            }
-            @Override public boolean areContentsTheSame(int o, int n) {
-                SeasonDetailResponse.Episode a = old.get(o), b = newEpisodes.get(n);
-                return a.getEpisodeNumber() == b.getEpisodeNumber()
-                        && Objects.equals(a.getName(), b.getName())
-                        && Objects.equals(a.getStillPath(), b.getStillPath());
-            }
-        });
-        episodeList.clear();
-        if (newEpisodes != null) episodeList.addAll(newEpisodes);
-        diff.dispatchUpdatesTo(this);
+        super.updateData(newEpisodes);
+    }
+
+    // Overrides base getItemCount() to respect the expand/collapse state.
+    @Override
+    public int getItemCount() {
+        return expanded ? mData.size() : Math.min(mData.size(), MAX_VISIBLE);
     }
 
     public void setExpanded(boolean expanded) {
         if (this.expanded == expanded) return;
         this.expanded = expanded;
-        int total = episodeList.size();
+        int total = mData.size();
         if (total <= MAX_VISIBLE) return;
         if (expanded) {
             notifyItemRangeInserted(MAX_VISIBLE, total - MAX_VISIBLE);
@@ -71,7 +73,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
 
     public boolean isExpanded() { return expanded; }
 
-    public int getTotalCount() { return episodeList.size(); }
+    public int getTotalCount() { return mData.size(); }
 
     @NonNull
     @Override
@@ -82,7 +84,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
 
     @Override
     public void onBindViewHolder(@NonNull EpisodeViewHolder holder, int position) {
-        SeasonDetailResponse.Episode ep = episodeList.get(position);
+        SeasonDetailResponse.Episode ep = mData.get(position);
 
         holder.episodeTitle.setText(ep.getName());
         holder.episodeNumber.setText(String.valueOf(ep.getEpisodeNumber()));
@@ -119,16 +121,9 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
             holder.readMore.setVisibility(View.GONE);
         }
 
-        String stillUrl = !TextUtils.isEmpty(ep.getStillPath()) ? ImageUrl.THUMBNAIL + ep.getStillPath() : null;
-        Glide.with(context)
-                .load(stillUrl)
-                .placeholder(R.drawable.bg_poster_placeholder)
-                .into(holder.episodeStill);
-    }
-
-    @Override
-    public int getItemCount() {
-        return expanded ? episodeList.size() : Math.min(episodeList.size(), MAX_VISIBLE);
+        GlideImageLoader.load(context,
+                ImageUrl.of(ImageUrl.THUMBNAIL, ep.getStillPath()),
+                holder.episodeStill, R.drawable.bg_poster_placeholder);
     }
 
     public static class EpisodeViewHolder extends RecyclerView.ViewHolder {

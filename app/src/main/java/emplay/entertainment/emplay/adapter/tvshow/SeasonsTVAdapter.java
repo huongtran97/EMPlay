@@ -8,51 +8,41 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import emplay.entertainment.emplay.R;
+import emplay.entertainment.emplay.adapter.common.BaseDiffUtilAdapter;
 import emplay.entertainment.emplay.models.tvshow.SeasonsModel;
 
-public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.SeasonTabViewHolder> {
+public class SeasonsTVAdapter extends BaseDiffUtilAdapter<SeasonsModel, SeasonsTVAdapter.SeasonTabViewHolder> {
 
     public interface OnSeasonSelectedListener {
         void onSeasonSelected(SeasonsModel season);
     }
 
-    private final ArrayList<SeasonsModel> seasonsList;
     private final Context context;
     private final OnSeasonSelectedListener listener;
     private int selectedPosition = 0;
 
     public SeasonsTVAdapter(List<SeasonsModel> seasonsList, Context context,
                             OnSeasonSelectedListener listener) {
-        this.seasonsList = new ArrayList<>(seasonsList);
         this.context = context;
         this.listener = listener;
+        if (seasonsList != null) mData.addAll(seasonsList);
     }
 
-    public void updateData(List<SeasonsModel> newList) {
-        List<SeasonsModel> old = new ArrayList<>(seasonsList);
-        DiffUtil.DiffResult diff = DiffUtil.calculateDiff(new DiffUtil.Callback() {
-            @Override public int getOldListSize() { return old.size(); }
-            @Override public int getNewListSize() { return newList != null ? newList.size() : 0; }
-            @Override public boolean areItemsTheSame(int o, int n) {
-                return old.get(o).getId() == newList.get(n).getId();
-            }
-            @Override public boolean areContentsTheSame(int o, int n) {
-                SeasonsModel a = old.get(o), b = newList.get(n);
-                return a.getSeasonNumber() == b.getSeasonNumber()
-                        && Objects.equals(a.getName(), b.getName());
-            }
-        });
-        seasonsList.clear();
-        if (newList != null) seasonsList.addAll(newList);
-        diff.dispatchUpdatesTo(this);
+    @Override
+    protected boolean areItemsTheSame(@NonNull SeasonsModel oldItem, @NonNull SeasonsModel newItem) {
+        return oldItem.getId() == newItem.getId();
+    }
+
+    @Override
+    protected boolean areContentsTheSame(@NonNull SeasonsModel oldItem, @NonNull SeasonsModel newItem) {
+        return oldItem.getSeasonNumber() == newItem.getSeasonNumber()
+                && Objects.equals(oldItem.getName(), newItem.getName());
     }
 
     public void setSelectedPosition(int position) {
@@ -72,7 +62,7 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
 
     @Override
     public void onBindViewHolder(@NonNull SeasonTabViewHolder holder, int position) {
-        SeasonsModel season = seasonsList.get(position);
+        SeasonsModel season = mData.get(position);
         holder.tvSeasonTab.setText(season.getName());
 
         boolean selected = position == selectedPosition;
@@ -89,9 +79,6 @@ public class SeasonsTVAdapter extends RecyclerView.Adapter<SeasonsTVAdapter.Seas
             if (listener != null) listener.onSeasonSelected(season);
         });
     }
-
-    @Override
-    public int getItemCount() { return seasonsList.size(); }
 
     public static class SeasonTabViewHolder extends RecyclerView.ViewHolder {
         TextView tvSeasonTab;

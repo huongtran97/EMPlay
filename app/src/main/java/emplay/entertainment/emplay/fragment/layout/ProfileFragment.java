@@ -50,7 +50,6 @@ import emplay.entertainment.emplay.api.auth.model.TMDBTVWatchlistResponse;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.auth.AuthManager;
-import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.common.RecentlyAddedFragment;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
@@ -66,7 +65,6 @@ import retrofit2.Response;
 public class ProfileFragment extends BaseFragment {
     private static final String ARG_ID = "arg_id";
     private FirebaseAuth mAuth;
-    private DatabaseHelper databaseHelper;
     private TMDBWatchlistApiService watchlistApiService;
     private CircleImageView civAvatar;
     private TextView tvProfileName, tvProfileEmail, tvMemberSince;
@@ -88,7 +86,6 @@ public class ProfileFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        databaseHelper = DatabaseHelper.getInstance(requireContext());
         mAuth = FirebaseAuth.getInstance();
         watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
     }
@@ -239,8 +236,8 @@ public class ProfileFragment extends BaseFragment {
 
     private void loadGoogleUserData(String userId) {
         new Thread(() -> {
-            List<MovieModel> movies = databaseHelper.getAllMoviesFromDatabase(userId);
-            List<TVShowModel> tvShows = databaseHelper.getSavedTVShows(userId);
+            List<MovieModel> movies = getDbHelper().getAllMoviesFromDatabase(userId);
+            List<TVShowModel> tvShows = getDbHelper().getSavedTVShows(userId);
 
             List<MediaItem> combined = new ArrayList<>();
             combined.addAll(movies);
@@ -276,7 +273,7 @@ public class ProfileFragment extends BaseFragment {
                         user.delete().addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
                                 AuthManager.getInstance(requireContext()).signOut();
-                                if (email != null) databaseHelper.deleteUserProfile(email);
+                                if (email != null) getDbHelper().deleteUserProfile(email);
                                 if (isAdded()) {
                                     Toast.makeText(requireContext(),
                                             "Account deleted successfully", Toast.LENGTH_SHORT).show();

@@ -59,7 +59,6 @@ import emplay.entertainment.emplay.api.tvshow.TVShowSimilarResponse;
 import emplay.entertainment.emplay.api.tvshow.TVShowCreditsResponses;
 import emplay.entertainment.emplay.api.tvshow.TVShowsTrailerResponses;
 import emplay.entertainment.emplay.auth.AuthManager;
-import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.database.WatchlistHelper;
 import emplay.entertainment.emplay.databinding.ActivityDetailTvBinding;
 import emplay.entertainment.emplay.databinding.ActivityWtwReleasedBinding;
@@ -101,7 +100,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private SuggestionTVAdapter suggestionTVAdapter;
     private MovieApiService apiService;
     private TMDBWatchlistApiService watchlistApiService;
-    private DatabaseHelper databaseHelper;
     private PaginationHelper<TVShowModel> paginationHelper;
 
     private boolean tmdbTVInWatchlist = false;
@@ -134,7 +132,6 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
         watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
-        databaseHelper = DatabaseHelper.getInstance(requireContext());
 
         // Season tab chips (horizontal)
         seasonTabAdapter = new SeasonsTVAdapter(seasonsList, requireContext(), season -> {
@@ -354,22 +351,22 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         String releaseDate = tv.getFirst_air_date();
 
         new Thread(() -> {
-            boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_TV);
+            boolean isSet = getDbHelper().isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_TV);
             safeRunOnUiThread(() -> applyTVNotifyState(isSet));
         }).start();
 
         binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
             new Thread(() -> {
-                boolean isSet = databaseHelper.isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_TV);
+                boolean isSet = getDbHelper().isReleaseAlertSet(userId, mediaId, ReleaseAlertItem.TYPE_TV);
                 if (isSet) {
-                    databaseHelper.removeReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV);
+                    getDbHelper().removeReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV);
                     safeRunOnUiThread(() -> {
                         applyTVNotifyState(false);
                         if (getContext() != null)
                             Toast.makeText(getContext(), R.string.release_alert_removed, Toast.LENGTH_SHORT).show();
                     });
                 } else {
-                    databaseHelper.addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV,
+                    getDbHelper().addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV,
                             title, posterPath, releaseDate);
                     safeRunOnUiThread(() -> {
                         applyTVNotifyState(true);
@@ -587,7 +584,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                         String region = WatchProviderHelper.defaultRegion();
                         new Thread(() -> {
                             cachedMotn = MotnHelper.fromJson(
-                                    databaseHelper.getCachedMotnJson(tvId, MotnHelper.SHOW_TYPE_TV));
+                                    getDbHelper().getCachedMotnJson(tvId, MotnHelper.SHOW_TYPE_TV));
                             if (getActivity() != null) getActivity().runOnUiThread(() -> {
                                 bindTVProviders(region);
                                 binding.wtwReleased.chipLocation.setOnClickListener(v ->
@@ -705,7 +702,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
     private void handleProviderClick(ProviderModel provider, String showType) {
         new Thread(() -> {
-            String cached = databaseHelper.getCachedMotnJson(tvId, showType);
+            String cached = getDbHelper().getCachedMotnJson(tvId, showType);
             if (cached != null) {
                 MotnShowResponse motn = MotnHelper.fromJson(cached);
                 if (getActivity() != null) {
@@ -728,7 +725,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                         if (binding == null || !response.isSuccessful() || response.body() == null) return;
                         MotnShowResponse motn = response.body();
                         cachedMotn = motn;
-                        new Thread(() -> databaseHelper.cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
+                        new Thread(() -> getDbHelper().cacheMotnJson(tmdbId, showType, MotnHelper.toJson(motn))).start();
                         openMotnLink(motn, providerName, tmdbProviderId);
                     }
                     @Override public void onFailure(@NonNull Call<MotnShowResponse> call,
@@ -761,11 +758,11 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     }
 
     private void setupGoogleWatchlistButton(String userId, TVShowDetailsResponse tv) {
-        updateMyListLabel(WatchlistHelper.isTVShowSaved(databaseHelper, userId, tv.getId()));
+        updateMyListLabel(WatchlistHelper.isTVShowSaved(getDbHelper(), userId, tv.getId()));
         binding.btnMyList.setOnClickListener(v -> new Thread(() -> {
-            boolean wasSaved = WatchlistHelper.isTVShowSaved(databaseHelper, userId, tv.getId());
+            boolean wasSaved = WatchlistHelper.isTVShowSaved(getDbHelper(), userId, tv.getId());
             if (wasSaved) {
-                WatchlistHelper.removeTVShow(databaseHelper, userId, tv.getId());
+                WatchlistHelper.removeTVShow(getDbHelper(), userId, tv.getId());
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
                     updateMyListLabel(false);
@@ -774,7 +771,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 });
             } else {
                 String genres = buildGenresString(tv.getGenres());
-                boolean saved = WatchlistHelper.saveTVShow(databaseHelper, userId, tv.getId(),
+                boolean saved = WatchlistHelper.saveTVShow(getDbHelper(), userId, tv.getId(),
                         tv.getName(), tv.getPoster_path(), genres,
                         tv.getVote_average()) != -1;
                 safeRunOnUiThread(() -> {

@@ -30,7 +30,6 @@ import emplay.entertainment.emplay.api.auth.model.TMDBTVWatchlistResponse;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.auth.AuthManager;
-import emplay.entertainment.emplay.database.DatabaseHelper;
 import emplay.entertainment.emplay.databinding.LayoutWatchlistBinding;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import emplay.entertainment.emplay.fragment.details.MovieResultDetailsFragment;
@@ -54,7 +53,6 @@ public class WatchlistFragment extends BaseFragment {
 
     private LayoutWatchlistBinding binding;
     private WatchlistGridAdapter adapter;
-    private DatabaseHelper dbHelper;
     private TMDBWatchlistApiService watchlistApiService;
 
     private final List<MediaItem> allItems = new ArrayList<>();
@@ -65,7 +63,6 @@ public class WatchlistFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = LayoutWatchlistBinding.inflate(inflater, container, false);
-        dbHelper = DatabaseHelper.getInstance(requireContext());
         watchlistApiService = ApiClient.getClient().create(TMDBWatchlistApiService.class);
 
         setupRecyclerView();
@@ -167,8 +164,8 @@ public class WatchlistFragment extends BaseFragment {
     private void loadFromSqlite(String userId) {
         new Thread(() -> {
             List<MediaItem> combined = new ArrayList<>();
-            combined.addAll(dbHelper.getAllMoviesFromDatabase(userId));
-            combined.addAll(dbHelper.getSavedTVShows(userId));
+            combined.addAll(getDbHelper().getAllMoviesFromDatabase(userId));
+            combined.addAll(getDbHelper().getSavedTVShows(userId));
             safeRunOnUiThread(() -> onDataLoaded(combined));
         }).start();
     }

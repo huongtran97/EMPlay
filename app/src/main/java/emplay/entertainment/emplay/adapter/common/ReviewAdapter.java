@@ -11,8 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -21,7 +19,7 @@ import java.util.Set;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.common.ReviewModel;
-import emplay.entertainment.emplay.tool.CircleTransform;
+import emplay.entertainment.emplay.tool.GlideImageLoader;
 
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder> {
 
@@ -70,11 +68,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
                 avatarUrl = ImageUrl.of(ImageUrl.THUMBNAIL, path);
             }
         }
-        Glide.with(context)
-                .load(avatarUrl)
-                .placeholder(R.drawable.ic_user)
-                .transform(new CircleTransform())
-                .into(holder.ivAvatar);
+        GlideImageLoader.loadCircle(context, avatarUrl, holder.ivAvatar, R.drawable.ic_user);
 
         String content = review.getContent() != null ? review.getContent() : "";
         holder.tvContent.setText(content);

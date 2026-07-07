@@ -10,14 +10,13 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.PersonCreditsResponse.CreditItem;
+import emplay.entertainment.emplay.tool.GlideImageLoader;
 
 public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditViewHolder> {
 
@@ -59,10 +58,8 @@ public class CreditAdapter extends RecyclerView.Adapter<CreditAdapter.CreditView
     public void onBindViewHolder(@NonNull CreditViewHolder holder, int position) {
         CreditItem item = creditList.get(position);
 
-        Glide.with(context)
-                .load(ImageUrl.of(ImageUrl.THUMBNAIL, item.getPosterPath()))
-                .placeholder(R.drawable.bg_poster_placeholder)
-                .into(holder.posterImage);
+        GlideImageLoader.load(context, ImageUrl.of(ImageUrl.THUMBNAIL, item.getPosterPath()),
+                holder.posterImage, R.drawable.bg_poster_placeholder);
 
         holder.posterImage.setTransitionName("poster_" + item.getId());
         holder.itemView.setOnClickListener(v -> listener.onCreditClick(item, holder.posterImage));

@@ -75,7 +75,7 @@ public class TrendingSeeAllFragment extends BaseFragment {
         // Resolve Firebase user for My List inline actions
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String userId = currentUser != null ? currentUser.getUid() : null;
-        DatabaseHelper dbHelper = DatabaseHelper.getInstance(requireContext());
+        DatabaseHelper dbHelper = getDbHelper();
 
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new TrendingSearchAdapter<>(requireContext(), trendingList, this::onItemClick,

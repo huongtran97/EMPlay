@@ -342,7 +342,7 @@ public class SeeAllFragment extends BaseFragment {
             case TYPE_ON_AIR: {
                 FirebaseUser onAirUser = FirebaseAuth.getInstance().getCurrentUser();
                 String onAirUserId = onAirUser != null ? onAirUser.getUid() : null;
-                DatabaseHelper onAirDb = DatabaseHelper.getInstance(requireContext());
+                DatabaseHelper onAirDb = getDbHelper();
                 onAirSeeAllAdapter = new OnAirSeeAllAdapter(
                         requireContext(), onAirTVList,
                         (tv, v) -> navigateTo(TVShowResultDetailsFragment.newInstance(tv.getTVShowId()),
@@ -370,7 +370,7 @@ public class SeeAllFragment extends BaseFragment {
                 // UPCOMING_MOVIES, UPCOMING_TV — vertical list using TrendingSearchAdapter
                 FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 String userId = user != null ? user.getUid() : null;
-                DatabaseHelper db = DatabaseHelper.getInstance(requireContext());
+                DatabaseHelper db = getDbHelper();
                 trendingAdapter = new TrendingSearchAdapter<>(
                         requireContext(), new ArrayList<>(), this::onMediaClick, db, userId);
                 comingSoonRv = rv;

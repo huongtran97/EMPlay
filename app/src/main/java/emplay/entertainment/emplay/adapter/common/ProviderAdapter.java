@@ -10,15 +10,13 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.common.ProviderModel;
+import emplay.entertainment.emplay.tool.GlideImageLoader;
 
 public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -108,10 +106,7 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             String imageUrl = resolveLogoUrl(provider);
             if (imageUrl != null) {
                 imgProviderLogo.setVisibility(View.VISIBLE);
-                Glide.with(itemView.getContext())
-                        .load(imageUrl)
-                        .transform(new RoundedCorners(4))
-                        .into(imgProviderLogo);
+                GlideImageLoader.loadRounded(itemView.getContext(), imageUrl, imgProviderLogo, 4, 0);
             } else {
                 imgProviderLogo.setVisibility(View.GONE);
             }
@@ -135,11 +130,8 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         void bind(ProviderModel provider) {
             tvName.setText(provider.getProviderName());
-            Glide.with(itemView.getContext())
-                    .load(resolveLogoUrl(provider))
-                    .placeholder(R.drawable.bg_provider_fallback)
-                    .transform(new RoundedCorners(12))
-                    .into(ivLogo);
+            GlideImageLoader.loadRounded(itemView.getContext(), resolveLogoUrl(provider),
+                    ivLogo, 12, R.drawable.bg_provider_fallback);
 
             if (provider.hasDeepLink()) {
                 ivChevron.setVisibility(View.VISIBLE);
@@ -165,11 +157,8 @@ public class ProviderAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
         void bind(ProviderModel provider) {
             tvName.setText(provider.getProviderName());
-            Glide.with(itemView.getContext())
-                    .load(resolveLogoUrl(provider))
-                    .placeholder(R.drawable.bg_provider_fallback)
-                    .transform(new RoundedCorners(12))
-                    .into(ivLogo);
+            GlideImageLoader.loadRounded(itemView.getContext(), resolveLogoUrl(provider),
+                    ivLogo, 12, R.drawable.bg_provider_fallback);
 
             if (provider.hasDeepLink()) {
                 ivChevron.setVisibility(View.VISIBLE);

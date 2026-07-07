@@ -36,6 +36,7 @@ import androidx.transition.ChangeImageTransform;
 import androidx.transition.TransitionSet;
 
 import emplay.entertainment.emplay.activity.LoginActivity;
+import emplay.entertainment.emplay.database.DatabaseHelper;
 
 import com.google.android.flexbox.FlexboxLayout;
 
@@ -57,6 +58,12 @@ public abstract class BaseFragment extends Fragment {
     protected CountDownTimer countDownTimer;
     private long lastNavTime = 0;
     private final List<Call<?>> pendingCalls = new ArrayList<>();
+    private DatabaseHelper dbHelper;
+
+    protected DatabaseHelper getDbHelper() {
+        if (dbHelper == null) dbHelper = DatabaseHelper.getInstance(requireContext());
+        return dbHelper;
+    }
 
     @ColorInt
     private int currentBgColor = 0xFF0D0D0D;

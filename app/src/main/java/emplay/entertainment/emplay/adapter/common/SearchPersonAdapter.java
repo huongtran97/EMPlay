@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.google.android.material.imageview.ShapeableImageView;
 
 import java.util.Locale;
@@ -19,6 +17,7 @@ import java.util.Locale;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.common.MultiSearchResult;
+import emplay.entertainment.emplay.tool.GlideImageLoader;
 
 public class SearchPersonAdapter extends ListAdapter<MultiSearchResult, SearchPersonAdapter.ViewHolder> {
 
@@ -60,11 +59,9 @@ public class SearchPersonAdapter extends ListAdapter<MultiSearchResult, SearchPe
         if (profilePath != null && !profilePath.isEmpty()) {
             holder.tvInitials.setVisibility(View.GONE);
             holder.ivAvatar.setVisibility(View.VISIBLE);
-            Glide.with(holder.itemView.getContext())
-                    .load(ImageUrl.of(ImageUrl.THUMBNAIL, profilePath))
-                    .transform(new CircleCrop())
-                    .placeholder(R.drawable.bg_circle_surface_high)
-                    .into(holder.ivAvatar);
+            GlideImageLoader.loadCircle(holder.itemView.getContext(),
+                    ImageUrl.of(ImageUrl.THUMBNAIL, profilePath),
+                    holder.ivAvatar, R.drawable.bg_circle_surface_high);
         } else {
             holder.ivAvatar.setVisibility(View.INVISIBLE);
             holder.tvInitials.setVisibility(View.VISIBLE);
