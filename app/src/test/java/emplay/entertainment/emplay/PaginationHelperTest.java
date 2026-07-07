@@ -38,7 +38,7 @@ public class PaginationHelperTest {
         return list;
     }
 
-    // --- Single-page scenarios ---
+    // Single-page scenarios
 
     @Test
     public void singlePage_showsAllItems() {
@@ -64,7 +64,7 @@ public class PaginationHelperTest {
         assertFalse(cap.hasNext);
     }
 
-    // --- Multi-page navigation ---
+    // Multi-page navigation
 
     @Test
     public void nextPage_advancesToSecondPage() {
@@ -128,7 +128,7 @@ public class PaginationHelperTest {
         assertEquals(1, cap.currentPage);
     }
 
-    // --- isAtLastLocalPage ---
+    // isAtLastLocalPage
 
     @Test
     public void isAtLastLocalPage_trueOnFirstPageWhenOnePage() {
@@ -155,7 +155,7 @@ public class PaginationHelperTest {
         assertTrue(helper.isAtLastLocalPage());
     }
 
-    // --- updateData resets state ---
+    // updateData resets state
 
     @Test
     public void updateData_resetsToPageOne() {
@@ -169,7 +169,7 @@ public class PaginationHelperTest {
         assertEquals(Arrays.asList(10, 11, 12), cap.lastPage);
     }
 
-    // --- appendData grows the list without changing current page ---
+    // appendData grows the list without changing current page
 
     @Test
     public void appendData_growsListButDoesNotTriggerCallback() {
@@ -185,7 +185,7 @@ public class PaginationHelperTest {
         assertEquals(Arrays.asList(4, 5, 6), cap.lastPage);
     }
 
-    // --- getCurrentPage ---
+    // getCurrentPage
 
     @Test
     public void getCurrentPage_startsAtOne() {

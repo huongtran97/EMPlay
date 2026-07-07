@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 public class TMDBpathTest {
 
-    // --- Static path methods ---
+    // Static path methods
 
     @Test
     public void trendingMovies_returnsCorrectPath() {
@@ -54,7 +54,7 @@ public class TMDBpathTest {
         assertEquals("3/tv/on_the_air", TMDBpath.onAirTVShows());
     }
 
-    // --- ID-parameterized paths ---
+    // ID-parameterized paths
 
     @Test
     public void movieDetails_embedsId() {
@@ -152,7 +152,7 @@ public class TMDBpathTest {
         assertEquals("3/person/200/combined_credits", TMDBpath.personCredits(200));
     }
 
-    // --- Search / Discover / Genre paths ---
+    // Search / Discover / Genre paths
 
     @Test
     public void searchMovies_returnsCorrectPath() {
@@ -194,7 +194,7 @@ public class TMDBpathTest {
         assertEquals("3/configuration/countries", TMDBpath.countries());
     }
 
-    // --- Account / Watchlist paths ---
+    // Account / Watchlist paths
 
     @Test
     public void accountWatchlistMovies_embedsAccountId() {
@@ -221,7 +221,7 @@ public class TMDBpathTest {
         assertEquals("3/tv/77/account_states", TMDBpath.tvAccountStates(77));
     }
 
-    // --- Dynamic date methods ---
+    // Dynamic date methods
 
     @Test
     public void todayDate_matchesCurrentDate() {

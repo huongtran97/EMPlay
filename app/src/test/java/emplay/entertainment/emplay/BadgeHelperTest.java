@@ -30,7 +30,7 @@ public class BadgeHelperTest {
         return SDF.format(cal.getTime());
     }
 
-    // ─── isFutureDate ────────────────────────────────────────────────────────
+    // isFutureDate
 
     @Test
     public void isFutureDate_withFutureDate_returnsTrue() {
@@ -67,7 +67,7 @@ public class BadgeHelperTest {
         assertFalse(BadgeHelper.isFutureDate("not-a-date"));
     }
 
-    // ─── isWithinDays (past only, not future) ────────────────────────────────
+    // isWithinDays (past only, not future)
 
     @Test
     public void isWithinDays_recentPastDate_returnsTrue() {
@@ -101,7 +101,7 @@ public class BadgeHelperTest {
         assertFalse(BadgeHelper.isWithinDays(daysAgo(30), 30));
     }
 
-    // ─── isNotOlderThan (includes future dates) ───────────────────────────────
+    // isNotOlderThan (includes future dates)
 
     @Test
     public void isNotOlderThan_recentPastDate_returnsTrue() {
@@ -128,7 +128,7 @@ public class BadgeHelperTest {
         assertFalse(BadgeHelper.isNotOlderThan("", 30));
     }
 
-    // ─── getTVShowType ────────────────────────────────────────────────────────
+    //  getTVShowType
 
     @Test
     public void getTVShowType_within30Days_returnsNewTVShow() {
@@ -151,7 +151,7 @@ public class BadgeHelperTest {
         assertEquals("EP", BadgeHelper.getTVShowType(null));
     }
 
-    // ─── formatRelativeDate ───────────────────────────────────────────────────
+    // formatRelativeDate
 
     @Test
     public void formatRelativeDate_today_returnsToday() {
