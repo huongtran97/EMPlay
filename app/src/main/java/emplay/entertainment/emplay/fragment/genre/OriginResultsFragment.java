@@ -14,6 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -103,9 +105,8 @@ public class OriginResultsFragment extends BaseFragment {
         movieAdapter = new MovieByGenreAdapter(requireContext(), new ArrayList<>(), this::onMovieClick);
         tvAdapter    = new TVShowByGenreAdapter(requireContext(), new ArrayList<>(), this::onTVClick);
 
-        GridLayoutManager lm = new GridLayoutManager(requireContext(), 3);
-        resultsRecyclerView.setLayoutManager(lm);
-        resultsRecyclerView.setHasFixedSize(true);
+        GridLayoutManager lm = RecyclerViewHelper.setupGrid(resultsRecyclerView, requireContext(), 3,
+                showingTV ? tvAdapter : movieAdapter);
         resultsRecyclerView.addOnScrollListener(infiniteScrollListener(lm));
 
         apiService = ApiClient.getClient().create(MovieApiService.class);

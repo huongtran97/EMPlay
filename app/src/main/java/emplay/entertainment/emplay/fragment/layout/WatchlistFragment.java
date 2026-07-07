@@ -10,9 +10,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import com.google.android.material.snackbar.Snackbar;
 
@@ -81,8 +82,7 @@ public class WatchlistFragment extends BaseFragment {
 
     private void setupRecyclerView() {
         adapter = new WatchlistGridAdapter(requireContext(), this::onItemClick);
-        binding.rvWatchlist.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-        binding.rvWatchlist.setAdapter(adapter);
+        RecyclerViewHelper.setupGrid(binding.rvWatchlist, requireContext(), 3, adapter);
 
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override

@@ -12,15 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 import androidx.transition.TransitionInflater;
 
 import com.bumptech.glide.Glide;
@@ -127,9 +127,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
 
         castAdapter = new CastAdapter(castList, requireContext(),
                 cast -> navigateTo(CastDetailFragment.newInstance(cast.getId())));
-        binding.rvCast.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.rvCast.setAdapter(castAdapter);
+        RecyclerViewHelper.setupHorizontal(binding.rvCast, requireContext(), castAdapter);
 
         binding.tvAllCast.setOnClickListener(v ->
                 navigateTo(SeeAllFragment.newInstance(SeeAllFragment.TYPE_CAST_MOVIE, movieId,
@@ -138,14 +136,11 @@ public class MovieResultDetailsFragment extends BaseFragment {
         alsoLikeAdapter = new SuggestionMovieAdapter(new ArrayList<>(), requireContext(),
                 (movie, view) -> navigateTo(MovieResultDetailsFragment.newInstance(movie.getMovieId()),
                         view, "poster_transition"));
-        binding.searchResultSuggestionRecyclerview.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.searchResultSuggestionRecyclerview.setAdapter(alsoLikeAdapter);
+        RecyclerViewHelper.setupHorizontal(binding.searchResultSuggestionRecyclerview, requireContext(), alsoLikeAdapter);
 
         collectionAdapter = new CollectionAdapter(new ArrayList<>(), requireContext(),
                 id -> navigateTo(MovieResultDetailsFragment.newInstance(id)));
-        binding.rvCollection.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvCollection.setAdapter(collectionAdapter);
+        RecyclerViewHelper.setupVertical(binding.rvCollection, requireContext(), collectionAdapter);
 
         binding.layoutCollectionHeader.setOnClickListener(v -> toggleCollectionDropdown());
 
@@ -327,7 +322,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
         if (!auth.isLoggedIn()) {
             binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
                 if (getContext() != null)
-                    Toast.makeText(getContext(), R.string.release_alert_login_required, Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(getContext(), R.string.release_alert_login_required);
             });
             return;
         }
@@ -350,7 +345,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                     safeRunOnUiThread(() -> {
                         applyNotifyState(false);
                         if (getContext() != null)
-                            Toast.makeText(getContext(), R.string.release_alert_removed, Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), R.string.release_alert_removed);
                     });
                 } else {
                     getDbHelper().addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_MOVIE,
@@ -358,7 +353,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                     safeRunOnUiThread(() -> {
                         applyNotifyState(true);
                         if (getContext() != null)
-                            Toast.makeText(getContext(), R.string.release_alert_set, Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), R.string.release_alert_set);
                     });
                 }
             }).start();
@@ -394,7 +389,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
                     applyMyListState(false);
-                    Toast.makeText(requireContext(), "Movie removed from library", Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(requireContext(), "Movie removed from library");
                 });
             } else {
                 String genresString = buildGenresString(movieDetails.getGenres());
@@ -406,9 +401,9 @@ public class MovieResultDetailsFragment extends BaseFragment {
                     if (binding == null) return;
                     if (saved) {
                         applyMyListState(true);
-                        Toast.makeText(requireContext(), "Movie added to library", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(requireContext(), "Movie added to library");
                     } else {
-                        Toast.makeText(requireContext(), "Failed to add Movie", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(requireContext(), "Failed to add Movie");
                     }
                 });
             }
@@ -458,11 +453,10 @@ public class MovieResultDetailsFragment extends BaseFragment {
                         if (response.isSuccessful() && response.body() != null) {
                             tmdbMovieInWatchlist = addToWatchlist;
                             applyMyListState(tmdbMovieInWatchlist);
-                            Toast.makeText(requireContext(),
-                                    addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist",
-                                    Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(requireContext(),
+                                    addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist");
                         } else {
-                            Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(requireContext(), "Failed to update watchlist");
                         }
                         binding.btnMyList.setEnabled(true);
                     }
@@ -470,7 +464,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                     public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call,
                                           @NonNull Throwable t) {
                         if (binding != null) {
-                            Toast.makeText(requireContext(), "Failed to update watchlist", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(requireContext(), "Failed to update watchlist");
                             binding.btnMyList.setEnabled(true);
                         }
                     }
@@ -588,7 +582,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                 TrailerBottomSheetFragment.newInstance(pick.getKey(), pick.getName())
                         .show(getChildFragmentManager(), "trailer");
             } else {
-                Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
+                ToastHelper.show(getContext(), "No trailer available");
             }
         });
     }
@@ -825,7 +819,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
         String link = MotnHelper.findLink(motn, currentWtwRegion, providerName, tmdbProviderId);
         if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName, tmdbProviderId);
         if (link == null) {
-            Toast.makeText(requireContext(), R.string.motn_link_unavailable, Toast.LENGTH_SHORT).show();
+            ToastHelper.show(requireContext(), R.string.motn_link_unavailable);
             return;
         }
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(link)));
@@ -874,8 +868,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
             rv.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
         } else {
-            rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-            rv.setAdapter(new ReviewAdapter(reviews, requireContext()));
+            RecyclerViewHelper.setupVertical(rv, requireContext(), new ReviewAdapter(reviews, requireContext()));
         }
 
         dialog.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());

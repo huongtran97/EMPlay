@@ -19,8 +19,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 import androidx.viewpager2.widget.ViewPager2;
 
 
@@ -196,32 +197,24 @@ public class HomeFragment extends BaseFragment {
 
         rvUpcomingMovies = view.findViewById(R.id.rvUpcomingMovies);
         upcomingMovieAdapter = new UpcomingMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
-        rvUpcomingMovies.setAdapter(upcomingMovieAdapter);
-        rvUpcomingMovies.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        RecyclerViewHelper.setupHorizontal(rvUpcomingMovies, requireContext(), upcomingMovieAdapter);
 
         rvUpcomingTvShows = view.findViewById(R.id.rvUpcomingTvShows);
         upComingTVAdapter = new UpComingTVAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
-        rvUpcomingTvShows.setAdapter(upComingTVAdapter);
-        rvUpcomingTvShows.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        RecyclerViewHelper.setupHorizontal(rvUpcomingTvShows, requireContext(), upComingTVAdapter);
 
         rvTopRated = view.findViewById(R.id.rvTopRated);
         topRatedMovieAdapter = new TopRatedMovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
-        rvTopRated.setAdapter(topRatedMovieAdapter);
-        rvTopRated.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        RecyclerViewHelper.setupHorizontal(rvTopRated, requireContext(), topRatedMovieAdapter);
 
         rvTrending = view.findViewById(R.id.rvTrending);
         trendingMoviesAdapter = new MovieAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
         trendingTVAdapter = new TVShowAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
-        rvTrending.setAdapter(trendingMoviesAdapter);
-        rvTrending.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        RecyclerViewHelper.setupHorizontal(rvTrending, requireContext(), trendingMoviesAdapter);
 
         rvOnAir = view.findViewById(R.id.rvOnAir);
         onAirTVAdapter = new OnAirTVAdapter(requireContext(), new ArrayList<>(), this::onItemClicked);
-        rvOnAir.setAdapter(onAirTVAdapter);
-        rvOnAir.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        RecyclerViewHelper.setupHorizontal(rvOnAir, requireContext(), onAirTVAdapter);
 
         btnTrendingMovies = view.findViewById(R.id.btnTrendingMovies);
         btnTrendingTV = view.findViewById(R.id.btnTrendingTV);

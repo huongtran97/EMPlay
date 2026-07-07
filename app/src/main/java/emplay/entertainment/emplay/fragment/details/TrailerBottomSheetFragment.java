@@ -19,7 +19,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+import emplay.entertainment.emplay.tool.ToastHelper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -397,6 +397,6 @@ public class TrailerBottomSheetFragment extends DialogFragment {
     }
 
     private void showToast(String message) {
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+        ToastHelper.show(requireContext(), message);
     }
 }

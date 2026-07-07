@@ -12,6 +12,8 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -75,10 +77,7 @@ public class TVShowsByGenresFragment extends BaseFragment {
         TextView tvGhostGlyph   = view.findViewById(R.id.tvGhostGlyph);
 
         adapter = new TVShowByGenreAdapter(requireContext(), new ArrayList<>(), this::onItemClick);
-        GridLayoutManager lm = new GridLayoutManager(requireContext(), 3);
-        recyclerView.setLayoutManager(lm);
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(adapter);
+        GridLayoutManager lm = RecyclerViewHelper.setupGrid(recyclerView, requireContext(), 3, adapter);
         recyclerView.addOnScrollListener(infiniteScrollListener(lm));
 
         apiService = ApiClient.getClient().create(MovieApiService.class);

@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ImageButton;
-import android.widget.Toast;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -20,9 +19,10 @@ import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.tabs.TabLayout;
@@ -203,8 +203,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         }
 
         genresAdapter = new GenresAdapter(genresList, this::onGenreSelected);
-        rvGenres.setAdapter(genresAdapter);
-        rvGenres.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        RecyclerViewHelper.setupGrid(rvGenres, requireContext(), 2, genresAdapter);
 
         trendingAdapter = new TrendingSearchAdapter<>(requireContext(), new ArrayList<>(), (item, v) -> onTrendingSelected(item));
         rvPopularSearches.setAdapter(trendingAdapter);
@@ -212,7 +211,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
         // Dropdown adapters
         mediaAdapter = new SearchMediaAdapter(this::onMultiItemClicked);
         personAdapter = new SearchPersonAdapter(this::onPersonClicked);
-        rvDropdownResults.setLayoutManager(new LinearLayoutManager(requireContext()));
+        RecyclerViewHelper.setupVertical(rvDropdownResults, requireContext());
 
         // Add tabs: Movies (0) · TV Shows (1) · People (2)
         tabLayoutSearch.addTab(tabLayoutSearch.newTab().setText(R.string.label_movies));
@@ -567,7 +566,7 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
                 }
             }
             @Override public void onFailure(@NonNull Call<GenresResponse> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Failed to load genres", Toast.LENGTH_SHORT).show();
+                ToastHelper.show(getContext(), "Failed to load genres");
             }
         });
     }

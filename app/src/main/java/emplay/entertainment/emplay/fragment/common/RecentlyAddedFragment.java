@@ -9,8 +9,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,9 +50,8 @@ public class RecentlyAddedFragment extends BaseFragment {
         adapter = new RecentlyAddedAdapter(requireContext(), allItems, this::onItemClick, getDbHelper(), userId);
         adapter.setOnItemRemovedListener(count ->
                 tvItemCount.setText(getResources().getQuantityString(R.plurals.items_count, count, count)));
-        rvRecentlyAdded.setLayoutManager(new LinearLayoutManager(requireContext()));
+        RecyclerViewHelper.setupVertical(rvRecentlyAdded, requireContext(), adapter);
         rvRecentlyAdded.setHasFixedSize(true);
-        rvRecentlyAdded.setAdapter(adapter);
         new ItemTouchHelper(new SwipeToDeleteCallback(rvRecentlyAdded)).attachToRecyclerView(rvRecentlyAdded);
 
         loadData();

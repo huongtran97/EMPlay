@@ -11,8 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import com.bumptech.glide.Glide;
 
@@ -164,8 +165,7 @@ public class CastDetailFragment extends BaseFragment {
                     List<CreditItem> top10 = knownFor.subList(0, Math.min(5, knownFor.size()));
 
                     creditAdapter = new CreditAdapter(top10, requireContext(), (item, view) -> onCreditClicked(item, view));
-                    creditsRecyclerView.setAdapter(creditAdapter);
-                    creditsRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                    RecyclerViewHelper.setupHorizontal(creditsRecyclerView, requireContext(), creditAdapter);
 
                     filmographyAdapter = new FilmographyAdapter(filmographyList, (item, view) -> onCreditClicked(item, view));
                     filmographyRecyclerView.setAdapter(filmographyAdapter);

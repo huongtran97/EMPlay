@@ -7,12 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 
 import com.bumptech.glide.Glide;
 
@@ -76,8 +76,7 @@ public class SeasonDetailFragment extends BaseFragment {
         episodesRecyclerView = view.findViewById(R.id.season_detail_episodes_recyclerview);
 
         episodeAdapter = new EpisodeAdapter(requireContext());
-        episodesRecyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
-        episodesRecyclerView.setAdapter(episodeAdapter);
+        RecyclerViewHelper.setupVertical(episodesRecyclerView, requireContext(), episodeAdapter);
         episodesRecyclerView.setNestedScrollingEnabled(false);
 
         // Read More / Less
@@ -130,7 +129,7 @@ public class SeasonDetailFragment extends BaseFragment {
 
             @Override
             public void onFailure(@NonNull Call<SeasonDetailResponse> call, @NonNull Throwable t) {
-                Toast.makeText(getContext(), "Failed to load season details", Toast.LENGTH_SHORT).show();
+                ToastHelper.show(getContext(), "Failed to load season details");
             }
         });
     }

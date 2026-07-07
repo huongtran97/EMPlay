@@ -7,8 +7,9 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +68,7 @@ public class AllGenresFragment extends BaseFragment {
         });
 
         RecyclerView rv = view.findViewById(R.id.rvAllGenres);
-        rv.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-        rv.setAdapter(adapter);
+        RecyclerViewHelper.setupGrid(rv, requireContext(), 2, adapter);
 
         return view;
     }

@@ -12,8 +12,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.material.textfield.TextInputEditText;
@@ -101,8 +102,7 @@ public class SearchByOriginFragment extends BaseFragment {
                     code, origin.getName(), origin.getGlyph(), isAnime, isAnime || defaultTV));
         });
 
-        rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-        rv.setAdapter(adapter);
+        RecyclerViewHelper.setupVertical(rv, requireContext(), adapter);
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int st, int c, int a) {}

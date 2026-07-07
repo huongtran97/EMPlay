@@ -8,8 +8,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.imageview.ShapeableImageView;
@@ -53,7 +54,7 @@ public class ReleaseAlertsBottomSheet extends BottomSheetDialogFragment {
         tvEmpty = view.findViewById(R.id.tvEmpty);
         btnDismissAll = view.findViewById(R.id.btnDismissAll);
 
-        rvAlerts.setLayoutManager(new LinearLayoutManager(requireContext()));
+        RecyclerViewHelper.setupVertical(rvAlerts, requireContext());
         loadData(view);
 
         btnDismissAll.setOnClickListener(v -> {

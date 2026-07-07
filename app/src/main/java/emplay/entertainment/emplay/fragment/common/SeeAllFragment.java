@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import emplay.entertainment.emplay.databinding.ActivitySeeAllBinding;
 import emplay.entertainment.emplay.databinding.ItemSearchResultCastBinding;
 
@@ -18,6 +17,9 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -188,12 +190,10 @@ public class SeeAllFragment extends BaseFragment {
 
     private void setupCastCrewAccordion() {
         castGridAdapter = buildCastGridAdapter(castOnlyList);
-        binding.rvCastSection.setLayoutManager(new GridLayoutManager(requireContext(), 4));
-        binding.rvCastSection.setAdapter(castGridAdapter);
+        RecyclerViewHelper.setupGrid(binding.rvCastSection, requireContext(), 4, castGridAdapter);
 
         crewGridAdapter = buildCrewGridAdapter(crewList);
-        binding.rvCrewSection.setLayoutManager(new GridLayoutManager(requireContext(), 4));
-        binding.rvCrewSection.setAdapter(crewGridAdapter);
+        RecyclerViewHelper.setupGrid(binding.rvCrewSection, requireContext(), 4, crewGridAdapter);
 
         binding.rowCastToggle.setOnClickListener(v -> {
             castExpanded = !castExpanded;
@@ -298,9 +298,7 @@ public class SeeAllFragment extends BaseFragment {
                         (movie, v) -> navigateTo(
                                 MovieResultDetailsFragment.newInstance(movie.getMovieId()),
                                 v, "poster_transition"));
-                GridLayoutManager movieLm = new GridLayoutManager(requireContext(), 3);
-                rv.setLayoutManager(movieLm);
-                rv.setAdapter(moviePosterAdapter);
+                GridLayoutManager movieLm = RecyclerViewHelper.setupGrid(rv, requireContext(), 3, moviePosterAdapter);
                 rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -321,9 +319,7 @@ public class SeeAllFragment extends BaseFragment {
                         (tv, v) -> navigateTo(
                                 TVShowResultDetailsFragment.newInstance(tv.getTVShowId()),
                                 v, "poster_transition"));
-                GridLayoutManager tvLm = new GridLayoutManager(requireContext(), 3);
-                rv.setLayoutManager(tvLm);
-                rv.setAdapter(tvPosterAdapter);
+                GridLayoutManager tvLm = RecyclerViewHelper.setupGrid(rv, requireContext(), 3, tvPosterAdapter);
                 rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -349,8 +345,7 @@ public class SeeAllFragment extends BaseFragment {
                                 v, "poster_transition"),
                         onAirDb, onAirUserId, this::showLoginPromptDialog);
                 onAirRv = rv;
-                rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-                rv.setAdapter(onAirSeeAllAdapter);
+                RecyclerViewHelper.setupVertical(rv, requireContext(), onAirSeeAllAdapter);
                 rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -374,8 +369,7 @@ public class SeeAllFragment extends BaseFragment {
                 trendingAdapter = new TrendingSearchAdapter<>(
                         requireContext(), new ArrayList<>(), this::onMediaClick, db, userId);
                 comingSoonRv = rv;
-                rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-                rv.setAdapter(trendingAdapter);
+                RecyclerViewHelper.setupVertical(rv, requireContext(), trendingAdapter);
                 rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
                     @Override
                     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
@@ -452,7 +446,7 @@ public class SeeAllFragment extends BaseFragment {
                     }
                     @Override
                     public void onFailure(@NonNull Call<MovieCreditsResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Failed to load cast", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load cast");
                     }
                 });
     }
@@ -488,7 +482,7 @@ public class SeeAllFragment extends BaseFragment {
                     }
                     @Override
                     public void onFailure(@NonNull Call<AggregateCreditsResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Failed to load cast", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load cast");
                     }
                 });
     }
@@ -522,7 +516,7 @@ public class SeeAllFragment extends BaseFragment {
                     @Override
                     public void onFailure(@NonNull Call<MovieSimilarResponse> call, @NonNull Throwable t) {
                         similarIsLoading = false;
-                        Toast.makeText(getContext(), "Failed to load similar movies", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load similar movies");
                     }
                 });
     }
@@ -556,7 +550,7 @@ public class SeeAllFragment extends BaseFragment {
                     @Override
                     public void onFailure(@NonNull Call<TVShowSimilarResponse> call, @NonNull Throwable t) {
                         similarIsLoading = false;
-                        Toast.makeText(getContext(), "Failed to load similar TV shows", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load similar TV shows");
                     }
                 });
     }
@@ -585,7 +579,7 @@ public class SeeAllFragment extends BaseFragment {
                     }
                     @Override
                     public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Failed to load on-air shows", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load on-air shows");
                     }
                 });
     }
@@ -649,7 +643,7 @@ public class SeeAllFragment extends BaseFragment {
                     public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
                         if (onAirSeeAllAdapter != null) onAirSeeAllAdapter.setLoading(false);
                         onAirIsLoading = false;
-                        Toast.makeText(getContext(), "Failed to load more shows", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load more shows");
                     }
                 });
     }
@@ -711,7 +705,7 @@ public class SeeAllFragment extends BaseFragment {
                     }
                     @Override
                     public void onFailure(@NonNull Call<UpComingMovieResponse> call, @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Failed to load upcoming movies", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load upcoming movies");
                     }
                 });
     }
@@ -741,7 +735,7 @@ public class SeeAllFragment extends BaseFragment {
                     @Override
                     public void onFailure(@NonNull Call<UpComingTVShowsResponse> call,
                                           @NonNull Throwable t) {
-                        Toast.makeText(getContext(), "Failed to load upcoming TV shows", Toast.LENGTH_SHORT).show();
+                        ToastHelper.show(getContext(), "Failed to load upcoming TV shows");
                     }
                 });
     }
@@ -805,7 +799,7 @@ public class SeeAllFragment extends BaseFragment {
                         public void onFailure(@NonNull Call<UpComingMovieResponse> call, @NonNull Throwable t) {
                             if (trendingAdapter != null) trendingAdapter.setLoading(false);
                             comingSoonIsLoading = false;
-                            Toast.makeText(getContext(), "Failed to load more movies", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), "Failed to load more movies");
                         }
                     });
         } else {
@@ -831,7 +825,7 @@ public class SeeAllFragment extends BaseFragment {
                         public void onFailure(@NonNull Call<UpComingTVShowsResponse> call, @NonNull Throwable t) {
                             if (trendingAdapter != null) trendingAdapter.setLoading(false);
                             comingSoonIsLoading = false;
-                            Toast.makeText(getContext(), "Failed to load more TV shows", Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), "Failed to load more TV shows");
                         }
                     });
         }

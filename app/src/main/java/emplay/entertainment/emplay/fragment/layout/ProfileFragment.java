@@ -14,15 +14,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -109,8 +109,7 @@ public class ProfileFragment extends BaseFragment {
 
         RecyclerView rvRecentlySaved = view.findViewById(R.id.rvRecentlySaved);
         recentlySavedAdapter = new RecentlySavedAdapter(requireContext(), recentlySavedList, this::onItemClicked);
-        rvRecentlySaved.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        rvRecentlySaved.setAdapter(recentlySavedAdapter);
+        RecyclerViewHelper.setupHorizontal(rvRecentlySaved, requireContext(), recentlySavedAdapter);
 
         view.findViewById(R.id.llAbout).setOnClickListener(v ->
                 startActivity(new Intent(requireContext(), AboutActivity.class)));
@@ -275,14 +274,12 @@ public class ProfileFragment extends BaseFragment {
                                 AuthManager.getInstance(requireContext()).signOut();
                                 if (email != null) getDbHelper().deleteUserProfile(email);
                                 if (isAdded()) {
-                                    Toast.makeText(requireContext(),
-                                            "Account deleted successfully", Toast.LENGTH_SHORT).show();
+                                    ToastHelper.show(requireContext(), "Account deleted successfully");
                                     startActivity(new Intent(requireContext(), LoginActivity.class));
                                     requireActivity().finish();
                                 }
                             } else if (isAdded()) {
-                                Toast.makeText(requireContext(),
-                                        "Failed to delete account", Toast.LENGTH_SHORT).show();
+                                ToastHelper.show(requireContext(), "Failed to delete account");
                             }
                         });
                     })

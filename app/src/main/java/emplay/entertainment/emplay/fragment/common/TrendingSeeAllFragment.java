@@ -6,12 +6,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -77,10 +77,9 @@ public class TrendingSeeAllFragment extends BaseFragment {
         String userId = currentUser != null ? currentUser.getUid() : null;
         DatabaseHelper dbHelper = getDbHelper();
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
         adapter = new TrendingSearchAdapter<>(requireContext(), trendingList, this::onItemClick,
                 dbHelper, userId);
-        recyclerView.setAdapter(adapter);
+        RecyclerViewHelper.setupVertical(recyclerView, requireContext(), adapter);
 
         apiService = ApiClient.getClient().create(MovieApiService.class);
         fetchTrendingData();
@@ -109,8 +108,7 @@ public class TrendingSeeAllFragment extends BaseFragment {
 
                         @Override
                         public void onFailure(@NonNull Call<TVShowResponse> call, @NonNull Throwable t) {
-                            Toast.makeText(getContext(), "Failed to load trending TV shows",
-                                    Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), "Failed to load trending TV shows");
                         }
                     });
         } else {
@@ -133,8 +131,7 @@ public class TrendingSeeAllFragment extends BaseFragment {
 
                         @Override
                         public void onFailure(@NonNull Call<MovieResponse> call, @NonNull Throwable t) {
-                            Toast.makeText(getContext(), "Failed to load trending movies",
-                                    Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), "Failed to load trending movies");
                         }
                     });
         }

@@ -9,8 +9,9 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,8 +74,7 @@ public class KnownForSeeAllFragment extends BaseFragment {
         binding.tvLoadingMore.setVisibility(View.VISIBLE);
 
         adapter = new CreditAdapter(new ArrayList<>(), requireContext(), this::onCreditClicked);
-        binding.rvAllItems.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-        binding.rvAllItems.setAdapter(adapter);
+        RecyclerViewHelper.setupGrid(binding.rvAllItems, requireContext(), 3, adapter);
 
         binding.rvAllItems.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override

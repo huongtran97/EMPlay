@@ -9,8 +9,9 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class WhatsNewFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.activity_whats_new, container, false);
 
         recyclerView = view.findViewById(R.id.rvWhatsNewFull);
-        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
+        RecyclerViewHelper.setupVertical(recyclerView, requireContext());
 
         TextView tvTitle = view.findViewById(R.id.trendNow);
         tvTitle.setText(isTV ? "What's New in TV Shows" : "What's New in Movies");

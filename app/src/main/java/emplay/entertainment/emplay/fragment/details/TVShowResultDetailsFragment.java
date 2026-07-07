@@ -11,15 +11,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
+
+import emplay.entertainment.emplay.tool.RecyclerViewHelper;
+import emplay.entertainment.emplay.tool.ToastHelper;
 import com.google.android.flexbox.FlexDirection;
 import com.google.android.flexbox.FlexWrap;
 import com.google.android.flexbox.FlexboxLayoutManager;
@@ -139,14 +139,11 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             seasonTabAdapter.setSelectedPosition(pos);
             fetchEpisodes(season.getSeasonNumber());
         });
-        binding.rvSeasonTabs.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.rvSeasonTabs.setAdapter(seasonTabAdapter);
+        RecyclerViewHelper.setupHorizontal(binding.rvSeasonTabs, requireContext(), seasonTabAdapter);
 
         // Episode list (vertical)
         episodeAdapter = new EpisodeAdapter(requireContext());
-        binding.rvEpisodes.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvEpisodes.setAdapter(episodeAdapter);
+        RecyclerViewHelper.setupVertical(binding.rvEpisodes, requireContext(), episodeAdapter);
 
         binding.tvSeeMoreEpisodes.setOnClickListener(v -> {
             boolean expanded = !episodeAdapter.isExpanded();
@@ -157,9 +154,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         // Cast
         castAdapter = new CastAdapter(castList, requireContext(), cast ->
                 navigateTo(CastDetailFragment.newInstance(cast.getId())));
-        binding.rvCast.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.rvCast.setAdapter(castAdapter);
+        RecyclerViewHelper.setupHorizontal(binding.rvCast, requireContext(), castAdapter);
 
         binding.tvAllCast.setOnClickListener(v ->
                 navigateTo(SeeAllFragment.newInstance(SeeAllFragment.TYPE_CAST_TV, tvId,
@@ -169,9 +164,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         suggestionTVAdapter = new SuggestionTVAdapter(new ArrayList<>(), requireContext(),
                 (tv, view) -> navigateTo(TVShowResultDetailsFragment.newInstance(tv.getTVShowId()),
                         view, "poster_transition"));
-        binding.searchResultSuggestionRecyclerview.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
-        binding.searchResultSuggestionRecyclerview.setAdapter(suggestionTVAdapter);
+        RecyclerViewHelper.setupHorizontal(binding.searchResultSuggestionRecyclerview, requireContext(), suggestionTVAdapter);
 
         paginationHelper = new PaginationHelper<>(PAGE_SIZE, allSuggestions,
                 new PaginationHelper.PaginationCallback<TVShowModel>() {
@@ -340,7 +333,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         if (!auth.isLoggedIn()) {
             binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
                 if (getContext() != null)
-                    Toast.makeText(getContext(), R.string.release_alert_login_required, Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(getContext(), R.string.release_alert_login_required);
             });
             return;
         }
@@ -363,7 +356,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                     safeRunOnUiThread(() -> {
                         applyTVNotifyState(false);
                         if (getContext() != null)
-                            Toast.makeText(getContext(), R.string.release_alert_removed, Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), R.string.release_alert_removed);
                     });
                 } else {
                     getDbHelper().addReleaseAlert(userId, mediaId, ReleaseAlertItem.TYPE_TV,
@@ -371,7 +364,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                     safeRunOnUiThread(() -> {
                         applyTVNotifyState(true);
                         if (getContext() != null)
-                            Toast.makeText(getContext(), R.string.release_alert_set, Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(getContext(), R.string.release_alert_set);
                     });
                 }
             }).start();
@@ -509,7 +502,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 TrailerBottomSheetFragment.newInstance(pick.getKey(), pick.getName())
                         .show(getChildFragmentManager(), "trailer");
             } else {
-                Toast.makeText(getContext(), "No trailer available", Toast.LENGTH_SHORT).show();
+                ToastHelper.show(getContext(), "No trailer available");
             }
         });
     }
@@ -738,7 +731,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         String link = MotnHelper.findLink(motn, currentWtwRegion, providerName, tmdbProviderId);
         if (link == null) link = MotnHelper.findServiceHomePage(motn, providerName, tmdbProviderId);
         if (link == null) {
-            Toast.makeText(requireContext(), R.string.motn_link_unavailable, Toast.LENGTH_SHORT).show();
+            ToastHelper.show(requireContext(), R.string.motn_link_unavailable);
             return;
         }
         startActivity(new android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link)));
@@ -766,8 +759,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
                     updateMyListLabel(false);
-                    Toast.makeText(requireContext(), "TV Show removed from library",
-                            Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(requireContext(), "TV Show removed from library");
                 });
             } else {
                 String genres = buildGenresString(tv.getGenres());
@@ -777,9 +769,8 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 safeRunOnUiThread(() -> {
                     if (binding == null) return;
                     updateMyListLabel(saved);
-                    Toast.makeText(requireContext(),
-                            saved ? "TV Show added to library" : "Failed to add TV Show",
-                            Toast.LENGTH_SHORT).show();
+                    ToastHelper.show(requireContext(),
+                            saved ? "TV Show added to library" : "Failed to add TV Show");
                 });
             }
         }).start());
@@ -824,13 +815,10 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                         if (response.isSuccessful() && response.body() != null) {
                             tmdbTVInWatchlist = addToWatchlist;
                             updateMyListLabel(tmdbTVInWatchlist);
-                            Toast.makeText(requireContext(),
-                                    addToWatchlist ? "Added to TMDB watchlist"
-                                                   : "Removed from TMDB watchlist",
-                                    Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(requireContext(),
+                                    addToWatchlist ? "Added to TMDB watchlist" : "Removed from TMDB watchlist");
                         } else {
-                            Toast.makeText(requireContext(), "Failed to update watchlist",
-                                    Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(requireContext(), "Failed to update watchlist");
                         }
                         binding.btnMyList.setClickable(true);
                     }
@@ -838,8 +826,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                     public void onFailure(@NonNull Call<TMDBWatchlistStatusResponse> call,
                                           @NonNull Throwable t) {
                         if (binding != null) {
-                            Toast.makeText(requireContext(), "Failed to update watchlist",
-                                    Toast.LENGTH_SHORT).show();
+                            ToastHelper.show(requireContext(), "Failed to update watchlist");
                             binding.btnMyList.setClickable(true);
                         }
                     }
@@ -904,8 +891,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             rv.setVisibility(View.GONE);
             tvEmpty.setVisibility(View.VISIBLE);
         } else {
-            rv.setLayoutManager(new LinearLayoutManager(requireContext()));
-            rv.setAdapter(new ReviewAdapter(reviews, requireContext()));
+            RecyclerViewHelper.setupVertical(rv, requireContext(), new ReviewAdapter(reviews, requireContext()));
         }
 
         dialog.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
