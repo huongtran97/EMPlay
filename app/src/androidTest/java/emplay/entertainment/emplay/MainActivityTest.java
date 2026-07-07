@@ -50,7 +50,6 @@ public class MainActivityTest {
     }
 
     // Welcome dialog
-
     @Test
     public void welcomeDialog_isShown_whenNotLoggedIn() {
         onView(withId(R.id.btn_guest)).check(matches(isDisplayed()));
@@ -69,7 +68,6 @@ public class MainActivityTest {
     }
 
     // Bottom navigation (all start with dialog dismissal)
-
     @Test
     public void bottomNav_allTabs_areVisibleAfterGuestLogin() {
         onView(withId(R.id.btn_guest)).perform(click());
