@@ -33,7 +33,7 @@ public class WatchProviderHelper {
         
         String[] displayNames = new String[codes.size()];
         for (int i = 0; i < codes.size(); i++) {
-            String name = new Locale("", codes.get(i)).getDisplayCountry();
+            String name = new Locale.Builder().setRegion(codes.get(i)).build().getDisplayCountry();
             displayNames[i] = name.isEmpty() ? codes.get(i) : name + " (" + codes.get(i) + ")";
         }
         

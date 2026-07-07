@@ -187,11 +187,11 @@ public class TrendingBannerAdapter extends RecyclerView.Adapter<TrendingBannerAd
             itemView.setOnTouchListener((v, event) -> {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        ViewCompat.animate(v).scaleX(0.96f).scaleY(0.96f).setDuration(120).start();
+                        v.animate().scaleX(0.96f).scaleY(0.96f).setDuration(120).start();
                         break;
                     case MotionEvent.ACTION_UP:
                     case MotionEvent.ACTION_CANCEL:
-                        ViewCompat.animate(v).scaleX(1f).scaleY(1f).setDuration(120).start();
+                        v.animate().scaleX(1f).scaleY(1f).setDuration(120).start();
                         break;
                 }
                 boolean handled = gestureDetector.onTouchEvent(event);

@@ -139,7 +139,7 @@ public class ReleaseAlertsBottomSheet extends BottomSheetDialogFragment {
             });
 
             holder.dismiss.setOnClickListener(v -> {
-                int pos = holder.getAdapterPosition();
+                int pos = holder.getBindingAdapterPosition();
                 if (pos == RecyclerView.NO_POSITION) return;
                 new Thread(() -> {
                     db.removeReleaseAlert(userId, item.getMediaId(), item.getMediaType());

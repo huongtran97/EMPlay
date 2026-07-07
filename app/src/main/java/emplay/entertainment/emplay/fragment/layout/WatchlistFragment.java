@@ -92,7 +92,7 @@ public class WatchlistFragment extends BaseFragment {
 
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-                int pos = viewHolder.getAdapterPosition();
+                int pos = viewHolder.getBindingAdapterPosition();
                 if (pos == RecyclerView.NO_POSITION || binding == null) return;
 
                 MediaItem removed = adapter.getItem(pos);

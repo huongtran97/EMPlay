@@ -73,7 +73,7 @@ public class SeasonsTVAdapter extends BaseDiffUtilAdapter<SeasonsModel, SeasonsT
 
         holder.tvSeasonTab.setOnClickListener(v -> {
             int prev = selectedPosition;
-            selectedPosition = holder.getAdapterPosition();
+            selectedPosition = holder.getBindingAdapterPosition();
             notifyItemChanged(prev);
             notifyItemChanged(selectedPosition);
             if (listener != null) listener.onSeasonSelected(season);

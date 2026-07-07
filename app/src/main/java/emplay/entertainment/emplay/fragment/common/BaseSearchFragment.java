@@ -67,7 +67,7 @@ import retrofit2.Response;
 
 public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragment {
     protected GenresAdapter genresAdapter;
-    protected TrendingSearchAdapter trendingAdapter;
+    protected TrendingSearchAdapter<MediaItem> trendingAdapter;
     protected List<GenresModel> genresList = new ArrayList<>();
     private final List<GenresModel> fullGenresList = new ArrayList<>();
     protected RecyclerView rvGenres, rvPopularSearches;

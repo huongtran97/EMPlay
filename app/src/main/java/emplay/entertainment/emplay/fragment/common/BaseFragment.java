@@ -258,12 +258,12 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected static void sizeChipIcon(TextView tv) {
-        Drawable[] drawables = TextViewCompat.getCompoundDrawablesRelative(tv);
+        Drawable[] drawables = tv.getCompoundDrawablesRelative();
         Drawable icon = drawables[0];
         if (icon == null) return;
         int size = Math.round(tv.getTextSize());
         icon.setBounds(0, 0, size, size);
-        TextViewCompat.setCompoundDrawablesRelative(tv, icon, null, null, null);
+        tv.setCompoundDrawablesRelative(icon, null, null, null);
     }
 
     protected void handleNoWatchProviders(View layoutEmpty, View rvProviders, View tabLayout) {
