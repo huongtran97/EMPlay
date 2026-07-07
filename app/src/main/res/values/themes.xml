@@ -41,6 +41,9 @@
     <style name="HiddenTitleTheme" parent="Theme.EMPlay">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="HiddenTitleTheme.Black">
         <item name="android:windowBackground">@color/black</item>
     </style>
 
