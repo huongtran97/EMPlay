@@ -23,52 +23,31 @@
     <color name="black">#000000</color>
     <color name="text_primary">@color/text_1</color>
     <color name="text_secondary">@color/text_2</color>
-    <color name="text_tertiary">@color/text_3</color>
 
-    <!-- Genre tiles use surface_high per spec R10 — no per-genre accent colours -->
-    <color name="genre_default">@color/surface_high</color>
     <color name="text_overview">@color/text_2</color>
     <color name="text_hint">@color/text_3</color>
-    <color name="bottom_nav_background">@color/bg_surface</color>
-    <color name="accent_amber">@color/accent</color>
     <color name="accent_red">@color/error</color>
     <color name="red_primary">@color/error</color>
     <color name="text_disabled">@color/text_3</color>
-    <color name="toggle_bg">@color/bg_surface</color>
 
     <!-- Placeholder fill tints for backdrop / poster areas -->
     <color name="text_dim">#4E5872</color>
-    <color name="bg_dark">#1F2740</color>
-    <color name="bg_dark_purple">#2A2030</color>
-    <color name="bg_dark_teal">#1C3036</color>
 
     <!-- Search dropdown tokens -->
     <color name="ripple_accent">#33E3B566</color>
     <color name="badge_tv_bg">#267FBF9A</color>
-    <color name="badge_accent_bg">#26E3B566</color>
 
-    <!-- Poster card stroke (18% opacity) -->
-    <color name="poster_card_stroke">#2EEDF0F7</color>
     <!-- Login screen overlay (60% opacity) -->
     <color name="scrim_60">#990B0F19</color>
     <!-- Brand colors — same in both themes -->
     <color name="rating_imdb">#F5C518</color>
     <color name="tmdb_blue">#01B4E4</color>
 
-    <!-- Back/share button circle tint (70% opacity) -->
-    <color name="bg_back_tint">#B30B0F19</color>
     <!-- Rank badge circle tint on poster (82% opacity) -->
     <color name="bg_rank_tint">#D10B0F19</color>
-    <!-- Airing badge background (35% opacity airing green) -->
-    <color name="badge_airing_muted">#597FBF9A</color>
 
     <!-- Bottom nav pill tokens (dark) -->
     <color name="nav_pill_bg">#D9171E31</color>
     <color name="nav_pill_stroke">#26EDF0F7</color>
-    <color name="nav_indicator_fill">#29E3B566</color>
-    <color name="bottom_nav_icon_active">@color/accent</color>
-    <color name="bottom_nav_icon_inactive">@color/text_3</color>
-    <color name="bottom_nav_label_active">@color/accent</color>
-    <color name="bottom_nav_label_inactive">@color/text_3</color>
 
 </resources>

@@ -5,7 +5,6 @@
     android:id="@+id/movie_by_genres_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_base"
     tools:context=".fragment.genre.TVShowsByGenresFragment">
 
     <!-- Ghost glyph -->

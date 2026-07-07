@@ -274,7 +274,8 @@ public class WatchlistFragment extends BaseFragment {
 
     private void updateCountLabel() {
         if (binding == null) return;
-        binding.tvItemCount.setText(getString(R.string.count_item, adapter.getItemCount()));
+        int count = adapter.getItemCount();
+        binding.tvItemCount.setText(getResources().getQuantityString(R.plurals.count_item, count, count));
     }
 
     private void onItemClick(MediaItem item, View sharedElement) {

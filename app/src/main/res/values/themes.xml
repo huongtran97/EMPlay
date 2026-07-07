@@ -41,27 +41,7 @@
     <style name="HiddenTitleTheme" parent="Theme.EMPlay">
         <item name="windowNoTitle">true</item>
         <item name="windowActionBar">false</item>
-    </style>
-
-    <style name="CustomRatingBar" parent="Widget.AppCompat.RatingBar">
-        <item name="android:progressDrawable">@style/CustomRatingBar</item>
-        <item name="android:minHeight">4dp</item>
-        <item name="android:maxHeight">4dp</item>
-    </style>
-
-    <style name="TextHintStyle" parent="TextAppearance.AppCompat.Small">
-        <item name="android:textColor">@color/text_3</item>
-        <item name="android:textStyle">italic</item>
-    </style>
-
-    <style name="RatingBar" parent="Theme.AppCompat">
-        <item name="colorControlActivated">@color/accent</item>
-        <item name="colorControlHighlight">@color/accent</item>
-    </style>
-
-    <style name="TabTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="android:textSize">13sp</item>
-        <item name="android:fontFamily">@font/inter</item>
+        <item name="android:windowBackground">@color/black</item>
     </style>
 
     <style name="WtwTabItem">
@@ -79,36 +59,14 @@
         <item name="android:focusable">true</item>
     </style>
 
-    <!--Chip Style-->
-    <style name="ChipStyle" parent="Widget.MaterialComponents.Chip.Filter">
-        <item name="android:textColor">@color/text_2</item>
-        <item name="android:textSize">12sp</item>
-        <item name="chipBackgroundColor">@android:color/transparent</item>
-        <item name="chipStrokeColor">@color/border</item>
-        <item name="chipStrokeWidth">@dimen/hairline</item>
-        <item name="chipCornerRadius">@dimen/radius_pill</item>
-        <item name="chipMinHeight">32dp</item>
-        <item name="checkedIconVisible">false</item>
-        <item name="rippleColor">@android:color/transparent</item>
-    </style>
-
     <style name="RoundedCorners.8dp" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">8dp</item>
     </style>
 
-    <style name="ShapeAppearance.EMPlay.TopRounded8dp" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeTopLeft">8dp</item>
-        <item name="cornerSizeTopRight">8dp</item>
-        <item name="cornerSizeBottomLeft">0dp</item>
-        <item name="cornerSizeBottomRight">0dp</item>
-    </style>
-
     <style name="EMPlay.Circle" parent="">
         <item name="cornerSize">50%</item>
     </style>
-
 
     <style name="ShapeAppearance.EMPlay.PosterThumb" parent="">
         <item name="cornerFamily">rounded</item>

@@ -1,5 +1,6 @@
 package emplay.entertainment.emplay.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +14,7 @@ import androidx.core.content.ContextCompat;
 
 import emplay.entertainment.emplay.R;
 
+@SuppressLint("CustomSplashScreen")
 public class SplashActivity extends AppCompatActivity {
 
     private static final long STEP_MS = 850L;

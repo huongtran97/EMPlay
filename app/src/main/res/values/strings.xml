@@ -5,10 +5,8 @@
     <string name="app_name" translatable="false">EMPlay</string>
     <string name="brand_name" translatable="false">EMPLAY</string>
     <string name="memorabilia_admit_one" translatable="false">ADMIT ONE</string>
-    <string name="profile_club" translatable="false">EMPLAY CLUB</string>
     <string name="profile_member_card" translatable="false">MEMBER CARD</string>
     <string name="splash_now_showing" translatable="false">NOW SHOWING</string>
-
 
     <!-- ════════ Shared / Global ════════ -->
     <string name="nav_home">Home</string>
@@ -22,26 +20,17 @@
     <string name="sort_popular">Popular</string>
     <string name="sort_top_rated">Top rated</string>
     <string name="sort_newest">Newest</string>
-    <string name="sort_revenue">Revenue</string>
     <string name="list_loading_more">Loading more…</string>
     <string name="badge_days_until">In %1$dd</string>
-    <string name="badge_in_days">In %1$d days</string>
     <plurals name="results_titles_count">
         <item quantity="one">%1$d title</item>
         <item quantity="other">%1$d titles</item>
     </plurals>
-    <!-- Content descriptions (accessibility) -->
-    <string name="cd_back">Back</string>
-    <string name="cd_back_button">@string/cd_back</string>
     <string name="cd_backdrop">Show backdrop image</string>
-    <string name="cd_search">Search</string>
     <string name="cd_notifications">Notifications</string>
-    <string name="cd_more_options">More options</string>
-    <string name="cd_watched">Watched</string>
     <string name="cd_poster">Poster of %1$s</string>
     <string name="cd_actor_photo">Actor photo</string>
     <string name="cd_provider_logo">Streaming provider logo</string>
-    <string name="cd_star_rating">Rating</string>
     <string name="cd_back_to_top">Back to top</string>
 
     <!-- ════════ Login View ════════ -->
@@ -74,46 +63,32 @@
     <string name="label_today">Today</string>
     <string name="label_tomorrow">Tomorrow</string>
     <string name="year_range_format">%1$d – %2$d</string>
-    <string name="action_trailer">Trailer</string>
 
     <!-- ════════ Detail View (Movie + TV) ════════ -->
     <string name="action_watch_trailer">Watch trailer</string>
     <string name="detail_btn_mylist">My list</string>
     <string name="detail_saved">ADMIT ONE · SAVED</string>
-    <string name="detail_section_where_to_watch">Where to watch</string>
     <string name="detail_section_cast">Cast</string>
     <string name="detail_section_cast_crew">Cast &amp; Crew</string>
     <string name="detail_all_cast">All cast ›</string>
     <string name="detail_part_of">PART OF</string>
-    <string name="detail_collection_count">%1$d movies ›</string>
     <string name="detail_section_also_like">You may also like</string>
     <string name="tv_badge_now_airing">● NOW AIRING</string>
     <string name="tv_badge_ended">ENDED</string>
     <string name="tv_badge_returning">● NOW AIRING</string>
-    <string name="providers_unavailable_ca">Not available in Canada</string>
     <string name="tv_next_episode">NEXT EPISODE</string>
     <string name="tv_section_episodes">Episodes</string>
-    <string name="tv_season_n">Season %1$d</string>
-    <string name="tv_specials">Specials</string>
 
     <!-- ════════ Search View (CA IA: genre grid above origin row) ════════ -->
     <string name="search_hint">Search movies, TV shows, people…</string>
     <string name="badge_tv">TV</string>
     <string name="search_see_people">See people ›</string>
-    <string name="cd_clear_search">Clear search</string>
     <string name="label_people">People</string>
     <string name="search_section_genres">BY GENRE</string>
     <string name="search_section_origin">BY ORIGIN</string>
     <string name="search_section_popular">POPULAR RIGHT NOW</string>
-    <string name="search_all_genres">All %1$d genres ›</string>
     <!-- Origin cards · ghost glyphs (한 日 ア 中 É B) ship in the data model, not here.
          VN card parked for the values-vi localization wave. -->
-    <string name="origin_korean">Korean</string>
-    <string name="origin_japanese">Japanese</string>
-    <string name="origin_anime">Anime</string>
-    <string name="origin_chinese">Chinese</string>
-    <string name="origin_french">French</string>
-    <string name="origin_british">British</string>
 
     <!-- ════════ Results Views (Genre / Origin / See all) ════════ -->
     <string name="eyebrow_genre">GENRE</string>
@@ -124,9 +99,6 @@
 
     <!-- ════════ My List View ════════ -->
     <string name="mylist_title">My list</string>
-    <string name="tab_watchlist">Watchlist</string>
-    <string name="tab_favorites">Favorites</string>
-    <string name="tab_rated">Rated</string>
     <string name="tag_in_theaters">In theaters</string>
     <string name="empty_watchlist_title">Your list is empty</string>
     <string name="empty_watchlist_body">Films you save will live here, ready for the next showing.</string>
@@ -145,35 +117,23 @@
     <string name="theme_deep_blue">Deep Blue</string>
     <string name="theme_parchment">Parchment</string>
     <string name="action_sign_out">Sign out</string>
-    <string name="sign_out_confirm_title">Sign out?</string>
-    <string name="sign_out_confirm_message">You\'ll need to sign in again to save titles.</string>
     <string name="browsing_as_guest">Browsing as Guest</string>
-    <string name="guest_create_account">Create Account / Sign In</string>
 
     <!-- ════════ Cast Info View ════════ -->
     <string name="cast_known_for">KNOWN FOR</string>
     <string name="cast_filmography">Filmography</string>
     <string name="cast_more">More</string>
-    <string name="cast_filmography_count">%1$d titles ›</string>
     <string name="cast_role">as %1$s · %2$s</string>
 
-    <!-- ════════ Attribution & Legal ════════ -->
-    <string name="tmdb_attribution">Powered by TMDB</string>
     <string name="tmdb_data_attribution">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
     <string name="motn_attribution">Streaming availability information is provided by Streaming Availability API by Movie of the Night.</string>
-    <string name="legal_terms_note">By continuing, you agree to our Terms and Privacy Policy.</string>
 
-    <!-- Legacy mappings for stability during transition -->
-    <string name="back">@string/cd_back</string>
-    <string name="emplay">@string/app_name</string>
     <string name="emplay_logo">@string/app_name</string>
     <string name="app_info">App Info</string>
     <string name="your_movies_and_tv_shows_companion">Your movies and TV shows companion</string>
     <string name="the_movie_database">The Movie Database</string>
-    <string name="tmdb">TMDB</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="policy_title">Privacy Policy</string>
-    <string name="ic">IC</string>
     <string name="credits">Credits</string>
 
     <string name="developer">Developer</string>
@@ -181,37 +141,22 @@
     <string name="libraries">Libraries</string>
     <string name="signing_in_tmdb">Signing in with TMDB</string>
     <string name="show_poster">Show Poster</string>
-    <string name="bio">Bio</string>
     <string name="read_more">Read more</string>
     <string name="read_less">Read less</string>
     <string name="reviews">Reviews</string>
     <string name="no_reviews">No reviews yet.</string>
-    <string name="credit">Credit</string>
-    <string name="pre_page">Previous</string>
-    <string name="next_page">Next</string>
     <string name="continue_with_google">@string/login_google</string>
     <string name="continue_with_tmdb">@string/login_tmdb</string>
-    <string name="or">or</string>
     <string name="guest">@string/login_guest</string>
     <string name="user_name">User Name</string>
     <string name="user_email">Email</string>
-    <string name="member_since">@string/profile_member_since</string>
     <string name="zero">0</string>
-    <string name="movies_saved">@string/stat_watchlist</string>
 
-    <string name="tv_shows_saved">TV Shows Saved</string>
-    <string name="genre">Genre</string>
-    <string name="top_genre">Top Genre</string>
     <string name="show_icon">Icon</string>
-    <string name="taste_profile">Taste Profile</string>
-    <string name="recently_saved">Recently Saved</string>
-    <string name="see_all">@string/action_see_all</string>
     <string name="about">About</string>
     <string name="log_out">@string/action_sign_out</string>
     <string name="delete_account">Delete Account</string>
     <string name="close">Close</string>
-    <string name="fullscreen">Fullscreen</string>
-    <string name="exit_fullscreen">Exit fullscreen</string>
     <string name="policy">Policy</string>
     <string name="welcome">Welcome</string>
     <string name="message_welcomer">Welcome to EMPlay!</string>
@@ -221,46 +166,28 @@
     <string name="theaters_nearby">Theaters Nearby</string>
     <string name="now_airing">Now Airing</string>
     <string name="whats_new">What\'s New</string>
-    <string name="tv_show">TV Show</string>
-    <string name="movie">Movie</string>
     <string name="upcoming">@string/home_section_coming_soon</string>
     <string name="rating_format">%1$s</string>
-    <string name="add_to_watchlist">Add to Watchlist</string>
-    <string name="page_1">1</string>
-    <string name="share">Share</string>
     <string name="coming_soon">@string/home_section_coming_soon</string>
     <string name="title">Title</string>
 
-    <string name="trailer">@string/action_trailer</string>
-    <string name="overview">Overview</string>
     <string name="recently_add">Recently Added</string>
-    <string name="count_item">%1$d items</string>
+    <plurals name="count_item">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
     <string name="sort_newest_first">Newest First</string>
-    <string name="_0_0">0.0</string>
     <string name="release_date">Release Date</string>
-    <string name="language">Language</string>
     <string name="cast">@string/detail_section_cast</string>
-    <string name="you_might_also_like">@string/detail_section_also_like</string>
     <string name="season">Season</string>
-    <string name="input_text">Search…</string>
     <string name="clear_all">Clear all</string>
-    <string name="trending_search">@string/search_section_popular</string>
-    <string name="browse_by_genre">@string/search_section_genres</string>
 
-    <string name="episode">Episode</string>
     <string name="trending_now">@string/home_section_trending</string>
-    <string name="watch_list">@string/nav_mylist</string>
-    <string name="a_z">A-Z</string>
-    <string name="wtw">Where to Watch</string>
     <string name="wtw_title">Where to Watch</string>
     <string name="wtw_location_placeholder">--</string>
     <string name="wtw_tab_stream">Stream</string>
     <string name="wtw_tab_rent">Rent</string>
     <string name="wtw_tab_buy">Buy</string>
-    <string name="region">Region</string>
-    <string name="stream">Stream</string>
-    <string name="rent">Rent</string>
-    <string name="buy">Buy</string>
     <string name="unavailable_country">Unavailable in your country</string>
     <string name="motn_link_unavailable">Direct link not available for this region</string>
     <string name="d">D</string>
@@ -280,7 +207,10 @@
     <string name="disconnect_tmdb">Disconnect TMDB</string>
     <string name="log_in">Log In</string>
     <string name="tmdb_account_badge">TMDB Member</string>
-    <string name="items_count">%1$d items</string>
+    <plurals name="items_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
     <string name="sort_a_z">Sort A-Z</string>
     <string name="saved_recently">Saved recently</string>
     <string name="just_now">Just now</string>
@@ -302,8 +232,6 @@
     <string name="btn_apply">Apply</string>
     <string name="label_sort_by">Sort by</string>
     <string name="label_year_range">Year range</string>
-    <string name="label_type">Type</string>
-    <string name="label_both">Both</string>
 
     <!-- Non-translatable placeholders used as runtime defaults -->
     <string name="stat_no_data" translatable="false">—</string>
@@ -336,9 +264,6 @@
     <string name="lib_author_reaxt" translatable="false">reaxt</string>
     <string name="lib_author_facebook" translatable="false">Facebook</string>
     <string name="lib_author_soffritti" translatable="false">Pierfrancesco Soffritti</string>
-    <string name="home">Home</string>
-    <string name="search">Search</string>
-    <string name="profile">Profile</string>
     <string name="see_more">More >></string>
     <string name="see_less">See less</string>
     <string name="back_to_top">↑ Back to top</string>

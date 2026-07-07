@@ -68,7 +68,7 @@
                     android:paddingBottom="1dp"
                     android:text="@string/badge_tv"
                     android:textColor="@color/airing"
-                    android:textSize="9sp"
+                    android:textSize="11sp"
                     android:visibility="gone"
                     tools:visibility="visible" />
 

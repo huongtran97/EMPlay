@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_base"
     android:fillViewport="true">
 
     <LinearLayout
@@ -42,8 +41,8 @@
 
                 <ImageView
                     android:id="@+id/btnBell"
-                    android:layout_width="34dp"
-                    android:layout_height="34dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:src="@drawable/ic_bell"
                     android:clickable="true"
                     android:focusable="true"
@@ -478,7 +477,8 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="UseCompoundDrawables">
 
                     <ImageView
                         android:id="@+id/icSectionComingSoon"

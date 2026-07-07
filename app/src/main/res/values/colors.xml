@@ -24,9 +24,6 @@
     <color name="black">#000000</color>
     <color name="text_primary">@color/text_1</color>
     <color name="text_secondary">@color/text_2</color>
-    <color name="text_tertiary">@color/text_3</color>
-
-    <color name="genre_default">@color/surface_high</color>
 
     <!-- Per-genre text accent colours (warm parchment palette) — movie + TV -->
     <color name="genre_action">#C04848</color>
@@ -59,60 +56,34 @@
     <color name="genre_war_politics">#4A5A30</color>
     <color name="text_overview">@color/text_2</color>
     <color name="text_hint">@color/text_3</color>
-    <color name="bottom_nav_background">@color/bg_surface</color>
-    <color name="accent_amber">@color/accent</color>
     <color name="accent_red">@color/error</color>
     <color name="red_primary">@color/error</color>
     <color name="text_disabled">@color/text_3</color>
-    <color name="toggle_bg">@color/bg_surface</color>
 
     <!-- Placeholder fill tints for backdrop / poster areas -->
     <color name="text_dim">#8A7E6C</color>
-    <color name="bg_dark">#D2C8B4</color>
-    <color name="bg_dark_purple">#D8CECC</color>
-    <color name="bg_dark_teal">#C8D4CC</color>
 
     <!-- Search dropdown tokens -->
     <color name="ripple_accent">#33B8892A</color>
     <color name="badge_tv_bg">#264E9668</color>
-    <color name="badge_accent_bg">#26B8892A</color>
 
-    <!-- Poster card stroke (18% opacity) -->
-    <color name="poster_card_stroke">#2E1C1510</color>
     <!-- Login screen overlay (60% opacity) -->
     <color name="scrim_60">#99EDE6D8</color>
     <!-- Brand colors — same in both themes -->
     <color name="rating_imdb">#F5C518</color>
     <color name="tmdb_blue">#01B4E4</color>
 
-    <!-- Back/share button circle tint (70% opacity) -->
-    <color name="bg_back_tint">#B3C4B89E</color>
     <!-- Rank badge circle tint on poster (82% opacity) -->
     <color name="bg_rank_tint">#D1C4B89E</color>
-    <!-- Airing badge background (35% opacity airing green) -->
-    <color name="badge_airing_muted">#594E9668</color>
 
-    <!-- WTW (Where to Watch) section tokens — dark island within the light detail screen -->
-    <color name="wtw_background">#0A0E17</color>
     <color name="wtw_surface">#141A29</color>
     <color name="wtw_text_primary">#F2F4F8</color>
     <color name="wtw_text_secondary">#8B93A7</color>
     <color name="wtw_accent">#E9364B</color>
     <color name="wtw_accent_on">#FFFFFF</color>
-    <!-- Per-provider icon chip background colours -->
-    <color name="wtw_icon_paramount">#0B5FFF</color>
-    <color name="wtw_icon_amazon">#232F3E</color>
-    <color name="wtw_icon_appletv">#1C1C1E</color>
-    <color name="wtw_icon_verizon">#DB0032</color>
 
     <!-- Bottom nav pill tokens (light) -->
     <color name="nav_pill_bg">#D9E0D8C8</color>
     <color name="nav_pill_stroke">#261C1510</color>
-    <color name="nav_indicator_fill">#29B8892A</color>
-    <color name="bottom_nav_indicator">#29B8892A</color>
-    <color name="bottom_nav_icon_active">@color/accent</color>
-    <color name="bottom_nav_icon_inactive">@color/text_3</color>
-    <color name="bottom_nav_label_active">@color/accent</color>
-    <color name="bottom_nav_label_inactive">@color/text_3</color>
 
 </resources>

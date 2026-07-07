@@ -52,7 +52,7 @@ public class RecentlyAddedFragment extends BaseFragment {
 
         adapter = new RecentlyAddedAdapter(requireContext(), allItems, this::onItemClick, dbHelper, userId);
         adapter.setOnItemRemovedListener(count ->
-                tvItemCount.setText(getString(R.string.items_count, count)));
+                tvItemCount.setText(getResources().getQuantityString(R.plurals.items_count, count, count)));
         rvRecentlyAdded.setLayoutManager(new LinearLayoutManager(requireContext()));
         rvRecentlyAdded.setHasFixedSize(true);
         rvRecentlyAdded.setAdapter(adapter);
@@ -85,7 +85,8 @@ public class RecentlyAddedFragment extends BaseFragment {
                     isSortedAZ = false;
                     tvSortLabel.setText(R.string.sort_newest_first);
                     adapter.updateData(loaded);
-                    tvItemCount.setText(getString(R.string.items_count, allItems.size()));
+                    int count = allItems.size();
+                    tvItemCount.setText(getResources().getQuantityString(R.plurals.items_count, count, count));
                 });
             }
         }).start();

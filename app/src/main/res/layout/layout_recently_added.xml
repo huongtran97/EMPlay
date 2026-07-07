@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_base"
     android:orientation="vertical">
 
     <LinearLayout
@@ -41,7 +40,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/count_item"
+            tools:text="0 items"
             android:textColor="@color/text_3"
             android:textSize="@dimen/text_divider_label" />
 
