@@ -81,8 +81,6 @@ public class LoginActivity extends AppCompatActivity {
             AuthManager.getInstance(this).setGuest();
             navigateToMainActivity();
         });
-        findViewById(R.id.tv_forgot_password).setOnClickListener(v ->
-                new ForgotPasswordSheet().show(getSupportFragmentManager(), "forgot_password"));
     }
 
     @Override

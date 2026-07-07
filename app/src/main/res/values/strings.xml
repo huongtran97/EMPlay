@@ -39,15 +39,7 @@
     <string name="login_tmdb">Continue with TMDB</string>
     <string name="login_google">Continue with Google</string>
     <string name="login_guest">Continue as a guest ›</string>
-    <string name="login_forgot_password">Forgot your password?</string>
     <string name="login_legal">By continuing, you agree to EMPlay\'s Terms of Service and Privacy Policy.</string>
-    <string name="forgot_password_title">Password Reset</string>
-    <string name="forgot_password_subtitle">Choose your sign-in method below to reset your password.</string>
-    <string name="forgot_password_tmdb_label">TMDB Account</string>
-    <string name="forgot_password_tmdb_body">Reset your TMDB password on the TMDB website. After resetting, return here and sign in with your new credentials.</string>
-    <string name="forgot_password_tmdb_cta">Reset TMDB Password</string>
-    <string name="forgot_password_google_label">Google Account</string>
-    <string name="forgot_password_google_body">Google manages password recovery for Google accounts. Tap "Continue with Google" on the sign-in screen — Google will guide you through account recovery if needed.</string>
 
     <!-- ════════ Home View ════════ -->
     <string name="home_eyebrow_now_showing">NOW SHOWING · IN THEATERS</string>
@@ -197,7 +189,7 @@
     <string name="release_notify">Notify on Release</string>
 
     <!--Privacy Policy Message-->
-    <string name="privacy_policy_text"><i>Last updated: May 2025</i>\n\nEMPlay does not collect or share personal data with third parties.\n\n<b>Account &amp; Authentication</b>\nIf you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n<b>Local Storage</b>\nSaved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n<b>Third-Party Services</b>\nMovie and TV show data is fetched from The Movie Database (TMDB) API. Please refer to TMDB\'s privacy policy for details on their data practices.\n\n<b>Contact</b>\nFor any privacy concerns, contact us through our GitHub repository:\nhttps://github.com/huongtran97/EMPlay</string>
+    <string name="privacy_policy_text"><i>Last updated: May 2025</i>\n\nEMPlay does not collect or share personal data with third parties.\n\n<b>Account &amp; Authentication</b>\nIf you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n<b>Local Storage</b>\nSaved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n<b>Third-Party Services</b>\nMovie and TV show data is fetched from The Movie Database (TMDB) API and Movie Of The Night (MOTN) API. Please refer to TMDB\'s and MOTN\'s privacy policy for details on their data practices.\n\n<b>Contact</b>\nFor any privacy concerns, contact us through our GitHub repository:\nhttps://github.com/huongtran97/EMPlay</string>
     <string name="tmdb_auth_cancelled">TMDB Auth Cancelled</string>
     <string name="welcome_tmdb">Welcome %1$s</string>
     <string name="tmdb_auth_failed">TMDB Auth Failed</string>
