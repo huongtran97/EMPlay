@@ -161,6 +161,10 @@ public class MainActivity extends AppCompatActivity {
             });
 
             welcomeDialog.show();
+            if (welcomeDialog.getWindow() != null) {
+                int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.85);
+                welcomeDialog.getWindow().setLayout(width, android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
         }
     }
 
