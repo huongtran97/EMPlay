@@ -15,24 +15,13 @@
         android:contentDescription="@string/emplay_logo"
         android:layout_marginBottom="12dp" />
 
-    <!-- App Name -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/welcome"
-        android:textColor="@color/text_1"
-        android:textSize="@dimen/text_subtitle"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-medium"
-        android:layout_marginBottom="8dp" />
-
     <!-- Message -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/message_welcomer"
         android:textColor="@color/text_2"
-        android:textSize="@dimen/text_chip"
+        android:textSize="@dimen/text_headline"
         android:gravity="center"
         android:lineSpacingExtra="4dp"
         android:layout_marginBottom="24dp"

@@ -150,7 +150,6 @@
     <string name="delete_account">Delete Account</string>
     <string name="close">Close</string>
     <string name="policy">Policy</string>
-    <string name="welcome">Welcome</string>
     <string name="message_welcomer">Welcome to EMPlay!</string>
 
     <string name="login_register">Login / Register</string>
