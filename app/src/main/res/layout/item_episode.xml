@@ -43,8 +43,10 @@
                 android:background="@drawable/bg_circle_dark"
                 app:backgroundTint="@color/bg_rank_tint"
                 android:gravity="center"
-                android:textColor="@color/text_1"
-                android:textSize="@dimen/text_badge"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_chip"
+                android:fontFamily="@font/playfair_display_medium"
+                app:fontFamily="@font/playfair_display_medium"
                 tools:text="5" />
 
         </FrameLayout>
