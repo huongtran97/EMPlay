@@ -264,7 +264,7 @@ public class WatchlistFragment extends BaseFragment {
             binding.emptyLayout.btnExplore.setText(R.string.empty_watchlist_cta);
             binding.emptyLayout.btnExplore.setOnClickListener(v -> {
                 if (getActivity() instanceof MainActivity) {
-                    getActivity().findViewById(R.id.menu_movie_home).performClick();
+                    getActivity().findViewById(R.id.nav_home).performClick();
                 }
             });
         }
