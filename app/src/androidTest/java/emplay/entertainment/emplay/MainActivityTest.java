@@ -13,10 +13,13 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.RuleChain;
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.junit.runners.model.Statement;
 
 import emplay.entertainment.emplay.activity.MainActivity;
 import emplay.entertainment.emplay.auth.AuthManager;
@@ -24,23 +27,29 @@ import emplay.entertainment.emplay.auth.AuthManager;
 @RunWith(AndroidJUnit4.class)
 public class MainActivityTest {
 
+    // RuleChain ensures auth is reset BEFORE ActivityScenarioRule launches the activity.
+    // Without this ordering, ActivityScenarioRule.before() fires before @Before, so the
+    // activity launches with stale GUEST state from the previous test — no dialog appears.
     @Rule
-    public ActivityScenarioRule<MainActivity> activityRule =
-            new ActivityScenarioRule<>(MainActivity.class);
+    public RuleChain ruleChain = RuleChain
+            .outerRule(new ResetAuthRule())
+            .around(new ActivityScenarioRule<>(MainActivity.class));
 
-    /**
-     * Reset auth to NONE before each test so the welcome dialog always shows,
-     * regardless of what a previous test did.
-     * ActivityScenarioRule launches a fresh activity after @Before runs, so the
-     * singleton state set here is what the activity sees on its first call.
-     */
-    @Before
-    public void resetAuthState() {
-        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        AuthManager.getInstance(context).signOut();
+    private static class ResetAuthRule implements TestRule {
+        @Override
+        public Statement apply(Statement base, Description description) {
+            return new Statement() {
+                @Override
+                public void evaluate() throws Throwable {
+                    Context ctx = InstrumentationRegistry.getInstrumentation().getTargetContext();
+                    AuthManager.getInstance(ctx).signOut();
+                    base.evaluate();
+                }
+            };
+        }
     }
 
-    // --- Welcome dialog ---
+    // Welcome dialog
 
     @Test
     public void welcomeDialog_isShown_whenNotLoggedIn() {
@@ -59,7 +68,7 @@ public class MainActivityTest {
         onView(withId(R.id.btn_guest)).check(doesNotExist());
     }
 
-    // --- Bottom navigation (all start with dialog dismissal) ---
+    // Bottom navigation (all start with dialog dismissal)
 
     @Test
     public void bottomNav_allTabs_areVisibleAfterGuestLogin() {
