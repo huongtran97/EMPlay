@@ -189,7 +189,7 @@
     <string name="release_notify">Notify on Release</string>
 
     <!--Privacy Policy Message-->
-    <string name="privacy_policy_text"><i>Last updated: May 2025</i>\n\nEMPlay does not collect or share personal data with third parties.\n\n<b>Account &amp; Authentication</b>\nIf you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n<b>Local Storage</b>\nSaved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n<b>Third-Party Services</b>\nMovie and TV show data is fetched from The Movie Database (TMDB) API and Movie Of The Night (MOTN) API. Please refer to TMDB\'s and MOTN\'s privacy policy for details on their data practices.\n\n<b>Contact</b>\nFor any privacy concerns, contact us through our GitHub repository:\nhttps://github.com/huongtran97/EMPlay</string>
+    <string name="privacy_policy_text"><i>Last updated: July 2026</i>\n\nEMPlay does not collect or share personal data with third parties.\n\n<b>Account &amp; Authentication</b>\nIf you create an account, your email and display name are stored via Firebase Authentication. This data is used solely to identify your session and is not shared.\n\n<b>Local Storage</b>\nSaved movies and TV shows are stored locally on your device using SQLite. This data never leaves your device.\n\n<b>Third-Party Services</b>\nMovie and TV show data is fetched from The Movie Database (TMDB) API and Movie Of The Night (MOTN) API. Please refer to TMDB\'s and MOTN\'s privacy policy for details on their data practices.\n\n<b>Contact</b>\nFor any privacy concerns, contact us through our GitHub repository:\nhttps://github.com/huongtran97/EMPlay</string>
     <string name="tmdb_auth_cancelled">TMDB Auth Cancelled</string>
     <string name="welcome_tmdb">Welcome %1$s</string>
     <string name="tmdb_auth_failed">TMDB Auth Failed</string>
@@ -246,7 +246,10 @@
     <string name="lib_security_crypto" translatable="false">Security Crypto</string>
     <string name="lib_shimmer" translatable="false">Shimmer</string>
     <string name="lib_youtube_player" translatable="false">Android YouTube Player</string>
+    <string name="lib_firebase" translatable="false">Firebase</string>
+    <string name="lib_browser" translatable="false">AndroidX Browser</string>
     <string name="lib_author_square" translatable="false">Square</string>
+    <string name="lib_author_firebase" translatable="false">Google / Firebase</string>
     <string name="lib_author_bump" translatable="false">Bump Technologies</string>
     <string name="lib_author_wasabeef" translatable="false">Wasabeef</string>
     <string name="lib_author_hdodenhof" translatable="false">hdodenhof</string>
