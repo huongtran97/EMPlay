@@ -385,8 +385,8 @@ public class ProfileFragment extends BaseFragment {
     // Guest session
 
     private void bindGuestProfile() {
-        tvProfileName.setText("Hi there!");
-        tvProfileEmail.setText("Do you want to login?");
+        tvProfileName.setText(R.string.guest_name);
+        tvProfileEmail.setText(R.string.guest_login_prompt);
         tvMemberSince.setText("");
         guestBanner.setVisibility(View.VISIBLE);
     }

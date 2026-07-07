@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import emplay.entertainment.emplay.R;
@@ -405,11 +406,13 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                 binding.tvNextEpisodeTitle.setText(title);
 
                 if (daysUntil > 0) {
-                    binding.tvNextEpisodeDays.setText(
-                            daysUntil == 1 ? "Tomorrow" : "In " + daysUntil + "d");
+                    String daysText = daysUntil == 1
+                            ? getString(R.string.label_tomorrow)
+                            : getString(R.string.badge_days_until, daysUntil);
+                    binding.tvNextEpisodeDays.setText(daysText);
                     binding.tvNextEpisodeDays.setVisibility(View.VISIBLE);
                 } else if (daysUntil == 0) {
-                    binding.tvNextEpisodeDays.setText("Today");
+                    binding.tvNextEpisodeDays.setText(R.string.label_today);
                     binding.tvNextEpisodeDays.setVisibility(View.VISIBLE);
                 } else {
                     binding.tvNextEpisodeDays.setVisibility(View.GONE);
@@ -522,7 +525,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
         TVShowsTrailerResponses.TrailerModel anyTeaser = null;
         for (TVShowsTrailerResponses.TrailerModel t : trailers) {
             if (!"YouTube".equals(t.getSite())) continue;
-            String name = t.getName() != null ? t.getName().toLowerCase() : "";
+            String name = t.getName() != null ? t.getName().toLowerCase(Locale.ROOT) : "";
             String type = t.getType();
             if ("Trailer".equals(type)) {
                 if (t.isOfficial() && name.contains("official") && officialTrailer == null)

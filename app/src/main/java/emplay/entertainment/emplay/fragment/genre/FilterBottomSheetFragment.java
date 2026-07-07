@@ -95,14 +95,14 @@ public class FilterBottomSheetFragment extends BottomSheetDialogFragment {
         slider.setValueTo((float) maxYear);
         slider.setStepSize(1f);
         slider.setValues((float) clampedFrom, (float) clampedTo);
-        tvYearLabel.setText(clampedFrom + " – " + clampedTo);
+        tvYearLabel.setText(getString(R.string.year_range_format, clampedFrom, clampedTo));
 
         final int[] selectedYears = {clampedFrom, clampedTo};
         slider.addOnChangeListener((s, value, fromUser) -> {
             List<Float> vals = s.getValues();
             selectedYears[0] = vals.get(0).intValue();
             selectedYears[1] = vals.get(1).intValue();
-            tvYearLabel.setText(selectedYears[0] + " – " + selectedYears[1]);
+            tvYearLabel.setText(getString(R.string.year_range_format, selectedYears[0], selectedYears[1]));
         });
 
         view.findViewById(R.id.btnApply).setOnClickListener(v -> {

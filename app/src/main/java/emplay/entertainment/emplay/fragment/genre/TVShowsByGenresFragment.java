@@ -23,6 +23,8 @@ import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.api.tvshow.TVShowResponse;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
+import java.util.Locale;
+
 import emplay.entertainment.emplay.fragment.details.TVShowResultDetailsFragment;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import retrofit2.Call;
@@ -86,7 +88,7 @@ public class TVShowsByGenresFragment extends BaseFragment {
             String genreName = getArguments().getString(ARG_GENRE_NAME, "");
             genreNameHeader.setText(genreName);
             if (tvGhostGlyph != null && !genreName.isEmpty()) {
-                tvGhostGlyph.setText(String.valueOf(genreName.charAt(0)).toUpperCase());
+                tvGhostGlyph.setText(String.valueOf(genreName.charAt(0)).toUpperCase(Locale.getDefault()));
             }
         }
 

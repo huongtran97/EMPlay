@@ -182,11 +182,11 @@ public class BadgeHelper {
         if (isFuture) {
             badge.setVisibility(View.GONE);
         } else if (Boolean.FALSE.equals(nextEpisodeExists)) {
-            badge.setText("FULL SERIES");
+            badge.setText(R.string.badge_full_series);
             badge.setTextColor(Color.parseColor("#9BB5CC"));
             badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D1A2A")));
         } else {
-            badge.setText("NEW EP");
+            badge.setText(R.string.badge_new_episode);
             badge.setTextColor(Color.parseColor("#4DB87A"));
             badge.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#0D2A1A")));
         }

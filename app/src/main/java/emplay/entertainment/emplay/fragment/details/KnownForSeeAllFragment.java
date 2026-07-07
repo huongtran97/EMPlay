@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.CreditAdapter;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.MovieApiService;
@@ -109,7 +110,8 @@ public class KnownForSeeAllFragment extends BaseFragment {
                                 Collections.sort(allCredits,
                                         (a, b) -> Double.compare(b.getPopularity(), a.getPopularity()));
                             }
-                            binding.tvSubtitle.setText(allCredits.size() + " titles");
+                            int count = allCredits.size();
+                            binding.tvSubtitle.setText(getResources().getQuantityString(R.plurals.results_titles_count, count, count));
                             binding.tvSubtitle.setVisibility(View.VISIBLE);
                             loadNextPage();
                         }

@@ -30,6 +30,8 @@ import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
+import java.util.Locale;
+
 import emplay.entertainment.emplay.models.common.CountryModel;
 import emplay.entertainment.emplay.models.common.OriginModel;
 import retrofit2.Call;
@@ -133,7 +135,7 @@ public class SearchByOriginFragment extends BaseFragment {
                         String code = c.getIso31661();
                         String glyph = ORIGIN_GLYPHS.containsKey(code)
                                 ? ORIGIN_GLYPHS.get(code)
-                                : code.substring(0, 1).toUpperCase();
+                                : code.substring(0, 1).toUpperCase(Locale.ROOT);
                         resolved.add(new OriginModel(code, c.getEnglishName(), glyph));
                         if ("JP".equals(code)) resolved.add(new OriginModel("JP", "Anime", "ア"));
                     }

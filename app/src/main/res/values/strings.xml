@@ -67,6 +67,13 @@
     <string name="home_section_top_rated">Top rated of all time</string>
     <string name="home_section_coming_soon">Coming soon</string>
     <string name="badge_new_episode">NEW EP</string>
+    <string name="badge_new_season">NEW SEASON</string>
+    <string name="badge_full_series">FULL SERIES</string>
+    <string name="badge_movie">Movie</string>
+    <string name="badge_episode_number">Ep %1$d</string>
+    <string name="label_today">Today</string>
+    <string name="label_tomorrow">Tomorrow</string>
+    <string name="year_range_format">%1$d – %2$d</string>
     <string name="action_trailer">Trailer</string>
 
     <!-- ════════ Detail View (Movie + TV) ════════ -->
@@ -126,6 +133,8 @@
     <string name="empty_watchlist_cta">Explore films</string>
     <string name="guest_empty_list_title">Sign in to keep your tickets</string>
     <string name="guest_sign_in_cta">Sign In to Save</string>
+    <string name="guest_name">Hi there!</string>
+    <string name="guest_login_prompt">Do you want to login?</string>
 
     <!-- ════════ Profile View ════════ -->
     <string name="profile_member_since">MEMBER SINCE %1$s</string>

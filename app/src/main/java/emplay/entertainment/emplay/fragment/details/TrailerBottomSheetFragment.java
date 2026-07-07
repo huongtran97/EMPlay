@@ -151,6 +151,7 @@ public class TrailerBottomSheetFragment extends DialogFragment {
                     return true;
                 case MotionEvent.ACTION_UP:
                     if (event.getRawY() - startY[0] < -threshold) dismiss();
+                    else v.performClick();
                     return true;
             }
             return false;

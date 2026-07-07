@@ -30,8 +30,7 @@
                 android:scaleType="centerCrop"
                 android:contentDescription="@string/show_poster"
                 android:background="@drawable/bg_poster_placeholder"
-                android:clipToOutline="true"
-                tools:targetApi="lollipop" />
+                android:clipToOutline="true" />
 
             <!-- Episode number circle -->
             <TextView

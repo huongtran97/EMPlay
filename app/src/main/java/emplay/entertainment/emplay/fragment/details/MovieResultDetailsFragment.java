@@ -32,6 +32,7 @@ import android.graphics.drawable.GradientDrawable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import emplay.entertainment.emplay.R;
@@ -602,7 +603,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
         MoviesTrailerResponses.TrailerModel anyTeaser = null;
         for (MoviesTrailerResponses.TrailerModel t : trailers) {
             if (!"YouTube".equals(t.getSite())) continue;
-            String name = t.getName() != null ? t.getName().toLowerCase() : "";
+            String name = t.getName() != null ? t.getName().toLowerCase(Locale.ROOT) : "";
             String type = t.getType();
             if ("Trailer".equals(type)) {
                 if (t.isOfficial() && name.contains("official") && officialTrailer == null)

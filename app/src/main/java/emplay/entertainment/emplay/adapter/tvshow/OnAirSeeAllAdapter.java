@@ -95,17 +95,17 @@ public class OnAirSeeAllAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         if (epNum > 0) {
             h.tvBadge.setVisibility(View.VISIBLE);
             if (epNum == 1) {
-                h.tvBadge.setText("NEW SEASON");
+                h.tvBadge.setText(R.string.badge_new_season);
                 h.tvBadge.setTextColor(Color.parseColor("#5BA3D9"));
                 h.tvBadge.setBackgroundTintList(
                         ColorStateList.valueOf(Color.parseColor("#0D2A4A")));
             } else {
-                h.tvBadge.setText("NEW EP");
+                h.tvBadge.setText(R.string.badge_new_episode);
                 h.tvBadge.setTextColor(Color.parseColor("#4DB87A"));
                 h.tvBadge.setBackgroundTintList(
                         ColorStateList.valueOf(Color.parseColor("#0D2A1A")));
             }
-            h.tvEpNum.setText("Ep " + epNum);
+            h.tvEpNum.setText(h.tvEpNum.getContext().getString(R.string.badge_episode_number, epNum));
             h.tvEpNum.setVisibility(View.VISIBLE);
         } else {
             h.tvBadge.setVisibility(View.GONE);

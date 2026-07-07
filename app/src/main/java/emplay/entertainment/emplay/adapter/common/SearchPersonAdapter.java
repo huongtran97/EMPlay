@@ -14,6 +14,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.google.android.material.imageview.ShapeableImageView;
 
+import java.util.Locale;
+
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.models.common.MultiSearchResult;
@@ -67,7 +69,7 @@ public class SearchPersonAdapter extends ListAdapter<MultiSearchResult, SearchPe
             holder.ivAvatar.setVisibility(View.INVISIBLE);
             holder.tvInitials.setVisibility(View.VISIBLE);
             String name = item.getTitle();
-            holder.tvInitials.setText(name.isEmpty() ? "?" : String.valueOf(name.charAt(0)).toUpperCase());
+            holder.tvInitials.setText(name.isEmpty() ? "?" : String.valueOf(name.charAt(0)).toUpperCase(Locale.getDefault()));
         }
 
 holder.itemView.setOnClickListener(v -> listener.onClick(item));

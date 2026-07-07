@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
+import java.util.Locale;
 
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.models.common.GenresModel;
@@ -86,7 +87,7 @@ public class GenresAdapter extends RecyclerView.Adapter<GenresAdapter.GenresView
 
         // Use first letter as Ghost Glyph
         if (genre.getName() != null && !genre.getName().isEmpty()) {
-            holder.tvGhostGlyph.setText(genre.getName().substring(0, 1).toUpperCase());
+            holder.tvGhostGlyph.setText(genre.getName().substring(0, 1).toUpperCase(Locale.getDefault()));
         }
 
         @ColorRes int colorRes = GENRE_COLORS.get(genre.getId(), R.color.text_1);

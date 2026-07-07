@@ -30,6 +30,8 @@ import emplay.entertainment.emplay.api.common.MovieApiService;
 import emplay.entertainment.emplay.api.common.PersonCreditsResponse;
 import emplay.entertainment.emplay.api.common.PersonCreditsResponse.CreditItem;
 import emplay.entertainment.emplay.api.common.PersonDetailsResponse;
+import java.util.Locale;
+
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.fragment.common.BaseFragment;
 import retrofit2.Call;
@@ -108,7 +110,7 @@ public class CastDetailFragment extends BaseFragment {
                     nameText.setText(personName);
                     
                     if (person.getName() != null && !person.getName().isEmpty()) {
-                        ghostGlyphText.setText(person.getName().substring(0, 1).toUpperCase());
+                        ghostGlyphText.setText(person.getName().substring(0, 1).toUpperCase(Locale.getDefault()));
                     }
 
                     String bio = person.getBiography();

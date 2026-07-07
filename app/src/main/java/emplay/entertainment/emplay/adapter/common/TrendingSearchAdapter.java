@@ -122,7 +122,7 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
         // Type chip + year + runtime/countdown
         if (item instanceof MovieModel) {
             MovieModel movie = (MovieModel) item;
-            h.tvTypeChip.setText("Movie");
+            h.tvTypeChip.setText(R.string.badge_movie);
             h.tvYear.setText(extractYear(movie.getReleaseDate()));
             String countdown = formatCountdown(movie.getReleaseDate());
             if (countdown != null && h.tvCountdown != null) {
@@ -141,7 +141,7 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
             }
         } else if (item instanceof TVShowModel) {
             TVShowModel tv = (TVShowModel) item;
-            h.tvTypeChip.setText("TV");
+            h.tvTypeChip.setText(R.string.badge_tv);
             h.tvYear.setText(extractYear(tv.getFirstAirDate()));
             String countdown = formatCountdown(tv.getFirstAirDate());
             if (h.tvCountdown != null) {
@@ -156,9 +156,9 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
         } else if (item instanceof MultiSearchResult) {
             MultiSearchResult multi = (MultiSearchResult) item;
             if ("movie".equals(multi.getMediaType())) {
-                h.tvTypeChip.setText("Movie");
+                h.tvTypeChip.setText(R.string.badge_movie);
             } else if ("tv".equals(multi.getMediaType())) {
-                h.tvTypeChip.setText("TV");
+                h.tvTypeChip.setText(R.string.badge_tv);
             } else {
                 h.tvTypeChip.setText("");
             }
