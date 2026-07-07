@@ -151,6 +151,7 @@
     <!-- ════════ Attribution & Legal ════════ -->
     <string name="tmdb_attribution">Powered by TMDB</string>
     <string name="tmdb_data_attribution">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
+    <string name="motn_attribution">Streaming availability information is provided by Streaming Availability API by Movie of the Night.</string>
     <string name="legal_terms_note">By continuing, you agree to our Terms and Privacy Policy.</string>
 
     <!-- Legacy mappings for stability during transition -->
@@ -314,6 +315,8 @@
     <string name="lib_image_slider" translatable="false">Android Image Slider</string>
     <string name="lib_circle_indicator" translatable="false">CircleIndicator</string>
     <string name="lib_security_crypto" translatable="false">Security Crypto</string>
+    <string name="lib_shimmer" translatable="false">Shimmer</string>
+    <string name="lib_youtube_player" translatable="false">Android YouTube Player</string>
     <string name="lib_author_square" translatable="false">Square</string>
     <string name="lib_author_bump" translatable="false">Bump Technologies</string>
     <string name="lib_author_wasabeef" translatable="false">Wasabeef</string>
@@ -322,6 +325,8 @@
     <string name="lib_author_androidx" translatable="false">AndroidX</string>
     <string name="lib_author_smarteist" translatable="false">smarteist</string>
     <string name="lib_author_reaxt" translatable="false">reaxt</string>
+    <string name="lib_author_facebook" translatable="false">Facebook</string>
+    <string name="lib_author_soffritti" translatable="false">Pierfrancesco Soffritti</string>
     <string name="home">Home</string>
     <string name="search">Search</string>
     <string name="profile">Profile</string>
@@ -345,5 +350,6 @@
     <string name="release_alert_removed">Alert removed</string>
     <string name="release_alert_watching">Watching for release</string>
     <string name="release_alert_login_required">Sign in to get notified when this releases</string>
+    <string name="movie_of_the_night">Movie of the Night</string>
 
 </resources>

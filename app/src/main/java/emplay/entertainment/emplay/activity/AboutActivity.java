@@ -55,6 +55,9 @@ public class AboutActivity extends AppCompatActivity {
         tmdbLogo.setOnClickListener(v -> startActivity(
                 new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.themoviedb.org"))));
 
+        findViewById(R.id.motn_link).setOnClickListener(v -> startActivity(
+                new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.movieofthenight.com"))));
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
