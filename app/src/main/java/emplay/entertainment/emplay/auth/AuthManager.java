@@ -45,6 +45,7 @@ public class AuthManager {
         return instance;
     }
 
+    @SuppressWarnings("deprecation")
     private SharedPreferences buildPrefs(Context context) {
         try {
             MasterKey masterKey = new MasterKey.Builder(context)

@@ -21,6 +21,7 @@ import okhttp3.Response;
 import okhttp3.TlsVersion;
 import okhttp3.logging.HttpLoggingInterceptor;
 import com.google.gson.GsonBuilder;
+import com.google.gson.Strictness;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -110,7 +111,7 @@ public class ApiClient {
                     .baseUrl(BASE_URL)
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create(
-                            new GsonBuilder().setLenient().create()))
+                            new GsonBuilder().setStrictness(Strictness.LENIENT).create()))
                     .build();
         }
         return retrofit;

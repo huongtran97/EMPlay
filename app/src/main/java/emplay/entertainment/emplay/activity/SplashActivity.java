@@ -96,6 +96,7 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void launchMain() {
         // Brief pause on "1" before transitioning
         handler.postDelayed(() -> {
