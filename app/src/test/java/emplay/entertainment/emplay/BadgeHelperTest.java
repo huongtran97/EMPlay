@@ -31,7 +31,6 @@ public class BadgeHelperTest {
     }
 
     // isFutureDate
-
     @Test
     public void isFutureDate_withFutureDate_returnsTrue() {
         assertTrue(BadgeHelper.isFutureDate(daysFromNow(5)));
@@ -68,7 +67,6 @@ public class BadgeHelperTest {
     }
 
     // isWithinDays (past only, not future)
-
     @Test
     public void isWithinDays_recentPastDate_returnsTrue() {
         assertTrue(BadgeHelper.isWithinDays(daysAgo(10), 30));
@@ -102,7 +100,6 @@ public class BadgeHelperTest {
     }
 
     // isNotOlderThan (includes future dates)
-
     @Test
     public void isNotOlderThan_recentPastDate_returnsTrue() {
         assertTrue(BadgeHelper.isNotOlderThan(daysAgo(10), 30));
@@ -129,7 +126,6 @@ public class BadgeHelperTest {
     }
 
     //  getTVShowType
-
     @Test
     public void getTVShowType_within30Days_returnsNewTVShow() {
         assertEquals("New TV show", BadgeHelper.getTVShowType(daysAgo(15)));
@@ -152,7 +148,6 @@ public class BadgeHelperTest {
     }
 
     // formatRelativeDate
-
     @Test
     public void formatRelativeDate_today_returnsToday() {
         assertEquals("Today", BadgeHelper.formatRelativeDate(daysAgo(0)));

@@ -33,8 +33,7 @@ public class LoginActivityTest {
     @Rule
     public IntentsRule intentsRule = new IntentsRule();
 
-    // --- Layout visibility ---
-
+    // Layout visibility
     @Test
     public void googleButton_isDisplayed() {
         onView(withId(R.id.btn_google)).check(matches(isDisplayed()));
@@ -50,8 +49,7 @@ public class LoginActivityTest {
         onView(withId(R.id.tv_guest)).check(matches(isDisplayed()));
     }
 
-    // --- Guest navigation ---
-
+    // Guest navigation
     @Test
     public void guestLink_click_firesMainActivityIntent() {
         // Stub MainActivity so the host activity finishes cleanly without

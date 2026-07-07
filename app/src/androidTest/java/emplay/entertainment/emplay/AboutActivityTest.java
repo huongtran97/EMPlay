@@ -26,8 +26,7 @@ public class AboutActivityTest {
     public ActivityScenarioRule<AboutActivity> activityRule =
             new ActivityScenarioRule<>(AboutActivity.class);
 
-    // --- Static content ---
-
+    // Static content
     @Test
     public void versionText_isDisplayed() {
         onView(withId(R.id.app_version)).check(matches(isDisplayed()));
@@ -38,8 +37,7 @@ public class AboutActivityTest {
         onView(withId(R.id.app_version)).check(matches(withText(containsString("Version"))));
     }
 
-    // --- Clickable rows ---
-
+    // Clickable rows
     @Test
     public void librariesRow_isDisplayed() {
         onView(withId(R.id.libraries_row)).check(matches(isDisplayed()));
@@ -55,8 +53,7 @@ public class AboutActivityTest {
         onView(withId(R.id.privacy_policy_row)).check(matches(isDisplayed()));
     }
 
-    // --- Libraries dialog ---
-
+    // Libraries dialog
     @Test
     public void clickLibraries_showsDialog() {
         onView(withId(R.id.libraries_row)).perform(click());

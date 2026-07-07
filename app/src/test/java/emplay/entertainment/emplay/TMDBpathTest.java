@@ -12,7 +12,6 @@ import static org.junit.Assert.*;
 public class TMDBpathTest {
 
     // Static path methods
-
     @Test
     public void trendingMovies_returnsCorrectPath() {
         assertEquals("3/trending/movie/week", TMDBpath.trendingMovies());
@@ -55,7 +54,6 @@ public class TMDBpathTest {
     }
 
     // ID-parameterized paths
-
     @Test
     public void movieDetails_embedsId() {
         assertEquals("3/movie/123", TMDBpath.movieDetails(123));
@@ -153,7 +151,6 @@ public class TMDBpathTest {
     }
 
     // Search / Discover / Genre paths
-
     @Test
     public void searchMovies_returnsCorrectPath() {
         assertEquals("3/search/movie", TMDBpath.searchMovies());
@@ -195,7 +192,6 @@ public class TMDBpathTest {
     }
 
     // Account / Watchlist paths
-
     @Test
     public void accountWatchlistMovies_embedsAccountId() {
         assertEquals("3/account/abc123/watchlist/movies", TMDBpath.accountWatchlistMovies("abc123"));
@@ -222,7 +218,6 @@ public class TMDBpathTest {
     }
 
     // Dynamic date methods
-
     @Test
     public void todayDate_matchesCurrentDate() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);

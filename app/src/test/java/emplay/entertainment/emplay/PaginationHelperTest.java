@@ -39,7 +39,6 @@ public class PaginationHelperTest {
     }
 
     // Single-page scenarios
-
     @Test
     public void singlePage_showsAllItems() {
         Capture<Integer> cap = new Capture<>();
@@ -65,7 +64,6 @@ public class PaginationHelperTest {
     }
 
     // Multi-page navigation
-
     @Test
     public void nextPage_advancesToSecondPage() {
         Capture<Integer> cap = new Capture<>();
@@ -129,7 +127,6 @@ public class PaginationHelperTest {
     }
 
     // isAtLastLocalPage
-
     @Test
     public void isAtLastLocalPage_trueOnFirstPageWhenOnePage() {
         PaginationHelper<Integer> helper = new PaginationHelper<>(5, range(1, 3), new Capture<>());
@@ -156,7 +153,6 @@ public class PaginationHelperTest {
     }
 
     // updateData resets state
-
     @Test
     public void updateData_resetsToPageOne() {
         Capture<Integer> cap = new Capture<>();
@@ -170,7 +166,6 @@ public class PaginationHelperTest {
     }
 
     // appendData grows the list without changing current page
-
     @Test
     public void appendData_growsListButDoesNotTriggerCallback() {
         Capture<Integer> cap = new Capture<>();
@@ -186,7 +181,6 @@ public class PaginationHelperTest {
     }
 
     // getCurrentPage
-
     @Test
     public void getCurrentPage_startsAtOne() {
         PaginationHelper<Integer> helper = new PaginationHelper<>(5, range(1, 10), new Capture<>());
