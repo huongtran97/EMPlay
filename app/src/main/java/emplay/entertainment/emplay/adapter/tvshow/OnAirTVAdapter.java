@@ -35,9 +35,14 @@ public class OnAirTVAdapter extends BasePosterAdapter<TVShowModel> {
     }
 
     public void setShowMoreItem(boolean show, Runnable onMoreClick) {
+        boolean wasShowing = mShowMoreItem;
         mShowMoreItem = show;
         mOnMoreClick = onMoreClick;
-        notifyDataSetChanged();
+        if (show && !wasShowing) {
+            notifyItemInserted(mData.size());
+        } else if (!show && wasShowing) {
+            notifyItemRemoved(mData.size());
+        }
     }
 
     @Override

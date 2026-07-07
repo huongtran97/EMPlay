@@ -61,9 +61,12 @@ public class TrendingSearchAdapter<T extends MediaItem> extends RecyclerView.Ada
     }
 
     public void updateData(List<? extends MediaItem> newItems) {
+        int oldSize = items.size();
         items.clear();
         if (newItems != null) items.addAll(newItems);
-        notifyDataSetChanged();
+        int newSize = items.size();
+        if (oldSize > 0) notifyItemRangeRemoved(0, oldSize);
+        if (newSize > 0) notifyItemRangeInserted(0, newSize);
     }
 
     public void appendItems(List<? extends MediaItem> newItems) {

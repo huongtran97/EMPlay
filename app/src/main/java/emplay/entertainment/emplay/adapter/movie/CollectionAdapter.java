@@ -38,8 +38,11 @@ public class CollectionAdapter extends RecyclerView.Adapter<CollectionAdapter.Vi
     }
 
     public void updateData(List<CollectionResponse.Part> newParts) {
+        int oldSize = parts != null ? parts.size() : 0;
         this.parts = newParts;
-        notifyDataSetChanged();
+        int newSize = newParts != null ? newParts.size() : 0;
+        if (oldSize > 0) notifyItemRangeRemoved(0, oldSize);
+        if (newSize > 0) notifyItemRangeInserted(0, newSize);
     }
 
     @NonNull

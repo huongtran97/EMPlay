@@ -43,8 +43,11 @@ public class OriginAdapter extends RecyclerView.Adapter<OriginAdapter.ViewHolder
     }
 
     public void updateData(List<OriginModel> newOrigins) {
+        int oldSize = origins != null ? origins.size() : 0;
         this.origins = newOrigins;
-        notifyDataSetChanged();
+        int newSize = newOrigins != null ? newOrigins.size() : 0;
+        if (oldSize > 0) notifyItemRangeRemoved(0, oldSize);
+        if (newSize > 0) notifyItemRangeInserted(0, newSize);
     }
 
     @Override

@@ -60,7 +60,13 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.EpisodeV
     public void setExpanded(boolean expanded) {
         if (this.expanded == expanded) return;
         this.expanded = expanded;
-        notifyDataSetChanged();
+        int total = episodeList.size();
+        if (total <= MAX_VISIBLE) return;
+        if (expanded) {
+            notifyItemRangeInserted(MAX_VISIBLE, total - MAX_VISIBLE);
+        } else {
+            notifyItemRangeRemoved(MAX_VISIBLE, total - MAX_VISIBLE);
+        }
     }
 
     public boolean isExpanded() { return expanded; }
