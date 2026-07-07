@@ -266,6 +266,7 @@ public class TrailerBottomSheetFragment extends DialogFragment {
         activityWindow.getDecorView().setSystemUiVisibility(IMMERSIVE_FLAGS);
     }
 
+    @SuppressWarnings("deprecation")
     private Rect getScreenBounds() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             return requireActivity().getWindowManager()
@@ -291,11 +292,13 @@ public class TrailerBottomSheetFragment extends DialogFragment {
         WindowInsetsControllerCompat activityController =
                 WindowCompat.getInsetsController(activityWindow, activityWindow.getDecorView());
 
-        dialogWindow.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        activityWindow.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        WindowCompat.getInsetsController(dialogWindow, dialogWindow.getDecorView())
+                .show(WindowInsetsCompat.Type.systemBars());
 
-        int bgSurface = requireContext().getColor(R.color.bg_surface);
-        activityWindow.setStatusBarColor(bgSurface);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            int bgSurface = requireContext().getColor(R.color.bg_surface);
+            activityWindow.setStatusBarColor(bgSurface);
+        }
         activityController.setAppearanceLightStatusBars(true);
 
         dialogWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -362,6 +365,7 @@ public class TrailerBottomSheetFragment extends DialogFragment {
     }
 
     // Cleanup helpers
+    @SuppressWarnings("deprecation")
     private void restoreActivityWindowState() {
         if (isFullscreen && fullscreenContainer != null) {
             fullscreenContainer.removeAllViews();
@@ -370,9 +374,8 @@ public class TrailerBottomSheetFragment extends DialogFragment {
 
         if (getActivity() == null) return;
         Window activityWindow = getActivity().getWindow();
-        //noinspection deprecation
-        activityWindow.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-        activityWindow.setStatusBarColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            activityWindow.setStatusBarColor(Color.TRANSPARENT);
         activityWindow.setBackgroundDrawableResource(R.color.bg_base);
         WindowCompat.setDecorFitsSystemWindows(activityWindow, true);
         WindowInsetsControllerCompat controller =

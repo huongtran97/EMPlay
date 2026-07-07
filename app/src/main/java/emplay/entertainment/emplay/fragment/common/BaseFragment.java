@@ -20,7 +20,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.core.widget.TextViewCompat;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -79,6 +78,7 @@ public abstract class BaseFragment extends Fragment {
         });
     }
 
+    @SuppressWarnings("deprecation")
     protected void animateBackground(@ColorInt int toColor) {
         View root = getView();
         if (root == null || !isAdded()) return;
@@ -92,17 +92,20 @@ public abstract class BaseFragment extends Fragment {
         animator.addUpdateListener(anim -> {
             int color = (int) anim.getAnimatedValue();
             root.setBackgroundColor(color);
-            if (isAdded()) requireActivity().getWindow().setStatusBarColor(color);
+            if (isAdded() && Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM)
+                requireActivity().getWindow().setStatusBarColor(color);
             currentBgColor = color;
         });
         animator.start();
     }
 
+    @SuppressWarnings("deprecation")
     protected void resetBackground() {
         currentBgColor = 0xFF0A0A0A;
         View root = getView();
         if (root != null) root.setBackgroundColor(currentBgColor);
-        if (isAdded()) requireActivity().getWindow().setStatusBarColor(currentBgColor);
+        if (isAdded() && Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            requireActivity().getWindow().setStatusBarColor(currentBgColor);
     }
 
 
@@ -280,10 +283,12 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    @SuppressWarnings("deprecation")
     protected void setDarkStatusBar() {
         if (!isAdded()) return;
         android.view.Window window = requireActivity().getWindow();
-        window.setStatusBarColor(Color.TRANSPARENT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.VANILLA_ICE_CREAM)
+            window.setStatusBarColor(Color.TRANSPARENT);
         new WindowInsetsControllerCompat(window, window.getDecorView())
                 .setAppearanceLightStatusBars(false);
     }
