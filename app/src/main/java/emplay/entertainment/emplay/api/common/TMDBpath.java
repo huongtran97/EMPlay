@@ -44,6 +44,8 @@ public class TMDBpath {
     public static String movieReleaseDates(int movieId) { return "3/movie/" + movieId + "/release_dates"; }
     public static String collectionDetails(int collectionId) { return "3/collection/" + collectionId; }
     public static String tvShowContentRatings(int tvId) { return "3/tv/" + tvId + "/content_ratings"; }
+    public static String movieReviews(int movieId) { return "3/movie/" + movieId + "/reviews"; }
+    public static String tvReviews(int tvId) { return "3/tv/" + tvId + "/reviews"; }
     public static String countries() { return "3/configuration/countries"; }
 
     // TMDB account / watchlist paths

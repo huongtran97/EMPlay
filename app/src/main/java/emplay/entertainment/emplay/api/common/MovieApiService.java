@@ -3,6 +3,7 @@ package emplay.entertainment.emplay.api.common;
 import java.util.List;
 
 import emplay.entertainment.emplay.models.common.CountryModel;
+import emplay.entertainment.emplay.api.common.ReviewResponse;
 import emplay.entertainment.emplay.api.common.MultiSearchResponse;
 import emplay.entertainment.emplay.api.movie.CollectionResponse;
 import emplay.entertainment.emplay.api.movie.MovieCreditsResponse;
@@ -241,6 +242,14 @@ public interface MovieApiService {
 
     @GET("api/tmdb")
     Call<CollectionResponse> getCollectionDetails(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<ReviewResponse> getMovieReviews(
+            @Query("path") String path);
+
+    @GET("api/tmdb")
+    Call<ReviewResponse> getTVReviews(
             @Query("path") String path);
 
     /** Movie of the Night streaming availability — routed through the Railway proxy. */

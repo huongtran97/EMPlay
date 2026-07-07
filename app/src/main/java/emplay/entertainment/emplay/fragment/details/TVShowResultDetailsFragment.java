@@ -1,11 +1,15 @@
 package emplay.entertainment.emplay.fragment.details;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +36,7 @@ import java.util.Map;
 import emplay.entertainment.emplay.R;
 import emplay.entertainment.emplay.adapter.common.CastAdapter;
 import emplay.entertainment.emplay.adapter.common.ProviderAdapter;
+import emplay.entertainment.emplay.adapter.common.ReviewAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.EpisodeAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.SeasonsTVAdapter;
 import emplay.entertainment.emplay.adapter.tvshow.SuggestionTVAdapter;
@@ -42,6 +47,7 @@ import emplay.entertainment.emplay.api.auth.model.TMDBWatchlistStatusResponse;
 import emplay.entertainment.emplay.api.common.ApiClient;
 import emplay.entertainment.emplay.api.common.ImageUrl;
 import emplay.entertainment.emplay.api.common.MovieApiService;
+import emplay.entertainment.emplay.api.common.ReviewResponse;
 import emplay.entertainment.emplay.api.common.TMDBpath;
 import emplay.entertainment.emplay.api.motn.MotnShowResponse;
 import emplay.entertainment.emplay.api.tvshow.SeasonDetailResponse;
@@ -64,6 +70,7 @@ import emplay.entertainment.emplay.models.common.RegionProvidersModel;
 import emplay.entertainment.emplay.models.tvshow.SeasonsModel;
 import emplay.entertainment.emplay.models.tvshow.TVShowModel;
 import emplay.entertainment.emplay.models.common.ReleaseAlertItem;
+import emplay.entertainment.emplay.models.common.ReviewModel;
 import emplay.entertainment.emplay.tool.BadgeHelper;
 import emplay.entertainment.emplay.tool.MotnHelper;
 import emplay.entertainment.emplay.tool.PaginationHelper;
@@ -101,6 +108,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private boolean userHasSelectedRegion = false;
     private String currentWtwRegion = WatchProviderHelper.defaultRegion();
     private final ArrayList<String> tvGenreNames = new ArrayList<>();
+    private List<ReviewModel> cachedReviews = null;
 
     public static TVShowResultDetailsFragment newInstance(int tvId) {
         TVShowResultDetailsFragment fragment = new TVShowResultDetailsFragment();
@@ -178,6 +186,8 @@ public class TVShowResultDetailsFragment extends BaseFragment {
 
 
         binding.cardNextEpisode.setVisibility(View.GONE);
+
+        binding.rowReviews.setOnClickListener(v -> openReviewsDialog());
 
         if (getArguments() != null) {
             tvId = getArguments().getInt(ARG_TV_ID, -1);
@@ -841,5 +851,56 @@ public class TVShowResultDetailsFragment extends BaseFragment {
             if (i < genres.size() - 1) sb.append(",");
         }
         return sb.toString();
+    }
+
+    private void openReviewsDialog() {
+        if (cachedReviews != null) {
+            showReviewsDialog(cachedReviews);
+            return;
+        }
+        safeEnqueue(apiService.getTVReviews(TMDBpath.tvReviews(tvId)),
+                new Callback<ReviewResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<ReviewResponse> call,
+                                           @NonNull Response<ReviewResponse> response) {
+                        if (!isAdded()) return;
+                        List<ReviewModel> results = (response.isSuccessful() && response.body() != null)
+                                ? response.body().getResults() : new ArrayList<>();
+                        cachedReviews = results != null ? results : new ArrayList<>();
+                        showReviewsDialog(cachedReviews);
+                    }
+                    @Override public void onFailure(@NonNull Call<ReviewResponse> call,
+                                                    @NonNull Throwable t) {
+                        if (isAdded()) showReviewsDialog(new ArrayList<>());
+                    }
+                });
+    }
+
+    private void showReviewsDialog(List<ReviewModel> reviews) {
+        if (!isAdded()) return;
+        Dialog dialog = new Dialog(requireContext());
+        dialog.setContentView(R.layout.dialog_reviews);
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setLayout(
+                    (int) (requireContext().getResources().getDisplayMetrics().widthPixels * 0.90),
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+
+        androidx.recyclerview.widget.RecyclerView rv = dialog.findViewById(R.id.rv_reviews);
+        TextView tvEmpty = dialog.findViewById(R.id.tv_no_reviews);
+
+        if (reviews.isEmpty()) {
+            rv.setVisibility(View.GONE);
+            tvEmpty.setVisibility(View.VISIBLE);
+        } else {
+            rv.setLayoutManager(new LinearLayoutManager(requireContext()));
+            rv.setAdapter(new ReviewAdapter(reviews, requireContext()));
+        }
+
+        dialog.findViewById(R.id.btn_close).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
     }
 }

@@ -182,6 +182,41 @@
             android:textSize="@dimen/text_meta"
             android:textStyle="bold"
             android:visibility="gone" />
+
+        <!-- REVIEWS TOGGLE -->
+        <LinearLayout
+            android:id="@+id/row_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@color/bg_surface"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:layout_marginTop="4dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/reviews"
+                android:textColor="@color/text_1"
+                android:textSize="@dimen/text_chip"
+                android:fontFamily="sans-serif" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/text_3" />
+
+        </LinearLayout>
     </LinearLayout>
 
         <!-- CTA BUTTONS -->
