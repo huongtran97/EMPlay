@@ -292,7 +292,9 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
                             List<MultiSearchResult> results = response.body().getResults();
                             if (results != null) {
                                 for (MultiSearchResult r : results) {
-                                    if (r != null) searchBuffer.add(r);
+                                    if (r != null && ("person".equals(r.getMediaType())
+                                            || r.getPosterPath() != null || r.getBackdropPath() != null))
+                                        searchBuffer.add(r);
                                 }
                             }
                         }
@@ -376,7 +378,10 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
                     int tp = response.body().getTotal_pages();
                     if (tp > 0) popularTotalApiPages = tp;
                     List<MovieModel> movies = response.body().getResults();
-                    if (movies != null) movieResults.addAll(movies);
+                    if (movies != null) {
+                        movies.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
+                        movieResults.addAll(movies);
+                    }
                 }
                 if (pending.decrementAndGet() == 0) finishPopularPage(page, movieResults, tvResults);
             }
@@ -394,7 +399,10 @@ public abstract class BaseSearchFragment<T extends MediaItem> extends BaseFragme
                                    @NonNull Response<TVShowResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<TVShowModel> shows = response.body().getResults();
-                    if (shows != null) tvResults.addAll(shows);
+                    if (shows != null) {
+                        shows.removeIf(tv -> tv.getPosterPath() == null && tv.getBackdropPath() == null);
+                        tvResults.addAll(shows);
+                    }
                 }
                 if (pending.decrementAndGet() == 0) finishPopularPage(page, movieResults, tvResults);
             }

@@ -335,8 +335,15 @@ public class TVShowResultDetailsFragment extends BaseFragment {
     private void setupTVNotifyButton(TVShowDetailsResponse tv) {
         if (binding == null) return;
         AuthManager auth = AuthManager.getInstance(requireContext());
-        if (!auth.isLoggedIn() || !BadgeHelper.isFutureDate(tv.getFirst_air_date())) {
+        if (!BadgeHelper.isFutureDate(tv.getFirst_air_date())) {
             binding.wtwUnreleased.btnNotify.setVisibility(View.GONE);
+            return;
+        }
+        if (!auth.isLoggedIn()) {
+            binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
+                if (getContext() != null)
+                    Toast.makeText(getContext(), R.string.release_alert_login_required, Toast.LENGTH_SHORT).show();
+            });
             return;
         }
         String userId = auth.getUserId();
@@ -459,6 +466,7 @@ public class TVShowResultDetailsFragment extends BaseFragment {
                                            @NonNull Response<TVShowSimilarResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<TVShowModel> results = new ArrayList<>(response.body().getResults());
+                            results.removeIf(tv -> tv.getPosterPath() == null && tv.getBackdropPath() == null);
                             allSuggestions.clear();
                             allSuggestions.addAll(results);
                             int previewCount = Math.min(10, results.size());

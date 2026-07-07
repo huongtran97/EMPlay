@@ -680,7 +680,7 @@ public class HomeFragment extends BaseFragment {
                             if (results == null || results.isEmpty()) return;
                             allTrendingMovies.clear();
                             for (MovieModel movie : results) {
-                                if (movie.getPosterPath() == null) continue;
+                                if (movie.getPosterPath() == null && movie.getBackdropPath() == null) continue;
                                 allTrendingMovies.add(movie);
                             }
                             trendingMoviesAdapter.updateData(new ArrayList<>(allTrendingMovies));
@@ -705,7 +705,7 @@ public class HomeFragment extends BaseFragment {
                             if (results == null) return;
                             allTrendingTVShows.clear();
                             for (TVShowModel tv : results) {
-                                if (tv.getPosterPath() == null) continue;
+                                if (tv.getPosterPath() == null && tv.getBackdropPath() == null) continue;
                                 allTrendingTVShows.add(tv);
                             }
                             trendingTVAdapter.updateData(new ArrayList<>(allTrendingTVShows));
@@ -727,6 +727,7 @@ public class HomeFragment extends BaseFragment {
                         if (response.isSuccessful() && response.body() != null) {
                             List<MovieModel> results = response.body().getResults();
                             if (results != null) {
+                                results.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
                                 topRatedMovieAdapter.updateData(results.subList(0, Math.min(10, results.size())));
                                 hideShimmer(shimmerTopRated, rvTopRated);
                             }
@@ -752,7 +753,7 @@ public class HomeFragment extends BaseFragment {
                         if (response.isSuccessful() && response.body() != null) {
                             List<MovieModel> raw = new ArrayList<>();
                             for (MovieModel movie : response.body().getResults()) {
-                                if (movie.getPosterPath() != null) raw.add(movie);
+                                if (movie.getPosterPath() != null || movie.getBackdropPath() != null) raw.add(movie);
                             }
                             rawUpcomingMovies = raw;
                             applyUpcomingMovieFilter();
@@ -802,7 +803,7 @@ public class HomeFragment extends BaseFragment {
                                 && response.body().getResults() != null) {
                             for (TVShowModel tv : response.body().getResults()) {
                                 onAirTVIds.add(tv.getTVShowId());
-                                if (tv.getBackdropPath() != null) onAirList.add(tv);
+                                if (tv.getPosterPath() != null || tv.getBackdropPath() != null) onAirList.add(tv);
                             }
                         }
                         List<TVShowModel> onAirPreview = onAirList.size() > 10
@@ -877,7 +878,7 @@ public class HomeFragment extends BaseFragment {
                         if (response.isSuccessful() && response.body() != null) {
                             List<TVShowModel> raw = new ArrayList<>();
                             for (TVShowModel tv : response.body().getResults()) {
-                                if (tv.getPosterPath() != null) raw.add(tv);
+                                if (tv.getPosterPath() != null || tv.getBackdropPath() != null) raw.add(tv);
                             }
                             rawUpcomingTVShows = raw;
                             applyUpcomingTVFilter();

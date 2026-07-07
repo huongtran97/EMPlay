@@ -168,6 +168,7 @@ public class MovieByGenresFragment extends BaseFragment {
                 if (response.isSuccessful() && response.body() != null) {
                     totalTmdbPages = response.body().getTotal_pages();
                     List<MovieModel> results = response.body().getResults();
+                    if (results != null) results.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
                     if (reset) {
                         adapter.updateData(results != null ? results : new ArrayList<>());
                         recyclerView.scrollToPosition(0);

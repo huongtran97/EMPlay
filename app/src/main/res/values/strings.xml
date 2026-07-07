@@ -344,5 +344,6 @@
     <string name="release_alert_set">Alert set — we\'ll remind you when it\'s out</string>
     <string name="release_alert_removed">Alert removed</string>
     <string name="release_alert_watching">Watching for release</string>
+    <string name="release_alert_login_required">Sign in to get notified when this releases</string>
 
 </resources>

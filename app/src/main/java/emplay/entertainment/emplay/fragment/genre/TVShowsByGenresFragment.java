@@ -168,6 +168,7 @@ public class TVShowsByGenresFragment extends BaseFragment {
                 if (response.isSuccessful() && response.body() != null) {
                     totalTmdbPages = response.body().getTotal_pages();
                     List<TVShowModel> results = response.body().getResults();
+                    if (results != null) results.removeIf(tv -> tv.getPosterPath() == null && tv.getBackdropPath() == null);
                     if (reset) {
                         adapter.updateData(results != null ? results : new ArrayList<>());
                         recyclerView.scrollToPosition(0);

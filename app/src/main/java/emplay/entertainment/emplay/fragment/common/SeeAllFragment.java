@@ -508,6 +508,7 @@ public class SeeAllFragment extends BaseFragment {
                             similarTotalPages = response.body().getTotal_pages();
                             List<MovieModel> results = response.body().getResults();
                             if (results == null) results = new ArrayList<>();
+                            results.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
                             if (moviePosterAdapter != null) {
                                 if (pageToFetch == 1) {
                                     moviePosterAdapter.updateData(results);
@@ -541,6 +542,7 @@ public class SeeAllFragment extends BaseFragment {
                             similarTotalPages = response.body().getTotal_pages();
                             List<TVShowModel> results = response.body().getResults();
                             if (results == null) results = new ArrayList<>();
+                            results.removeIf(tv -> tv.getPosterPath() == null && tv.getBackdropPath() == null);
                             if (tvPosterAdapter != null) {
                                 if (pageToFetch == 1) {
                                     tvPosterAdapter.updateData(results);
@@ -574,7 +576,7 @@ public class SeeAllFragment extends BaseFragment {
                             List<TVShowModel> results = body.getResults();
                             if (results != null) {
                                 for (TVShowModel tv : results) {
-                                    if (tv.getPosterPath() != null) onAirBuffer.add(tv);
+                                    if (tv.getPosterPath() != null || tv.getBackdropPath() != null) onAirBuffer.add(tv);
                                 }
                             }
                             appendOnAirBatch();
@@ -634,7 +636,7 @@ public class SeeAllFragment extends BaseFragment {
                             List<TVShowModel> results = response.body().getResults();
                             if (results != null) {
                                 for (TVShowModel tv : results) {
-                                    if (tv.getPosterPath() != null) onAirBuffer.add(tv);
+                                    if (tv.getPosterPath() != null || tv.getBackdropPath() != null) onAirBuffer.add(tv);
                                 }
                             }
                             appendOnAirBatch();
@@ -701,7 +703,7 @@ public class SeeAllFragment extends BaseFragment {
                             comingSoonTmdbTotalPages = body.getTotal_pages();
                             comingSoonBuffer.clear();
                             for (MovieModel m : body.getResults()) {
-                                if (m.getPosterPath() != null) comingSoonBuffer.add(m);
+                                if (m.getPosterPath() != null || m.getBackdropPath() != null) comingSoonBuffer.add(m);
                             }
                             appendComingSoonBatch();
                             showSubtitle(tvSubtitle, "Movies");
@@ -730,7 +732,7 @@ public class SeeAllFragment extends BaseFragment {
                             comingSoonTmdbTotalPages = body.getTotal_pages();
                             comingSoonBuffer.clear();
                             for (TVShowModel tv : body.getResults()) {
-                                if (tv.getPosterPath() != null) comingSoonBuffer.add(tv);
+                                if (tv.getPosterPath() != null || tv.getBackdropPath() != null) comingSoonBuffer.add(tv);
                             }
                             appendComingSoonBatch();
                             showSubtitle(tvSubtitle, "TV Shows");
@@ -792,7 +794,7 @@ public class SeeAllFragment extends BaseFragment {
                             if (response.isSuccessful() && response.body() != null) {
                                 comingSoonTmdbPage = page;
                                 for (MovieModel m : response.body().getResults()) {
-                                    if (m.getPosterPath() != null) comingSoonBuffer.add(m);
+                                    if (m.getPosterPath() != null || m.getBackdropPath() != null) comingSoonBuffer.add(m);
                                 }
                                 appendComingSoonBatch();
                             } else {
@@ -818,7 +820,7 @@ public class SeeAllFragment extends BaseFragment {
                             if (response.isSuccessful() && response.body() != null) {
                                 comingSoonTmdbPage = page;
                                 for (TVShowModel tv : response.body().getResults()) {
-                                    if (tv.getPosterPath() != null) comingSoonBuffer.add(tv);
+                                    if (tv.getPosterPath() != null || tv.getBackdropPath() != null) comingSoonBuffer.add(tv);
                                 }
                                 appendComingSoonBatch();
                             } else {

@@ -326,7 +326,10 @@ public class MovieResultDetailsFragment extends BaseFragment {
         if (binding == null) return;
         AuthManager auth = AuthManager.getInstance(requireContext());
         if (!auth.isLoggedIn()) {
-            binding.wtwUnreleased.btnNotify.setVisibility(View.GONE);
+            binding.wtwUnreleased.btnNotify.setOnClickListener(v -> {
+                if (getContext() != null)
+                    Toast.makeText(getContext(), R.string.release_alert_login_required, Toast.LENGTH_SHORT).show();
+            });
             return;
         }
         String userId = auth.getUserId();
@@ -545,6 +548,7 @@ public class MovieResultDetailsFragment extends BaseFragment {
                                            @NonNull Response<MovieSimilarResponse> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             List<MovieModel> results = new ArrayList<>(response.body().getResults());
+                            results.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
                             alsoLikeAdapter.updateData(results.subList(0, Math.min(10, results.size())));
                             if (binding != null && results.size() > 10) {
                                 alsoLikeAdapter.setShowMoreItem(true,

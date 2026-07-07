@@ -88,7 +88,7 @@ public class WhatsNewFragment extends BaseFragment {
                     List<TVShowModel> all = new ArrayList<>();
                     if (results != null) {
                         for (TVShowModel tv : results) {
-                            if (tv.getPosterPath() != null && !BadgeHelper.isFutureDate(tv.getFirstAirDate()))
+                            if ((tv.getPosterPath() != null || tv.getBackdropPath() != null) && !BadgeHelper.isFutureDate(tv.getFirstAirDate()))
                                 all.add(tv);
                         }
                     }
@@ -115,7 +115,7 @@ public class WhatsNewFragment extends BaseFragment {
                     List<MovieModel> filtered = new ArrayList<>();
                     if (results != null) {
                         for (MovieModel m : results) {
-                            if (m.getPosterPath() != null && BadgeHelper.isWithinDays(m.getReleaseDate(), 30)) {
+                            if ((m.getPosterPath() != null || m.getBackdropPath() != null) && BadgeHelper.isWithinDays(m.getReleaseDate(), 30)) {
                                 filtered.add(m);
                             }
                         }

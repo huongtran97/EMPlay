@@ -99,7 +99,10 @@ public class TrendingSeeAllFragment extends BaseFragment {
                             if (response.isSuccessful() && response.body() != null) {
                                 trendingList.clear();
                                 List<TVShowModel> results = response.body().getResults();
-                                if (results != null) trendingList.addAll(results);
+                                if (results != null) {
+                                    results.removeIf(tv -> tv.getPosterPath() == null && tv.getBackdropPath() == null);
+                                    trendingList.addAll(results);
+                                }
                                 adapter.notifyDataSetChanged();
                             }
                         }
@@ -120,7 +123,10 @@ public class TrendingSeeAllFragment extends BaseFragment {
                             if (response.isSuccessful() && response.body() != null) {
                                 trendingList.clear();
                                 List<MovieModel> results = response.body().getResults();
-                                if (results != null) trendingList.addAll(results);
+                                if (results != null) {
+                                    results.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
+                                    trendingList.addAll(results);
+                                }
                                 adapter.notifyDataSetChanged();
                             }
                         }

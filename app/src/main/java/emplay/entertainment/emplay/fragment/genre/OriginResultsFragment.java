@@ -214,6 +214,7 @@ public class OriginResultsFragment extends BaseFragment {
                             if (resp.isSuccessful() && resp.body() != null) {
                                 totalTmdbPages = resp.body().getTotal_pages();
                                 List<TVShowModel> results = resp.body().getResults();
+                                if (results != null) results.removeIf(tv -> tv.getPosterPath() == null && tv.getBackdropPath() == null);
                                 if (reset) {
                                     tvAdapter.updateData(results != null ? results : new ArrayList<>());
                                     resultsRecyclerView.scrollToPosition(0);
@@ -242,6 +243,7 @@ public class OriginResultsFragment extends BaseFragment {
                             if (resp.isSuccessful() && resp.body() != null) {
                                 totalTmdbPages = resp.body().getTotal_pages();
                                 List<MovieModel> results = resp.body().getResults();
+                                if (results != null) results.removeIf(m -> m.getPosterPath() == null && m.getBackdropPath() == null);
                                 if (reset) {
                                     movieAdapter.updateData(results != null ? results : new ArrayList<>());
                                     resultsRecyclerView.scrollToPosition(0);
