@@ -88,12 +88,11 @@
 
                 <ImageView
                     android:id="@+id/tmdb_logo"
-                    android:layout_width="85dp"
-                    android:layout_height="wrap_content"
-                    android:minHeight="48dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="6dp"
                     android:adjustViewBounds="true"
-                    android:scaleType="centerInside"
+                    android:scaleType="fitStart"
                     android:contentDescription="@string/the_movie_database"
                     android:src="@drawable/tmdb_logo1"
                     android:clickable="true"

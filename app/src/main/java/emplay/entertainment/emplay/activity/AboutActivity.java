@@ -42,8 +42,6 @@ public class AboutActivity extends AppCompatActivity {
         TextView versionText = findViewById(R.id.app_version);
         versionText.setText("Version " + BuildConfig.VERSION_NAME);
 
-        ImageButton backBtn = findViewById(R.id.back_btn);
-        backBtn.setOnClickListener(v -> finish());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             findViewById(R.id.privacy_policy_row).setOnClickListener(v -> showPrivacyPolicy());
