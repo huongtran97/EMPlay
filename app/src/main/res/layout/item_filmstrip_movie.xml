@@ -26,8 +26,10 @@
         android:background="@drawable/bg_circle_dark"
         app:backgroundTint="@color/bg_rank_tint"
         android:gravity="center"
-        android:textColor="@color/text_1"
-        android:textSize="@dimen/text_badge"
+        android:textColor="@color/accent"
+        android:textSize="@dimen/text_meta"
+        android:fontFamily="@font/playfair_display_medium"
+        app:fontFamily="@font/playfair_display_medium"
         app:layout_constraintTop_toTopOf="@id/ivPoster"
         app:layout_constraintStart_toStartOf="@id/ivPoster"
         tools:text="1" />
