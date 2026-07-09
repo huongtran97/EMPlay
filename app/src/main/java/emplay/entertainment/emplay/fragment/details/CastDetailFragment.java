@@ -167,9 +167,9 @@ public class CastDetailFragment extends BaseFragment {
 
                     List<CreditItem> knownFor = new ArrayList<>(allCredits);
                     Collections.sort(knownFor, (a, b) -> Double.compare(b.getPopularity(), a.getPopularity()));
-                    List<CreditItem> top10 = knownFor.subList(0, Math.min(5, knownFor.size()));
+                    List<CreditItem> top5 = knownFor.subList(0, Math.min(5, knownFor.size()));
 
-                    creditAdapter = new CreditAdapter(top10, requireContext(), (item, view) -> onCreditClicked(item, view));
+                    creditAdapter = new CreditAdapter(top5, requireContext(), (item, view) -> onCreditClicked(item, view));
                     RecyclerViewHelper.setupHorizontal(creditsRecyclerView, requireContext(), creditAdapter);
 
                     filmographyAdapter = new FilmographyAdapter(filmographyList, (item, view) -> onCreditClicked(item, view));
