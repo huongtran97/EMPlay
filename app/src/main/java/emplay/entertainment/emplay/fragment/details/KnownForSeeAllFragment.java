@@ -34,6 +34,7 @@ public class KnownForSeeAllFragment extends BaseFragment {
 
     private static final String ARG_PERSON_ID = "person_id";
     private static final String ARG_PERSON_NAME = "person_name";
+    private static final String ARG_CREDITS = "credits";
     private static final int PAGE_SIZE = 18;
 
     private ActivitySeeAllBinding binding;
@@ -43,11 +44,12 @@ public class KnownForSeeAllFragment extends BaseFragment {
     private final List<CreditItem> allCredits = new ArrayList<>();
     private CreditAdapter adapter;
 
-    public static KnownForSeeAllFragment newInstance(int personId, String personName) {
+    public static KnownForSeeAllFragment newInstance(int personId, String personName, ArrayList<CreditItem> credits) {
         KnownForSeeAllFragment fragment = new KnownForSeeAllFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_PERSON_ID, personId);
         args.putString(ARG_PERSON_NAME, personName != null ? personName : "");
+        if (credits != null) args.putSerializable(ARG_CREDITS, credits);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,6 +60,9 @@ public class KnownForSeeAllFragment extends BaseFragment {
         if (getArguments() != null) {
             personId = getArguments().getInt(ARG_PERSON_ID);
             personName = getArguments().getString(ARG_PERSON_NAME, "");
+            @SuppressWarnings("unchecked")
+            ArrayList<CreditItem> bundled = (ArrayList<CreditItem>) getArguments().getSerializable(ARG_CREDITS);
+            if (bundled != null) allCredits.addAll(bundled);
         }
         apiService = ApiClient.getClient().create(MovieApiService.class);
     }
@@ -85,7 +90,16 @@ public class KnownForSeeAllFragment extends BaseFragment {
             }
         });
 
-        fetchCredits();
+        if (allCredits.isEmpty()) {
+            fetchCredits();
+        } else {
+            Collections.sort(allCredits, (a, b) -> Double.compare(b.getPopularity(), a.getPopularity()));
+            int count = allCredits.size();
+            binding.tvSubtitle.setText(getResources().getQuantityString(R.plurals.results_titles_count, count, count));
+            binding.tvSubtitle.setVisibility(View.VISIBLE);
+            binding.tvLoadingMore.setVisibility(View.GONE);
+            loadNextPage();
+        }
         return binding.getRoot();
     }
 

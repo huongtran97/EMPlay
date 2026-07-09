@@ -18,7 +18,7 @@ public class PersonCreditsResponse {
     public List<CreditItem> getCast() { return cast; }
     public List<CreditItem> getCrew() { return crew; }
 
-    public static class CreditItem {
+    public static class CreditItem implements java.io.Serializable {
         @SerializedName("id")
         private int id;
         @SerializedName("title")

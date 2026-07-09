@@ -93,7 +93,7 @@ public class CastDetailFragment extends BaseFragment {
         });
 
         btnKnownForSeeAll.setOnClickListener(v ->
-                navigateTo(KnownForSeeAllFragment.newInstance(personId, personName)));
+                navigateTo(KnownForSeeAllFragment.newInstance(personId, personName, new ArrayList<>(allCredits))));
 
         fetchPersonDetails();
         fetchPersonCredits();
