@@ -52,6 +52,8 @@ public class CastDetailFragment extends BaseFragment {
     private CreditAdapter creditAdapter;
     private FilmographyAdapter filmographyAdapter;
     private List<CreditItem> allCredits = new ArrayList<>();
+    private boolean detailsLoaded = false;
+    private boolean creditsLoaded = false;
 
     public static CastDetailFragment newInstance(int personId) {
         CastDetailFragment fragment = new CastDetailFragment();
@@ -133,6 +135,9 @@ public class CastDetailFragment extends BaseFragment {
                             .load(ImageUrl.of(ImageUrl.PROFILE, person.getProfilePath()))
                             .placeholder(R.drawable.bg_poster_placeholder)
                             .into(profileImage);
+
+                    detailsLoaded = true;
+                    maybeShowKnownForButton();
                 }
             }
 
@@ -170,7 +175,8 @@ public class CastDetailFragment extends BaseFragment {
                     filmographyAdapter = new FilmographyAdapter(filmographyList, (item, view) -> onCreditClicked(item, view));
                     filmographyRecyclerView.setAdapter(filmographyAdapter);
 
-                    btnKnownForSeeAll.setVisibility(View.VISIBLE);
+                    creditsLoaded = true;
+                    maybeShowKnownForButton();
 
                     int totalCount = allCredits.size();
                     creditsPageIndicator.setText(String.format(java.util.Locale.getDefault(), "%d titles ›", totalCount));
@@ -195,6 +201,10 @@ public class CastDetailFragment extends BaseFragment {
                 Log.e("CastDetailFragment", "Failed to fetch person credits", t);
             }
         });
+    }
+
+    private void maybeShowKnownForButton() {
+        if (detailsLoaded && creditsLoaded) btnKnownForSeeAll.setVisibility(View.VISIBLE);
     }
 
     private void onCreditClicked(CreditItem item, View sharedElement) {
