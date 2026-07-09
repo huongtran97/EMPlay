@@ -15,6 +15,15 @@ android {
     namespace 'emplay.entertainment.emplay'
     compileSdk 36
 
+    signingConfigs {
+        release {
+            storeFile file(localProperties['RELEASE_STORE_FILE'])
+            storePassword localProperties['RELEASE_STORE_PASSWORD']
+            keyAlias localProperties['RELEASE_KEY_ALIAS']
+            keyPassword localProperties['RELEASE_KEY_PASSWORD']
+        }
+    }
+
     defaultConfig {
         applicationId "emplay.entertainment.emplay"
         minSdk 23
@@ -38,6 +47,7 @@ android {
             buildConfigField "String", "GOOGLE_WEB_CLIENT_ID", "\"${localProperties['GOOGLE_WEB_CLIENT_ID'] ?: ''}\""
         }
         release {
+            signingConfig signingConfigs.release
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
