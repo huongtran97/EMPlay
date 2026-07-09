@@ -94,6 +94,13 @@ public class SeeAllFragment extends BaseFragment {
     private final List<CastModel> crewList = new ArrayList<>();
     private boolean castExpanded = false;
     private boolean crewExpanded = false;
+    private static final int CAST_CREW_PAGE_SIZE = 20;
+    private final List<CastModel> castDisplayedList = new ArrayList<>();
+    private final List<CastModel> crewDisplayedList = new ArrayList<>();
+    private int castDisplayedCount = 0;
+    private int crewDisplayedCount = 0;
+    private boolean castLoadingMore = false;
+    private boolean crewLoadingMore = false;
 
     // Similar pagination state
     private int similarNextPage = 1;
@@ -167,8 +174,16 @@ public class SeeAllFragment extends BaseFragment {
             fetchData(binding.tvSubtitle);
             binding.nsvCastCrew.setOnScrollChangeListener(
                     (androidx.core.widget.NestedScrollView.OnScrollChangeListener)
-                            (v, scrollX, scrollY, oldScrollX, oldScrollY) ->
-                                    binding.fabScrollTop.setVisibility(scrollY > 0 ? View.VISIBLE : View.GONE));
+                            (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                                binding.fabScrollTop.setVisibility(scrollY > 0 ? View.VISIBLE : View.GONE);
+                                int bottom = scrollY + v.getHeight();
+                                if (castExpanded && bottom >= binding.rvCastSection.getBottom() - 200) {
+                                    loadMoreCast();
+                                }
+                                if (crewExpanded && bottom >= binding.rvCrewSection.getBottom() - 200) {
+                                    loadMoreCrew();
+                                }
+                            });
             binding.fabScrollTop.setOnClickListener(v -> binding.nsvCastCrew.smoothScrollTo(0, 0));
         } else {
             binding.nsvCastCrew.setVisibility(View.GONE);
@@ -189,20 +204,46 @@ public class SeeAllFragment extends BaseFragment {
     }
 
     private void setupCastCrewAccordion() {
-        castGridAdapter = buildCastGridAdapter(castOnlyList);
+        castGridAdapter = buildCastGridAdapter(castDisplayedList);
         RecyclerViewHelper.setupGrid(binding.rvCastSection, requireContext(), 4, castGridAdapter);
 
-        crewGridAdapter = buildCrewGridAdapter(crewList);
+        crewGridAdapter = buildCrewGridAdapter(crewDisplayedList);
         RecyclerViewHelper.setupGrid(binding.rvCrewSection, requireContext(), 4, crewGridAdapter);
 
         binding.rowCastToggle.setOnClickListener(v -> {
             castExpanded = !castExpanded;
+            if (castExpanded && castDisplayedCount == 0 && !castOnlyList.isEmpty()) loadMoreCast();
             toggleSection(binding.rvCastSection, binding.icCastChevron, castExpanded);
         });
         binding.rowCrewToggle.setOnClickListener(v -> {
             crewExpanded = !crewExpanded;
+            if (crewExpanded && crewDisplayedCount == 0 && !crewList.isEmpty()) loadMoreCrew();
             toggleSection(binding.rvCrewSection, binding.icCrewChevron, crewExpanded);
         });
+    }
+
+    private void loadMoreCast() {
+        if (castLoadingMore) return;
+        int from = castDisplayedCount;
+        int to = Math.min(from + CAST_CREW_PAGE_SIZE, castOnlyList.size());
+        if (from >= to) return;
+        castLoadingMore = true;
+        castDisplayedList.addAll(castOnlyList.subList(from, to));
+        castDisplayedCount = to;
+        if (castGridAdapter != null) castGridAdapter.notifyItemRangeInserted(from, to - from);
+        castLoadingMore = false;
+    }
+
+    private void loadMoreCrew() {
+        if (crewLoadingMore) return;
+        int from = crewDisplayedCount;
+        int to = Math.min(from + CAST_CREW_PAGE_SIZE, crewList.size());
+        if (from >= to) return;
+        crewLoadingMore = true;
+        crewDisplayedList.addAll(crewList.subList(from, to));
+        crewDisplayedCount = to;
+        if (crewGridAdapter != null) crewGridAdapter.notifyItemRangeInserted(from, to - from);
+        crewLoadingMore = false;
     }
 
     private void toggleSection(RecyclerView rv, ImageView chevron, boolean expanded) {
@@ -289,6 +330,10 @@ public class SeeAllFragment extends BaseFragment {
         comingSoonBuffer.clear();
         castOnlyList.clear();
         crewList.clear();
+        castDisplayedList.clear();
+        crewDisplayedList.clear();
+        castDisplayedCount = 0;
+        crewDisplayedCount = 0;
     }
 
     private void setupRecyclerView(RecyclerView rv) {
@@ -415,7 +460,6 @@ public class SeeAllFragment extends BaseFragment {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void fetchMovieCast(TextView tvSubtitle) {
         safeEnqueue(apiService.getMovieCredits(TMDBpath.movieCredits(mediaId)),
                 new Callback<MovieCreditsResponse>() {
@@ -439,8 +483,6 @@ public class SeeAllFragment extends BaseFragment {
                                             c.getProfilePath(), c.getJob()));
                                 }
                             }
-                            if (castGridAdapter != null) castGridAdapter.notifyDataSetChanged();
-                            if (crewGridAdapter != null) crewGridAdapter.notifyDataSetChanged();
                             updateCastCrewCounts(tvSubtitle);
                         }
                     }
@@ -451,7 +493,6 @@ public class SeeAllFragment extends BaseFragment {
                 });
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private void fetchTVCast(TextView tvSubtitle) {
         safeEnqueue(apiService.getTVAggregateCredits(TMDBpath.tvShowAggregateCredits(mediaId)),
                 new Callback<AggregateCreditsResponse>() {
@@ -475,8 +516,6 @@ public class SeeAllFragment extends BaseFragment {
                                             c.getProfilePath(), c.getJob()));
                                 }
                             }
-                            if (castGridAdapter != null) castGridAdapter.notifyDataSetChanged();
-                            if (crewGridAdapter != null) crewGridAdapter.notifyDataSetChanged();
                             updateCastCrewCounts(tvSubtitle);
                         }
                     }
@@ -875,6 +914,9 @@ public class SeeAllFragment extends BaseFragment {
         binding.tvCrewCount.setVisibility(View.VISIBLE);
 
         showSubtitle(tvSubtitle, castCount + " cast  •  " + crewCount + " crew");
+
+        if (castExpanded && castDisplayedCount == 0) loadMoreCast();
+        if (crewExpanded && crewDisplayedCount == 0) loadMoreCrew();
     }
 
     private void onMediaClick(MediaItem item, View sharedElement) {
