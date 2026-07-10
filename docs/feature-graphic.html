@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1024px;
+    height: 500px;
+    overflow: hidden;
+    background: #0D1117;
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  /* background gradient */
+  .bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 90% 80% at 50% 50%, #1C1A14 0%, #0A0D12 100%);
+  }
+
+  /* film strip top & bottom */
+  .strip {
+    position: absolute;
+    left: 0; right: 0;
+    height: 44px;
+    background: #131008;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    z-index: 2;
+  }
+  .strip.top    { top: 0; }
+  .strip.bottom { bottom: 0; }
+  .hole {
+    width: 26px;
+    height: 30px;
+    border-radius: 4px;
+    background: #0A0D12;
+    flex-shrink: 0;
+    margin: 0 9px;
+  }
+
+  /* subtle poster columns in background */
+  .posters {
+    position: absolute;
+    top: 44px; bottom: 44px;
+    left: 0; right: 0;
+    display: flex;
+    gap: 3px;
+    opacity: 0.08;
+  }
+  .poster-col { flex: 1; border-radius: 2px; }
+  .poster-col:nth-child(1) { background: linear-gradient(180deg,#4A3A28,#1A1208); }
+  .poster-col:nth-child(2) { background: linear-gradient(180deg,#283A4A,#081828); }
+  .poster-col:nth-child(3) { background: linear-gradient(180deg,#3A2840,#180820); }
+  .poster-col:nth-child(4) { background: linear-gradient(180deg,#2A4028,#081808); }
+  .poster-col:nth-child(5) { background: linear-gradient(180deg,#4A2828,#200808); }
+  .poster-col:nth-child(6) { background: linear-gradient(180deg,#4A3A28,#1A1208); }
+  .poster-col:nth-child(7) { background: linear-gradient(180deg,#283A4A,#081828); }
+  .poster-col:nth-child(8) { background: linear-gradient(180deg,#3A2840,#180820); }
+
+  /* centre scrim */
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 70% at 50% 50%, rgba(10,13,18,0.45) 0%, rgba(10,13,18,0.88) 100%);
+  }
+
+  /* ── TICKET CARD ── */
+  .ticket {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 260px;
+    background: #EDE6D8;
+    border-radius: 14px;
+    display: flex;
+    overflow: visible;
+    z-index: 3;
+  }
+
+  /* LEFT content area */
+  .ticket-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 36px;
+    gap: 10px;
+  }
+
+  .now-showing {
+    font-size: 10px;
+    letter-spacing: 5px;
+    color: #9A8E7C;
+    text-transform: uppercase;
+  }
+
+  .app-name {
+    font-size: 62px;
+    font-weight: 700;
+    letter-spacing: 8px;
+    color: #1C1510;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  .gold-line {
+    width: 180px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #B8892A, transparent);
+  }
+
+  .tagline {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: #6B5F4E;
+    text-transform: uppercase;
+  }
+
+  /* SEPARATOR — dashed tear line with punch holes */
+  .separator {
+    position: relative;
+    width: 2px;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .dash-line {
+    width: 2px;
+    height: 100%;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      #B0A48E 0px,
+      #B0A48E 8px,
+      transparent 8px,
+      transparent 14px
+    );
+  }
+  .punch {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0A0D12;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4;
+  }
+  .punch.top    { top: -11px; }
+  .punch.bottom { bottom: -11px; }
+
+  /* RIGHT stub */
+  .ticket-right {
+    width: 110px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 12px;
+    gap: 8px;
+  }
+
+  .admit-label {
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: #9A8E7C;
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  .stub-divider {
+    width: 32px;
+    height: 1px;
+    background: #B8892A;
+    opacity: 0.5;
+  }
+
+  .stub-e {
+    font-size: 52px;
+    font-weight: 700;
+    color: #B8892A;
+    line-height: 1;
+    letter-spacing: 2px;
+  }
+
+  .stub-dots {
+    display: flex;
+    gap: 5px;
+  }
+  .stub-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #C4B89E;
+  }
+</style>
+</head>
+<body>
+  <div class="bg"></div>
+
+  <div class="strip top">
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+  </div>
+
+  <div class="posters">
+    <div class="poster-col"></div><div class="poster-col"></div>
+    <div class="poster-col"></div><div class="poster-col"></div>
+    <div class="poster-col"></div><div class="poster-col"></div>
+    <div class="poster-col"></div><div class="poster-col"></div>
+  </div>
+
+  <div class="scrim"></div>
+
+  <div class="ticket">
+    <div class="ticket-left">
+      <div class="now-showing">Now Showing</div>
+      <div class="app-name">EMPLAY</div>
+      <div class="gold-line"></div>
+      <div class="tagline">Discover &nbsp;·&nbsp; Save &nbsp;·&nbsp; Explore</div>
+    </div>
+
+    <div class="separator">
+      <div class="punch top"></div>
+      <div class="dash-line"></div>
+      <div class="punch bottom"></div>
+    </div>
+
+    <div class="ticket-right">
+      <div class="admit-label">Admit One</div>
+      <div class="stub-divider"></div>
+      <div class="stub-e">E</div>
+      <div class="stub-dots">
+        <div class="stub-dot"></div>
+        <div class="stub-dot"></div>
+        <div class="stub-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="strip bottom">
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+    <div class="hole"></div><div class="hole"></div><div class="hole"></div>
+  </div>
+</body>
+</html>
